@@ -178,6 +178,8 @@ const MODULES = [
   /* House cusps from the sky frame, in every system the Astropedia teaches.
      Reads nothing; the chart asks it once per render. */
   'house-systems.js',
+  /* Ayanamsas, nakshatras and the Chinese calendar for the chart studies. */
+  'chart-traditions.js',
   /* The gates the sky stands in at one instant. Reads the wheel above by
      name, so it has to follow it. */
   'hd-transit.js',

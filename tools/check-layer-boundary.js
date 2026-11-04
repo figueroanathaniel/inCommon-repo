@@ -74,6 +74,7 @@ const LAYERS = {
     'hd-topology.js',            /* the wiring as facts: channel pairs, gate to centre */
     'hd-wheel.js',                 /* gate order and the boundary rule, as data */
     'house-systems.js',            /* house cusps from the sky frame, as numbers */
+    'chart-traditions.js',         /* ayanamsas, nakshatras, the Chinese calendar, as numbers and names */
     'hd-transit.js',               /* every body's gate and line at an instant the caller names */
     'hd-composite.js',             /* two bodygraphs overlaid, six states, no score */
     'hd-circle.js',                /* Circle and Ground: structure only, one caution, no seat */

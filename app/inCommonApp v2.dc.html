@@ -408,6 +408,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./ephemeris-cache.js"></script>
 <script src="./hd-wheel.js"></script>
 <script src="./house-systems.js"></script>
+<script src="./chart-traditions.js"></script>
 <!-- The gates the sky stands in now. Reads HDWheel by name, so it follows it. -->
 <script src="./hd-transit.js"></script>
 <!-- The People Library, and the cache that stands in front of the composite.
@@ -5181,6 +5182,15 @@ input[type="date"]{color-scheme:dark}
           <span style="width:16px;height:16px;border-radius:50%;background:{{ hcKnob }}"></span>
         </span>
       </button>
+    </div>
+    <div role="radiogroup" aria-label="Chart study" style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Chart Study</div>
+      <sc-for list="{{ studyRows }}" as="t" hint-placeholder-count="10">
+        <button data-lift onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid {{ t.bd }};border-radius:12px;padding:11px 14px">
+          <span style="flex:1;min-width:0;font:600 12.5px var(--fu);color:var(--tx)">{{ t.label }}</span>
+          <span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:var(--ac)">{{ t.tick }}</span>
+        </button>
+      </sc-for>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Memory &amp; Privacy</div>
@@ -12405,6 +12415,15 @@ input[type="date"]{color-scheme:dark}
         </span>
       </button>
     </div>
+    <div role="radiogroup" aria-label="Chart study" style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Chart Study</div>
+      <sc-for list="{{ studyRows }}" as="t" hint-placeholder-count="10">
+        <button data-lift onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid {{ t.bd }};border-radius:12px;padding:11px 14px">
+          <span style="flex:1;min-width:0;font:600 12.5px var(--fu);color:var(--tx)">{{ t.label }}</span>
+          <span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:var(--ac)">{{ t.tick }}</span>
+        </button>
+      </sc-for>
+    </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Memory &amp; Privacy</div>
       <sc-for list="{{ memRows }}" as="m" hint-placeholder-count="4">
@@ -17561,12 +17580,102 @@ class Component extends DCLogic {
      the Oracle. */
   chartStamp(p) {
     p = p === undefined ? this.activeProfile() : p;
-    return (p ? p.birthStamp : 'legacy') + '|h' + this.houseSys();
+    return (p ? p.birthStamp : 'legacy') + '|h' + this.houseSys() + '|s' + this.chartStudy();
   }
   houseSysSet(k) {
     const H = window.HouseSystems;
     if (!H || !H.SYSTEMS.some(x => x.key === k) || k === this.houseSys()) return;
     this.studySave({ houses: k });
+  }
+  /* THE CHART STUDY IS THE READER'S CHOICE TOO (the owner, 4 November 2026:
+     ten studies, chosen in Settings, and the Oracle reads through the one
+     chosen). A study names a zodiac, a house system and what else its
+     tradition reads; chart-traditions.js holds the arithmetic and the list.
+     Choosing a study sets its house system; the Astropedia can still change
+     the houses afterwards. Kept with the study path, per profile. */
+  chartStudy() {
+    const T = window.ChartTraditions, k = this.studyState().study;
+    return T && T.STUDIES.some(x => x.key === k) ? k : 'western';
+  }
+  chartStudyOf(k) { const T = window.ChartTraditions; return T ? T.STUDIES.find(x => x.key === (k || this.chartStudy())) : null; }
+  chartStudySet(k) {
+    const x = this.chartStudyOf(k);
+    if (!x || (k === this.chartStudy() && (!x.houses || x.houses === this.houseSys()))) return;
+    this.studySave(x.houses ? { study: k, houses: x.houses } : { study: k });
+  }
+  chartStudyRows() {
+    const T = window.ChartTraditions, cur = this.chartStudy();
+    return (T ? T.STUDIES : []).map(x => ({ label: x.name, on: x.key === cur, bd: x.key === cur ? 'var(--ac)' : 'var(--bd)',
+      tick: x.key === cur ? '\u2713' : '', go: () => this.chartStudySet(x.key) }));
+  }
+  /* What the chosen study adds to the Oracle's dossier: the chart as that
+     tradition casts it. Positions are the app's own apparent longitudes, moved
+     into the study's frame, so the study and the wheel cannot disagree about
+     where a body is, only about what the tradition calls the place. */
+  studyDossierLines(nd, at, asc) {
+    const T = window.ChartTraditions, A = window.Astronomy, x = this.chartStudyOf(), out = [];
+    if (!T || !x) return out;
+    out.push('CHART STUDY: ' + x.name + '. Read the chart through this tradition, in its own terms.');
+    const jd = this.t2000(nd) + 2451545, jdAt = this.t2000(at) + 2451545;
+    const natal = this.chartAt(nd).filter(r => r.lon != null), sky = this.chartAt(at).filter(r => r.lon != null);
+    const SIGNS = this.SIGNS12;
+    const dm = l => { const d = this.norm360(l) % 30, i = Math.floor(d), m = Math.floor((d - i) * 60); return i + '\u00b0' + String(m).padStart(2, '0') + '\u2032'; };
+    const nut = j => { try { return A && A.e_tilt ? A.e_tilt(A.MakeTime(new Date((j - 2440587.5) * 864e5))).dpsi / 3600 : null; } catch (e) { return null; } };
+    if (x.zodiac === 'lahiri' || x.zodiac === 'fagan') {
+      const n0 = nut(jd), sid = l => T.sidereal(l, x.zodiac, jd, n0), ay = T.ayanamsa(x.zodiac, jd);
+      if (x.zodiac === 'lahiri') {
+        const GR = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+        const gr = natal.filter(r => GR.indexOf(r.name) !== -1 || r.name === 'North Node');
+        const lagna = asc ? sid(asc.asc) : null, lagnaSign = lagna == null ? null : Math.floor(lagna / 30);
+        const nm = r => r.name === 'North Node' ? 'Rahu' : r.name;
+        const rows = gr.map(r => { const s = sid(r.lon), n = T.nakshatra(s), dg = T.dignity(r.name, s);
+          return nm(r) + ' ' + dm(s) + ' ' + T.RASHI[Math.floor(s / 30)] + (lagnaSign == null ? '' : ' (bhava ' + (((Math.floor(s / 30) - lagnaSign + 12) % 12) + 1) + ')') +
+            ', ' + n.name + ' pada ' + n.pada + (dg ? ', ' + dg : ''); });
+        const nn = gr.find(r => r.name === 'North Node');
+        if (nn) { const k = this.norm360(sid(nn.lon) + 180), n = T.nakshatra(k); rows.push('Ketu ' + dm(k) + ' ' + T.RASHI[Math.floor(k / 30)] + (lagnaSign == null ? '' : ' (bhava ' + (((Math.floor(k / 30) - lagnaSign + 12) % 12) + 1) + ')') + ', ' + n.name + ' pada ' + n.pada); }
+        out.push('VEDIC SIDEREAL CHART (Lahiri ayanamsa ' + ay.toFixed(4) + '\u00b0, whole sign bhavas, mean Rahu): ' + (lagna == null ? 'Lagna unknown (no birth time); ' : 'Lagna ' + dm(lagna) + ' ' + T.RASHI[lagnaSign] + ', ' + T.nakshatra(lagna).name + '; ') + rows.join('; '));
+        const moon = gr.find(r => r.name === 'Moon');
+        if (moon) {
+          const ms = sid(moon.lon), dashas = T.vimshottari(ms, jd, 18), now = jdAt;
+          const cur = dashas.find(d => d.start <= now && now < d.end);
+          const ymd = j => new Date((j - 2440587.5) * 864e5).toISOString().slice(0, 10);
+          out.push('JANMA NAKSHATRA: ' + T.nakshatra(ms).name + ' pada ' + T.nakshatra(ms).pada + ' (lord ' + T.nakshatra(ms).lord + ')' +
+            (cur ? '; VIMSHOTTARI MAHADASHA AT THIS PERIOD: ' + cur.lord + ' (' + ymd(cur.start) + ' to ' + ymd(cur.end) + ')' : ''));
+        }
+      } else {
+        out.push('WESTERN SIDEREAL CHART (Fagan-Bradley ayanamsa ' + ay.toFixed(4) + '\u00b0): ' + natal.filter(r => r.name !== 'South Node').map(r => r.name + ' ' + dm(sid(r.lon)) + ' ' + SIGNS[Math.floor(sid(r.lon) / 30)]).join('; ') +
+          (asc ? '; Ascendant ' + dm(sid(asc.asc)) + ' ' + SIGNS[Math.floor(sid(asc.asc) / 30)] : ''));
+      }
+      const n1 = nut(jdAt);
+      out.push('CURRENT SKY IN THIS ZODIAC: ' + sky.filter(r => r.name !== 'South Node').map(r => { const s = T.sidereal(r.lon, x.zodiac, jdAt, n1); return (x.zodiac === 'lahiri' && r.name === 'North Node' ? 'Rahu' : r.name) + ' in ' + (x.zodiac === 'lahiri' ? T.RASHI : SIGNS)[Math.floor(s / 30)]; }).join(', '));
+    } else if (x.zodiac === 'draconic') {
+      const nn = natal.find(r => r.name === 'North Node');
+      if (nn) out.push('DRACONIC CHART (0\u00b0 Aries at the natal North Node): ' + natal.filter(r => r.name !== 'North Node' && r.name !== 'South Node').map(r => { const d = this.norm360(r.lon - nn.lon); return r.name + ' ' + dm(d) + ' ' + SIGNS[Math.floor(d / 30)]; }).join('; ') +
+        (asc ? '; Ascendant ' + dm(this.norm360(asc.asc - nn.lon)) + ' ' + SIGNS[Math.floor(this.norm360(asc.asc - nn.lon) / 30)] : ''));
+    } else if (x.frame === 'helio') {
+      if (A) {
+        const BODIES = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+        const h = BODIES.map(b => { const l = T.helio(A, b, jd); return l == null ? null : b + ' ' + dm(l) + ' ' + SIGNS[Math.floor(l / 30)]; }).filter(Boolean);
+        out.push('HELIOCENTRIC CHART (from the Sun; no Moon, nodes, angles or houses): ' + h.join('; '));
+      }
+    } else if (x.calendar === 'chinese') {
+      if (A) {
+        const p = this.activeProfile(), timed = this.timeStateOf(p) === 'known';
+        let off = 0;
+        if (p && p.birthDate) { const [y, mo, d] = p.birthDate.split('-').map(Number), tm = timed ? p.birthTime.split(':').map(Number) : [12, 0]; off = (Date.UTC(y, mo - 1, d, tm[0], tm[1]) - nd.getTime()) / 36e5; }
+        const fp = T.fourPillars(A, jd, off, timed), an = T.animalYear(A, jd);
+        const pl = q => q.stem + '-' + q.branch + ' (' + (q.yin ? 'Yin ' : 'Yang ') + q.element + ' ' + q.animal + ')';
+        out.push('CHINESE FOUR PILLARS (BaZi; the year turns at Lichun): Year ' + pl(fp.year) + '; Month ' + pl(fp.month) + '; Day ' + pl(fp.day) + (fp.hour ? '; Hour ' + pl(fp.hour) : '; Hour unknown (no birth time)') +
+          '; Day Master ' + (fp.day.yin ? 'Yin ' : 'Yang ') + fp.day.element);
+        out.push('CHINESE ZODIAC SIGN (by the lunar new year): ' + (an.yin ? 'Yin ' : 'Yang ') + an.element + ' ' + an.animal + ' (' + an.year + '); THIS PERIOD\u2019S YEAR: ' + (() => { const q = T.animalYear(A, jdAt); return q.element + ' ' + q.animal; })());
+      }
+    } else if (x.sect && asc) {
+      const sun = natal[0], day = this.sectOf(sun.lon, asc);
+      const RULER = ['Mars', 'Venus', 'Mercury', 'Moon', 'Sun', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Saturn', 'Jupiter'];
+      out.push('HELLENISTIC: ' + (day ? 'Day' : 'Night') + ' chart; sect light ' + (day ? 'Sun' : 'Moon') + '; benefic of sect ' + (day ? 'Jupiter' : 'Venus') + ', malefic of sect ' + (day ? 'Saturn' : 'Mars') +
+        '; chart ruler ' + RULER[Math.floor(this.norm360(asc.asc) / 30)] + ' (traditional rulers); whole sign houses.');
+    }
+    return out;
   }
   houseSysName(k) {
     const H = window.HouseSystems, x = H && H.SYSTEMS.find(y => y.key === (k || this.houseSys()));
@@ -21686,6 +21795,7 @@ class Component extends DCLogic {
           tickColor: 'var(--ac)',
           go: () => this.themeSet(k) };
       }),
+      studyRows: this.chartStudyRows(),
       hcOn: hc,
       hcNote: hc ? 'On: brighter text, firmer borders, and readings at 16px in the interface face.' : 'Off: each identity keeps its own type and weight.',
       hcTrack: hc ? 'var(--ac)' : 'var(--sf)',
@@ -25758,7 +25868,7 @@ class Component extends DCLogic {
       pmHelpGo: () => { this.crisisAudit(); this.setState({ ...close, callOpen: true }); },
       pmLogOutGo: () => { this.setState(close); this.accountLogOut(); },
       pmLogOutNote: (cs.mode === 'cloud' && (cs.email || shown(cs.phone))) || '',
-      /* Support inCommon, in the apps only (giftOn): here, beside Contact
+      /* Support inCommon, on the website and in the apps (giftOn): here, beside Contact
          Support, and in the Settings footer. */
       giftOn: this.giftOn(),
       giftGo: () => this.giftGo(),
@@ -27056,6 +27166,7 @@ class Component extends DCLogic {
       '; Personality Sun gate ' + pSun.gate + ' (' + gname(pSun.gate) + '), Design Sun gate ' + dSun.gate + ' (' + gname(dSun.gate) + ')');
     lines.push('CURRENT TRANSITING SUN GATE: ' + skySun.gate + '.' + skySun.line + ' (' + gname(skySun.gate) + ')');
     lines.push('NUMEROLOGY: ' + numParts.join('; '));
+    try { this.studyDossierLines(nd, at, asc).forEach(l => lines.push(l)); } catch (e) { /* a study that cannot be cast leaves the reading as it was */ }
     if (depth === 'deep') {
       /* The Codex's advanced chart: the South Node, Black Moon Lilith, the
          bodies it fetched from Horizons, and the three sensitive points, in its
@@ -28982,10 +29093,14 @@ class Component extends DCLogic {
      device's browser (Capacitor sends any address that is not the app's to
      the system browser), needs no account, and comes back to thanks.html on
      the website. GIFT_IN_APP is the switch: the stores' review may refuse a
-     payment link from inside an app, and turning it off is this one word. */
+     payment link from inside an app, and turning it off is this one word.
+     Since 4 November 2026 (the owner: "We also need a donation option") the
+     website offers it too, in the same places, under GIFT_ON_WEB; still a
+     gift and never a donation, for the reason above. */
   GIFT_IN_APP = true;
+  GIFT_ON_WEB = true;
   SITE = 'https://incommonspace.com';
-  giftOn() { return this.nativeApp() && this.GIFT_IN_APP; }
+  giftOn() { return this.nativeApp() ? this.GIFT_IN_APP : this.GIFT_ON_WEB; }
   giftGo() {
     const IC = this.cloud || window.InCommonCloud;
     if (this.state.giftBusy) return;

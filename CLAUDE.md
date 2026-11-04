@@ -3325,6 +3325,40 @@ it, and Today's Alignment sits under the astrology chart. The titles are Your
 Natal Chart, Your Wiring (the owner's pick over Your Bodygraph, for the mark)
 and Your Numerology.
 
+## The chart study is the reader's choice, and the Oracle reads through it
+Asked for by the owner on 4 November 2026: at least ten studies, Whole Sign,
+Placidus, Vedic and Chinese among them, chosen in Settings, traditionally
+accurate, and the Oracle's readings shift with the choice. Settings has a
+**Chart Study** radiogroup in both shells (`studyRows`, `chartStudySet()`),
+kept per profile beside the house system (`studyState().study`, default
+`western`). The ten, in `ChartTraditions.STUDIES`: Western Whole Sign, Western
+Placidus, Vedic (Jyotish), Chinese (Four Pillars), Western Koch, Western Equal,
+Hellenistic, Western Sidereal (Fagan-Bradley), Draconic and Heliocentric.
+Choosing one sets its house system; `chartStamp()` carries the study, so a
+new study is a new reading.
+
+**`app/chart-traditions.js` is the arithmetic**, mechanics layer. Lahiri and
+Fagan-Bradley by the Swiss Ephemeris method and epochs (Lahiri within 0.01
+arcsecond of the six Swiss Ephemeris and Indian Astronomical Ephemeris values
+from 1950 to 2020); nakshatras, padas, Parashara dignities and Vimshottari
+(a year of 365.25 days); the Four Pillars by the solar terms and the
+sexagenary day; the lunar new year by the 1645 rule, counted at UTC+8 and on
+Beijing mean time before 1929, held to every year from 1900 to 2100
+(`tools/fixtures/chinese-new-year.json`, from pinyin.info's tables). A sidereal
+longitude is the app's apparent longitude less the mean ayanamsa and the
+nutation. `tools/check-chart-traditions.js` (CT1 to CT6) is the gate.
+
+**What changes today is the Oracle, not the wheel.** `studyDossierLines()`
+adds the chart as the study casts it to every dossier: the Vedic rashis,
+bhavas, nakshatras, dignities and current mahadasha; the sidereal or draconic
+positions; the heliocentric bodies; the Four Pillars and the animal year; the
+Hellenistic sect and chart ruler. The wheel, the Ledger and the placement
+pages are still drawn in the tropical zodiac under every study. Relabelling
+them is the next step and needs the ayanamsa at each instant a sign is read,
+so it was not done by shifting `chartAt()`: transits are read through
+`lonOf()` directly in several places, and a shift in one would set the two
+frames 24 degrees apart.
+
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
 perfectly center"). The cover's camera looked at a point wandering half a unit
@@ -4944,8 +4978,8 @@ apart by the origin Capacitor gives its web view** (`capacitor://localhost`,
 browser can, and that is accepted on purpose, because what it would get is what
 installing the app gives anybody.
 
-**Support inCommon is the owner's donate button, in the apps only**
-(`GIFT_IN_APP`, `giftOn()`): beside Contact Support, in the Settings footer
+**Support inCommon is the owner's donate button, in the apps and, since 4
+November 2026, on the website too** (`GIFT_IN_APP`, `GIFT_ON_WEB`, `giftOn()`): beside Contact Support, in the Settings footer
 after Accessibility, and in the profile menu. It is called a gift on every
 surface because inCommon is not a charity and "donate" says tax deductible to
 most people. It needs no account (the `support` action is answered before
