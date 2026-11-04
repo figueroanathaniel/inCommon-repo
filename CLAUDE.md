@@ -3362,6 +3362,37 @@ so it was not done by shifting `chartAt()`: transits are read through
 `lonOf()` directly in several places, and a shift in one would set the two
 frames 24 degrees apart.
 
+## A house that crosses a sign is a hand-off
+Approved by the owner on 4 November 2026 ("Hand off plan works, proceed"), from
+the plan at claude.ai/artifact/54mMqRoui5kk5eG2GwpDgr, with its four decisions
+taken as recommended: a share under 3 degrees (`HANDOFF_THRESHOLD`) is a
+threshold rather than a second room, a Whole Sign reader sees nothing (a house
+is one sign there, by "No disclaimers"), the Personal Year still turns on 1
+January, and the heading is The Hand-off.
+
+`houseSegs(cs, i)` lists the signs a house passes through with the degrees each
+holds; `houseHandoff(n)` composes from them: door and room, weighted by those
+degrees, each sign's ruler and the house it sits in (Scorpio, Aquarius and
+Pisces add their older ruler in a sentence of its own), an intercepted sign as
+the quiet third voice, a sign on two cusps in a row as one sign holding two
+rooms, and one of the twelve `HANDOFF_PAIR` sentences, each written once. It is
+a headed block on the house's For You tab, after Where this house sits, and the
+open house's wedge on the wheel draws the room's share in a second tint with a
+dashed seam where the sign turns (`sp`, `s1` to `s4`, `t1` to `t4` on
+`wheelHouses`, in all eight wheel markups). **A natal body is never split**:
+only a space is.
+
+`gateHandoff(g)` finds the twelve gates that cross a sign boundary from
+`HDWheel` (3, 8, 10, 14, 15, 25, 29, 30, 46, 50, 56, 60, each on one line; 8,
+14, 29 and 30 on a 0.125 degree sliver, read as a threshold), and the gate pane
+says so on both tabs, naming the side the reader's own activation sits on.
+`hdChart()` activations carry `lon` for that; R1 lifts the collector with no
+`norm360`, so the Earth's longitude is reduced inline there.
+
+Not built yet, in the plan's order: progressed Sun and Moon arrivals (no
+progression pass exists), out of sign aspects and gatherings on the Ledger, and
+the numerology hand-offs.
+
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
 perfectly center"). The cover's camera looked at a point wandering half a unit
