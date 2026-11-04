@@ -176,6 +176,58 @@ summary rather than verbatim.
 | 11 | Sacral sounds rising and falling | "uh-huh" and "unh-unh" confirmed (Jovian, "Sacral Authority"); pitch not found. The Atlas never carried the pitch claim | nothing to change |
 | 12 | Base count of five, the Alpha, Uranus opposition 38 to 44 | five bases and 69,120 bases: Jovian dictionary, verbatim; 38 to 44: dictionary, "Mid-Life Point", verbatim; the Alpha only as part of the Wa, summary | kept; the Alpha entry already says little else was found |
 
+**Corrected the same day by a wider search (below):** rows 7 and 10 were wrong.
+Jovian does use "active" and "passive" for the arrows, and does teach line fixing by
+astral bodies. Both are restored.
+
+## Wider research, 4 November 2026
+
+The owner asked for a search beyond Jovian, for the kinds within every type, and for a
+probability that each removal was true to the tradition as Jovian and Ra Uru Hu teach
+it. Anything above 90% goes back in as the tradition, or as an honourable mention of
+modern study. **The probabilities are judgement, not a calculation**: they weigh how
+many independent pages agree, whether Ra's or Jovian's own material says it, whether
+any page contradicts it, and whether it fits the wiring the app already computes.
+
+### Kinds within each type
+
+| Term | Sources read | Ra or Jovian | Definitions agree | Atlas |
+|---|---|---|---|---|
+| Type plus authority (emotional Projector, Generator emotional) | Ra's reading titles on Jovian product pages, one blog | yes | yes | added to Kinds of Projector |
+| Mental Projector | Jovian Projector hub, Ra's readings, three blogs | yes | yes, one outlier | kept |
+| Energy and classic Projector | three teacher blogs (Laura Olsen, Ann Smyth, Being Awakened) | no; Jovian calls the Projector a non-energy type | no: each blog draws the line differently | named as modern terms, no definition |
+| Pure Generator | Augurine, a Jovian guide | yes | yes | already in the lexicon |
+| Manifesting Generator as a kind of Generator | Jovian guide, one blog | yes | mostly | already in |
+| Emotional Manifestor | one self-description | only as an authority | n/a | not added |
+| Kinds of Manifesting Generator or Reflector | none found | none | n/a | none |
+
+### The removals, scored
+
+| Removed item | Evidence | Probability | Done |
+|---|---|---|---|
+| Line fixing: astral bodies exalt a line or put it in detriment, and an activation fixes it | Jovian "Line Fixing in Human Design", the Rave I'Ching guide, a 2005 blog, Ra quoted on the names; juxtaposition and harmonic fixing on Jovian | 97% | restored; a line may carry more than one body a side |
+| Arrows: left active, right passive | Jovian "Variable" article and hub ("receptive, passive, and open"), three more pages | 97% | restored |
+| The seven splenic fears, gate by gate | Ra's Rave Anatomy II contents (18 authority, 48 inadequacy), Satyori, humandesignlife, plum-bassoon, Bonnie Sorsby; no contradiction | 93% | added |
+| The Ajna's fear is anxiety (the principle) | Ra's Rave Anatomy II contents: "The Fear of the Ajna is Anxiety" | 93% | added |
+| An anxiety per Ajna gate | three teacher lists; only 17 and 43 agree | 60% | named as modern study, no list |
+| A nervousness per Solar Plexus gate | two teacher lists agree closely; nothing from Jovian | 85% | named as modern study, no list |
+| Tribal emotional stream 19, 49, 37, 40 | humandesignlife, humandesigninsight; 6-59 is outside it | 93% | added; "or 6 and 59" stays out |
+| Ajna streams 64-47-11, 63-4-17, 61-24-43 | Satyori, Jovian "The Mental Streams" for 24-43-23; the channels fit the circuits | 91% | added, ending "at the Throat" since 56, 62 and 23 were not read |
+| Splenic streams 54-32-44, 38-28-57, 58-18-48 | one page (humandesignlife); circuits fit | 90% | not above 90; left out |
+| Individual emotional stream 39, 55, 22, 12 | one page; channels fit | 90% | left out |
+| Gap: a newcomer is pulled into the role | two pages say a group seeks to fill its gaps; none says the arrival takes it | 40% | left out |
+| Energy and classic Projector as defined before | definitions disagree across three blogs | 50% | only the names, as above |
+| Determination's six left and right sides | one page for four of them, two for Sound and Light | 80% | sides left out |
+| Reflector about 28 days | five pages; one says 29.5; Jovian says a cycle of the Moon | kept as on main | n/a |
+
+Pages added by this search: jovianarchive.com/blogs/chart-interpretations-components/line-fixing-in-human-design-exaltation-detriment-and-juxtaposition;
+jovianarchive.com/Stories/118/Variable-_The_Blueprint_of_Brain_Body_and_Mind;
+jovianarchive.com/pages/projector-human-design; jovianarchive.com/Products/371/The_Art_of_Reading_Projectors;
+jovianarchive.com/Stories/2/The_Mental_Streams; satyori.com/human-design/spleen-center-human-design/;
+satyori.com/human-design/ajna-center-human-design/; humandesignlife.squarespace.com (Splenic and Solar Plexus centre posts);
+humandesigninsight.com/tribal-emotional-wave/; the Rave Anatomy II contents (Ra Uru Hu); lauraolsen, annsmyth and
+beingawakened Projector posts; issuu Rave I'Ching guide; plum-bassoon-jhnw.squarespace.com (fear gates, Penta, determination).
+
 Left as it was on main: Reflector "about 28 days" predates this branch, and Jovian
 says only that the Moon passes all the gates in about a month.
 

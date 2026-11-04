@@ -520,7 +520,7 @@
         ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for its surroundings. About 1 percent.'],
         ['Energy types and non-energy types', 'Manifestors and both kinds of Generator are called energy types. Projectors and Reflectors are non-energy types: the tradition holds they have no consistent working energy of their own and do best when they stop trying to keep pace with those who do.'],
         ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar, because the Moon’s monthly passage is what gives its decisions their shape.'],
-        ['Kinds of Projector', 'The published material names one kind: the mental Projector, whose definition sits only at or above the Throat, so that it has no direct inner authority, a group it shares with the Reflector. Other labels that circulate among teachers were not found in the published sources and are left out here.']
+        ['Kinds of Projector', 'Ra Uru Hu\u2019s own readings name a chart by its type and its authority: an emotional Projector, a splenic Projector, a self-projected Projector, and the mental Projector, whose definition sits only above the Throat so that it has no direct inner authority, a group it shares with the Reflector. Modern teachers also speak of energy and classic Projectors, but each school draws that line differently, so the Atlas leaves those as names rather than definitions.'],
       ],
       see: [['types', 'Manifestor'], ['types', 'Generator'], ['types', 'Manifesting Generator'], ['types', 'Projector'], ['types', 'Reflector']],
       words: [['bedrock', 'Strategy'], ['bedrock', 'Aura'], ['weather', 'Centers']] },
@@ -672,8 +672,8 @@
       lead: 'A stream is a run of gates carrying a potential from a pressure center through an awareness center toward expression. Each awareness center has three, so the wiring holds nine streams of awareness, and teachers follow each one gate by gate as a story of how that kind of knowing matures.',
       parts: [
         ['Spleen: instinct, intuition and taste', 'The Spleen\u2019s awareness is read through three themes: instinct, intuition and taste.'],
-        ['Ajna: abstract, logical, individual', 'Conceptualizing runs in three streams: the abstract idea, the logical fact and the individual insight.'],
-        ['Solar Plexus: need, uncertainty, desire', 'The emotional wave is read in three variations: the tribal wave of need, the individual wave of uncertainty and the collective wave of desire. The collective stream of feeling runs through gates 41, 30, 36 and 35.'],
+        ['Ajna: abstract, logical, individual', 'Conceptualizing runs in three streams: the abstract idea through gates 64, 47 and 11, the logical fact through 63, 4 and 17, and the individual insight through 61, 24 and 43, each then reaching the Throat.'],
+        ['Solar Plexus: need, uncertainty, desire', 'The emotional wave is read in three variations: the tribal wave of need, the individual wave of uncertainty and the collective wave of desire. The tribal stream runs through gates 19, 49, 37 and 40, and the collective stream of feeling through 41, 30, 36 and 35.'],
         ['Why streams matter', 'A stream shows a gate in context: what pressure feeds it, what awareness it carries, and where it wants to come out.']
       ],
       see: [['centers', 'Spleen'], ['centers', 'Ajna'], ['centers', 'Solar Plexus']],
@@ -751,7 +751,8 @@
         ['Splenic awareness', 'The oldest, concerned with survival and wellbeing, speaking once and only in the present.'],
         ['Mental awareness', 'The Ajna’s way: concepts, comparisons and research, working across time and best offered to others.'],
         ['Emotional awareness', 'The Solar Plexus’s way: clarity that comes across the wave, which the tradition expects to deepen after 2027.'],
-        ['Streams of awareness', 'Each awareness center carries three streams, nine in all, which follow a potential from pressure to expression.']
+        ['Streams of awareness', 'Each awareness center carries three streams, nine in all, which follow a potential from pressure to expression.'],
+        ['The fears of awareness', 'Ra Uru Hu taught that awareness carries fear: the Spleen\u2019s are fears of survival, one to each gate, and the Ajna\u2019s fear is anxiety. The seven splenic fears are of authority (18), of death and a life without meaning (28), of failure (32), of the past (44), of inadequacy (48), of responsibility (50) and of the future (57). Modern teachers also give each Solar Plexus gate a nervousness and each Ajna gate an anxiety; the Ajna lists still differ from one teacher to the next.']
       ],
       see: [['centers', 'Spleen'], ['centers', 'Ajna'], ['centers', 'Solar Plexus']],
       words: [['weather', 'Streams'], ['terms', 'Emotional Wave']] },
@@ -772,7 +773,7 @@
     { tier: 'horizon', name: 'Left or Right', epi: 'Strategic or receptive',
       lead: 'Each of the four arrows points left or right, and the direction comes from the tone beneath it: tones 1 to 3 point left, tones 4 to 6 point right. Left is described as strategic, focused and active. Right is described as receptive, peripheral and passive. Neither is better; they are two builds.',
       parts: [
-        ['Determination', 'An arrow pointing left is called strategic and one pointing right receptive, the published words for the two orientations of every arrow.'],
+        ['Determination', 'As with every arrow, left is read as strategic and active and right as receptive and passive: how deliberately the body is said to need to approach nourishment.'],
         ['Environment', 'Left is described as being observed, right as observing: whether the body does best seen within its setting or watching it.'],
         ['Motivation', 'Left is strategic, right is receptive: whether the mind is said to drive toward a goal or take in what arrives.'],
         ['Perspective', 'Left is focused, right is peripheral: whether the mind is said to see best narrowly or take in the wide field.'],
@@ -840,7 +841,7 @@
     { name: 'Emotional Wave Types', text: 'Three shapes of emotional wave. The tribal wave builds by steps, one forward and one back, until it releases. The individual wave runs level and then spikes. The collective wave climbs gradually and falls sharply. Their themes are given as need, passion and desire; one entry in the published dictionary calls the individual theme uncertainty instead of passion.', see: ['weather', 'Streams'] },
     { name: 'Energy Type', text: 'Manifestors, Generators and Manifesting Generators: the types with a motor defined in a way that gives consistent access to working energy.', see: ['bedrock', 'Type'] },
     { name: 'Environment', text: 'The bottom left arrow, from the Design side: the kind of surroundings the body is said to do best in. Its six colors are Caves, Markets, Kitchens, Mountains, Valleys and Shores.', see: ['horizon', 'Variable'] },
-    { name: 'Exaltation and Detriment', text: 'The two poles of a line. The published dictionary calls both words often misleading, because they name a polarity within the line rather than a good and a bad version of it.', see: ['gates', 'g1'] },
+    { name: 'Exaltation and Detriment', text: 'The two poles of a line. Each line is given one or more astral bodies that exalt it and one or more in its detriment, and an activation by one of them is said to fix the line in that expression; fixed both ways at once is a juxtaposition. Ra Uru Hu regretted the two names, because they read as good and bad when they describe a polarity within the line.', see: ['gates', 'g1'] },
     { name: 'Gate', text: 'One of the 64 divisions of the wheel, each matching a hexagram of the I Ching, and each housed in one center. Gate N is hexagram N.', see: ['gates', 'g1'] },
     { name: 'Generator', text: 'The type with a defined Sacral. In the published convention it is an umbrella with two kinds, the Pure Generator and the Manifesting Generator, together about seven in ten people. Strategy to respond, signature satisfaction, not-self theme frustration.', see: ['types', 'Generator'] },
     { name: 'Global Cycle', text: 'An era of history read as carrying the theme of one Incarnation Cross. The present one is the Cross of Planning.', see: ['horizon', 'Evolution'] },
