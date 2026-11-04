@@ -92,11 +92,11 @@
 
   function getAspectExplainer(aspect) {
     var explainers = {
-      conjunction: 'A conjunction is when two astral bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these astral bodies represent are amplified when together, for better and for worse.',
+      conjunction: 'A conjunction is when two celestial bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these celestial bodies represent are amplified when together, for better and for worse.',
       sextile: 'A sextile (60 degrees) is one of astrology\'s easy aspects. Between you two, it\'s an opening. Conversation flows. This is an area where mutual support comes naturally.',
-      square: 'A square (90 degrees) is tension in geometric form. Between you, these astral bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
+      square: 'A square (90 degrees) is tension in geometric form. Between you, these celestial bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
       trine: 'A trine (120 degrees) is harmony. Between you, it\'s where things flow. This is where the two of you understand each other without asking. A rare gift that deepens with use.',
-      opposite: 'An opposition (180 degrees) is two astral bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
+      opposite: 'An opposition (180 degrees) is two celestial bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
     };
     return explainers[aspect] || 'A contact between your charts.';
   }

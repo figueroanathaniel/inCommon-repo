@@ -183,7 +183,7 @@ export function validatePartnerChart(partner: PartnerChart): { valid: boolean; e
   if (!partner.name) errors.push('Partner missing name');
   if (!partner.birthDate) errors.push('Partner missing birthDate');
   if (!partner.bodies || Object.keys(partner.bodies).length === 0) {
-    errors.push('Partner missing computed astral bodies');
+    errors.push('Partner missing computed celestial bodies');
   }
 
   return {

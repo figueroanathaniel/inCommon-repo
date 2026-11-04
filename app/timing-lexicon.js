@@ -21,7 +21,8 @@
 
    House rules, all of them enforced by tools/check-timing-lexicon.js: no dash
    of either kind, no sentence that tells a reader who they are, no rating of
-   any kind, the word astral body where a reader would otherwise meet planet,
+   any kind, never the old word astral body (owner, 4 November 2026: planet when
+   it is a planet, celestial body as the general word),
    and no question that answers itself. A question here is one only the reader
    can close.                                                                 */
 (function () {

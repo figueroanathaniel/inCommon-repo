@@ -63,7 +63,7 @@ export function test_A1_basicItemCreation(): void {
   });
 
   if (!item.headline.includes('Venus') || !item.headline.includes('Lucia')) {
-    throw new Error('A1: Headline missing astral body or partner name');
+    throw new Error('A1: Headline missing celestial body or partner name');
   }
 
   if (item.category !== 'transit') {

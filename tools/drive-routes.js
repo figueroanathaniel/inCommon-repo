@@ -10,7 +10,7 @@
  *
  *   B1  Arrive at a screen by a route, move once without one, go Back: the
  *       reader lands on the screen they arrived at. Reported on an iPhone as
- *       "the astral body page in the Observatory exits to Today": the chart
+ *       "the celestial body page in the Observatory exits to Today": the chart
  *       was reached by a route, opening a body's reading replaced its history
  *       entry instead of pushing one, and Back skipped it. The fault was the
  *       arrival's replace flag (_routeNav) outliving an arrival that needed no

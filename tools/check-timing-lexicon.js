@@ -58,7 +58,10 @@ function strings() {
 /* The detectors, built from char codes so this file obeys the rule it enforces. */
 const DASH = new RegExp('[' + String.fromCharCode(8211, 8212) + ']|\\\\u201[34]|&[mn]dash;|&#821[12];|&#x201[34];', 'i');
 const WHO = /\byou are\b|\byou’re\b|\byou're\b/i;
-const PLANET = /\bplanets?\b/i;
+/* The old general word. Since 4 November 2026 the owner's rule is planet when it
+   is a planet and celestial body as the general word, so planet is allowed and
+   astral body is what is barred. */
+const ASTRAL = /\bastral bod(y|ies)\b/i;
 const RATING = /\bscores?\b|\bcompatib|\bpercent|%|\bratings?\b|\branked\b|\bbest match\b/i;
 function repeats(list, cap) {
   const cnt = {};
@@ -79,7 +82,7 @@ console.log('check-timing-lexicon');
 const planted = 'The first line ' + String.fromCharCode(8212) + ' a dash.';
 const plantedRep = ['one two three four five six seven', 'one two three four five six eight', 'one two three four five six nine', 'zero one two three four five six'];
 row('TL0', 'every detector fires on a planted fixture',
-  DASH.test(planted) && WHO.test('you are steady') && PLANET.test('a planet') && RATING.test('a 78% match') &&
+  DASH.test(planted) && WHO.test('you are steady') && ASTRAL.test('an astral body') && RATING.test('a 78% match') &&
   repeats(plantedRep, 3).length === 1 && !DASH.test('a comma, a colon: a full stop.'));
 
 /* TL1: the movers and the aspects are the app's own. */
@@ -166,8 +169,8 @@ const dashed = all.filter(x => DASH.test(x.s)).concat(DASH.test(src) ? [{ at: 's
 row('TL8', 'no dash of either kind, in any encoding, anywhere in the file', dashed.length === 0, dashed.map(x => x.at).slice(0, 5).join(', '));
 const who = all.filter(x => WHO.test(x.s));
 row('TL9', 'no sentence tells the reader who they are', who.length === 0, who.map(x => x.at + ': ' + x.s).slice(0, 3).join('\n         '));
-const bad = all.filter(x => PLANET.test(x.s) || RATING.test(x.s));
-row('TL10', 'astral body, never planet, and nothing that rates or ranks', bad.length === 0, bad.map(x => x.at).slice(0, 5).join(', '));
+const bad = all.filter(x => ASTRAL.test(x.s) || RATING.test(x.s));
+row('TL10', 'never the old word astral body, and nothing that rates or ranks', bad.length === 0, bad.map(x => x.at).slice(0, 5).join(', '));
 
 /* TL11: the phrase cap the app holds itself to. */
 const prose = all.map(x => x.s).filter(s => s.split(/\s+/).length >= 6);

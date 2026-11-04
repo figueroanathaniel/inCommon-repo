@@ -12,7 +12,7 @@
  *   Tc  T0 and the defined centres (no channels)
  *   T1  T0 and the defined centres and defined channels
  *   T2  T1 and every gate held (no lines, nobody named as holding it)
- *   T3  every activation: side, astral body, gate and line
+ *   T3  every activation: side, celestial body, gate and line
  *
  * For each sample birth it measures two things.
  *
@@ -25,7 +25,7 @@
  *   a crowd of hundreds hides the person in it.
  *
  *   The days: for T2 and T3, how many days from 1900 to 2100 are consistent
- *   with the personality side's Sun and slow astral bodies (and node) as the
+ *   with the personality side's Sun and slow celestial bodies (and node) as the
  *   handout gives them, read at noon UT. One day means the handout names the
  *   date; together with the window it names the hour too.
  *

@@ -43,7 +43,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     type: 'square',
     templates: [
       '{body1} square {body2} {time}. Translation: friction. The kind that sharpens or stalls. Which depends on you.',
-      'Two astral bodies at odds: {body1} {body2} {time}. Expect the resistance. It\'s trying to teach you something.',
+      'Two celestial bodies at odds: {body1} {body2} {time}. Expect the resistance. It\'s trying to teach you something.',
       'Hard aspect alert, {time}: {body1} and {body2} want different things. Channel it into {theme}.',
     ]
   },
@@ -55,7 +55,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     templates: [
       'A gift lands {time}: {body1} trine {body2}. {theme} flows. Don\'t waste it on autopilot.',
       '{time}, {body1} and {body2} are in conversation. The air is clear for {theme}.',
-      'Rare ease: {body1} trine {body2}, {time}. This is what "favor of the astral bodies" looks like.',
+      'Rare ease: {body1} trine {body2}, {time}. This is what "favor of the celestial bodies" looks like.',
     ]
   },
 
@@ -116,7 +116,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Grand Trine',
     templates: [
-      'A Grand Trine is live today {bodies}. Three astral bodies in harmony. Talent made visible.',
+      'A Grand Trine is live today {bodies}. Three celestial bodies in harmony. Talent made visible.',
       'Rare symmetry: Grand Trine {bodies}. The gifts are real. The work is yours.',
       '{bodies} form a Grand Trine. Luck showed up. Use it before tomorrow.',
     ]
@@ -127,7 +127,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'T-Square',
     templates: [
-      'A T-Square is live {bodies}. Two astral bodies pulling opposite ways. A third caught between. Resolution is the day\'s theme.',
+      'A T-Square is live {bodies}. Two celestial bodies pulling opposite ways. A third caught between. Resolution is the day\'s theme.',
       'Tension architecture: T-Square {bodies}. The empty leg (opposite the apex) is where release lives. Find it.',
       '{bodies} form a T-Square. Friction. Growth. Same thing today.',
     ]
@@ -149,7 +149,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Grand Cross',
     templates: [
-      'A Grand Cross: {bodies}. Four astral bodies in tension on all sides. No easy exit. That\'s the point.',
+      'A Grand Cross: {bodies}. Four celestial bodies in tension on all sides. No easy exit. That\'s the point.',
       'Heavy day: Grand Cross {bodies}. All the pressures at once. Channel it into mastery.',
       '{bodies} form a Grand Cross. This is what "no way out but through" looks like in the sky.',
     ]
@@ -171,7 +171,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Boomerang',
     templates: [
-      'A Boomerang pattern: {bodies}. Tension wants out. A resolution astral body says "throw me". Do it.',
+      'A Boomerang pattern: {bodies}. Tension wants out. A resolution celestial body says "throw me". Do it.',
       'Boomerang {bodies}: a Yod with an escape route. The escape route is {apex}.',
       '{bodies} form a Boomerang. The tension reflects back to its solution. Pay attention.',
     ]
@@ -183,7 +183,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     type: 'Stellium',
     templates: [
       'A Stellium in {sign}: {bodies}. Concentrated power. Laser focus. Obsession territory.',
-      'Four+ astral bodies in {sign}. That\'s a Stellium. Today\'s intensity is not an accident.',
+      'Four+ celestial bodies in {sign}. That\'s a Stellium. Today\'s intensity is not an accident.',
       '{bodies} cluster in {sign}. Stellium energy. One theme dominates. Lean into it.',
     ]
   },
@@ -197,7 +197,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Thor\'s Hammer',
     templates: [
-      'A Thor\'s Hammer is live {bodies}. Two astral bodies squeezing a third. Pressure breeds precision.',
+      'A Thor\'s Hammer is live {bodies}. Two celestial bodies squeezing a third. Pressure breeds precision.',
       'Hard rectangle energy: {bodies}. Squeeze and release. Today you choose what gets released.',
       '{bodies}: Thor\'s Hammer configuration. Minor aspects, real tension. Unorthodox but active.',
     ]

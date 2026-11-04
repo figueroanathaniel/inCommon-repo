@@ -39,7 +39,7 @@ function applyNatalTouchWeight(
   // Check if item has natal-touch info in keywords
   if (item.keywords && item.keywords.includes('natal-touch')) {
     // Extract touched point from headline or use fallback
-    // For this implementation, we look at all mentioned astral bodies and apply avg weight
+    // For this implementation, we look at all mentioned celestial bodies and apply avg weight
     const mentionedBodies = Object.keys(profile.weights).filter(p =>
       item.headline.toLowerCase().includes(p.toLowerCase())
     );
@@ -81,7 +81,7 @@ function applyTopicBonus(item: NewsItem, profile: PersonalizationProfile): numbe
         }
       }
 
-      // Check if keyword is an astral body
+      // Check if keyword is a celestial body
       if (profile.weights[keywordLower] !== undefined) {
         const weight = profile.weights[keywordLower];
         if (weight > 1.0) {
@@ -95,7 +95,7 @@ function applyTopicBonus(item: NewsItem, profile: PersonalizationProfile): numbe
 }
 
 /**
- * Determine if item is deselected (all keyword astral bodies have weight ≤0.7)
+ * Determine if item is deselected (all keyword celestial bodies have weight ≤0.7)
  */
 function isDeselected(item: NewsItem, profile: PersonalizationProfile): boolean {
   if (!item.keywords || item.keywords.length === 0) return false;

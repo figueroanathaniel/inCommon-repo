@@ -662,7 +662,41 @@ rule nobody is reading. And it refuses to report green when it cannot see: too
 few files walked, the app not reached, fewer than twenty label positions found,
 or no mark found inside `docs/reference/` where they are known to be.
 
+## Planet when it is a planet, celestial body otherwise
+Decided by the owner on 4 November 2026, and it reverses the section below
+wherever the two disagree. The general word is **celestial body**, never astral
+body, and a body is named by its type as specifically as astronomy names it:
+the Sun and the Moon are the **luminaries**, Mercury to Neptune are **planets**,
+Pluto, Ceres and Eris are **dwarf planets**, and asteroid, centaur, comet and
+TNO keep their own names. A point (the nodes, the angles, Lilith, the Parts) is
+a point, not a body. `bodyType(name)` in the app is the one place a name becomes
+its type, and `placement-content.js` carries the same type as each body's
+`kind`. The chart's category for the ten is **Luminaries & Planets**, the
+heading astrology itself uses for them, with Pluto inside it by that
+convention.
+
+**The sweep was prose only.** Every "astral body" in app, server and tool prose
+became "celestial body", article aware ("an astral body" became "a celestial
+body"). Identifiers (`astralBodyInSign`, `ASTRAL_BODIES`, `check-astral-bodies.js`)
+and the internal key `'astral body'` (a detail pane's `kind`, a wheel row's
+`group`) were left as they were: nobody reads them, and renaming a key that
+state is compared against is churn with a real chance of a blank pane. The
+historical records (`docs/`, `data-contracts/`, `reports/`, the hd vault) were
+not touched, by the same rule as before: a record of what was written on a date
+is not a pointer. Two names the first rename had broken were put back: the
+Minor Planet Center, and TNOs & Dwarf Planets in the extended points doc.
+
+**The gates bar the old word now, not planet.** TL10 in
+`check-timing-lexicon.js` and Z5 in `run-module-tests.js` refused planet and
+now refuse astral body. The Cycle Audit's instructions in `server/oracle/index.ts`
+tell the model to name the bodies, and to say planet, dwarf planet or celestial
+body, never astral body; that change reaches readers only when the Oracle
+function is redeployed.
+
 ## Planet is astral body, and where it is not
+**Superseded on 4 November 2026 by the section above**; kept as the record of
+the first rename and of the astronomy exceptions, which still hold.
+
 The owner asked for the word replaced, and it is, everywhere a reader can see
 it. This section exists because the terminology test three sections above would
 have KEPT it: planet is the field's own word rather than anyone's brand, so by
@@ -2072,7 +2106,7 @@ the app (`PLNS`, `ASPECTS`, `anglePoints()`) and out of `hd-topology.js`
 rather than typing them, so a body or angle the app starts producing without
 an entry fails rather than quietly falling back. It asserts 960 distinct
 readings, distinct pieces, the six word phrase cap of three the app holds
-itself to, no dash, no "you are", astral body rather than planet, no rating
+itself to, no dash, no "you are", never the old word astral body, no rating
 vocabulary, and that every question is one. Its detectors are tested on
 planted fixtures first (TL0). Add to the corpus by adding to the module and
 running the gate; a new entry that repeats an old one's phrasing is the fault
@@ -4847,7 +4881,7 @@ the page still drew, because the runtime forgave the stray closer.
 and `CYCLE_SCHEMA` in `server/oracle/index.ts`), not the Codex's, and they carry
 this file's rules for interpretive writing: what a passage offers and asks,
 never what the reader is, no "you are", never good or bad, no predictions of
-harm, astral body rather than planet, and questions only the reader can close.
+harm, planet only for a planet and never astral body, and questions only the reader can close.
 The voice and emphasis line and the dash cleaner apply as to every reading.
 
 **The paywall is the server**, and since the same day it is Codex Luminary's
@@ -6912,7 +6946,7 @@ D-02 (which gate names are right) waits on the Human Design reviewer, D-06 on
 the owner, and D-07 on 3.2's inspection panel.
 
 The vault holds no reader's data. Add to it by the same rules as the docs: no
-dash, astral body in prose, and the wiring wherever a heading would otherwise
+dash, planet or celestial body in prose (never astral body), and the wiring wherever a heading would otherwise
 say the field's word for it.
 
 ## A corrected birth is a version, and a note keeps its address (1.2)

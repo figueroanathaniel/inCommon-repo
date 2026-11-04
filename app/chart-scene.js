@@ -8,7 +8,7 @@
 
    3D is the wheel as an object, an astrolabe lying in space. The disc carries
    the house band, the sign band with a tick for every degree, and the inner
-   field the aspects cross. Each astral body stands on a pillar of light over
+   field the aspects cross. Each celestial body stands on a pillar of light over
    its own longitude, at the radius the 2D wheel staggers it to, and wears its
    glyph above it. The aspects are ribbons of light bowed over the disc, and
    the four angles are beams at the rim.

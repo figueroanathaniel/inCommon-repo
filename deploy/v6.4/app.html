@@ -5833,7 +5833,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 
    CONTRACT
    The app reads window.MinorBodies[name] as a 5-slot element array, identical to
-   the layout its own astral bodies use:
+   the layout its own celestial bodies use:
 
        [ L0, n, e, varpi, a ]
          L0    mean longitude at J2000.0 (deg)
@@ -6414,7 +6414,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
 <script>
 /* placement-content.js. Modular content engine for placement detail pages. V1.0.0
 
-   WHY MODULAR: a placement is astral body × sign × house × degree. Enumerated, that is
+   WHY MODULAR: a placement is celestial body × sign × house × degree. Enumerated, that is
    21 × 12 × 12 × 30 = ~90,000 texts. Nobody writes those, and text generated to
    fill that grid reads like filler. So this file holds SIX layers of real written
    material and composes them per request:
@@ -6425,7 +6425,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
      3 houses   12 entries. Arena, definition, what it asks of whoever lands there
      4 dignity  the traditional rulership/exaltation/detriment/fall table
      5 decans   per-sign decan rulers (Chaldean order) + decan character
-     6 compose  astral body-in-sign, astral body-in-house, sign-in-house, synthesis, and the
+     6 compose  celestial body-in-sign, celestial body-in-house, sign-in-house, synthesis, and the
                 strengths / challenges / opportunities / obstacles lists
 
    Every string is tagged with the app's epistemic vocabulary:
@@ -6443,70 +6443,70 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
      verb     how it acts on an arena
      gifts / shadows / growth / blocks  seed the Working With lists            */
   var BODIES = {
-    'Sun': { glyph: '\u2609', kind: 'astral body', energy: 'identity and conscious will',
+    'Sun': { glyph: '\u2609', kind: 'luminary', energy: 'identity and conscious will',
       definition: 'The Sun is vitality, will, and the self that wants to be someone in particular. It is not personality but the thing personality is trying to express.',
       role: 'The Sun shows what you are here to become rather than what you already are, and where your energy renews itself.',
       verb: 'centres', gifts: ['hold a centre other people can locate', 'give warmth without being asked for it', 'know what you actually want when the room is undecided'],
       shadows: ['need the room to notice before something feels real', 'confuse being seen with being understood', 'burn through vitality proving a point'],
       growth: ['spend your warmth where it is received rather than where it is contested', 'let your identity be a practice rather than a verdict'],
       blocks: ['audiences that reward performance over substance', 'a self-image formed before you knew yourself'] },
-    'Moon': { glyph: '\u263D', kind: 'astral body', energy: 'feeling, memory, and what soothes',
+    'Moon': { glyph: '\u263D', kind: 'luminary', energy: 'feeling, memory, and what soothes',
       definition: 'The Moon is feeling, memory, and need. It is the private weather under the public day, and the first place the body reacts before thought arrives.',
       role: 'The Moon shows what actually comforts you, what you return to under pressure, and the emotional habits laid down early.',
       verb: 'softens', gifts: ['read a room before anyone speaks', 'remember what people needed last time', 'self-soothe without needing anyone to arrive'],
       shadows: ['mistake a familiar feeling for a true one', 'withdraw before asking', 'tend everyone\u2019s weather but your own'],
       growth: ['name a need out loud while it is still small', 'let comfort change shape as you do'],
       blocks: ['an old comfort that no longer comforts', 'moods treated as facts rather than reports'] },
-    'Mercury': { glyph: '\u263F', kind: 'astral body', energy: 'thought, language, and exchange',
+    'Mercury': { glyph: '\u263F', kind: 'planet', energy: 'thought, language, and exchange',
       definition: 'Mercury is thinking, speech, and the traffic between minds. It governs how you take information in, sort it, and hand it back.',
       role: 'Mercury shows how you learn, what you notice first, and the shape your explanations take.',
       verb: 'articulates', gifts: ['find the sentence that makes a tangle legible', 'change your mind on new evidence', 'ask the question nobody framed'],
       shadows: ['talk past the point at which you knew', 'use precision as a way of not committing', 'mistake having words for having understanding'],
       growth: ['write down the thought you keep re-thinking', 'let silence carry part of the meaning'],
       blocks: ['a story about yourself repeated until it stopped being examined', 'rooms where speed is mistaken for intelligence'] },
-    'Venus': { glyph: '\u2640', kind: 'astral body', energy: 'affection, taste, and worth',
+    'Venus': { glyph: '\u2640', kind: 'planet', energy: 'affection, taste, and worth',
       definition: 'Venus is attraction, value, and pleasure. It governs what you find beautiful, how you draw close, and what you believe you are worth.',
       role: 'Venus shows how you love, what you consider fair, and the terms on which you accept being cared for.',
       verb: 'harmonises', gifts: ['make people feel welcome without effort', 'know what is worth keeping', 'bring beauty to something purely functional'],
       shadows: ['keep the peace past the point of honesty', 'confuse being wanted with being valued', 'spend on the appearance of a life rather than the life'],
       growth: ['say the unlovely true thing to someone who can hold it', 'let your taste be yours rather than defensible'],
       blocks: ['a standard of worth borrowed from someone who did not love you well', 'pleasure postponed as though it were owed later'] },
-    'Mars': { glyph: '\u2642', kind: 'astral body', energy: 'appetite, anger, and assertion',
+    'Mars': { glyph: '\u2642', kind: 'planet', energy: 'appetite, anger, and assertion',
       definition: 'Mars is action, appetite, and the will to assert. It is how you fight, how you pursue, and how you claim.',
       role: 'Mars shows where your initiative flows most naturally, how your anger behaves, and where conflict tends to find you.',
       verb: 'drives', gifts: ['start the thing while others are still deciding', 'stay in a difficult conversation', 'want something plainly enough to act on it'],
       shadows: ['spend force on the wrong target', 'read friction as proof of aliveness', 'let anger arrive as cold distance instead of speech'],
       growth: ['aim the heat rather than damping it', 'let a want be spoken before it becomes a demand'],
       blocks: ['a rule about anger set by someone else\u2019s temper', 'competition that is not actually a contest'] },
-    'Jupiter': { glyph: '\u2643', kind: 'astral body', energy: 'growth, belief, and meaning',
+    'Jupiter': { glyph: '\u2643', kind: 'planet', energy: 'growth, belief, and meaning',
       definition: 'Jupiter is expansion, faith, and the search for meaning. It governs where you widen, what you trust, and how you make sense of scale.',
       role: 'Jupiter shows where you grow easily, where you overreach, and what you take on faith.',
       verb: 'expands', gifts: ['see the larger frame while others fight the detail', 'give generously without keeping the ledger', 'stay hopeful with your eyes open'],
       shadows: ['promise at the size of your optimism', 'mistake a good story for a true one', 'expand past what you can actually tend'],
       growth: ['let a belief be tested rather than defended', 'choose depth once breadth has been had'],
       blocks: ['a conviction inherited and never examined', 'more open doors than hours'] },
-    'Saturn': { glyph: '\u2644', kind: 'astral body', energy: 'structure, limit, and responsibility',
+    'Saturn': { glyph: '\u2644', kind: 'planet', energy: 'structure, limit, and responsibility',
       definition: 'Saturn is limit, time, and consequence. It governs what must be built slowly and what will not be talked out of its price.',
       role: 'Saturn shows where you meet resistance, where mastery is available but only through repetition, and what you feel responsible for.',
       verb: 'disciplines', gifts: ['finish what stopped being interesting', 'hold a boundary without a speech', 'be the one who is actually reliable'],
       shadows: ['audit yourself in a voice you would not use on anyone else', 'call fear prudence', 'wait for qualification that never certifies itself'],
       growth: ['let sufficiency be a standard you can actually reach', 'build the small structure rather than plan the large one'],
       blocks: ['a standard set by someone who was never satisfied', 'a delay that has become a residence'] },
-    'Uranus': { glyph: '\u2645', kind: 'astral body', energy: 'individuation and the break in the pattern',
+    'Uranus': { glyph: '\u2645', kind: 'planet', energy: 'individuation and the break in the pattern',
       definition: 'Uranus is the break in the pattern. Sudden insight, deviation, the refusal to inherit a life unexamined.',
       role: 'Uranus shows where you cannot be standardised, and where change arrives faster than preparation.',
       verb: 'pursues', gifts: ['see the arrangement everyone stopped questioning', 'tolerate being the odd one', 'change your life in a week when it is warranted'],
       shadows: ['break something because it is intact', 'call restlessness freedom', 'leave before being known'],
       growth: ['stay long enough for a change to take root', 'let difference be a contribution rather than a position'],
       blocks: ['belonging treated as a threat', 'a reflex against structure, including your own'] },
-    'Neptune': { glyph: '\u2646', kind: 'astral body', energy: 'longing and imagination',
+    'Neptune': { glyph: '\u2646', kind: 'planet', energy: 'longing and imagination',
       definition: 'Neptune dissolves the edges. Imagination, compassion, longing, and the pull toward something larger than the self.',
       role: 'Neptune shows where boundaries thin, where inspiration arrives unearned, and where you are most easily fooled.',
       verb: 'thins the edges of', gifts: ['feel what someone will not say', 'make something from almost nothing', 'forgive at scale'],
       shadows: ['soften a fact until it stops requiring action', 'merge until you cannot locate yourself', 'wait for rescue and call it faith'],
       growth: ['put the vision into a form that can be corrected', 'keep compassion and clear sight in the same hand'],
       blocks: ['a fog that arrives whenever a decision does', 'an ideal held close enough to obscure the actual' ] },
-    'Pluto': { glyph: '\u2647', kind: 'astral body', energy: 'power and compulsion',
+    'Pluto': { glyph: '\u2647', kind: 'dwarf planet', energy: 'power and compulsion',
       definition: 'Pluto is depth, power, and forced transformation. What will not stay buried, and what must end for something truer to live.',
       role: 'Pluto shows where you are compulsive, where your power is real, and where life keeps requiring a death and a rebuild.',
       verb: 'transforms', gifts: ['stay present to what others cannot look at', 'rebuild after a loss that should have ended it', 'sense the real power in a room'],
@@ -6997,7 +6997,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       shadows: ['rely on grace instead of effort', 'hide from your own shadow behind goodness', 'expect protection and take risks accordingly'],
       growth: ['let good fortune make you generous', 'hold your light and your shadow together'],
       blocks: ['a belief that you must be pure to be protected', 'spaces where kindness is taken for weakness'] },
-    /* planetary nodes: where each astral body's orbit crosses the ecliptic, seen
+    /* planetary nodes: where each celestial body's orbit crosses the ecliptic, seen
        from the Sun. They move so slowly that everyone born within decades
        shares them, so they read as the shared work of a generation. */
     mercuryNode: { label: 'Mercury’s North Node', kind: 'node', energy: 'the thinking of a generation',
@@ -7060,7 +7060,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
        Sieggruen proposed in the 1920s beyond Neptune. No such bodies have
        been found. Uranian astrology reads them as defined points on an orbit. */
     tnp_cupido: { label: 'Cupido (Hamburg)', kind: 'hypothetical', energy: 'belonging, family and shared art',
-      definition: 'Cupido is the first of the Hamburg School’s hypothetical points, proposed by Alfred Witte in the 1920s. No astral body has been found at this place: it is a point on a defined orbit, used in Uranian astrology. It is read for groups, family, marriage as an institution, and the arts that bind people together. It is not the asteroid Cupido.',
+      definition: 'Cupido is the first of the Hamburg School’s hypothetical points, proposed by Alfred Witte in the 1920s. No celestial body has been found at this place: it is a point on a defined orbit, used in Uranian astrology. It is read for groups, family, marriage as an institution, and the arts that bind people together. It is not the asteroid Cupido.',
       role: 'Cupido shows where you belong to a group, what family and community mean to you, and how you create beauty with others.',
       verb: 'gathers', gifts: ['bring people together into a family of choice', 'create beauty in a group', 'keep traditions that connect people'],
       shadows: ['lose yourself in belonging', 'value the group over its members', 'put up with a group to avoid being alone'],
@@ -7145,7 +7145,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       growth: ['align intention with action', 'accept what fortune brings while acting on what you choose'],
       blocks: ['circumstances that limit choice', 'confusion about what you actually want'] },
     ariesPoint: { label: 'Aries Point', kind: 'point', energy: 'contact with the public world',
-      definition: 'The Aries Point is zero degrees of Aries, where the Sun crosses the celestial equator at the March equinox and the tropical zodiac begins. It is the same place in every chart. Uranian astrology gave it weight as the point where personal life meets the world at large, and an astral body near it is read as reaching the public.',
+      definition: 'The Aries Point is zero degrees of Aries, where the Sun crosses the celestial equator at the March equinox and the tropical zodiac begins. It is the same place in every chart. Uranian astrology gave it weight as the point where personal life meets the world at large, and a celestial body near it is read as reaching the public.',
       role: 'The Aries Point shows how a chart meets the wider world. What sits near it, by conjunction, square or opposition, may be where you become visible beyond private life.',
       verb: 'opens', gifts: ['bring a personal matter into public life', 'make a mark beyond your own circle', 'begin something that others notice'],
       shadows: ['seek visibility for its own sake', 'feel exposed by public attention', 'let public events take over private life'],
@@ -7285,32 +7285,32 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
        presence  how a body behaves once it lands in this house
        inLife    what the house does to an actual life                          */
   var HOUSE_PRESENCE = [
-    'When astral bodies gather in your 1st House, you feel their presence directly. This is the house of self-presentation. An astral body here does not hide. It becomes part of how others recognise you and how you recognise yourself.',
-    'When astral bodies occupy your 2nd House, they shape what you value and how you secure it. This is the terrain of earned worth. An astral body here asks: what do you build, and what builds you?',
-    'When astral bodies move through your 3rd House, they colour how you speak, learn, and connect with your immediate world. This is the house of daily exchange. An astral body here shows up in conversations, short journeys, and the information you choose to carry.',
-    'When astral bodies rest in your 4th House, they touch the foundation of your life. This is the house of home, heritage, and emotional ground. An astral body here shapes what shelters you and what you are called to shelter.',
-    'When astral bodies shine in your 5th House, they ignite what you create for joy. This is the house of self-expression, romance, and play. An astral body here wants to be seen, felt, and celebrated.',
-    'When astral bodies work in your 6th House, they shape your daily rhythms and how you tend to what needs doing. This is the house of craft, health, and useful labour. An astral body here shows up in your routines and your relationship to your own body.',
-    'When astral bodies mirror in your 7th House, they reveal who stands across from you. This is the house of committed relationship and open opposition. An astral body here draws others in to teach you what you cannot learn alone.',
-    'When astral bodies plunge into your 8th House, they enter the depths where surface life falls away. This is the house of shared resources, intimacy, and what must end to be remade. An astral body here does not skim. It asks for the truth.',
-    'When astral bodies expand in your 9th House, they stretch your understanding of what is possible. This is the house of long journeys, higher learning, and belief. An astral body here calls you beyond the familiar.',
-    'When astral bodies climb to your 10th House, they shape how you are known in the world. This is the house of vocation, reputation, and public life. An astral body here leaves a mark that outlasts the moment.',
-    'When astral bodies gather in your 11th House, they weave you into the fabric of something larger. This is the house of friends, hopes, and collective future. An astral body here shows what you wish for and who wishes it with you.',
-    'When astral bodies dissolve into your 12th House, they work below the level of conscious choice. This is the house of seclusion, undoing, and hidden strengths. An astral body here operates in dreams, in solitude, and in what you release.'
+    'When celestial bodies gather in your 1st House, you feel their presence directly. This is the house of self-presentation. A celestial body here does not hide. It becomes part of how others recognise you and how you recognise yourself.',
+    'When celestial bodies occupy your 2nd House, they shape what you value and how you secure it. This is the terrain of earned worth. A celestial body here asks: what do you build, and what builds you?',
+    'When celestial bodies move through your 3rd House, they colour how you speak, learn, and connect with your immediate world. This is the house of daily exchange. A celestial body here shows up in conversations, short journeys, and the information you choose to carry.',
+    'When celestial bodies rest in your 4th House, they touch the foundation of your life. This is the house of home, heritage, and emotional ground. A celestial body here shapes what shelters you and what you are called to shelter.',
+    'When celestial bodies shine in your 5th House, they ignite what you create for joy. This is the house of self-expression, romance, and play. A celestial body here wants to be seen, felt, and celebrated.',
+    'When celestial bodies work in your 6th House, they shape your daily rhythms and how you tend to what needs doing. This is the house of craft, health, and useful labour. A celestial body here shows up in your routines and your relationship to your own body.',
+    'When celestial bodies mirror in your 7th House, they reveal who stands across from you. This is the house of committed relationship and open opposition. A celestial body here draws others in to teach you what you cannot learn alone.',
+    'When celestial bodies plunge into your 8th House, they enter the depths where surface life falls away. This is the house of shared resources, intimacy, and what must end to be remade. A celestial body here does not skim. It asks for the truth.',
+    'When celestial bodies expand in your 9th House, they stretch your understanding of what is possible. This is the house of long journeys, higher learning, and belief. A celestial body here calls you beyond the familiar.',
+    'When celestial bodies climb to your 10th House, they shape how you are known in the world. This is the house of vocation, reputation, and public life. A celestial body here leaves a mark that outlasts the moment.',
+    'When celestial bodies gather in your 11th House, they weave you into the fabric of something larger. This is the house of friends, hopes, and collective future. A celestial body here shows what you wish for and who wishes it with you.',
+    'When celestial bodies dissolve into your 12th House, they work below the level of conscious choice. This is the house of seclusion, undoing, and hidden strengths. A celestial body here operates in dreams, in solitude, and in what you release.'
   ];
   var HOUSE_IN_LIFE = [
-    'This is where your life becomes visible. An astral body in your 1st House does not stay hidden. It becomes part of your face to the world.',
-    'This is where your values become tangible. An astral body in your 2nd House asks what you are willing to cultivate and what you need in order to feel secure.',
-    'This is where your mind meets the world. An astral body in your 3rd House shapes how you speak, what you notice, and how you move through your daily environment.',
-    'This is where your roots speak. An astral body in your 4th House touches what grounds you, what you come from, and what you need in order to feel at home.',
-    'This is where your joy finds form. An astral body in your 5th House colours what you create, who you love, and what you do simply because it delights you.',
-    'This is where your life finds its rhythm. An astral body in your 6th House shapes your daily work, your health, and how you serve what matters.',
-    'This is where you meet the other. An astral body in your 7th House draws people toward you who mirror what you need to see in yourself.',
-    'This is where surface gives way to depth. An astral body in your 8th House enters the territory of trust, shared power, and what transforms through contact.',
-    'This is where your horizon expands. An astral body in your 9th House pulls you toward meaning, distance, and understanding that reorders what you thought you knew.',
-    'This is where your path becomes public. An astral body in your 10th House shapes how you are remembered and what you build that outlasts you.',
-    'This is where your individual life joins something collective. An astral body in your 11th House shows where your hopes align with others and what future you are willing to work toward.',
-    'This is where the visible world thins. An astral body in your 12th House works in solitude, in surrender, and in the strengths you do not know you have until they are needed.'
+    'This is where your life becomes visible. A celestial body in your 1st House does not stay hidden. It becomes part of your face to the world.',
+    'This is where your values become tangible. A celestial body in your 2nd House asks what you are willing to cultivate and what you need in order to feel secure.',
+    'This is where your mind meets the world. A celestial body in your 3rd House shapes how you speak, what you notice, and how you move through your daily environment.',
+    'This is where your roots speak. A celestial body in your 4th House touches what grounds you, what you come from, and what you need in order to feel at home.',
+    'This is where your joy finds form. A celestial body in your 5th House colours what you create, who you love, and what you do simply because it delights you.',
+    'This is where your life finds its rhythm. A celestial body in your 6th House shapes your daily work, your health, and how you serve what matters.',
+    'This is where you meet the other. A celestial body in your 7th House draws people toward you who mirror what you need to see in yourself.',
+    'This is where surface gives way to depth. A celestial body in your 8th House enters the territory of trust, shared power, and what transforms through contact.',
+    'This is where your horizon expands. A celestial body in your 9th House pulls you toward meaning, distance, and understanding that reorders what you thought you knew.',
+    'This is where your path becomes public. A celestial body in your 10th House shapes how you are remembered and what you build that outlasts you.',
+    'This is where your individual life joins something collective. A celestial body in your 11th House shows where your hopes align with others and what future you are willing to work toward.',
+    'This is where the visible world thins. A celestial body in your 12th House works in solitude, in surrender, and in the strengths you do not know you have until they are needed.'
   ];
   HOUSES.forEach(function (h, i) { h.presence = HOUSE_PRESENCE[i]; h.inLife = HOUSE_IN_LIFE[i]; });
 
@@ -7364,10 +7364,10 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
          “drive, desire, and assertion” cannot take a verb without disagreeing.
          Energy is always appended after a colon or preposition, never inflected. */
       var text = {
-        rulership: body + ' rules ' + sign + '. This is one of its home signs, where the astral body operates without translation. The sign asks for exactly what ' + body + ' already does: ' + nrg + '.',
-        exaltation: body + ' is exalted in ' + sign + '. Not its own sign, but a guest treated well: the astral body works through ' + (s ? s.quality : 'the sign\u2019s terms') + ' and gains a discipline it would not find alone, bringing ' + nrg + ' to a form that can hold it.',
-        detriment: body + ' is in detriment in ' + sign + ', the sign opposite its rulership. The astral body meets terms it did not set, and has to reach ' + nrg + ' indirectly.',
-        fall: body + ' is in fall in ' + sign + ', opposite its exaltation. The sign gives the astral body no natural support, so ' + body + ' has to build ' + nrg + ' here rather than assume it.'
+        rulership: body + ' rules ' + sign + '. This is one of its home signs, where the celestial body operates without translation. The sign asks for exactly what ' + body + ' already does: ' + nrg + '.',
+        exaltation: body + ' is exalted in ' + sign + '. Not its own sign, but a guest treated well: the celestial body works through ' + (s ? s.quality : 'the sign\u2019s terms') + ' and gains a discipline it would not find alone, bringing ' + nrg + ' to a form that can hold it.',
+        detriment: body + ' is in detriment in ' + sign + ', the sign opposite its rulership. The celestial body meets terms it did not set, and has to reach ' + nrg + ' indirectly.',
+        fall: body + ' is in fall in ' + sign + ', opposite its exaltation. The sign gives the celestial body no natural support, so ' + body + ' has to build ' + nrg + ' here rather than assume it.'
       }[state];
       var poss = {
         rulership: 'You may find this part of you is difficult to resist once it is pointed at something. And hardest to moderate for the same reason.',
@@ -7381,7 +7381,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     },
 
     /* Decan ruler filters. The decan ruler does not replace the sign, it filters
-       it: the same placement, narrowed. One entry per classical astral body, since the
+       it: the same placement, narrowed. One entry per classical celestial body, since the
        Chaldean decan sequence only uses the seven.                              */
     FILTERS: {
       'Mars':    { name: 'Mars', primary: 'intensifies direct action', gain: 'urgency and a competitive edge', asks: 'can the heat be aimed rather than spent?' },
@@ -8077,7 +8077,8 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
 
    House rules, all of them enforced by tools/check-timing-lexicon.js: no dash
    of either kind, no sentence that tells a reader who they are, no rating of
-   any kind, the word astral body where a reader would otherwise meet planet,
+   any kind, never the old word astral body (owner, 4 November 2026: planet when
+   it is a planet, celestial body as the general word),
    and no question that answers itself. A question here is one only the reader
    can close.                                                                 */
 (function () {
@@ -9380,7 +9381,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
  *
  * Rules held here:
  *   - qualities only, never identifiers. The passage never repeats the gate
- *     number, astral body name, degree, or personal day already listed above it,
+ *     number, celestial body name, degree, or personal day already listed above it,
  *     so it cannot collapse into a second summary of the same rows.
  *   - invitational language only: may, might, one possibility, you could.
  *   - no diagnosis, no prediction, no fate, no invented personal context.
@@ -11351,7 +11352,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   var INTRO = {
     what: 'Human Design is a synthesis. It takes a birth moment and draws a diagram, which inCommon calls the wiring and the field calls a bodygraph, and reads it as a map of how your body and mind are built to make decisions and spend energy.',
     history: 'The system was first published in the wake of a reported experience on Ibiza in January 1987. It combines the 64 hexagrams of the I Ching, the ten Sephirot of the Kabbalistic Tree of Life, the seven-chakra system, Western astrology, and a reading of the neutrino as a carrier of information.',
-    method: 'Two charts are cast. The Personality chart uses the birth moment. The Design chart uses the position of the astral bodies about 88 degrees of solar arc earlier, roughly 88 to 90 days before birth. Both are laid over the same nine centers, and the pattern of what connects decides type, authority, and profile.',
+    method: 'Two charts are cast. The Personality chart uses the birth moment. The Design chart uses the position of the celestial bodies about 88 degrees of solar arc earlier, roughly 88 to 90 days before birth. Both are laid over the same nine centers, and the pattern of what connects decides type, authority, and profile.',
     caution: 'None of this has been demonstrated by any mechanism outside the system itself. It is a language for noticing, and it is at its most useful where it describes something you can check.'
   };
 
@@ -11812,7 +11813,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     { name: 'Aura', text: 'The field the tradition says every body carries, reaching about two metres in each direction, through which every meeting begins before anything is said. Its quality is fixed by type rather than by manner, mood or intention, which is why the system treats it as mechanical rather than psychological. A Manifestor chart\u2019s aura is described as closed and repelling, hard to read from outside. A Generator chart\u2019s, and a Manifesting Generator chart\u2019s, is open and enveloping, taking in whatever is near. A Projector chart\u2019s is focused and absorbing, aimed at one person at a time, and a Reflector chart\u2019s is resistant and sampling, tasting everyone present without taking anyone in. Where two auras overlap is where conditioning happens: whatever one chart defines is felt by the other wherever the other is open.', see: ['bedrock', 'Aura'] },
     { name: 'Signature', text: 'The feeling the tradition says arrives with a life lived by your own strategy and authority: peace for a Manifestor chart, satisfaction for a Generator chart, success for a Projector chart and surprise for a Reflector chart. The published convention gives the Manifesting Generator the Generator\u2019s satisfaction, and some schools add peace for its informing half. Each word is meant in a particular sense: peace as ease after moving freely with nobody blindsided, satisfaction as the good tiredness after work that was truly responded to, success as the quiet recognition of having guided something well, and surprise as delight at a cycle that turned out differently than expected. It is a check noticed afterwards rather than a goal, since it cannot be produced by aiming at it, and its counterpart is the not-self theme.', see: ['bedrock', 'Signature'] },
     { name: 'Not-Self Theme', text: 'The feeling reported when your life runs on the mind\u2019s agenda or on borrowed pressure rather than on your design: anger for a Manifestor chart, frustration for a Generator chart, bitterness for a Projector chart and disappointment for a Reflector chart, with some schools adding anger for the Manifesting Generator. Each is read as a specific signal: anger as having been held back or having moved without informing, frustration as having initiated or said yes without the energy for it, bitterness as having entered uninvited or gone unrecognised too long, and disappointment as the wrong surroundings or a hurried decision. Each open center carries a habit of its own as well, from the open Head chasing questions that belong to others to the open Root hurrying to be free of pressure. The tradition treats all of it as early information, a nudge back toward strategy, and never as a verdict on you.', see: ['bedrock', 'Not-Self Theme'] },
-    { name: 'Conditioning', text: 'What the tradition says happens wherever your chart is open: the openness takes in other people\u2019s definition and the day\u2019s transits, and the mind mistakes the borrowed consistency for its own. An open center is said to amplify what is near it, so it can feel the borrowed energy more strongly than the chart that lends it. The moving astral bodies condition everyone at once, which the tradition calls the Program, and it calls the pull to be like everyone else homogenization. Between two charts the defined side conditions the open one, and the four connection patterns, electromagnetic, companionship, dominance and compromise, name how. None of it is framed as harm being done to you, only as the ordinary mechanics of being open, and the open places are where the tradition locates both confusion and wisdom. Living by strategy and authority over time is what it calls deconditioning.', see: ['horizon', 'Conditioning'] },
+    { name: 'Conditioning', text: 'What the tradition says happens wherever your chart is open: the openness takes in other people\u2019s definition and the day\u2019s transits, and the mind mistakes the borrowed consistency for its own. An open center is said to amplify what is near it, so it can feel the borrowed energy more strongly than the chart that lends it. The moving celestial bodies condition everyone at once, which the tradition calls the Program, and it calls the pull to be like everyone else homogenization. Between two charts the defined side conditions the open one, and the four connection patterns, electromagnetic, companionship, dominance and compromise, name how. None of it is framed as harm being done to you, only as the ordinary mechanics of being open, and the open places are where the tradition locates both confusion and wisdom. Living by strategy and authority over time is what it calls deconditioning.', see: ['horizon', 'Conditioning'] },
     { name: 'Deconditioning', text: 'The process of living by type and authority long enough to tell your own definition from what was filled in. The tradition puts it at roughly seven years and warns that it is uncomfortable in the middle, which is the part most often left out.' },
     { name: 'Hanging Gate', text: 'A gate that is defined while the gate at the other end of its channel is not, leaving half a channel open. The tradition reads a hanging gate as the place your pull toward others is most reliable, because any chart carrying the other gate completes the circuit on contact.' },
     { name: 'Electromagnetic Connection', text: 'When one chart holds one gate of a channel and the other holds its pair, completing a channel neither could complete alone. Described as the most magnetic thing available between two charts, with the standing caution that magnetism is not compatibility. The circuit closes with any chart that holds the other gate.' },
@@ -12023,7 +12024,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       parts: [
         ['The Biverse', 'The founder’s word for a cosmos that is dual at its root, yin and yang before anything else.'],
         ['The Maia', 'The world of form, from a Sanskrit root meaning to measure. The system describes itself as the mechanics of the Maia.'],
-        ['The neutrino and the Program', 'The neutrino is held to carry information as it passes through every body. The Program is the patterned, cyclical effect of that stream on all life, carried by the movement of the astral bodies.'],
+        ['The neutrino and the Program', 'The neutrino is held to carry information as it passes through every body. The Program is the patterned, cyclical effect of that stream on all life, carried by the movement of the celestial bodies.'],
         ['The crystals', 'Two crystals of consciousness: the Personality crystal, placed at the Head center, and the Design crystal, placed within the skull. The black activations are the Personality and the red ones the Design.'],
         ['The magnetic monopole', 'A single-poled magnet the tradition places in the G, at the sternum. It holds the two crystals together and is said to steer the body along its line through space.'],
         ['Passenger and vehicle', 'The Personality is the passenger and the Design is the vehicle, the body. The passenger rides; the vehicle knows the road.'],
@@ -12049,7 +12050,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       lead: 'Conditioning is what the tradition says happens wherever a chart is open: the openness takes in other people’s definition and the day’s transits, and the mind mistakes the borrowed consistency for its own. It is not framed as harm. It is the ordinary mechanics of being open, and the place where the tradition locates both confusion and wisdom.',
       parts: [
         ['Open centers', 'An open center amplifies whatever definition is near it, so it can feel the borrowed energy more strongly than the chart that lends it.'],
-        ['The transit field', 'The moving astral bodies activate gates for everyone at once, so the whole world is conditioned by the same sky for a while. The tradition calls this the Program.'],
+        ['The transit field', 'The moving celestial bodies activate gates for everyone at once, so the whole world is conditioned by the same sky for a while. The tradition calls this the Program.'],
         ['Homogenization', 'The founding teaching\u2019s word for the pull to be like everyone else, which conditioning makes easy and the not-self mind welcomes.'],
         ['Deconditioning', 'Living by strategy and authority long enough for the body to sort its own definition from what was borrowed. The published convention calls it a seven-year cellular process and is candid that the middle of it can be uncomfortable.'],
         ['Conditioning between two charts', 'Where one chart is defined and the other open, the defined side conditions the open one. The four connection patterns, electromagnetic, companionship, dominance and compromise, name how.']
@@ -12147,8 +12148,8 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
      list alphabetically. `see` points at the lesson or shelf that carries
      the full account. */
   var LEXICON = [
-    { name: 'Activation', text: 'One astral body standing in one gate and line, on either the Personality or the Design side. A chart has 26 of them, and they are the raw facts every other idea is read from.', see: ['horizon', 'Mechanics'] },
-    { name: 'Astral Bodies', text: 'The thirteen positions cast on each side of a chart: the Sun, the Earth, the Moon, the North and South Nodes, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune and Pluto. The Sun and Earth together carry most of the weight, about seventy percent of the imprint in the tradition’s own reckoning.', see: ['horizon', 'Mechanics'] },
+    { name: 'Activation', text: 'One celestial body standing in one gate and line, on either the Personality or the Design side. A chart has 26 of them, and they are the raw facts every other idea is read from.', see: ['horizon', 'Mechanics'] },
+    { name: 'Celestial Bodies', text: 'The thirteen positions cast on each side of a chart: the Sun, the Earth, the Moon, the North and South Nodes, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune and Pluto. The Sun and Earth together carry most of the weight, about seventy percent of the imprint in the tradition’s own reckoning.', see: ['horizon', 'Mechanics'] },
     { name: 'Awareness Centers', text: 'The Spleen, the Ajna and the Solar Plexus, the three centers that know rather than move: body, mind and the emerging awareness of spirit.', see: ['horizon', 'Awareness'] },
     { name: 'Alpha', text: 'In the published dictionary\u2019s account of the Wa, the one member beyond its three small groups. Little else written about it was found.', see: ['terms', 'Penta'] },
     { name: 'BG5', text: 'The business and career application of the system, taught by the BG5 Business Institute, which reads charts for work and for working groups.', see: ['terms', 'Penta'] },
@@ -12183,7 +12184,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     { name: 'Mental Projector', text: 'The founding teaching\u2019s name for a Projector chart whose definition sits only in the Head, the Ajna and the Throat. It has no direct inner authority, and clarity is read as coming from the right surroundings and from talking things over.', see: ['types', 'Projector'] },
     { name: 'Energy Type', text: 'Manifestors, Generators and Manifesting Generators: the types with a motor defined in a way that gives consistent access to working energy.', see: ['bedrock', 'Type'] },
     { name: 'Environment', text: 'The bottom left arrow, from the Design side: the kind of surroundings the body is said to do best in. Its six colors are Caves, Markets, Kitchens, Mountains, Valleys and Shores.', see: ['horizon', 'Variable'] },
-    { name: 'Exaltation and Detriment', text: 'The two poles of a line. Each line is given one or more astral bodies that exalt it and one or more in its detriment, and an activation by one of them is said to fix the line in that expression; fixed both ways at once is a juxtaposition. The founding teaching calls the two names regrettable, because they read as good and bad when they describe a polarity within the line.', see: ['gates', 'g1'] },
+    { name: 'Exaltation and Detriment', text: 'The two poles of a line. Each line is given one or more celestial bodies that exalt it and one or more in its detriment, and an activation by one of them is said to fix the line in that expression; fixed both ways at once is a juxtaposition. The founding teaching calls the two names regrettable, because they read as good and bad when they describe a polarity within the line.', see: ['gates', 'g1'] },
     { name: 'Gate', text: 'One of the 64 divisions of the wheel, each matching a hexagram of the I Ching, and each housed in one center. Gate N is hexagram N.', see: ['gates', 'g1'] },
     { name: 'Generator', text: 'The type with a defined Sacral and no motor reaching the Throat, about a third of people. Its sibling, the Manifesting Generator, has a motor joined to the Throat, and the two together are about seven in ten. Strategy to respond, signature satisfaction, not-self theme frustration.', see: ['types', 'Generator'] },
     { name: 'Global Cycle', text: 'An era of history read as carrying the theme of one Incarnation Cross. The present one is the Cross of Planning.', see: ['horizon', 'Evolution'] },
@@ -12218,7 +12219,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     { name: 'Personality Sun', text: 'The Sun’s gate and line at birth. It gives the first number of the profile and two of the four gates of the Cross.', see: ['weather', 'Profile'] },
     { name: 'Perspective', text: 'The bottom right arrow, from the Personality side, also called view: what the mind is built to notice. Its six colors are Survival, Possibility, Power, Wanting, Probability and Personal.', see: ['horizon', 'Variable'] },
     { name: 'Pressure Centers', text: 'The Head and the Root, which push rather than power: pressure to know and pressure to act.', see: ['weather', 'Centers'] },
-    { name: 'Program', text: 'The tradition’s word for the patterned, cyclical effect of the neutrino stream on all life, carried by the moving astral bodies.', see: ['horizon', 'Conditioning'] },
+    { name: 'Program', text: 'The tradition’s word for the patterned, cyclical effect of the neutrino stream on all life, carried by the moving celestial bodies.', see: ['horizon', 'Conditioning'] },
     { name: 'Quarter', text: 'One of four arcs of 16 hexagrams on the wheel: Initiation, which opens at gate 13, Civilization at gate 2, Duality at gate 7 and Mutation at gate 1.', see: ['weather', 'Angle'] },
     { name: 'Rave', text: 'The tradition’s name for nine-centered human beings, which it dates from 1781.', see: ['horizon', 'Evolution'] },
     { name: 'Rave Children', text: 'The tradition’s name for children it expects to be born with a mutated Solar Plexus after 2027.', see: ['horizon', 'Evolution'] },
@@ -12257,8 +12258,8 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     { name: 'Centers', text: 'The nine hubs of the wiring, drawn from the older seven-chakra picture and split into nine, and sorted by the work they do. The Head and the Root are pressure centers, pressing to know and pressing to act. The Spleen, the Ajna and the Solar Plexus are awareness centers: the body’s knowing, the mind’s, and the emerging awareness the tradition calls spirit. The Sacral, the Heart, the Solar Plexus and the Root are the motors, and only they supply energy. The Throat turns energy into speech and action, and the G holds identity, love and direction. Each center is either defined, working the same way every day, or open, taking in and amplifying what the room brings, which is where the tradition locates both conditioning and wisdom.', see: ['weather', 'Centers'] },
     { name: 'Circuits', text: 'The families the channels belong to, each read as the purpose its channels’ energy serves. They gather into three groups with a keynote apiece: the individual group empowers, the tribal group supports, and the collective group shares. Individual circuitry holds the Knowing circuit, of insight that arrives whole, the Centering circuit, of personal will, and the Integration channels, of survival in the present, and it is where the tradition says change enters the wiring. Tribal circuitry holds the Ego circuit, of resources, bargains and loyalty, and the Defense circuit, of nurture and care for the young. Collective circuitry holds the Understanding circuit, of patterns tested and repeated, and the Sensing circuit, of experience lived through and made sense of afterwards. Every one of the 36 channels belongs to one of these families.', see: ['weather', 'Circuits'] },
     { name: 'Streams', text: 'Runs of gates that carry a potential from a pressure center through an awareness center toward expression. Each awareness center holds three, nine in all. The Spleen’s are read through instinct, intuition and taste. The Ajna’s are the abstract idea, through gates 64, 47 and 11, the logical fact, through 63, 4 and 17, and the individual insight, through 61, 24 and 43. The Solar Plexus carries its three as kinds of emotional wave: the tribal stream of need, the individual stream of uncertainty and the collective stream of desire. Schools follow each stream gate by gate as a story of how one kind of knowing matures, and that is what lets a single gate be read in context: what pressure feeds it, what awareness it carries, and where it wants to come out.', see: ['weather', 'Streams'], aka: 'Streams of Awareness' },
-    { name: 'Rave Cosmology', text: 'The system’s account of where a design comes from, given at its founding. It is metaphysics rather than mechanics, best read as the frame the chart sits inside rather than as something the chart demonstrates. It begins with the Biverse, a cosmos dual at its root, and names the world of form the Maia, the system describing itself as the mechanics of the Maia. The neutrino is held to carry information through every body, and the Program is the patterned, cyclical effect of that stream, carried by the moving astral bodies. Two crystals of consciousness, the Personality and the Design, are said to be held together by a magnetic monopole seated in the G, with the Personality riding as a passenger in the vehicle of the body. The teaching is reported to have come from a source called the Voice, on Ibiza in January 1987.', see: ['weather', 'Rave Cosmology'] },
-    { name: 'Mechanics', text: 'The tradition’s word for how the system is built, what is calculated and how the parts connect, kept apart from what any of it is said to mean. A chart is cast twice: the Personality for the birth moment, and the Design for the moment the Sun stood 88 degrees of solar arc earlier, roughly 88 days before. Thirteen astral bodies are placed on each side, 26 activations in all, on a wheel of 64 gates of 5.625 degrees each that begins at gate 41. Every position has an address of gate, line, color, tone and base. From there the chain is fixed: two gates make a channel, a channel defines two centers, and the pattern of defined centers gives type, authority and definition. The founding phrase for all of it is the mechanics of the Maia.', see: ['horizon', 'Mechanics'] },
+    { name: 'Rave Cosmology', text: 'The system’s account of where a design comes from, given at its founding. It is metaphysics rather than mechanics, best read as the frame the chart sits inside rather than as something the chart demonstrates. It begins with the Biverse, a cosmos dual at its root, and names the world of form the Maia, the system describing itself as the mechanics of the Maia. The neutrino is held to carry information through every body, and the Program is the patterned, cyclical effect of that stream, carried by the moving celestial bodies. Two crystals of consciousness, the Personality and the Design, are said to be held together by a magnetic monopole seated in the G, with the Personality riding as a passenger in the vehicle of the body. The teaching is reported to have come from a source called the Voice, on Ibiza in January 1987.', see: ['weather', 'Rave Cosmology'] },
+    { name: 'Mechanics', text: 'The tradition’s word for how the system is built, what is calculated and how the parts connect, kept apart from what any of it is said to mean. A chart is cast twice: the Personality for the birth moment, and the Design for the moment the Sun stood 88 degrees of solar arc earlier, roughly 88 days before. Thirteen celestial bodies are placed on each side, 26 activations in all, on a wheel of 64 gates of 5.625 degrees each that begins at gate 41. Every position has an address of gate, line, color, tone and base. From there the chain is fixed: two gates make a channel, a channel defines two centers, and the pattern of defined centers gives type, authority and definition. The founding phrase for all of it is the mechanics of the Maia.', see: ['horizon', 'Mechanics'] },
     { name: 'Evolution', text: 'The larger story of human change every chart is set inside, in which kinds of awareness arrive one after another and the body goes on mutating. These are the system’s own claims about history, offered as its framework rather than as findings. The tradition holds that humanity was seven-centered until 1781, the year Uranus was discovered, and has been nine-centered since, which it calls Rave. Splenic awareness is described as the oldest, mental awareness as next, and emotional awareness as still arriving, with a mutation of the Solar Plexus expected from around 2027 through gates 55 and 49. History itself is read in global cycles, each carrying the theme of an Incarnation Cross, the present one the Cross of Planning. In the wiring, change enters through the individual circuitry.', see: ['horizon', 'Evolution'] },
     { name: 'Cycles', text: 'The timed returns the tradition reads across a year, a life and history, each describing the weather of a stage rather than an event. The Moon passes all 64 gates in about 28 days, the rhythm a Reflector chart decides by, and the wheel begins again each year at the Rave New Year, when the Sun enters gate 41 around the third week of January. Across a life, the Saturn return near 29 to 31 closes the first stage; the Uranus opposition, somewhere between 38 and 44, is the mid-life point, where the theme is said to turn from the South Node’s to the North Node’s; and the Kiron return near 50 to 51 opens the last stage. A full life is read as one orbit of Uranus, about 84 years. The sixth line follows these stages most closely: trial and error, then a time on the roof observing, then coming down as a lived example.', see: ['horizon', 'Cycles'] },
     { name: 'Awareness', text: 'The knowing the three awareness centers carry, as distinct from the energy the motors supply: the awareness centers know, and the motors move. The Spleen’s awareness is the oldest, concerned with survival and wellbeing, speaking once and only in the present. The Ajna’s is mental, made of concepts, comparisons and research, working across time and best offered to others. The Solar Plexus’s is emotional, a clarity that comes across the wave, which the tradition expects to deepen after 2027. Each of the three carries three streams. The founding teaching also holds that awareness carries fear: a fear of survival in each splenic gate, and anxiety in the Ajna, with modern schools adding a nervousness to each Solar Plexus gate.', see: ['horizon', 'Awareness'] },
@@ -12472,7 +12473,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
 /* astropedia.js: inCommon astrological reference. V1.0.0
    Pure reference. Nothing here reads or writes a profile, and nothing here knows
    anyone's birth moment. It is the language, not the reading: the twelve signs,
-   the twelve houses, the astral bodies, the points, the aspects, and how a chart is
+   the twelve houses, the celestial bodies, the points, the aspects, and how a chart is
    read. Gendered descriptions are tendencies the tradition reports, never rules
    about people, and the app presents them under a POSSIBILITY tag.
    Voice: organic and scholarly. No em dashes.
@@ -12487,7 +12488,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     ['signs', 'The Twelve Signs'],
     ['houses', 'The Twelve Houses'],
     ['housesystems', 'House Systems'],
-    ['bodies', 'The Astral Bodies'],
+    ['bodies', 'The Celestial Bodies'],
     ['points', 'The Asteroids and Points'],
     ['aspects', 'Aspects'],
     ['concepts', 'Astrological Concepts'],
@@ -12501,7 +12502,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   ];
 
   var INTRO = {
-    what: 'Astropedia is a reference, not a reading. It holds the language the tradition speaks in: the signs as atmospheres, the houses as rooms, the astral bodies as guests, and the aspects as the conversation between them.',
+    what: 'Astropedia is a reference, not a reading. It holds the language the tradition speaks in: the signs as atmospheres, the houses as rooms, the celestial bodies as guests, and the aspects as the conversation between them.',
     how: 'Read it beside your own chart. Nothing here knows your birth moment, so nothing here can tell you who you are. It can only teach you to hear what your chart is saying.',
     caution: 'None of this has been shown to work by any means outside the tradition itself. It is a language for noticing, and it earns its keep only where it describes something you can check against your own life.'
   };
@@ -12637,44 +12638,44 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   var HOUSES = [
     { n: 1, name: 'The House of Self', sign: 'Aries', area: 'appearance, arrival, the body as messenger',
       text: 'The First House is the threshold. It is the face you present before you have chosen to speak. It belongs to Aries by nature, and so it carries the mark of emergence, of self-assertion, of the body as the first thing anyone reads.',
-      bodies: 'An astral body here is worn in public. It colors how you are met before you have said anything.',
+      bodies: 'A celestial body here is worn in public. It colors how you are met before you have said anything.',
       signs: 'The sign on this cusp is the Ascendant, and it sets the atmosphere of the whole chart.' },
     { n: 2, name: 'The House of Substance', sign: 'Taurus', area: 'resources, worth, what is held',
       text: 'The Second House is the storehouse. It holds what is yours: money, possessions, talents, and the quieter matter of what you believe you are worth. Taurus by nature, it measures value by what can be kept.',
-      bodies: 'An astral body here shapes how you earn, spend, and value.', signs: 'The sign here reveals the manner of holding: generous, cautious, restless, or exacting.' },
+      bodies: 'A celestial body here shapes how you earn, spend, and value.', signs: 'The sign here reveals the manner of holding: generous, cautious, restless, or exacting.' },
     { n: 3, name: 'The House of Speech', sign: 'Gemini', area: 'language, siblings, the near world',
       text: 'The Third House is the street you grew up on. It governs speech, learning, letters, short journeys, and brothers and sisters. Gemini by nature, it is the mind at its most immediate.',
-      bodies: 'An astral body here speaks. It enters your language and your daily traffic.', signs: 'The sign here colors how you think out loud.' },
+      bodies: 'A celestial body here speaks. It enters your language and your daily traffic.', signs: 'The sign here colors how you think out loud.' },
     { n: 4, name: 'The House of Foundations', sign: 'Cancer', area: 'home, lineage, the root',
       text: 'The Fourth House is the floor beneath the house. It holds family, ancestry, the place you come from, and the private self no visitor sees. Cancer by nature, it keeps what was felt early.',
-      bodies: 'An astral body here works underground. It shapes the interior and the inheritance.', signs: 'The sign here describes the emotional weather of home.' },
+      bodies: 'A celestial body here works underground. It shapes the interior and the inheritance.', signs: 'The sign here describes the emotional weather of home.' },
     { n: 5, name: 'The House of Play', sign: 'Leo', area: 'creation, romance, children, delight',
       text: 'The Fifth House is where something is made for the joy of making it. It governs love affairs, children, performance, and play. Leo by nature, it is the self spilling over into what it creates.',
-      bodies: 'An astral body here wants to be expressed and enjoyed.', signs: 'The sign here reveals what delight looks like for you.' },
+      bodies: 'A celestial body here wants to be expressed and enjoyed.', signs: 'The sign here reveals what delight looks like for you.' },
     { n: 6, name: 'The House of Daily Work', sign: 'Virgo', area: 'labor, habit, health, service',
       text: 'The Sixth House is the ordinary day. It governs work as it is actually done, the body as it is actually kept, routine, and service. Virgo by nature, it is small repeated acts becoming a life.',
-      bodies: 'An astral body here shows up in your habits and in your health.', signs: 'The sign here colors your relationship to duty.' },
+      bodies: 'A celestial body here shows up in your habits and in your health.', signs: 'The sign here colors your relationship to duty.' },
     { n: 7, name: 'The House of the Other', sign: 'Libra', area: 'partnership, contracts, the mirror',
       text: 'The Seventh House is the person across from you. It governs marriage, partnership, agreements, and open opposition. Libra by nature, it reveals what you meet in another and cannot see in yourself.',
-      bodies: 'An astral body here arrives through other people.', signs: 'The sign here describes who you are drawn to and how you meet them.' },
+      bodies: 'A celestial body here arrives through other people.', signs: 'The sign here describes who you are drawn to and how you meet them.' },
     { n: 8, name: 'The House of Passage', sign: 'Scorpio', area: 'death, intimacy, shared resources, transformation',
       text: 'The Eighth House is the door you go through and do not come back the same. It governs deep intimacy, inheritance, debt, other people\u2019s money, and endings that remake you. Scorpio by nature, it deals in what cannot be kept.',
-      bodies: 'An astral body here goes through change and takes you with it.', signs: 'The sign here reveals how you handle surrender and shared power.' },
+      bodies: 'A celestial body here goes through change and takes you with it.', signs: 'The sign here reveals how you handle surrender and shared power.' },
     { n: 9, name: 'The House of the Horizon', sign: 'Sagittarius', area: 'belief, distance, study, meaning',
       text: 'The Ninth House is the far view. It governs philosophy, faith, higher study, long journeys, and the frameworks you make sense of things with. Sagittarius by nature, it is the search itself.',
-      bodies: 'An astral body here becomes part of what you believe.', signs: 'The sign here reveals the shape of your seeking.' },
+      bodies: 'A celestial body here becomes part of what you believe.', signs: 'The sign here reveals the shape of your seeking.' },
     { n: 10, name: 'The House of the Path', sign: 'Capricorn', area: 'vocation, reputation, standing',
       text: 'The Tenth House is the top of the chart, the most public point. It governs vocation, authority, reputation, and what you are recognized for. Capricorn by nature, it is built rather than granted.',
-      bodies: 'An astral body here becomes visible as your role in the world.', signs: 'The sign on this cusp is the Midheaven, the direction of the path.' },
+      bodies: 'A celestial body here becomes visible as your role in the world.', signs: 'The sign on this cusp is the Midheaven, the direction of the path.' },
     { n: 11, name: 'The House of the Many', sign: 'Aquarius', area: 'friendship, community, hopes',
       text: 'The Eleventh House is the circle you choose. It governs friends, allies, groups, and the future you are working toward with others. Aquarius by nature, it belongs to the many rather than the one.',
-      bodies: 'An astral body here arrives through community and shared aims.', signs: 'The sign here reveals what kind of company you keep.' },
+      bodies: 'A celestial body here arrives through community and shared aims.', signs: 'The sign here reveals what kind of company you keep.' },
     { n: 12, name: 'The House of Dissolution', sign: 'Pisces', area: 'solitude, the unseen, release',
       text: 'The Twelfth House is the room with no lamp. It governs solitude, dreams, what is hidden from you as much as from others, and what must be released. Pisces by nature, it has no clear edges.',
-      bodies: 'An astral body here works out of sight, often felt before it is understood.', signs: 'The sign here reveals what you meet in the dark and in retreat.' }
+      bodies: 'A celestial body here works out of sight, often felt before it is understood.', signs: 'The sign here reveals what you meet in the dark and in retreat.' }
   ];
 
-  /* ---------- the astral bodies ---------- */
+  /* ---------- the celestial bodies ---------- */
   var ASTRAL_BODIES = [
     { name: 'Sun', glyph: '\u2609', rhythm: 'one turn of the year', dignity: 'Leo', detriment: 'Aquarius', exaltation: 'Aries', fall: 'Libra',
       text: 'The Sun is the heart of the chart. It does not orbit; it holds the center. It reveals what you are becoming, what you cannot help but express, and what warms you from within.',
@@ -12724,14 +12725,14 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
 
   /* ---------- aspects ---------- */
   var ASPECTS = [
-    { name: 'Conjunction', angle: '0 degrees', text: 'Two astral bodies dwell in the same breath. Their qualities merge, for better or deeper. They cannot be separated in the reading.' },
+    { name: 'Conjunction', angle: '0 degrees', text: 'Two celestial bodies dwell in the same breath. Their qualities merge, for better or deeper. They cannot be separated in the reading.' },
     { name: 'Sextile', angle: '60 degrees', text: 'An opening. A door that invites but does not compel. Opportunity, if you choose to walk through it.' },
     { name: 'Square', angle: '90 degrees', text: 'Tension that builds. Two forces pulling in different directions, each necessary, each demanding integration.' },
     { name: 'Trine', angle: '120 degrees', text: 'Flow. What comes easily, perhaps too easily. The gift that risks being taken for granted.' },
     { name: 'Opposition', angle: '180 degrees', text: 'The mirror. The other that completes and confronts. Relationship as teacher.' }
   ];
   var ORBS = {
-    what: 'An aspect is rarely exact. The orb is the range within which the conversation between two astral bodies remains audible.',
+    what: 'An aspect is rarely exact. The orb is the range within which the conversation between two celestial bodies remains audible.',
     how: 'The closer the two stand to the exact angle, the louder the exchange. Within a degree or two it is unmistakable. Toward the edge of the orb it is a murmur you may only recognize afterward.',
     custom: 'The tradition allows wider orbs for the Sun and Moon and narrower ones for the slower bodies, and honest readers disagree about the exact limits.'
   };
@@ -12740,11 +12741,11 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   var CONCEPTS = [
     { name: 'Elements', text: 'Fire, earth, air, and water sort the twelve signs into four temperaments, three signs each. Fire acts before it thinks. Earth builds before it speaks. Air names before it feels. Water feels before it can say what it is feeling. A chart heavy in one element leans that way by default; a chart missing one tends to import it through other people, since a quality that finds no expression at home usually finds one somewhere else.' },
     { name: 'Modalities', text: 'Cardinal, fixed, and mutable sort the twelve signs into three postures toward change, four signs each. Cardinal signs start things, at the four points where a season turns. Fixed signs hold what cardinal signs began, at the point a season is most itself. Mutable signs let a season go, at the point it is already turning into the next one. A chart can lean toward starting, sustaining, or releasing before it says anything else about itself.' },
-    { name: 'Essential Dignity', text: 'Dignity is the old accounting of how well an astral body is suited to the sign it stands in, independent of anything else in the chart. Rulership and exaltation are the strong seats, where the body is understood on its own terms. Detriment and fall are the weak seats, the sign opposite, where it has to work through terms someone else set. Weak is not broken: a body in detriment or fall still does its work, it simply has to negotiate for it rather than assume it.' },
+    { name: 'Essential Dignity', text: 'Dignity is the old accounting of how well a celestial body is suited to the sign it stands in, independent of anything else in the chart. Rulership and exaltation are the strong seats, where the body is understood on its own terms. Detriment and fall are the weak seats, the sign opposite, where it has to work through terms someone else set. Weak is not broken: a body in detriment or fall still does its work, it simply has to negotiate for it rather than assume it.' },
     { name: 'Angular, Succedent, and Cadent Houses', text: 'The twelve houses fall into three groups of four by their relation to the angles. Angular houses, the first, fourth, seventh, and tenth, sit right on the Ascendant, IC, Descendant, and Midheaven, and are read as the most forceful, where a placement acts directly on a life. Succedent houses, the second, fifth, eighth, and eleventh, follow the angles and consolidate what they started, read as resources built rather than events. Cadent houses, the third, sixth, ninth, and twelfth, fall away from the angles and are read as processing houses: information, adjustment, and the work of making sense of what already happened.' },
     { name: 'Chart Ruler', text: 'The chart ruler is the traditional ruler of the sign on the Ascendant: Mars if Aries rises, Venus if Taurus rises, and so on through the wheel. Wherever that body sits by house and sign is read as a summary of the whole chart’s business, since it is the one placement bound to the exact degree the person was born on. A house works the same way in miniature: whichever sign sits on its cusp hands the room to that sign’s ruler, and the room is read through wherever the ruler actually stands.' },
     { name: 'Decans', text: 'Each thirty degree sign divides into three ten degree decans, ruled in turn by the seven classical bodies in a fixed order that repeats without regard for the sign’s own ruler. The opening decan carries the sign raw and unmixed, before anything has tested it. The middle decan is the sign at work, applied and made productive. The closing decan is the sign matured, already leaning toward whatever comes next. A decan does not replace the sign; it narrows it, the way an accent narrows a language without changing which language it is.' },
-    { name: 'Retrograde Motion', text: 'Retrograde motion is apparent, not real: no astral body reverses course. Seen from a moving Earth, an outer body appears to slow, stand still, and walk backward through the zodiac for a season before turning forward again. The tradition reads the appearance as a turn inward, the same business as always, handled in review rather than in advance. The days on either side of the turn, the stations, are read as the loudest part of the whole passage.' },
+    { name: 'Retrograde Motion', text: 'Retrograde motion is apparent, not real: no celestial body reverses course. Seen from a moving Earth, an outer body appears to slow, stand still, and walk backward through the zodiac for a season before turning forward again. The tradition reads the appearance as a turn inward, the same business as always, handled in review rather than in advance. The days on either side of the turn, the stations, are read as the loudest part of the whole passage.' },
     { name: 'Void of Course Moon', text: 'A Moon is void of course from the moment it makes its last aspect to another body before leaving its current sign until the moment it enters the next one. In that gap the tradition reads her as unattached, between rooms rather than in one, and reads action started there as more likely to drift or come to nothing than action started once she has landed. It is a weather report, not a lock on the day: plenty gets done under a void Moon, it simply tends to wander from the plan.' },
     { name: 'Combust and Cazimi', text: 'A body within about eight degrees of the Sun is combust, read as overpowered by proximity to the one light no other body can outshine, its own signal harder to hear under the glare. Inside about seventeen minutes of exact conjunction the same closeness flips: the body is cazimi, in the heart of the Sun rather than burned by it, and the tradition reads that narrow window as strength rather than loss. The difference between the two readings is almost entirely a matter of degrees.' },
     { name: 'Mutual Reception', text: 'Two bodies are in mutual reception when each sits in the sign the other rules, Mars in Cancer while the Moon sits in Aries, say. The tradition treats it as a kind of hospitality: each body is a guest in the other’s house, and each is understood well enough by its host to be handed a working key rather than left to manage as a stranger. It softens a difficult placement more reliably than almost anything else in the traditional toolkit.' },
@@ -12797,7 +12798,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   /* ---------- the birth chart ---------- */
   var CHART = {
     what: 'A map of the sky at your first breath. Not a fate, but a field of possibilities.',
-    wheel: 'Read the wheel as a building. The houses are rooms, the signs are the atmosphere in each room, and the astral bodies are the guests who arrived and stayed.',
+    wheel: 'Read the wheel as a building. The houses are rooms, the signs are the atmosphere in each room, and the celestial bodies are the guests who arrived and stayed.',
     angles: [
       ['Ascendant', 'The mask. The eastern horizon at your first breath, and the way you are met before you speak.'],
       ['Descendant', 'The mirror. The point opposite the Ascendant, where you meet the other.'],
@@ -12808,8 +12809,8 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       ['Find the Ascendant', 'This is where the chart begins. It sits at the left edge of the wheel and sets the atmosphere for everything else.'],
       ['Follow the houses', 'They move counterclockwise from the Ascendant, one room at a time, twelve in all.'],
       ['Notice the signs on each cusp', 'The sign at the edge of a house colors what happens inside it.'],
-      ['Find the astral bodies', 'They are the actors. Note which house holds each one, and which sign it dwells in.'],
-      ['Notice the aspects', 'The lines across the wheel reveal which astral bodies are in conversation, and in what tone.'],
+      ['Find the celestial bodies', 'They are the actors. Note which house holds each one, and which sign it dwells in.'],
+      ['Notice the aspects', 'The lines across the wheel reveal which celestial bodies are in conversation, and in what tone.'],
       ['Weigh the emphasis', 'Look for a gathering: several bodies in one sign or one house. The chart leans there.'],
       ['Synthesize', 'Ask what story emerges. A chart that does not sound like a life you recognize has been read too literally.']
     ]
@@ -12822,13 +12823,13 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   };
 
   var STELLIUM = {
-    what: 'A gathering. Three or more astral bodies in the same sign or house, concentrating their conversation in one room. The chart leans here. The life returns here, again and again, until what is concentrated is understood.',
+    what: 'A gathering. Three or more celestial bodies in the same sign or house, concentrating their conversation in one room. The chart leans here. The life returns here, again and again, until what is concentrated is understood.',
     read: 'Notice which house holds the gathering. That is where the energy pools. Notice the sign; that is the quality of the pool. The stellium does not demand; it invites attention.',
     caution: 'Concentration is not destiny. It may mean this is where you carry the most force and the least perspective. Your own record is the test.'
   };
 
   var TRANSITS = {
-    personal: 'The moving astral bodies touching your natal chart. A conversation between what is now and what was then.',
+    personal: 'The moving celestial bodies touching your natal chart. A conversation between what is now and what was then.',
     sky: 'The patterns in the sky themselves, independent of your chart. The weather that falls on everyone.',
     read: 'A transit does not cause; it reveals. It opens a window. What you see through it depends on where you stand.',
     timing: 'The swift bodies pass in hours or days. The slow ones stay for months and are better read as a season than an event.'
@@ -12844,7 +12845,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
 
   var SYNASTRY = {
     what: 'The comparison of two charts. Not compatibility in the simple sense, but the map of what happens when two fields of possibility meet.',
-    read: 'Look first at where your astral bodies fall in their houses. Then where theirs fall in yours. The aspects between your astral bodies reveal the nature of the conversation.',
+    read: 'Look first at where your celestial bodies fall in their houses. Then where theirs fall in yours. The aspects between your celestial bodies reveal the nature of the conversation.',
     caution: 'Two charts cannot tell you whether to stay. They can tell you what you keep running into, which is more useful and less flattering.'
   };
 
@@ -12868,7 +12869,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       ['Find the Ascendant', 'Libra rising. This person is met as even, courteous, and difficult to provoke on first meeting.'],
       ['Follow the houses', 'From Libra the rooms run counterclockwise, which places Capricorn on the fourth: home, lineage, the private foundation.'],
       ['Read the signs on the cusps', 'Cancer sits on the Midheaven, so the public path carries a protective, caretaking quality even though the interior is Capricorn.'],
-      ['Find the astral bodies', 'Three bodies gather in the fourth house. The chart is weighted toward family, inheritance, and the foundation the person is standing on.'],
+      ['Find the celestial bodies', 'Three bodies gather in the fourth house. The chart is weighted toward family, inheritance, and the foundation the person is standing on.'],
       ['Read the aspects', 'Sun conjunct Saturn says identity and duty arrived together. Mars in the seventh, square that gathering, says other people press on it.'],
       ['Notice the gathering', 'The Capricorn stellium in the fourth is the loudest feature. Whatever else is true, life keeps returning to home and obligation.'],
       ['Weigh what is missing', 'Only one water placement and no fire below the horizon. Ease is not the theme; endurance is.'],
@@ -21219,7 +21220,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
    3D is the wheel as an object, an astrolabe lying in space. The disc carries
    the house band, the sign band with a tick for every degree, and the inner
-   field the aspects cross. Each astral body stands on a pillar of light over
+   field the aspects cross. Each celestial body stands on a pillar of light over
    its own longitude, at the radius the 2D wheel staggers it to, and wears its
    glyph above it. The aspects are ribbons of light bowed over the disc, and
    the four angles are beams at the rim.
@@ -23284,7 +23285,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
    Wheel is the same chart with the sky put back round it: the sixty four
    gates as a ring at the body's waist, in their order from gate 41, and every
-   activation leaves its column for the place on the ring its astral body
+   activation leaves its column for the place on the ring its celestial body
    stood, with a thread down to the gate it lights. Moving between the two is a
    morph, not a cut.
 
@@ -24022,7 +24023,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     g.fillText(text, w / 2, h / 2);
     return this.sprite(c, px * 1.7, w / h, o);
   };
-  /* An activation: the astral body's glyph in a roundel ringed in its side's
+  /* An activation: the celestial body's glyph in a roundel ringed in its side's
      colour, set on its optical centre, with gate.line beside it. */
   P.activation = function (glyph, label, color, D, focus) {
     var k = 3, c = document.createElement('canvas'), g = c.getContext('2d');
@@ -25090,7 +25091,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   var VERSION = '1.1.0';
   /* Bumped whenever the shape or the arithmetic of computed_state changes, so
      stored records can be recognised as stale and recomputed. It is also what
-     invalidates the pair cache. 2: the ten astral bodies moved from the
+     invalidates the pair cache. 2: the ten celestial bodies moved from the
      hand written series to astronomy-engine, so every stored longitude and
      every cached composite gate list was computed by arithmetic that is gone.
      3: a birth with no time is drawn at noon where it happened rather than
@@ -29100,11 +29101,11 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
   function getAspectExplainer(aspect) {
     var explainers = {
-      conjunction: 'A conjunction is when two astral bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these astral bodies represent are amplified when together, for better and for worse.',
+      conjunction: 'A conjunction is when two celestial bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these celestial bodies represent are amplified when together, for better and for worse.',
       sextile: 'A sextile (60 degrees) is one of astrology\'s easy aspects. Between you two, it\'s an opening. Conversation flows. This is an area where mutual support comes naturally.',
-      square: 'A square (90 degrees) is tension in geometric form. Between you, these astral bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
+      square: 'A square (90 degrees) is tension in geometric form. Between you, these celestial bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
       trine: 'A trine (120 degrees) is harmony. Between you, it\'s where things flow. This is where the two of you understand each other without asking. A rare gift that deepens with use.',
-      opposite: 'An opposition (180 degrees) is two astral bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
+      opposite: 'An opposition (180 degrees) is two celestial bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
     };
     return explainers[aspect] || 'A contact between your charts.';
   }
@@ -29611,7 +29612,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (!partner.id) errors.push('Partner missing id');
     if (!partner.name) errors.push('Partner missing name');
     if (!partner.birthDate) errors.push('Partner missing birthDate');
-    if (!partner.bodies || Object.keys(partner.bodies).length === 0) errors.push('Partner missing computed astral bodies');
+    if (!partner.bodies || Object.keys(partner.bodies).length === 0) errors.push('Partner missing computed celestial bodies');
     return { valid: errors.length === 0, errors: errors };
   }
 
@@ -29686,14 +29687,14 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
       'transit-square': [
         '{body1} square {body2} {time}. Translation: friction. The kind that sharpens or stalls. Which depends on you.',
-        'Two astral bodies at odds: {body1} {body2} {time}. Expect the resistance. It\'s trying to teach you something.',
+        'Two celestial bodies at odds: {body1} {body2} {time}. Expect the resistance. It\'s trying to teach you something.',
         'Hard aspect alert, {time}: {body1} and {body2} want different things. Channel it into {theme}.'
       ],
 
       'transit-trine': [
         'A gift lands {time}: {body1} trine {body2}. {theme} flows. Don\'t waste it on autopilot.',
         '{time}, {body1} and {body2} are in conversation. The air is clear for {theme}.',
-        'Rare ease: {body1} trine {body2}, {time}. This is what favor of the astral bodies looks like.'
+        'Rare ease: {body1} trine {body2}, {time}. This is what favor of the celestial bodies looks like.'
       ],
 
       'transit-opposite': [
@@ -29724,13 +29725,13 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
       // ---- EXPLAINERS: Aspects ----
 
-      'explainer-conjunction': 'A conjunction is when two astral bodies occupy the same degree. They\'re "merged." Whatever energies these astral bodies represent are speaking in unison today, amplified, urgent, singular in focus. Conjunctions are powerful but undifferentiated; context matters enormously.',
+      'explainer-conjunction': 'A conjunction is when two celestial bodies occupy the same degree. They\'re "merged." Whatever energies these celestial bodies represent are speaking in unison today, amplified, urgent, singular in focus. Conjunctions are powerful but undifferentiated; context matters enormously.',
 
-      'explainer-sextile': 'A sextile (60°) is one of astrology\'s "easy" aspects. Two astral bodies at this angle support each other. It\'s like a green light: opportunity presenting itself. Sextiles don\'t force action, but they make forward motion possible. Look for doors opening.',
+      'explainer-sextile': 'A sextile (60°) is one of astrology\'s "easy" aspects. Two celestial bodies at this angle support each other. It\'s like a green light: opportunity presenting itself. Sextiles don\'t force action, but they make forward motion possible. Look for doors opening.',
 
-      'explainer-trine': 'A trine (120°) is harmony. Two astral bodies at this angle flow together naturally. Trines don\'t demand effort; they reward what\'s already in motion. The risk: taking them for granted. A trine is a gift, not a free pass. Use it or lose it.',
+      'explainer-trine': 'A trine (120°) is harmony. Two celestial bodies at this angle flow together naturally. Trines don\'t demand effort; they reward what\'s already in motion. The risk: taking them for granted. A trine is a gift, not a free pass. Use it or lose it.',
 
-      'explainer-opposite': 'An opposition (180°) is two astral bodies facing each other across the sky. It\'s not conflict, it\'s awareness of two viewpoints simultaneously. Oppositions demand balance, not victory. You\'re seeing both sides, which is clarifying if uncomfortable. Integration is the goal.',
+      'explainer-opposite': 'An opposition (180°) is two celestial bodies facing each other across the sky. It\'s not conflict, it\'s awareness of two viewpoints simultaneously. Oppositions demand balance, not victory. You\'re seeing both sides, which is clarifying if uncomfortable. Integration is the goal.',
 
       // ---- PRACTICAL: Action hooks ----
 
@@ -29748,7 +29749,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
       // ---- SKY WIRE: Strings (public feed) ----
 
-      'skywire-header': 'Sky Wire: What the astral bodies say today',
+      'skywire-header': 'Sky Wire: What the celestial bodies say today',
       'skywire-footer': 'A view of the planetary movements at a glance. No birth data needed.',
 
       // ---- UTILITY STRINGS ----
@@ -30430,7 +30431,7 @@ input[type="date"]{color-scheme:dark}
      its channel table from hd-atlas.js above rather than keeping a second
      copy of it. -->
 
-<!-- Where the ten astral bodies are. astronomy-engine 2.1.19 (MIT, Don Cross),
+<!-- Where the ten celestial bodies are. astronomy-engine 2.1.19 (MIT, Don Cross),
      vendored byte for byte from the npm registry tarball, because the hand
      written series it replaced measured up to 6.5 degrees from JPL Horizons.
      modulesReady() waits for window.Astronomy: the scripts in this helmet are
@@ -45767,18 +45768,31 @@ class Component extends DCLogic {
     { id: 'ariesPoint', name: 'Aries Point', glyph: 'AP', category: 'derived', tooltip: 'public visibility, world events, fame', reference: 'where you touch the public world (fixed 0°)' },
     { id: 'sunmoonMidpoint', name: 'Sun/Moon Midpoint', glyph: 'S/M', category: 'derived', tooltip: 'blend of will and feeling, core duality', reference: 'composite technique, synastry blend' }
   ];
-  // Ring 1 (inner, bold): the ten astral bodies and both nodes (already drawn from
+  // Ring 1 (inner, bold): the ten celestial bodies and both nodes (already drawn from
   // PLNS/chartAt, never in this registry) plus these seven. Ring 2 (outer,
   // small) is everything else this registry names. Comets are excluded from
   // both rings by default (see wheelBodies/wheelLabels): they show in the
   // side panel only, unless chartExpandShowComets is on.
   RING1_IDS = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'lilithMean', 'selena'];
-  /* Dwarf Planets is a sanctioned exception to the astral body rename, decided
+  /* Dwarf Planets is a sanctioned exception to the celestial body rename, decided
      by the owner. It is a formal IAU classification, and it sits here beside
      asteroid, centaur, comet and TNO, which are formal classifications too and
      were all kept. Renaming this one and not those four made it the odd one
      out. Do not sweep it. */
-  CAT_LABEL = { body: 'Astral Bodies & Nodes', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
+  /* What kind of celestial body a name is, as specifically as astronomy names it
+     (owner, 4 November 2026: planet when it is a planet, celestial body as the
+     general word). The Sun and the Moon are the luminaries, Pluto is a dwarf
+     planet, and anything this does not know is a celestial body. */
+  bodyType(name) {
+    const n = String(name || '');
+    if (n === 'Sun' || n === 'Moon') return 'luminary';
+    if (['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'].indexOf(n) !== -1) return 'planet';
+    if (['Pluto', 'Ceres', 'Eris', 'Haumea', 'Makemake'].indexOf(n) !== -1) return 'dwarf planet';
+    if (n === 'Chiron' || n === 'Pholus' || n === 'Nessus') return 'centaur';
+    if (['Pallas', 'Juno', 'Vesta', 'Hygiea'].indexOf(n) !== -1) return 'asteroid';
+    return 'celestial body';
+  }
+  CAT_LABEL = { body: 'Luminaries & Planets', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
   // Fixed hues, not themed, the same way --ac/--ac2/--crisis are fixed: a
   // category colour has to mean the same thing under every identity. TNO
   // reuses --ac2 (violet) rather than a fourth new token, node/hypothetical
@@ -45844,7 +45858,7 @@ class Component extends DCLogic {
     '5th and 11th: what you make alone against what you build with others', '6th and 12th: the ordinary day against what runs beneath it'];
   houseClassOf(n) { return this.HOUSE_CLASS[[1,4,7,10].indexOf(n) >= 0 ? 0 : [2,5,8,11].indexOf(n) >= 0 ? 1 : 2]; }
   // Everything below is assembled from PlacementContent, the same source the
-  // placement pages read, so a house never says something an astral body page contradicts.
+  // placement pages read, so a house never says something a celestial body page contradicts.
   houseDetail(n) {
     const PC = window.PlacementContent, T = (t, x) => this.tagLine(t, x);
     const h = PC && PC.houses ? PC.houses[n - 1] : null;
@@ -45871,7 +45885,7 @@ class Component extends DCLogic {
       gen.push(H('What this house is for', h.definition + ' ' + h.inLife));
       gen.push(H('Its temperament', 'It is ' + (cls[0] === 'Angular' ? 'an' : 'a') + ' ' + cls[0].toLowerCase() + ' house. ' + cls[1] + ' That classification is older than most of what people argue about in astrology, and it is the part that has held up best.'));
     }
-    gen.push(H('How any house gets its ruler', 'A house does not act on its own. Whichever sign falls on the cusp hands the house to that sign\u2019s astral body, and wherever that astral body sits in the chart is where the business of this room is actually conducted, whatever the room itself looks like.'));
+    gen.push(H('How any house gets its ruler', 'A house does not act on its own. Whichever sign falls on the cusp hands the house to that sign\u2019s celestial body, and wherever that celestial body sits in the chart is where the business of this room is actually conducted, whatever the room itself looks like.'));
     gen.push(H('The house it argues with', 'Every house works against its opposite. ' + this.HOUSE_AXIS[(n - 1) % 6] + '. Neither end functions well without the other, and a house read on its own is a house read badly.'));
     const lines = [];
     lines.push(H('Where this house sits', 'The ' + ord(n) + ' house of your chart begins at ' + Math.floor(cuspSign.deg) + '\u00b0 ' + cuspSign.sign +
@@ -45899,7 +45913,7 @@ class Component extends DCLogic {
     } else {
       lines.push(H('Nobody lives here', 'None of your bodies sit in this house.' +
         (rr ? ' Its ruler ' + ruler + ' is at ' + Math.floor(rr.deg) + '\u00b0 ' + rr.sign + ', in your ' + ord(rh) + ' house, and that is where to look for how this one is really run.' : '') +
-        ' An empty house is not an empty part of life, that misreading has caused more unnecessary worry than almost anything else I can name. It simply means no astral body is insisting on the subject.' +
+        ' An empty house is not an empty part of life, that misreading has caused more unnecessary worry than almost anything else I can name. It simply means no celestial body is insisting on the subject.' +
         ' In practice these are often the least dramatic and most functional rooms in a chart.'));
     }
     lines.push(H('The house it argues with', 'Every house works against its opposite. ' + this.HOUSE_AXIS[(n - 1) % 6] + '. Neither end functions well without the other, and a house read on its own is a house read badly.'));
@@ -46231,7 +46245,7 @@ class Component extends DCLogic {
   }
   lonRaw(name, t) {
     const R = this.RAD;
-    /* THE TEN ASTRAL BODIES COME FROM astronomy-engine, and the series below
+    /* THE TEN CELESTIAL BODIES COME FROM astronomy-engine, and the series below
        them is the fallback for a build where that file did not load.
 
        The series was a two term Moon and a coplanar first order Kepler model
@@ -46322,14 +46336,14 @@ class Component extends DCLogic {
     return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
   }
   // Chiron's eccentricity is 0.38, far too high for the equation-of-centre
-  // series the astral bodies use, which would drift by several degrees. Solve Kepler
+  // series the celestial bodies use, which would drift by several degrees. Solve Kepler
   // properly with Newton iteration instead.
   /* WHICH CLAIMS A BODY HAS EARNED.
 
      A Sabian symbol is a claim about ONE degree of arc. Printing one for a body
      whose position is good to about a degree is a precise statement resting on
      an imprecise number, and it reads as the most exact thing on the page
-     because it is the most specific. The ten astral bodies are measured against
+     because it is the most specific. The ten celestial bodies are measured against
      JPL Horizons to 0.03 degrees and keep their symbols (the series they came
      from before claimed "well inside a degree" here and measured 6.5). Chiron
      and the four asteroids are fetched from Horizons and measure 0.058 degrees
@@ -46549,7 +46563,7 @@ class Component extends DCLogic {
 
   // Newton-Raphson solve of Kepler's equation M = E - e*sin(E). Needed for
   // Eris, Sedna and the three comets, whose eccentricity is too high for the
-  // equation-of-centre series lonRaw() uses for the eight coplanar astral bodies.
+  // equation-of-centre series lonRaw() uses for the eight coplanar celestial bodies.
   solveKeplerE(M, e, tol, maxIter) {
     tol = tol || 1e-9; maxIter = maxIter || 30;
     let m = M % (2 * Math.PI);
@@ -46624,7 +46638,7 @@ class Component extends DCLogic {
   }
 
   // Eris and Sedna: full 3D Keplerian elements (Omega and omega split apart,
-  // unlike the coplanar model the eight astral bodies use). Source: JPL Small-Body
+  // unlike the coplanar model the eight celestial bodies use). Source: JPL Small-Body
   // Database / Horizons, cross-checked against two independent citations
   // each for a and e (see engine.ts). epochJD stored as an offset from
   // J2000 so this file can work entirely in t (=jd-2451545) like the rest
@@ -46648,7 +46662,7 @@ class Component extends DCLogic {
     const earth = this.helioOf(this.EARTH_EL, t);
     return this.norm360(Math.atan2(y - earth[1], x - earth[0]) / R);
   }
-  // Same coplanar heliocentric x/y lonRaw() computes inline for each astral body,
+  // Same coplanar heliocentric x/y lonRaw() computes inline for each celestial body,
   // pulled out as its own method so the TNO and comet solvers below (which
   // both need Earth's position) can share it instead of duplicating it.
   helioOf(el, t) {
@@ -47089,12 +47103,12 @@ class Component extends DCLogic {
       // Ascendant always opposes the Descendant. Those pairs are dropped.
       if (a.group === 'angle' && b.group === 'angle') return;
       // The minor-aspects toggle (opts.rich only): off shows only the
-      // sixteen core points (astral bodies, both nodes, the four angles) against
+      // sixteen core points (celestial bodies, both nodes, the four angles) against
       // each other, exactly like the basic grid, even while every other
       // expanded computation keeps running underneath.
       if (opts.rich && opts.minorAspects === false && (a.group === 'extra' || b.group === 'extra')) return;
       // Two outer ring points are not read against each other. A minor body
-      // is read by what it touches among the astral bodies, the lights, the nodes,
+      // is read by what it touches among the celestial bodies, the lights, the nodes,
       // the angles and the inner ring. With every registry point placed,
       // asteroid to hypothetical and centaur to TNO pairs were 393 of 708
       // contacts on a sample chart: a grid of them buries the ones the
@@ -47110,7 +47124,7 @@ class Component extends DCLogic {
     return out.sort((x, y) => x.orb - y.orb);
   }
   stelliums(expanded) {
-    // A gathering is counted in the astral bodies, nodes and the inner ring. With
+    // A gathering is counted in the celestial bodies, nodes and the inner ring. With
     // eighty minor points placed, every sign holds three of something, and a
     // stellium found everywhere is a stellium found nowhere.
     const rows = this.placed(expanded).filter(r => r.group !== 'angle' && (r.group !== 'extra' || r.ring === 1)), asc = this.ascendant(), sun = rows[0];
@@ -48663,7 +48677,7 @@ class Component extends DCLogic {
     /* Grouped on the transiting body alone. The body paragraph describes that
        body and the house it is walking; only the arrival clause depends on the
        aspect, so keying the repeat on body plus aspect printed the same three
-       sentences twice whenever one astral body hit two points by different angles. */
+       sentences twice whenever one celestial body hit two points by different angles. */
     const shown = picked.slice(0, 3), grp = {}, seq = {};
     shown.forEach(h => { grp[h.a.name] = (grp[h.a.name] || 0) + 1; });
     const word = n => this.HORO_WORD[n] || String(n), ordw = n => this.HORO_ORD[n] || String(n) + 'th';
@@ -49140,7 +49154,7 @@ class Component extends DCLogic {
   // step would miss one entirely.
   RETRO_BODIES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
   RETRO_WIN = 300;
-  RETRO_DOCTRINE = 'Retrograde motion is apparent, not real. No astral body reverses course. Seen from a moving Earth, it appears to slow, stand still, and then walk backwards through the zodiac for a season before turning forward again. The tradition reads that appearance as a turn inward: the same business as always, handled in review rather than in advance.';
+  RETRO_DOCTRINE = 'Retrograde motion is apparent, not real. No celestial body reverses course. Seen from a moving Earth, it appears to slow, stand still, and then walk backwards through the zodiac for a season before turning forward again. The tradition reads that appearance as a turn inward: the same business as always, handled in review rather than in advance.';
   RETRO_MEAN = {
     Mercury: 'Mercury governs speech, exchange, transit and the written record. Retrograde, the tradition expects the second draft rather than the first: things said again, contracts reread, plans revised, and people from earlier turning up mid-sentence.',
     Venus: 'Venus governs attraction, worth and the terms of an agreement. Retrograde, it is read as a re-pricing. What you value, what you tolerate, and what you have been calling love out of habit all come up for another look.',
@@ -49151,15 +49165,15 @@ class Component extends DCLogic {
     Neptune: 'Neptune governs dissolution, longing, and what is not quite seen. Retrograde, the tradition expects the fog to thin: an illusion loses its hold, sometimes as relief and sometimes as plain disappointment.',
     Pluto: 'Pluto governs what is buried and what will not stay buried. Retrograde, it is read as descent rather than eruption. The same material, worked at privately and slowly, usually well before anyone else notices.'
   };
-  // Shadow periods are only tracked for the personal astral bodies. An outer astral body is
+  // Shadow periods are only tracked for the personal celestial bodies. An outer celestial body is
   // retrograde for months and in shadow for most of what is left, so dating its
   // shadow produces a list that is technically true and useless to read.
   SHADOW_BODIES = ['Mercury', 'Venus', 'Mars'];
   PHASE_LABEL = { pre: 'pre-shadow', retro: 'retrograde', post: 'post-shadow' };
   PHASE_WHAT = {
-    pre: 'The pre-shadow is the run-up. The astral body is still moving forward, but it has crossed into the stretch of zodiac it will end up covering three separate times before it is done: forward now, backward through the retrograde, forward again on the way out. Whatever surfaces in these weeks is usually the first draft of the story.',
-    retro: 'The retrograde proper begins at the station, the day the astral body appears to stop and turn. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
-    post: 'The post-retrograde shadow runs from the day the astral body turns forward again to the day it finally clears the degree where it first stationed. It is the third pass over the same ground, and the difference is that by now you know what the ground is.'
+    pre: 'The pre-shadow is the run-up. The celestial body is still moving forward, but it has crossed into the stretch of zodiac it will end up covering three separate times before it is done: forward now, backward through the retrograde, forward again on the way out. Whatever surfaces in these weeks is usually the first draft of the story.',
+    retro: 'The retrograde proper begins at the station, the day the celestial body appears to stop and turn. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
+    post: 'The post-retrograde shadow runs from the day the celestial body turns forward again to the day it finally clears the degree where it first stationed. It is the third pass over the same ground, and the difference is that by now you know what the ground is.'
   };
   RETRO_TALK = {
     Mercury: {
@@ -49219,7 +49233,7 @@ class Component extends DCLogic {
       post: 'The third pass is where it stays above ground.'
     }
   };
-  // Shadow bounds. The pre-shadow opens where the astral body first crosses the degree it
+  // Shadow bounds. The pre-shadow opens where the celestial body first crosses the degree it
   // will later station direct at; the post-shadow closes where it recovers the degree
   // it stationed retrograde at. Both are found by walking the same ephemeris a day at
   // a time, so an unresolved crossing returns null rather than an invented date.
@@ -49239,8 +49253,8 @@ class Component extends DCLogic {
     }
     return { preStart: preStart, postEnd: postEnd };
   }
-  // Everything the Current Retrogrades panel lists: astral bodies actually retrograde today,
-  // plus personal astral bodies sitting in a shadow on either side of one.
+  // Everything the Current Retrogrades panel lists: celestial bodies actually retrograde today,
+  // plus personal celestial bodies sitting in a shadow on either side of one.
   retroPhases() {
     const key = Component.localDay();
     if (this._rpKey === key && this._rp) return this._rp;
@@ -49628,7 +49642,7 @@ class Component extends DCLogic {
       pos: Math.floor(r.deg) + '° ' + r.sign + (r.category === 'angle' ? '' : ' · House ' + ctx.houseOf(r)),
       chip: cs.length ? (cs.length === 1 ? 'Lit now' : 'Lit by ' + cs.length) : 'Quiet',
       status: status, bars: this.impactBars(level), contacts: contacts, contactsOn: contacts.length > 0,
-      quietOn: !contacts.length, quiet: 'No astral body is touching ' + name + ' today.',
+      quietOn: !contacts.length, quiet: 'No celestial body is touching ' + name + ' today.',
       ask: ask, askOn: !!ask, round: round, roundOn: !!round, roundPct: roundPct,
       pastOn: !!(arc && arc.past), past: arc && arc.past ? 'Earlier: ' + line(arc.past) + '.' : '',
       nextOn: !!(arc && arc.next), next: arc && arc.next ? 'Next: ' + line(arc.next) + '.' : '',
@@ -49663,7 +49677,7 @@ class Component extends DCLogic {
       pos: ctx.cuspSign(h),
       chip: inside.length ? inside.length + ' crossing' : 'Empty', bars: this.impactBars(this.impactLevel(w)),
       status: inside.length ? inside.map(x => x.m).join(', ') : arrives ? 'Next: ' + arrives.m + ' from ' + this.fmtDay(this.impactDay(arrives.i)) : 'Empty today',
-      inside: inside, insideOn: inside.length > 0, quietOn: !inside.length, quiet: 'No astral body is crossing the ' + ctx.ordinal(h) + ' house today.',
+      inside: inside, insideOn: inside.length > 0, quietOn: !inside.length, quiet: 'No celestial body is crossing the ' + ctx.ordinal(h) + ' house today.',
       pastOn: !!left, past: left ? 'Last to leave: ' + left.m + ', on ' + this.fmtDay(this.impactDay(left.i)) + '.' : '',
       nextOn: !!arrives, next: arrives ? 'Next to arrive: ' + arrives.m + ', on ' + this.fmtDay(this.impactDay(arrives.i)) + '.' : '',
       ask: this.HOUSE_ASK[h - 1], askOn: true, house: this.HOUSE_LONG[h - 1],
@@ -49781,7 +49795,7 @@ class Component extends DCLogic {
       meta: x.meta || '', metaOn: !!x.meta, sub: x.sub || '', edge: x.edge || 'transparent', go: x.go || null, btn: !!x.go, plain: !x.go,
       aria: x.aria || [x.title, x.hi, x.lit ? 'lit now' : '', x.sub].filter(Boolean).join(', '), litOn: !!x.lit, arrow: x.go ? '›' : '' });
     const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived'];
-    const LABEL = { ...this.CAT_LABEL, body: 'Astral Bodies' };
+    const LABEL = { ...this.CAT_LABEL, body: 'Luminaries & Planets' };
     const pts = CATS.map(cat => {
       const rs = o.rows.filter(r => r.category === cat);
       if (!rs.length) return null;
@@ -49799,7 +49813,7 @@ class Component extends DCLogic {
       return group('pt-' + cat, LABEL[cat] || cat, rows, { peek: rs.slice(0, 9).map(r => r.glyph).filter(Boolean).join(' ') + (rs.length > 9 ? ' …' : ''),
         lit: Object.keys(litMap).filter(k => litMap[k]).length, cards: () => live.map(r => this.impactPointCard(r, ctx)) });
     }).filter(Boolean);
-    /* THE LEDGER (owner, 21 October 2026). The astral bodies, nodes and
+    /* THE LEDGER (owner, 21 October 2026). The celestial bodies, nodes and
        angles are one table, a row each, and the columns are the three bands:
        where it sits and what it aspects (Bedrock), what the sky is doing to it
        this minute (Weather), and the next window that opens on it (Horizon).
@@ -51085,7 +51099,7 @@ class Component extends DCLogic {
         row('POSSIBILITY', 'In men: ' + s.male), row('POSSIBILITY', 'In women: ' + s.female)] }));
     if (key === 'houses') return A.HOUSES.map(h => ({
       head: ord(h.n) + ' House \u00b7 ' + h.name, hasSub: true, sub: h.area + ' \u00b7 ' + h.sign + ' by nature',
-      rows: [plain(h.text), row('TRADITIONAL', 'An astral body here: ' + h.bodies), row('TRADITIONAL', 'The sign here: ' + h.signs)] }));
+      rows: [plain(h.text), row('TRADITIONAL', 'A celestial body here: ' + h.bodies), row('TRADITIONAL', 'The sign here: ' + h.signs)] }));
     if (key === 'bodies') return A.ASTRAL_BODIES.map(p => ({
       head: p.glyph + '\uFE0E  ' + p.name, hasSub: true, sub: 'rhythm: ' + p.rhythm,
       rows: [plain(p.text), row('TRADITIONAL', 'In a sign: ' + p.sign), row('TRADITIONAL', 'In a house: ' + p.house),
@@ -51173,18 +51187,18 @@ class Component extends DCLogic {
     },
     astropedia: {
       first: [
-        ['The wheel', 'ap:sun', 'The circle is the sky seen from Earth, cut into twelve signs. The outer ring holds the signs, each tinted by its element, and the ring inside it holds the twelve houses. The symbols in the middle are the astral bodies, placed where they stand this minute. Tap any of them once to see its name, and again to open it.'],
+        ['The wheel', 'ap:sun', 'The circle is the sky seen from Earth, cut into twelve signs. The outer ring holds the signs, each tinted by its element, and the ring inside it holds the twelve houses. The symbols in the middle are the celestial bodies, placed where they stand this minute. Tap any of them once to see its name, and again to open it.'],
         ['The Sun sign', 'ap:sun', 'The sign the Sun stood in at birth is the one most people call their sign. The tradition reads it as the manner a person shines in. Of the tiles on this page, As the Sun is the one that belongs to this step.'],
         ['The Moon sign', 'ap:moon', 'The Moon crosses a sign in about two and a half days, so its sign is more personal than the Sun’s. It is read as what soothes, what is needed, and how feeling arrives. Read As the Moon on this page.'],
         ['The houses', 'ap:house:1', 'Where the signs are atmospheres, the houses are rooms: twelve areas of life, from the self in the first to the hidden things in the twelfth. The first house begins at the Rising sign, which is why a birth time matters. The arrows at the foot of the page step through all twelve.'],
-        ['The astral bodies', 'ap:body:Sun', 'The bodies are the actors in a chart, each with its own rhythm and its own concerns. Each is at home in some signs and uneasy in others, and those signs light up on the wheel while the body is open.'],
+        ['The celestial bodies', 'ap:body:Sun', 'The bodies are the actors in a chart, each with its own rhythm and its own concerns. Each is at home in some signs and uneasy in others, and those signs light up on the wheel while the body is open.'],
         ['Aspects', 'ap:aspect:Trine', 'An aspect is the angle between two bodies, read as the tone of their conversation. The triangle on the wheel is a trine, drawn from where the Sun stands today. When a chart of your own is on this device, its trines are listed on this page.'],
         ['Reading a whole chart', 'ap:essay:chart', 'This chapter puts the pieces together in seven steps. When it starts to feel familiar, An Example Chart is a chart that belongs to nobody, kept for practice. Wander is there whenever curiosity would rather lead.']
       ],
       way: [
         ['The four elements', 'ap:concept:Elements', 'Fire, earth, air and water sort the signs into four temperaments. Each triangle on the wheel joins the three signs of one element, and signs that share one tend to understand each other.'],
         ['The three modalities', 'ap:concept:Modalities', 'Cardinal, fixed and mutable are three postures toward change. The crosses on the wheel join the four signs of each, which is why a square so often runs between two signs that want the same kind of movement for different ends.'],
-        ['Dignity', 'ap:concept:Essential Dignity', 'A body is at home in some signs, exalted in one, and uneasy or fallen in their opposites. Open any astral body afterwards and its homes light up on the wheel.'],
+        ['Dignity', 'ap:concept:Essential Dignity', 'A body is at home in some signs, exalted in one, and uneasy or fallen in their opposites. Open any celestial body afterwards and its homes light up on the wheel.'],
         ['Houses by kind', 'ap:concept:Angular, Succedent, and Cadent Houses', 'Angular houses act, succedent houses hold, and cadent houses think and adjust. The four angular houses are lit on the wheel.'],
         ['Orbs', 'ap:essay:orbs', 'An aspect is rarely exact. The orb is how far from exact it can stand and still be heard, and the closer it stands, the louder it reads.'],
         ['Practice', 'ap:essay:example', 'An Example Chart walks a whole reading on a chart that belongs to nobody. Try reading it before the steps do, then compare the two.']
@@ -51579,7 +51593,7 @@ class Component extends DCLogic {
     } else if (e.kind === 'house') {
       const h = A.house(e.idx + 1);
       kicker = h.name + ' · ' + h.area; lead = h.text;
-      facets.push({ label: 'An astral body here', text: h.bodies }, { label: 'The sign here', text: h.signs });
+      facets.push({ label: 'A celestial body here', text: h.bodies }, { label: 'The sign here', text: h.signs });
       link('By nature, ' + h.sign, '', 'sign:' + h.sign);
       link('Across the wheel', '', 'house:' + (((e.idx + 6) % 12) + 1));
       S.natal.filter(r => r.house === e.idx + 1).forEach(r => yours.push({ label: 'Your ' + r.name, text: fmtDeg(r), go: place(r.name) }));
@@ -52728,7 +52742,7 @@ class Component extends DCLogic {
       chan: chan || null, partner: chan ? (chan[0] === c.gate.gate ? chan[1] : chan[0]) : null, ...numV };
   }
   /* Structured inputs for the Integration passage, qualities, never identifiers.
-     The gate, the astral bodies and the numbers are already listed above it on the page,
+     The gate, the celestial bodies and the numbers are already listed above it on the page,
      so the synthesis reads what those elements mean rather than naming them twice. */
   intElements(d) {
     if (!d) return {};
@@ -52903,7 +52917,7 @@ class Component extends DCLogic {
       const k = hit ? String(hit.asp).toLowerCase() : null;
       const general = [
         H('What ' + sel.name + ' handles', b.definition + ' ' + b.role),
-        sg ? H('What ' + r.sign + ' does to any astral body', sg.definition + ' ' + sg.demand) : null,
+        sg ? H('What ' + r.sign + ' does to any celestial body', sg.definition + ' ' + sg.demand) : null,
         hz ? H('The ' + PC.ord(house) + ' house, in general', hz.definition + ' ' + hz.arena.charAt(0).toUpperCase() + hz.arena.slice(1) + ' is the subject, in any chart.') : null,
         hit ? H('What a ' + this.aspName(k) + ' is', (this.ASP_NATURE[k] || 'A live contact between two bodies.') + ' That is the aspect itself, before anyone\u2019s chart is involved.')
             : H('Quiet today', 'No transit is within orb of this placement today. That is the ordinary condition of most placements on most days, and it is worth saying so plainly: a chart that is always being activated is a chart being read too generously.')
@@ -53021,7 +53035,7 @@ class Component extends DCLogic {
         strengths: [
           h ? 'When this room is working it looks like ' + h.gift + '. That is the thing to notice and keep, rather than the thing to chase.' : null,
           sg ? 'Your cusp is ' + hd2.cuspSign + ', so your way in here is to ' + sg.gift + '. Most people handle ' + arena + ' some other way; this is the one that costs you least.' : null,
-          first ? 'You have ' + this.horoList(hd2.occupants.map(o => o.name)) + ' working in here, which means the subject gets attention whether or not you schedule it.' : 'No astral body sits here, which in practice makes this one of the least dramatic rooms in your chart. That is usually an advantage.',
+          first ? 'You have ' + this.horoList(hd2.occupants.map(o => o.name)) + ' working in here, which means the subject gets attention whether or not you schedule it.' : 'No celestial body sits here, which in practice makes this one of the least dramatic rooms in your chart. That is usually an advantage.',
           hd2.rulerRow ? (ownRuler
             ? 'Its ruler ' + hd2.ruler + ' sits in this house, so the room runs its own affairs. The tradition reads that as self-contained: what happens here does not have to be arranged from somewhere else in your chart, and it answers to you rather than to a department you have to go through.'
             : 'Its ruler ' + hd2.ruler + ' sits in your ' + ord(hd2.rulerHouse) + ' house, so you can reach this room through that one when the direct route is blocked.') : null
@@ -53609,7 +53623,7 @@ class Component extends DCLogic {
     this._hdGates[key] = set;
     return set;
   }
-  // Two personal bodies in tight orb outrank an outer astral body that happens to
+  // Two personal bodies in tight orb outrank an outer celestial body that happens to
   // be close, so the list reads like something a person would point at first.
   /* Kept, and it is not a score. This orders the contacts inside ONE pair so
      the loudest three can be shown first: tightest orb, most personal bodies.
@@ -56988,7 +57002,7 @@ class Component extends DCLogic {
   /* ---- The Cycle Audit ----------------------------------------------------
 
      THE LONG PASSAGES, AND WHAT THEY ASK. Asked for by the owner on 18 October
-     2026: the slow astral bodies stay on a point of the chart for years rather
+     2026: the slow celestial bodies stay on a point of the chart for years rather
      than days, and the audit reads each of those passages in two directions,
      what it asks the reader to set down (the Tax) and what it builds (the
      Dividend). It is the Oracle's fourth period, so it lives where the model,
@@ -58195,7 +58209,7 @@ class Component extends DCLogic {
      payments are being set up rather than offering a button. */
   LUM_GATE = {
     deep: ['In-Depth Readings', 'Long-form readings of your entire chart, including Chiron, Lilith, the asteroids, the Vertex and minor aspects, with timing windows, shadow work and journal prompts for each period.'],
-    cycle: ['What the long passages ask, and what they build', 'The slowest astral bodies stay on a point of your chart for years, not days. Each passage asks for something to be set down, and builds something in its place. The audit reads every passage ahead of you in both directions: what it asks you to surrender, what it gives back, and three questions to carry while it lasts.'],
+    cycle: ['What the long passages ask, and what they build', 'The slowest celestial bodies stay on a point of your chart for years, not days. Each passage asks for something to be set down, and builds something in its place. The audit reads every passage ahead of you in both directions: what it asks you to surrender, what it gives back, and three questions to carry while it lasts.'],
     omni: ['Omni', 'The long study. Nine or eleven cards, every one read against every other, in seven passages, ending in a pattern named clearly enough that you can check it against what actually happens.']
   };
   lumGateVals(from, p) {
@@ -59446,7 +59460,7 @@ class Component extends DCLogic {
     const ordH = PC.ord(house);
     const dig = c.dignity;
     // Contacts. The angles sit in the natal set now, so the Ascendant reads its
-    // own aspects and its own transits exactly as an astral body does.
+    // own aspects and its own transits exactly as a celestial body does.
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
     const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
@@ -59486,7 +59500,7 @@ class Component extends DCLogic {
       plName: name.toUpperCase(), plGlyph: r.glyph || c.glyph,
       plSummary: name + ' in ' + r.sign + ' at ' + Math.floor(r.deg) + '\u00b0' + min + '\u2032 \u00b7 ' + PC.ord(house) + ' House',
       plSections: [
-        [c.house, 'Start with the room rather than the astral body. A house is an area of living, not a mood, not a trait, but a place where a particular kind of thing keeps happening to you. Your ' + name + ' does its work here, in the ' + ordH + ', and everything further down this page is a variation on that one fact.'],
+        [c.house, 'Start with the room rather than the celestial body. A house is an area of living, not a mood, not a trait, but a place where a particular kind of thing keeps happening to you. Your ' + name + ' does its work here, in the ' + ordH + ', and everything further down this page is a variation on that one fact.'],
         [c.signInHouse, r.sign + ' sits over this house, which sets the manner the room is handled in. The house is the subject and the sign is the accent: you do not choose an accent, and you generally cannot hear your own.'],
         [c.body, 'Now the body itself, before it is placed anywhere. ' + name + ' means roughly the same thing in every chart ever drawn; what differs is where it lands and what condition it is in. Learning the plain meaning first prevents a great many clever misreadings.'],
         [c.astralBodyInHouse, 'Put the two together: ' + name + ' operating in the ' + ordH + ' house. This is the sentence most people are looking for when they open a chart.'],
@@ -59495,7 +59509,7 @@ class Component extends DCLogic {
       plHasDignity: !!dig,
       plDignity: dig ? { heading: dig.heading, label: dig.label.toUpperCase(),
         c: dig.strong ? 'var(--ac)' : '#7d9bff', bg: dig.strong ? 'rgba(47,255,143,.1)' : 'rgba(125,155,255,.08)',
-        lines: [{ text: 'Dignity is the old question of whether an astral body is at home or working out of a borrowed office. ' + (dig.strong ? 'Yours is in good condition here, which the tradition treats as ease rather than merit: it is a well-lit room, not a virtue.' : 'Yours is in awkward condition here. That reads worse on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
+        lines: [{ text: 'Dignity is the old question of whether a celestial body is at home or working out of a borrowed office. ' + (dig.strong ? 'Yours is in good condition here, which the tradition treats as ease rather than merit: it is a well-lit room, not a virtue.' : 'Yours is in awkward condition here. That reads worse on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
           .concat(dig.lines.map(l => ({ text: l.text }))) } : null,
       ...plContacts,
       plSynth: sec(c.synthesis, 'Everything above, held together. A chart is not a stack of separate verdicts: it is one arrangement seen from several angles, and the reading only earns its keep when the angles agree.'),
@@ -59845,8 +59859,8 @@ class Component extends DCLogic {
                 'L' + b2.x.toFixed(1) + ' ' + b2.y.toFixed(1) +
                 'A' + rIn + ' ' + rIn + ' 0 ' + big + ' 1 ' + b1.x.toFixed(1) + ' ' + b1.y.toFixed(1) + 'Z';
             };
-            // Declutter: astral bodies within 9° of each other step inward in turn so
-            // glyphs never sit on top of one another. Ring 1 (astral bodies, both
+            // Declutter: celestial bodies within 9° of each other step inward in turn so
+            // glyphs never sit on top of one another. Ring 1 (celestial bodies, both
             // nodes, Chiron, Ceres/Pallas/Juno/Vesta, Lilith, Selena) staggers
             // in its own band near the sign boundary; ring 2 (everything else
             // this wheel draws) staggers in a smaller band further toward the
@@ -60176,12 +60190,12 @@ class Component extends DCLogic {
                   const wrap = (label, base, tail, dates) => S(label, base + (dates ? ' ' + dates : '') + (tail ? ' ' + tail : ''));
                   out.push(wrap('The pre-shadow', this.PHASE_WHAT.pre, K.pre,
                     sel.preStart ? 'For this passage it opened on ' + day(sel.preStart) + ' and ran to the station on ' + day(r.from) + '.'
-                      : 'For an astral body this slow the shadow stretches across most of a year, so this build does not put a date on it.'));
+                      : 'For a celestial body this slow the shadow stretches across most of a year, so this build does not put a date on it.'));
                   out.push(wrap('The retrograde itself', this.PHASE_WHAT.retro, null,
                     (r.openStart ? '' : 'This one runs from ' + day(r.from) + ' to ' + day(r.to) + ', about ' + r.days + ' days.')));
                   out.push(wrap('The post-retrograde shadow', this.PHASE_WHAT.post, K.post,
                     sel.postEnd ? 'Here it runs from ' + day(r.to) + ' until roughly ' + day(sel.postEnd) + '.'
-                      : 'For the slower astral bodies that final pass takes months, so treat the station as the turn and the clearing as gradual.'));
+                      : 'For the slower celestial bodies that final pass takes months, so treat the station as the turn and the clearing as gradual.'));
                   return out;
                 })();
                 const retroSub = (() => {
@@ -61429,7 +61443,7 @@ class Component extends DCLogic {
       L('The Oracle', 'a reading written for your chart, for today, the week or the month', '\u263D', 'oracle reading horoscope omen tide lunar chapter week month in-depth deep ritual mantra shadow work journal prompts', this.searchTab('oracle')),
       L('Throughline', 'your record, in your own hand', '◈', 'throughline timeline record journal diary history moments entries', this.searchLib(null, { libSub: 'throughline' })),
       L('Settings', 'profiles, theme, consent, and what leaves this device', '⚙', 'settings preferences options consent privacy theme dark light contrast motion profile account analytics export language delete data', this.searchTab('settings')),
-      L('Natal wheel', 'your birth chart, drawn from your own moment', '☉', 'astrology natal wheel birth chart placements astral bodies houses ascendant rising sign', this.searchSpirit('astrology', 1)),
+      L('Natal wheel', 'your birth chart, drawn from your own moment', '☉', 'astrology natal wheel birth chart placements celestial bodies houses ascendant rising sign', this.searchSpirit('astrology', 1)),
       L('The Wiring', 'your bodygraph: type, authority, centres and channels', '◇', 'human design wiring bodygraph type authority strategy centres centers channels gates profile definition', this.searchSpirit('humanDesign', 0)),
       L('Numerology', 'life path, personal year, pinnacles and cycles', '①', 'numerology numbers life path personal year month day expression soul urge pinnacle challenge', this.searchSpirit('numerology', 2)),
       L('Synchronicities', 'a repeating number, an animal, or anything else', '♾', 'synchronicities angel numbers animal sighting repeating signs omens 111 222 333', this.searchAngel()),
@@ -61440,7 +61454,7 @@ class Component extends DCLogic {
       L('The Archive', 'everything you have kept, by word or by date', '▦', 'archive kept saved readings past', this.searchLib(null, { libSub: 'archive' })),
       L('Sabian Lexicon', 'all 360 degrees, each with its image', '✧', 'sabian lexicon degrees symbols 360 images mandala', this.searchLib('lexicon')),
       L('Human Design Atlas', 'types, lines, profiles, centres, gates and channels', '◈', 'human design atlas reference gates channels centres centers types lines profiles authorities strategies', this.searchLib('hdatlas', { atlasSec: 'intro' })),
-      L('Astropedia', 'signs, houses, astral bodies, points and aspects', '☄', 'astropedia astrology reference signs houses astral bodies aspects points asteroids orbs', this.searchLib('astropedia', { apSec: 'signs' })),
+      L('Astropedia', 'signs, houses, celestial bodies, points and aspects', '☄', 'astropedia astrology reference signs houses celestial bodies aspects points asteroids orbs', this.searchLib('astropedia', { apSec: 'signs' })),
       L('The Book of Numbers', 'every compound from 10 to 99, on its root', '\u221e', 'book of numbers compound compounds master numbers karmic debt elite auspicious numerology matrix double digit 11 22 33', this.searchLib('numbers')),
       L('The Tarot deck', 'all 78 cards, as reference', '✳', 'tarot deck cards major arcana minor wands cups swords pentacles suits', this.searchLib('tarot', { ttSec: 'major' })),
       L('Dream Symbols', 'every image the Dream Journal can read', '☁', 'dream symbols images registry animals weather water places lookup', this.searchLib('dreams')),
@@ -61605,7 +61619,7 @@ class Component extends DCLogic {
         sub: h.area, keys: 'house ' + h.n + ' ' + h.sign, body: h.text,
         target: this.searchLib('astropedia', { apSec: 'houses', apOpen: 'house:' + h.n }) }));
       (AP.ASTRAL_BODIES || []).forEach(p => ap.push({ glyph: p.glyph, title: p.name,
-        sub: 'astral body · ' + p.rhythm + ' · at home in ' + p.dignity, keys: 'astral body', body: p.text,
+        sub: this.bodyType(p.name) + ' · ' + p.rhythm + ' · at home in ' + p.dignity, keys: 'planet luminary celestial body ' + this.bodyType(p.name), body: p.text,
         target: this.searchLib('astropedia', { apSec: 'bodies', apOpen: 'body:' + p.name }) }));
       (AP.POINTS || []).forEach(p => { if (!p || !p.name) return;
         ap.push({ glyph: p.glyph || '✦', title: p.name, sub: 'point · ' + cut(p.text, 62),

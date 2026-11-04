@@ -28,14 +28,14 @@ const EN: LocaleCatalog = {
 
     'transit-square': [
       '{body1} square {body2} {time}. Translation: friction. The kind that sharpens or stalls. Which depends on you.',
-      'Two astral bodies at odds: {body1} {body2} {time}. Expect the resistance. It\'s trying to teach you something.',
+      'Two celestial bodies at odds: {body1} {body2} {time}. Expect the resistance. It\'s trying to teach you something.',
       'Hard aspect alert, {time}: {body1} and {body2} want different things. Channel it into {theme}.'
     ],
 
     'transit-trine': [
       'A gift lands {time}: {body1} trine {body2}. {theme} flows. Don\'t waste it on autopilot.',
       '{time}, {body1} and {body2} are in conversation. The air is clear for {theme}.',
-      'Rare ease: {body1} trine {body2}, {time}. This is what "favor of the astral bodies" looks like.'
+      'Rare ease: {body1} trine {body2}, {time}. This is what "favor of the celestial bodies" looks like.'
     ],
 
     'transit-opposite': [
@@ -70,13 +70,13 @@ const EN: LocaleCatalog = {
     // EXPLAINERS: Aspects
     // ============================================================================
 
-    'explainer-conjunction': 'A conjunction is when two astral bodies occupy the same degree. They\'re "merged." Whatever energies these astral bodies represent are speaking in unison today, amplified, urgent, singular in focus. Conjunctions are powerful but undifferentiated; context matters enormously.',
+    'explainer-conjunction': 'A conjunction is when two celestial bodies occupy the same degree. They\'re "merged." Whatever energies these celestial bodies represent are speaking in unison today, amplified, urgent, singular in focus. Conjunctions are powerful but undifferentiated; context matters enormously.',
 
-    'explainer-sextile': 'A sextile (60°) is one of astrology\'s "easy" aspects. Two astral bodies at this angle support each other. It\'s like a green light: opportunity presenting itself. Sextiles don\'t force action, but they make forward motion possible. Look for doors opening.',
+    'explainer-sextile': 'A sextile (60°) is one of astrology\'s "easy" aspects. Two celestial bodies at this angle support each other. It\'s like a green light: opportunity presenting itself. Sextiles don\'t force action, but they make forward motion possible. Look for doors opening.',
 
-    'explainer-trine': 'A trine (120°) is harmony. Two astral bodies at this angle flow together naturally. Trines don\'t demand effort; they reward what\'s already in motion. The risk: taking them for granted. A trine is a gift, not a free pass. Use it or lose it.',
+    'explainer-trine': 'A trine (120°) is harmony. Two celestial bodies at this angle flow together naturally. Trines don\'t demand effort; they reward what\'s already in motion. The risk: taking them for granted. A trine is a gift, not a free pass. Use it or lose it.',
 
-    'explainer-opposite': 'An opposition (180°) is two astral bodies facing each other across the sky. It\'s not conflict, it\'s awareness of two viewpoints simultaneously. Oppositions demand balance, not victory. You\'re seeing both sides, which is clarifying if uncomfortable. Integration is the goal.',
+    'explainer-opposite': 'An opposition (180°) is two celestial bodies facing each other across the sky. It\'s not conflict, it\'s awareness of two viewpoints simultaneously. Oppositions demand balance, not victory. You\'re seeing both sides, which is clarifying if uncomfortable. Integration is the goal.',
 
     // ============================================================================
     // PRACTICAL: Action hooks
@@ -98,7 +98,7 @@ const EN: LocaleCatalog = {
     // SKY WIRE: Strings (public feed)
     // ============================================================================
 
-    'skywire-header': 'Sky Wire: What the astral bodies say today',
+    'skywire-header': 'Sky Wire: What the celestial bodies say today',
     'skywire-footer': 'A view of the planetary movements at a glance. No birth data needed.',
 
     // ============================================================================

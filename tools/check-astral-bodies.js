@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* check-astral-bodies.js: the ten astral bodies, measured against JPL Horizons.
+/* check-astral-bodies.js: the ten celestial bodies, measured against JPL Horizons.
  *
  * WHY THIS GATE EXISTS. Every reading in the app stands on ten longitudes, and
  * for as long as the app existed nothing compared them with anything outside

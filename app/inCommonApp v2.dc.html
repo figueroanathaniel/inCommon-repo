@@ -385,7 +385,7 @@ input[type="date"]{color-scheme:dark}
      its channel table from hd-atlas.js above rather than keeping a second
      copy of it. -->
 <script src="./birth-time.js"></script>
-<!-- Where the ten astral bodies are. astronomy-engine 2.1.19 (MIT, Don Cross),
+<!-- Where the ten celestial bodies are. astronomy-engine 2.1.19 (MIT, Don Cross),
      vendored byte for byte from the npm registry tarball, because the hand
      written series it replaced measured up to 6.5 degrees from JPL Horizons.
      modulesReady() waits for window.Astronomy: the scripts in this helmet are
@@ -15722,18 +15722,31 @@ class Component extends DCLogic {
     { id: 'ariesPoint', name: 'Aries Point', glyph: 'AP', category: 'derived', tooltip: 'public visibility, world events, fame', reference: 'where you touch the public world (fixed 0°)' },
     { id: 'sunmoonMidpoint', name: 'Sun/Moon Midpoint', glyph: 'S/M', category: 'derived', tooltip: 'blend of will and feeling, core duality', reference: 'composite technique, synastry blend' }
   ];
-  // Ring 1 (inner, bold): the ten astral bodies and both nodes (already drawn from
+  // Ring 1 (inner, bold): the ten celestial bodies and both nodes (already drawn from
   // PLNS/chartAt, never in this registry) plus these seven. Ring 2 (outer,
   // small) is everything else this registry names. Comets are excluded from
   // both rings by default (see wheelBodies/wheelLabels): they show in the
   // side panel only, unless chartExpandShowComets is on.
   RING1_IDS = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'lilithMean', 'selena'];
-  /* Dwarf Planets is a sanctioned exception to the astral body rename, decided
+  /* Dwarf Planets is a sanctioned exception to the celestial body rename, decided
      by the owner. It is a formal IAU classification, and it sits here beside
      asteroid, centaur, comet and TNO, which are formal classifications too and
      were all kept. Renaming this one and not those four made it the odd one
      out. Do not sweep it. */
-  CAT_LABEL = { body: 'Astral Bodies & Nodes', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
+  /* What kind of celestial body a name is, as specifically as astronomy names it
+     (owner, 4 November 2026: planet when it is a planet, celestial body as the
+     general word). The Sun and the Moon are the luminaries, Pluto is a dwarf
+     planet, and anything this does not know is a celestial body. */
+  bodyType(name) {
+    const n = String(name || '');
+    if (n === 'Sun' || n === 'Moon') return 'luminary';
+    if (['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'].indexOf(n) !== -1) return 'planet';
+    if (['Pluto', 'Ceres', 'Eris', 'Haumea', 'Makemake'].indexOf(n) !== -1) return 'dwarf planet';
+    if (n === 'Chiron' || n === 'Pholus' || n === 'Nessus') return 'centaur';
+    if (['Pallas', 'Juno', 'Vesta', 'Hygiea'].indexOf(n) !== -1) return 'asteroid';
+    return 'celestial body';
+  }
+  CAT_LABEL = { body: 'Luminaries & Planets', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
   // Fixed hues, not themed, the same way --ac/--ac2/--crisis are fixed: a
   // category colour has to mean the same thing under every identity. TNO
   // reuses --ac2 (violet) rather than a fourth new token, node/hypothetical
@@ -15799,7 +15812,7 @@ class Component extends DCLogic {
     '5th and 11th: what you make alone against what you build with others', '6th and 12th: the ordinary day against what runs beneath it'];
   houseClassOf(n) { return this.HOUSE_CLASS[[1,4,7,10].indexOf(n) >= 0 ? 0 : [2,5,8,11].indexOf(n) >= 0 ? 1 : 2]; }
   // Everything below is assembled from PlacementContent, the same source the
-  // placement pages read, so a house never says something an astral body page contradicts.
+  // placement pages read, so a house never says something a celestial body page contradicts.
   houseDetail(n) {
     const PC = window.PlacementContent, T = (t, x) => this.tagLine(t, x);
     const h = PC && PC.houses ? PC.houses[n - 1] : null;
@@ -15826,7 +15839,7 @@ class Component extends DCLogic {
       gen.push(H('What this house is for', h.definition + ' ' + h.inLife));
       gen.push(H('Its temperament', 'It is ' + (cls[0] === 'Angular' ? 'an' : 'a') + ' ' + cls[0].toLowerCase() + ' house. ' + cls[1] + ' That classification is older than most of what people argue about in astrology, and it is the part that has held up best.'));
     }
-    gen.push(H('How any house gets its ruler', 'A house does not act on its own. Whichever sign falls on the cusp hands the house to that sign\u2019s astral body, and wherever that astral body sits in the chart is where the business of this room is actually conducted, whatever the room itself looks like.'));
+    gen.push(H('How any house gets its ruler', 'A house does not act on its own. Whichever sign falls on the cusp hands the house to that sign\u2019s celestial body, and wherever that celestial body sits in the chart is where the business of this room is actually conducted, whatever the room itself looks like.'));
     gen.push(H('The house it argues with', 'Every house works against its opposite. ' + this.HOUSE_AXIS[(n - 1) % 6] + '. Neither end functions well without the other, and a house read on its own is a house read badly.'));
     const lines = [];
     lines.push(H('Where this house sits', 'The ' + ord(n) + ' house of your chart begins at ' + Math.floor(cuspSign.deg) + '\u00b0 ' + cuspSign.sign +
@@ -15854,7 +15867,7 @@ class Component extends DCLogic {
     } else {
       lines.push(H('Nobody lives here', 'None of your bodies sit in this house.' +
         (rr ? ' Its ruler ' + ruler + ' is at ' + Math.floor(rr.deg) + '\u00b0 ' + rr.sign + ', in your ' + ord(rh) + ' house, and that is where to look for how this one is really run.' : '') +
-        ' An empty house is not an empty part of life, that misreading has caused more unnecessary worry than almost anything else I can name. It simply means no astral body is insisting on the subject.' +
+        ' An empty house is not an empty part of life, that misreading has caused more unnecessary worry than almost anything else I can name. It simply means no celestial body is insisting on the subject.' +
         ' In practice these are often the least dramatic and most functional rooms in a chart.'));
     }
     lines.push(H('The house it argues with', 'Every house works against its opposite. ' + this.HOUSE_AXIS[(n - 1) % 6] + '. Neither end functions well without the other, and a house read on its own is a house read badly.'));
@@ -16186,7 +16199,7 @@ class Component extends DCLogic {
   }
   lonRaw(name, t) {
     const R = this.RAD;
-    /* THE TEN ASTRAL BODIES COME FROM astronomy-engine, and the series below
+    /* THE TEN CELESTIAL BODIES COME FROM astronomy-engine, and the series below
        them is the fallback for a build where that file did not load.
 
        The series was a two term Moon and a coplanar first order Kepler model
@@ -16277,14 +16290,14 @@ class Component extends DCLogic {
     return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
   }
   // Chiron's eccentricity is 0.38, far too high for the equation-of-centre
-  // series the astral bodies use, which would drift by several degrees. Solve Kepler
+  // series the celestial bodies use, which would drift by several degrees. Solve Kepler
   // properly with Newton iteration instead.
   /* WHICH CLAIMS A BODY HAS EARNED.
 
      A Sabian symbol is a claim about ONE degree of arc. Printing one for a body
      whose position is good to about a degree is a precise statement resting on
      an imprecise number, and it reads as the most exact thing on the page
-     because it is the most specific. The ten astral bodies are measured against
+     because it is the most specific. The ten celestial bodies are measured against
      JPL Horizons to 0.03 degrees and keep their symbols (the series they came
      from before claimed "well inside a degree" here and measured 6.5). Chiron
      and the four asteroids are fetched from Horizons and measure 0.058 degrees
@@ -16504,7 +16517,7 @@ class Component extends DCLogic {
 
   // Newton-Raphson solve of Kepler's equation M = E - e*sin(E). Needed for
   // Eris, Sedna and the three comets, whose eccentricity is too high for the
-  // equation-of-centre series lonRaw() uses for the eight coplanar astral bodies.
+  // equation-of-centre series lonRaw() uses for the eight coplanar celestial bodies.
   solveKeplerE(M, e, tol, maxIter) {
     tol = tol || 1e-9; maxIter = maxIter || 30;
     let m = M % (2 * Math.PI);
@@ -16579,7 +16592,7 @@ class Component extends DCLogic {
   }
 
   // Eris and Sedna: full 3D Keplerian elements (Omega and omega split apart,
-  // unlike the coplanar model the eight astral bodies use). Source: JPL Small-Body
+  // unlike the coplanar model the eight celestial bodies use). Source: JPL Small-Body
   // Database / Horizons, cross-checked against two independent citations
   // each for a and e (see engine.ts). epochJD stored as an offset from
   // J2000 so this file can work entirely in t (=jd-2451545) like the rest
@@ -16603,7 +16616,7 @@ class Component extends DCLogic {
     const earth = this.helioOf(this.EARTH_EL, t);
     return this.norm360(Math.atan2(y - earth[1], x - earth[0]) / R);
   }
-  // Same coplanar heliocentric x/y lonRaw() computes inline for each astral body,
+  // Same coplanar heliocentric x/y lonRaw() computes inline for each celestial body,
   // pulled out as its own method so the TNO and comet solvers below (which
   // both need Earth's position) can share it instead of duplicating it.
   helioOf(el, t) {
@@ -17044,12 +17057,12 @@ class Component extends DCLogic {
       // Ascendant always opposes the Descendant. Those pairs are dropped.
       if (a.group === 'angle' && b.group === 'angle') return;
       // The minor-aspects toggle (opts.rich only): off shows only the
-      // sixteen core points (astral bodies, both nodes, the four angles) against
+      // sixteen core points (celestial bodies, both nodes, the four angles) against
       // each other, exactly like the basic grid, even while every other
       // expanded computation keeps running underneath.
       if (opts.rich && opts.minorAspects === false && (a.group === 'extra' || b.group === 'extra')) return;
       // Two outer ring points are not read against each other. A minor body
-      // is read by what it touches among the astral bodies, the lights, the nodes,
+      // is read by what it touches among the celestial bodies, the lights, the nodes,
       // the angles and the inner ring. With every registry point placed,
       // asteroid to hypothetical and centaur to TNO pairs were 393 of 708
       // contacts on a sample chart: a grid of them buries the ones the
@@ -17065,7 +17078,7 @@ class Component extends DCLogic {
     return out.sort((x, y) => x.orb - y.orb);
   }
   stelliums(expanded) {
-    // A gathering is counted in the astral bodies, nodes and the inner ring. With
+    // A gathering is counted in the celestial bodies, nodes and the inner ring. With
     // eighty minor points placed, every sign holds three of something, and a
     // stellium found everywhere is a stellium found nowhere.
     const rows = this.placed(expanded).filter(r => r.group !== 'angle' && (r.group !== 'extra' || r.ring === 1)), asc = this.ascendant(), sun = rows[0];
@@ -18618,7 +18631,7 @@ class Component extends DCLogic {
     /* Grouped on the transiting body alone. The body paragraph describes that
        body and the house it is walking; only the arrival clause depends on the
        aspect, so keying the repeat on body plus aspect printed the same three
-       sentences twice whenever one astral body hit two points by different angles. */
+       sentences twice whenever one celestial body hit two points by different angles. */
     const shown = picked.slice(0, 3), grp = {}, seq = {};
     shown.forEach(h => { grp[h.a.name] = (grp[h.a.name] || 0) + 1; });
     const word = n => this.HORO_WORD[n] || String(n), ordw = n => this.HORO_ORD[n] || String(n) + 'th';
@@ -19095,7 +19108,7 @@ class Component extends DCLogic {
   // step would miss one entirely.
   RETRO_BODIES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
   RETRO_WIN = 300;
-  RETRO_DOCTRINE = 'Retrograde motion is apparent, not real. No astral body reverses course. Seen from a moving Earth, it appears to slow, stand still, and then walk backwards through the zodiac for a season before turning forward again. The tradition reads that appearance as a turn inward: the same business as always, handled in review rather than in advance.';
+  RETRO_DOCTRINE = 'Retrograde motion is apparent, not real. No celestial body reverses course. Seen from a moving Earth, it appears to slow, stand still, and then walk backwards through the zodiac for a season before turning forward again. The tradition reads that appearance as a turn inward: the same business as always, handled in review rather than in advance.';
   RETRO_MEAN = {
     Mercury: 'Mercury governs speech, exchange, transit and the written record. Retrograde, the tradition expects the second draft rather than the first: things said again, contracts reread, plans revised, and people from earlier turning up mid-sentence.',
     Venus: 'Venus governs attraction, worth and the terms of an agreement. Retrograde, it is read as a re-pricing. What you value, what you tolerate, and what you have been calling love out of habit all come up for another look.',
@@ -19106,15 +19119,15 @@ class Component extends DCLogic {
     Neptune: 'Neptune governs dissolution, longing, and what is not quite seen. Retrograde, the tradition expects the fog to thin: an illusion loses its hold, sometimes as relief and sometimes as plain disappointment.',
     Pluto: 'Pluto governs what is buried and what will not stay buried. Retrograde, it is read as descent rather than eruption. The same material, worked at privately and slowly, usually well before anyone else notices.'
   };
-  // Shadow periods are only tracked for the personal astral bodies. An outer astral body is
+  // Shadow periods are only tracked for the personal celestial bodies. An outer celestial body is
   // retrograde for months and in shadow for most of what is left, so dating its
   // shadow produces a list that is technically true and useless to read.
   SHADOW_BODIES = ['Mercury', 'Venus', 'Mars'];
   PHASE_LABEL = { pre: 'pre-shadow', retro: 'retrograde', post: 'post-shadow' };
   PHASE_WHAT = {
-    pre: 'The pre-shadow is the run-up. The astral body is still moving forward, but it has crossed into the stretch of zodiac it will end up covering three separate times before it is done: forward now, backward through the retrograde, forward again on the way out. Whatever surfaces in these weeks is usually the first draft of the story.',
-    retro: 'The retrograde proper begins at the station, the day the astral body appears to stop and turn. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
-    post: 'The post-retrograde shadow runs from the day the astral body turns forward again to the day it finally clears the degree where it first stationed. It is the third pass over the same ground, and the difference is that by now you know what the ground is.'
+    pre: 'The pre-shadow is the run-up. The celestial body is still moving forward, but it has crossed into the stretch of zodiac it will end up covering three separate times before it is done: forward now, backward through the retrograde, forward again on the way out. Whatever surfaces in these weeks is usually the first draft of the story.',
+    retro: 'The retrograde proper begins at the station, the day the celestial body appears to stop and turn. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
+    post: 'The post-retrograde shadow runs from the day the celestial body turns forward again to the day it finally clears the degree where it first stationed. It is the third pass over the same ground, and the difference is that by now you know what the ground is.'
   };
   RETRO_TALK = {
     Mercury: {
@@ -19174,7 +19187,7 @@ class Component extends DCLogic {
       post: 'The third pass is where it stays above ground.'
     }
   };
-  // Shadow bounds. The pre-shadow opens where the astral body first crosses the degree it
+  // Shadow bounds. The pre-shadow opens where the celestial body first crosses the degree it
   // will later station direct at; the post-shadow closes where it recovers the degree
   // it stationed retrograde at. Both are found by walking the same ephemeris a day at
   // a time, so an unresolved crossing returns null rather than an invented date.
@@ -19194,8 +19207,8 @@ class Component extends DCLogic {
     }
     return { preStart: preStart, postEnd: postEnd };
   }
-  // Everything the Current Retrogrades panel lists: astral bodies actually retrograde today,
-  // plus personal astral bodies sitting in a shadow on either side of one.
+  // Everything the Current Retrogrades panel lists: celestial bodies actually retrograde today,
+  // plus personal celestial bodies sitting in a shadow on either side of one.
   retroPhases() {
     const key = Component.localDay();
     if (this._rpKey === key && this._rp) return this._rp;
@@ -19583,7 +19596,7 @@ class Component extends DCLogic {
       pos: Math.floor(r.deg) + '° ' + r.sign + (r.category === 'angle' ? '' : ' · House ' + ctx.houseOf(r)),
       chip: cs.length ? (cs.length === 1 ? 'Lit now' : 'Lit by ' + cs.length) : 'Quiet',
       status: status, bars: this.impactBars(level), contacts: contacts, contactsOn: contacts.length > 0,
-      quietOn: !contacts.length, quiet: 'No astral body is touching ' + name + ' today.',
+      quietOn: !contacts.length, quiet: 'No celestial body is touching ' + name + ' today.',
       ask: ask, askOn: !!ask, round: round, roundOn: !!round, roundPct: roundPct,
       pastOn: !!(arc && arc.past), past: arc && arc.past ? 'Earlier: ' + line(arc.past) + '.' : '',
       nextOn: !!(arc && arc.next), next: arc && arc.next ? 'Next: ' + line(arc.next) + '.' : '',
@@ -19618,7 +19631,7 @@ class Component extends DCLogic {
       pos: ctx.cuspSign(h),
       chip: inside.length ? inside.length + ' crossing' : 'Empty', bars: this.impactBars(this.impactLevel(w)),
       status: inside.length ? inside.map(x => x.m).join(', ') : arrives ? 'Next: ' + arrives.m + ' from ' + this.fmtDay(this.impactDay(arrives.i)) : 'Empty today',
-      inside: inside, insideOn: inside.length > 0, quietOn: !inside.length, quiet: 'No astral body is crossing the ' + ctx.ordinal(h) + ' house today.',
+      inside: inside, insideOn: inside.length > 0, quietOn: !inside.length, quiet: 'No celestial body is crossing the ' + ctx.ordinal(h) + ' house today.',
       pastOn: !!left, past: left ? 'Last to leave: ' + left.m + ', on ' + this.fmtDay(this.impactDay(left.i)) + '.' : '',
       nextOn: !!arrives, next: arrives ? 'Next to arrive: ' + arrives.m + ', on ' + this.fmtDay(this.impactDay(arrives.i)) + '.' : '',
       ask: this.HOUSE_ASK[h - 1], askOn: true, house: this.HOUSE_LONG[h - 1],
@@ -19736,7 +19749,7 @@ class Component extends DCLogic {
       meta: x.meta || '', metaOn: !!x.meta, sub: x.sub || '', edge: x.edge || 'transparent', go: x.go || null, btn: !!x.go, plain: !x.go,
       aria: x.aria || [x.title, x.hi, x.lit ? 'lit now' : '', x.sub].filter(Boolean).join(', '), litOn: !!x.lit, arrow: x.go ? '›' : '' });
     const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived'];
-    const LABEL = { ...this.CAT_LABEL, body: 'Astral Bodies' };
+    const LABEL = { ...this.CAT_LABEL, body: 'Luminaries & Planets' };
     const pts = CATS.map(cat => {
       const rs = o.rows.filter(r => r.category === cat);
       if (!rs.length) return null;
@@ -19754,7 +19767,7 @@ class Component extends DCLogic {
       return group('pt-' + cat, LABEL[cat] || cat, rows, { peek: rs.slice(0, 9).map(r => r.glyph).filter(Boolean).join(' ') + (rs.length > 9 ? ' …' : ''),
         lit: Object.keys(litMap).filter(k => litMap[k]).length, cards: () => live.map(r => this.impactPointCard(r, ctx)) });
     }).filter(Boolean);
-    /* THE LEDGER (owner, 21 October 2026). The astral bodies, nodes and
+    /* THE LEDGER (owner, 21 October 2026). The celestial bodies, nodes and
        angles are one table, a row each, and the columns are the three bands:
        where it sits and what it aspects (Bedrock), what the sky is doing to it
        this minute (Weather), and the next window that opens on it (Horizon).
@@ -21040,7 +21053,7 @@ class Component extends DCLogic {
         row('POSSIBILITY', 'In men: ' + s.male), row('POSSIBILITY', 'In women: ' + s.female)] }));
     if (key === 'houses') return A.HOUSES.map(h => ({
       head: ord(h.n) + ' House \u00b7 ' + h.name, hasSub: true, sub: h.area + ' \u00b7 ' + h.sign + ' by nature',
-      rows: [plain(h.text), row('TRADITIONAL', 'An astral body here: ' + h.bodies), row('TRADITIONAL', 'The sign here: ' + h.signs)] }));
+      rows: [plain(h.text), row('TRADITIONAL', 'A celestial body here: ' + h.bodies), row('TRADITIONAL', 'The sign here: ' + h.signs)] }));
     if (key === 'bodies') return A.ASTRAL_BODIES.map(p => ({
       head: p.glyph + '\uFE0E  ' + p.name, hasSub: true, sub: 'rhythm: ' + p.rhythm,
       rows: [plain(p.text), row('TRADITIONAL', 'In a sign: ' + p.sign), row('TRADITIONAL', 'In a house: ' + p.house),
@@ -21128,18 +21141,18 @@ class Component extends DCLogic {
     },
     astropedia: {
       first: [
-        ['The wheel', 'ap:sun', 'The circle is the sky seen from Earth, cut into twelve signs. The outer ring holds the signs, each tinted by its element, and the ring inside it holds the twelve houses. The symbols in the middle are the astral bodies, placed where they stand this minute. Tap any of them once to see its name, and again to open it.'],
+        ['The wheel', 'ap:sun', 'The circle is the sky seen from Earth, cut into twelve signs. The outer ring holds the signs, each tinted by its element, and the ring inside it holds the twelve houses. The symbols in the middle are the celestial bodies, placed where they stand this minute. Tap any of them once to see its name, and again to open it.'],
         ['The Sun sign', 'ap:sun', 'The sign the Sun stood in at birth is the one most people call their sign. The tradition reads it as the manner a person shines in. Of the tiles on this page, As the Sun is the one that belongs to this step.'],
         ['The Moon sign', 'ap:moon', 'The Moon crosses a sign in about two and a half days, so its sign is more personal than the Sun’s. It is read as what soothes, what is needed, and how feeling arrives. Read As the Moon on this page.'],
         ['The houses', 'ap:house:1', 'Where the signs are atmospheres, the houses are rooms: twelve areas of life, from the self in the first to the hidden things in the twelfth. The first house begins at the Rising sign, which is why a birth time matters. The arrows at the foot of the page step through all twelve.'],
-        ['The astral bodies', 'ap:body:Sun', 'The bodies are the actors in a chart, each with its own rhythm and its own concerns. Each is at home in some signs and uneasy in others, and those signs light up on the wheel while the body is open.'],
+        ['The celestial bodies', 'ap:body:Sun', 'The bodies are the actors in a chart, each with its own rhythm and its own concerns. Each is at home in some signs and uneasy in others, and those signs light up on the wheel while the body is open.'],
         ['Aspects', 'ap:aspect:Trine', 'An aspect is the angle between two bodies, read as the tone of their conversation. The triangle on the wheel is a trine, drawn from where the Sun stands today. When a chart of your own is on this device, its trines are listed on this page.'],
         ['Reading a whole chart', 'ap:essay:chart', 'This chapter puts the pieces together in seven steps. When it starts to feel familiar, An Example Chart is a chart that belongs to nobody, kept for practice. Wander is there whenever curiosity would rather lead.']
       ],
       way: [
         ['The four elements', 'ap:concept:Elements', 'Fire, earth, air and water sort the signs into four temperaments. Each triangle on the wheel joins the three signs of one element, and signs that share one tend to understand each other.'],
         ['The three modalities', 'ap:concept:Modalities', 'Cardinal, fixed and mutable are three postures toward change. The crosses on the wheel join the four signs of each, which is why a square so often runs between two signs that want the same kind of movement for different ends.'],
-        ['Dignity', 'ap:concept:Essential Dignity', 'A body is at home in some signs, exalted in one, and uneasy or fallen in their opposites. Open any astral body afterwards and its homes light up on the wheel.'],
+        ['Dignity', 'ap:concept:Essential Dignity', 'A body is at home in some signs, exalted in one, and uneasy or fallen in their opposites. Open any celestial body afterwards and its homes light up on the wheel.'],
         ['Houses by kind', 'ap:concept:Angular, Succedent, and Cadent Houses', 'Angular houses act, succedent houses hold, and cadent houses think and adjust. The four angular houses are lit on the wheel.'],
         ['Orbs', 'ap:essay:orbs', 'An aspect is rarely exact. The orb is how far from exact it can stand and still be heard, and the closer it stands, the louder it reads.'],
         ['Practice', 'ap:essay:example', 'An Example Chart walks a whole reading on a chart that belongs to nobody. Try reading it before the steps do, then compare the two.']
@@ -21534,7 +21547,7 @@ class Component extends DCLogic {
     } else if (e.kind === 'house') {
       const h = A.house(e.idx + 1);
       kicker = h.name + ' · ' + h.area; lead = h.text;
-      facets.push({ label: 'An astral body here', text: h.bodies }, { label: 'The sign here', text: h.signs });
+      facets.push({ label: 'A celestial body here', text: h.bodies }, { label: 'The sign here', text: h.signs });
       link('By nature, ' + h.sign, '', 'sign:' + h.sign);
       link('Across the wheel', '', 'house:' + (((e.idx + 6) % 12) + 1));
       S.natal.filter(r => r.house === e.idx + 1).forEach(r => yours.push({ label: 'Your ' + r.name, text: fmtDeg(r), go: place(r.name) }));
@@ -22683,7 +22696,7 @@ class Component extends DCLogic {
       chan: chan || null, partner: chan ? (chan[0] === c.gate.gate ? chan[1] : chan[0]) : null, ...numV };
   }
   /* Structured inputs for the Integration passage, qualities, never identifiers.
-     The gate, the astral bodies and the numbers are already listed above it on the page,
+     The gate, the celestial bodies and the numbers are already listed above it on the page,
      so the synthesis reads what those elements mean rather than naming them twice. */
   intElements(d) {
     if (!d) return {};
@@ -22858,7 +22871,7 @@ class Component extends DCLogic {
       const k = hit ? String(hit.asp).toLowerCase() : null;
       const general = [
         H('What ' + sel.name + ' handles', b.definition + ' ' + b.role),
-        sg ? H('What ' + r.sign + ' does to any astral body', sg.definition + ' ' + sg.demand) : null,
+        sg ? H('What ' + r.sign + ' does to any celestial body', sg.definition + ' ' + sg.demand) : null,
         hz ? H('The ' + PC.ord(house) + ' house, in general', hz.definition + ' ' + hz.arena.charAt(0).toUpperCase() + hz.arena.slice(1) + ' is the subject, in any chart.') : null,
         hit ? H('What a ' + this.aspName(k) + ' is', (this.ASP_NATURE[k] || 'A live contact between two bodies.') + ' That is the aspect itself, before anyone\u2019s chart is involved.')
             : H('Quiet today', 'No transit is within orb of this placement today. That is the ordinary condition of most placements on most days, and it is worth saying so plainly: a chart that is always being activated is a chart being read too generously.')
@@ -22976,7 +22989,7 @@ class Component extends DCLogic {
         strengths: [
           h ? 'When this room is working it looks like ' + h.gift + '. That is the thing to notice and keep, rather than the thing to chase.' : null,
           sg ? 'Your cusp is ' + hd2.cuspSign + ', so your way in here is to ' + sg.gift + '. Most people handle ' + arena + ' some other way; this is the one that costs you least.' : null,
-          first ? 'You have ' + this.horoList(hd2.occupants.map(o => o.name)) + ' working in here, which means the subject gets attention whether or not you schedule it.' : 'No astral body sits here, which in practice makes this one of the least dramatic rooms in your chart. That is usually an advantage.',
+          first ? 'You have ' + this.horoList(hd2.occupants.map(o => o.name)) + ' working in here, which means the subject gets attention whether or not you schedule it.' : 'No celestial body sits here, which in practice makes this one of the least dramatic rooms in your chart. That is usually an advantage.',
           hd2.rulerRow ? (ownRuler
             ? 'Its ruler ' + hd2.ruler + ' sits in this house, so the room runs its own affairs. The tradition reads that as self-contained: what happens here does not have to be arranged from somewhere else in your chart, and it answers to you rather than to a department you have to go through.'
             : 'Its ruler ' + hd2.ruler + ' sits in your ' + ord(hd2.rulerHouse) + ' house, so you can reach this room through that one when the direct route is blocked.') : null
@@ -23564,7 +23577,7 @@ class Component extends DCLogic {
     this._hdGates[key] = set;
     return set;
   }
-  // Two personal bodies in tight orb outrank an outer astral body that happens to
+  // Two personal bodies in tight orb outrank an outer celestial body that happens to
   // be close, so the list reads like something a person would point at first.
   /* Kept, and it is not a score. This orders the contacts inside ONE pair so
      the loudest three can be shown first: tightest orb, most personal bodies.
@@ -26943,7 +26956,7 @@ class Component extends DCLogic {
   /* ---- The Cycle Audit ----------------------------------------------------
 
      THE LONG PASSAGES, AND WHAT THEY ASK. Asked for by the owner on 18 October
-     2026: the slow astral bodies stay on a point of the chart for years rather
+     2026: the slow celestial bodies stay on a point of the chart for years rather
      than days, and the audit reads each of those passages in two directions,
      what it asks the reader to set down (the Tax) and what it builds (the
      Dividend). It is the Oracle's fourth period, so it lives where the model,
@@ -28150,7 +28163,7 @@ class Component extends DCLogic {
      payments are being set up rather than offering a button. */
   LUM_GATE = {
     deep: ['In-Depth Readings', 'Long-form readings of your entire chart, including Chiron, Lilith, the asteroids, the Vertex and minor aspects, with timing windows, shadow work and journal prompts for each period.'],
-    cycle: ['What the long passages ask, and what they build', 'The slowest astral bodies stay on a point of your chart for years, not days. Each passage asks for something to be set down, and builds something in its place. The audit reads every passage ahead of you in both directions: what it asks you to surrender, what it gives back, and three questions to carry while it lasts.'],
+    cycle: ['What the long passages ask, and what they build', 'The slowest celestial bodies stay on a point of your chart for years, not days. Each passage asks for something to be set down, and builds something in its place. The audit reads every passage ahead of you in both directions: what it asks you to surrender, what it gives back, and three questions to carry while it lasts.'],
     omni: ['Omni', 'The long study. Nine or eleven cards, every one read against every other, in seven passages, ending in a pattern named clearly enough that you can check it against what actually happens.']
   };
   lumGateVals(from, p) {
@@ -29401,7 +29414,7 @@ class Component extends DCLogic {
     const ordH = PC.ord(house);
     const dig = c.dignity;
     // Contacts. The angles sit in the natal set now, so the Ascendant reads its
-    // own aspects and its own transits exactly as an astral body does.
+    // own aspects and its own transits exactly as a celestial body does.
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
     const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
@@ -29441,7 +29454,7 @@ class Component extends DCLogic {
       plName: name.toUpperCase(), plGlyph: r.glyph || c.glyph,
       plSummary: name + ' in ' + r.sign + ' at ' + Math.floor(r.deg) + '\u00b0' + min + '\u2032 \u00b7 ' + PC.ord(house) + ' House',
       plSections: [
-        [c.house, 'Start with the room rather than the astral body. A house is an area of living, not a mood, not a trait, but a place where a particular kind of thing keeps happening to you. Your ' + name + ' does its work here, in the ' + ordH + ', and everything further down this page is a variation on that one fact.'],
+        [c.house, 'Start with the room rather than the celestial body. A house is an area of living, not a mood, not a trait, but a place where a particular kind of thing keeps happening to you. Your ' + name + ' does its work here, in the ' + ordH + ', and everything further down this page is a variation on that one fact.'],
         [c.signInHouse, r.sign + ' sits over this house, which sets the manner the room is handled in. The house is the subject and the sign is the accent: you do not choose an accent, and you generally cannot hear your own.'],
         [c.body, 'Now the body itself, before it is placed anywhere. ' + name + ' means roughly the same thing in every chart ever drawn; what differs is where it lands and what condition it is in. Learning the plain meaning first prevents a great many clever misreadings.'],
         [c.astralBodyInHouse, 'Put the two together: ' + name + ' operating in the ' + ordH + ' house. This is the sentence most people are looking for when they open a chart.'],
@@ -29450,7 +29463,7 @@ class Component extends DCLogic {
       plHasDignity: !!dig,
       plDignity: dig ? { heading: dig.heading, label: dig.label.toUpperCase(),
         c: dig.strong ? 'var(--ac)' : '#7d9bff', bg: dig.strong ? 'rgba(47,255,143,.1)' : 'rgba(125,155,255,.08)',
-        lines: [{ text: 'Dignity is the old question of whether an astral body is at home or working out of a borrowed office. ' + (dig.strong ? 'Yours is in good condition here, which the tradition treats as ease rather than merit: it is a well-lit room, not a virtue.' : 'Yours is in awkward condition here. That reads worse on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
+        lines: [{ text: 'Dignity is the old question of whether a celestial body is at home or working out of a borrowed office. ' + (dig.strong ? 'Yours is in good condition here, which the tradition treats as ease rather than merit: it is a well-lit room, not a virtue.' : 'Yours is in awkward condition here. That reads worse on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
           .concat(dig.lines.map(l => ({ text: l.text }))) } : null,
       ...plContacts,
       plSynth: sec(c.synthesis, 'Everything above, held together. A chart is not a stack of separate verdicts: it is one arrangement seen from several angles, and the reading only earns its keep when the angles agree.'),
@@ -29800,8 +29813,8 @@ class Component extends DCLogic {
                 'L' + b2.x.toFixed(1) + ' ' + b2.y.toFixed(1) +
                 'A' + rIn + ' ' + rIn + ' 0 ' + big + ' 1 ' + b1.x.toFixed(1) + ' ' + b1.y.toFixed(1) + 'Z';
             };
-            // Declutter: astral bodies within 9° of each other step inward in turn so
-            // glyphs never sit on top of one another. Ring 1 (astral bodies, both
+            // Declutter: celestial bodies within 9° of each other step inward in turn so
+            // glyphs never sit on top of one another. Ring 1 (celestial bodies, both
             // nodes, Chiron, Ceres/Pallas/Juno/Vesta, Lilith, Selena) staggers
             // in its own band near the sign boundary; ring 2 (everything else
             // this wheel draws) staggers in a smaller band further toward the
@@ -30131,12 +30144,12 @@ class Component extends DCLogic {
                   const wrap = (label, base, tail, dates) => S(label, base + (dates ? ' ' + dates : '') + (tail ? ' ' + tail : ''));
                   out.push(wrap('The pre-shadow', this.PHASE_WHAT.pre, K.pre,
                     sel.preStart ? 'For this passage it opened on ' + day(sel.preStart) + ' and ran to the station on ' + day(r.from) + '.'
-                      : 'For an astral body this slow the shadow stretches across most of a year, so this build does not put a date on it.'));
+                      : 'For a celestial body this slow the shadow stretches across most of a year, so this build does not put a date on it.'));
                   out.push(wrap('The retrograde itself', this.PHASE_WHAT.retro, null,
                     (r.openStart ? '' : 'This one runs from ' + day(r.from) + ' to ' + day(r.to) + ', about ' + r.days + ' days.')));
                   out.push(wrap('The post-retrograde shadow', this.PHASE_WHAT.post, K.post,
                     sel.postEnd ? 'Here it runs from ' + day(r.to) + ' until roughly ' + day(sel.postEnd) + '.'
-                      : 'For the slower astral bodies that final pass takes months, so treat the station as the turn and the clearing as gradual.'));
+                      : 'For the slower celestial bodies that final pass takes months, so treat the station as the turn and the clearing as gradual.'));
                   return out;
                 })();
                 const retroSub = (() => {
@@ -31384,7 +31397,7 @@ class Component extends DCLogic {
       L('The Oracle', 'a reading written for your chart, for today, the week or the month', '\u263D', 'oracle reading horoscope omen tide lunar chapter week month in-depth deep ritual mantra shadow work journal prompts', this.searchTab('oracle')),
       L('Throughline', 'your record, in your own hand', '◈', 'throughline timeline record journal diary history moments entries', this.searchLib(null, { libSub: 'throughline' })),
       L('Settings', 'profiles, theme, consent, and what leaves this device', '⚙', 'settings preferences options consent privacy theme dark light contrast motion profile account analytics export language delete data', this.searchTab('settings')),
-      L('Natal wheel', 'your birth chart, drawn from your own moment', '☉', 'astrology natal wheel birth chart placements astral bodies houses ascendant rising sign', this.searchSpirit('astrology', 1)),
+      L('Natal wheel', 'your birth chart, drawn from your own moment', '☉', 'astrology natal wheel birth chart placements celestial bodies houses ascendant rising sign', this.searchSpirit('astrology', 1)),
       L('The Wiring', 'your bodygraph: type, authority, centres and channels', '◇', 'human design wiring bodygraph type authority strategy centres centers channels gates profile definition', this.searchSpirit('humanDesign', 0)),
       L('Numerology', 'life path, personal year, pinnacles and cycles', '①', 'numerology numbers life path personal year month day expression soul urge pinnacle challenge', this.searchSpirit('numerology', 2)),
       L('Synchronicities', 'a repeating number, an animal, or anything else', '♾', 'synchronicities angel numbers animal sighting repeating signs omens 111 222 333', this.searchAngel()),
@@ -31395,7 +31408,7 @@ class Component extends DCLogic {
       L('The Archive', 'everything you have kept, by word or by date', '▦', 'archive kept saved readings past', this.searchLib(null, { libSub: 'archive' })),
       L('Sabian Lexicon', 'all 360 degrees, each with its image', '✧', 'sabian lexicon degrees symbols 360 images mandala', this.searchLib('lexicon')),
       L('Human Design Atlas', 'types, lines, profiles, centres, gates and channels', '◈', 'human design atlas reference gates channels centres centers types lines profiles authorities strategies', this.searchLib('hdatlas', { atlasSec: 'intro' })),
-      L('Astropedia', 'signs, houses, astral bodies, points and aspects', '☄', 'astropedia astrology reference signs houses astral bodies aspects points asteroids orbs', this.searchLib('astropedia', { apSec: 'signs' })),
+      L('Astropedia', 'signs, houses, celestial bodies, points and aspects', '☄', 'astropedia astrology reference signs houses celestial bodies aspects points asteroids orbs', this.searchLib('astropedia', { apSec: 'signs' })),
       L('The Book of Numbers', 'every compound from 10 to 99, on its root', '\u221e', 'book of numbers compound compounds master numbers karmic debt elite auspicious numerology matrix double digit 11 22 33', this.searchLib('numbers')),
       L('The Tarot deck', 'all 78 cards, as reference', '✳', 'tarot deck cards major arcana minor wands cups swords pentacles suits', this.searchLib('tarot', { ttSec: 'major' })),
       L('Dream Symbols', 'every image the Dream Journal can read', '☁', 'dream symbols images registry animals weather water places lookup', this.searchLib('dreams')),
@@ -31560,7 +31573,7 @@ class Component extends DCLogic {
         sub: h.area, keys: 'house ' + h.n + ' ' + h.sign, body: h.text,
         target: this.searchLib('astropedia', { apSec: 'houses', apOpen: 'house:' + h.n }) }));
       (AP.ASTRAL_BODIES || []).forEach(p => ap.push({ glyph: p.glyph, title: p.name,
-        sub: 'astral body · ' + p.rhythm + ' · at home in ' + p.dignity, keys: 'astral body', body: p.text,
+        sub: this.bodyType(p.name) + ' · ' + p.rhythm + ' · at home in ' + p.dignity, keys: 'planet luminary celestial body ' + this.bodyType(p.name), body: p.text,
         target: this.searchLib('astropedia', { apSec: 'bodies', apOpen: 'body:' + p.name }) }));
       (AP.POINTS || []).forEach(p => { if (!p || !p.name) return;
         ap.push({ glyph: p.glyph || '✦', title: p.name, sub: 'point · ' + cut(p.text, 62),
