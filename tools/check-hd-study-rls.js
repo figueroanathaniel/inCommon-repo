@@ -828,6 +828,43 @@ const CASES = [
       const back = psql(db, f).ok && psql(db, `select tier || '|' || tier_source from public.accounts where id = '${T}';`).out === 'luminary|unlock';
       psql(db, `delete from public.luminary_unlocks where user_id = '${T}';`);
       return again && d && back && psql(db, `select tier from public.accounts where id = '${T}';`).out === 'free'; }],
+  /* ---- FS: migration 0018, the field study of the Atlas's modern study
+     (the owner, 4 November 2026). Only a signed in reader adds a note, one a
+     day per claim, through the function; nobody reads the table; anybody
+     reads the counts; the two-step rule holds inside the function; and a
+     deleted account takes its notes with it. ---- */
+  ['FS1', 'a reader who is not signed in cannot add a field note',
+    db => !psql(db, as(null, null, `select public.field_study_add('gap-newcomer', 2::smallint, 0::smallint, true);`)).ok],
+  ['FS2', 'a signed in reader adds a note, and a second that day replaces the first',
+    db => psql(db, as(A, 'aal1', `select public.field_study_add('gap-newcomer', 1::smallint, 2::smallint, null);`)).ok
+      && psql(db, as(A, 'aal1', `select public.field_study_add('gap-newcomer', 3::smallint, 0::smallint, true);`)).ok
+      && psql(db, `select count(*) || '|' || max(fit) || '|' || max(charge) from public.field_study_notes where user_id = '${A}' and item = 'gap-newcomer';`).out === '1|3|0'],
+  ['FS3', 'nobody reads the notes through the API, not even their own',
+    db => { const r = psql(db, as(A, 'aal1', `select count(*) from public.field_study_notes;`)), n = psql(db, as(null, null, `select count(*) from public.field_study_notes;`));
+      return r.out === '0' && (n.out === '0' || !n.ok) && psql(db, `select count(*) from public.field_study_notes;`).out !== '0'; }],
+  ['FS4', 'a note outside the bounds is refused: an unknown fit, an unknown charge, a key that is not a key',
+    db => !psql(db, as(B, 'aal1', `select public.field_study_add('gap-newcomer', 5::smallint, 0::smallint, null);`)).ok
+      && !psql(db, as(B, 'aal1', `select public.field_study_add('gap-newcomer', 1::smallint, 3::smallint, null);`)).ok
+      && !psql(db, as(B, 'aal1', `select public.field_study_add('Gap Newcomer', 1::smallint, 0::smallint, null);`)).ok],
+  ['FS5', 'anybody reads the counts for a claim, and they are counts only, the quiet moments apart',
+    db => psql(db, as(B, 'aal1', `select public.field_study_add('gap-newcomer', 2::smallint, 2::smallint, false);`)).ok
+      && psql(db, as(null, null, `select notes || '|' || sure || '|' || fit || '|' || quiet_sure || '|' || quiet_fit || '|' || held_sure || '|' || held_fit from public.field_study_tally('gap-newcomer');`)).out === '2|2|2|1|1|1|1'],
+  ['FS6', 'a password alone is refused on an account with an authenticator, and the code lets it in',
+    db => { psql(db, `insert into auth.mfa_factors (user_id, status) values ('${B}', 'verified');`);
+      const refused = !psql(db, as(B, 'aal1', `select public.field_study_add('gap-reliance', 1::smallint, 0::smallint, null);`)).ok;
+      const let_in = psql(db, as(B, 'aal2', `select public.field_study_add('gap-reliance', 1::smallint, 0::smallint, null);`)).ok;
+      psql(db, `delete from auth.mfa_factors where user_id = '${B}';`);
+      return refused && let_in; }],
+  ['FS7', 'deleting an account deletes every note it sent',
+    db => { const C = 'cccccccc-0000-4000-8000-00000000000c';
+      psql(db, `insert into auth.users (id, email) values ('${C}', 'c@test.invalid') on conflict do nothing;`);
+      const added = psql(db, as(C, 'aal1', `select public.field_study_add('gap-without', 0::smallint, 1::smallint, null);`)).ok;
+      psql(db, `delete from auth.users where id = '${C}';`);
+      return added && psql(db, `select count(*) from public.field_study_notes where user_id = '${C}';`).out === '0'; }],
+  ['FS8', '0018 applies again, undoes by its DOWN, and applies once more',
+    db => { const f = mfile('0018'); return psql(db, f).ok && psql(db, downOf(f)).ok
+      && psql(db, `select count(*) from pg_proc where proname like 'field_study%';`).out === '0'
+      && psql(db, f).ok && psql(db, `select count(*) from pg_proc where proname like 'field_study%';`).out === '3'; }],
 ];
 
 /* owns_profile() runs as the caller, so it reads profiles under that table's
@@ -851,7 +888,7 @@ function prepare(name, skipMig, mfaWith, definer, live) {
   const steps = live
     ? base.concat([['drift', DRIFT], ['seed', SEED], ['legacy rows', LEGACY]],
         ['0004', '0005', '0006', '0007', '0008'].map(mig),
-        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011', '0012', '0013', '0014', '0015', '0016', '0017'].map(mig) : [],
+        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011', '0012', '0013', '0014', '0015', '0016', '0017', '0018'].map(mig) : [],
         [['mfa-policies', mfa(true)]])
     : base
     .concat(migrations(skipMig).map(s => [s.split('\n')[0].slice(3), s]))
@@ -890,6 +927,11 @@ const RUNS = [
   /* Everything but 0017: each tier row must go red without it. */
   { name: 'before_tier', skip: ['0017'], mfa: true,
     mustFail: ['AT1', 'AT2', 'AT3', 'AT4', 'AT5', 'AT6', 'AT7', 'AT8'] },
+  /* Everything but 0018: every field study row that needs the function goes
+     red without it. FS1 and FS4 are refusals and hold either way, and FS8
+     applies the file itself. */
+  { name: 'before_field', skip: ['0018'], mfa: true,
+    mustFail: ['FS2', 'FS3', 'FS5', 'FS6', 'FS7'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },
   { name: 'full_definer', skip: [], mfa: true, definer: true, mustFail: [] },

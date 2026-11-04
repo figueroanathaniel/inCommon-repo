@@ -143,6 +143,12 @@ const TERMS = [
 /* `path` is a repo-relative file or directory prefix, forward slashes. */
 
 const ALLOW = [
+  { term: 'Penta', path: 'app/hd-atlas.js',
+    why: 'Owner decision, 4 November 2026: the Atlas is a dictionary of the practice and the group aura is a term of it. Used only as the name of the term being defined, never as the name of an inCommon surface.' },
+  { term: 'BG5', path: 'app/hd-atlas.js',
+    why: 'Owner decision, 4 November 2026: a lexicon entry defining the term and naming the institute that teaches it. No inCommon surface carries the name.' },
+  { term: 'OC16', path: 'app/hd-atlas.js',
+    why: 'Owner decision, 4 November 2026: a lexicon entry defining the term. No inCommon surface carries the name.' },
   { term: 'Penta', path: 'app/gazetteer-world.js',
     why: 'Penta-di-Casinca (Corsica) and Lancusi-Penta-Bolano (Campania) are real towns. A reader born in one has to be able to find it.' },
   { term: 'WA', path: 'data-contracts/calculation-fixtures.json',

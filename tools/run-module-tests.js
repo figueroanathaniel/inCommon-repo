@@ -3432,7 +3432,7 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 17, bad: [], listedInOrder: true, uncovered: []
+    files: 18, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 
@@ -4148,6 +4148,37 @@ async function runCloudTests() {
     badTopicFallsBack: sentTopic, invalidSentNothing: sentForInvalid, reasons: reasons
   });
 
+  /* ---- K54b: the field study (the owner, 4 November 2026). Signed out, a
+     field note is refused before anything is sent; a value outside the
+     bounds is refused before anything is sent; the tally is read with the
+     public key from the one function and comes back as counts. The body the
+     tally sends names the claim and nothing else. ---- */
+  var fsSent = [];
+  var fsFetch = function (answer) { return function (url, init) { fsSent.push({ url: url, init: init }); return Promise.resolve(answer); }; };
+  var fsRow = { ok: true, status: 200, text: function () { return Promise.resolve('[{"notes":12,"sure":10,"fit":6,"quiet_sure":4,"quiet_fit":1,"held_sure":5,"held_fit":4}]'); } };
+  var fsGone = { ok: false, status: 404, text: function () { return Promise.resolve('{"code":"PGRST202","message":"Could not find the function"}'); } };
+  var fsOut = await CL.fieldStudySend({ item: 'gap-newcomer', fit: 2, charge: 0, holds: true, text: 'my words' }, { fetch: fsFetch(fsRow) });
+  var fsBad = [
+    (await CL.fieldStudySend({ item: 'Gap Newcomer', fit: 2, charge: 0 }, { fetch: fsFetch(fsRow) })).reason,
+    (await CL.fieldStudySend({ item: 'gap-newcomer', fit: 4, charge: 0 }, { fetch: fsFetch(fsRow) })).reason,
+    (await CL.fieldStudySend({ item: 'gap-newcomer', fit: null, charge: 3 }, { fetch: fsFetch(fsRow) })).reason
+  ];
+  var fsBefore = fsSent.length;
+  var fsT = await CL.fieldStudyTally('gap-newcomer', { fetch: fsFetch(fsRow) });
+  var fsTB = fsSent[fsBefore] ? JSON.parse(fsSent[fsBefore].init.body) : {};
+  var fsTH = fsSent[fsBefore] ? fsSent[fsBefore].init.headers : {};
+  var fsNot = await CL.fieldStudyTally('gap-newcomer', { fetch: fsFetch(fsGone) });
+  t('K54b', 'a field note is refused signed out and out of bounds before anything is sent, and the tally reads counts for one claim with the public key', {
+    signedOut: 'signedOut', bad: ['item', 'fit', 'charge'], sentBefore: 0,
+    url: true, tallyKeys: ['p_item'], anon: true,
+    tally: { ok: true, notes: 12, sure: 10, fit: 6, quietSure: 4, quietFit: 1, heldSure: 5, heldFit: 4 }, notSetUp: 'notSetUp'
+  }, {
+    signedOut: fsOut.reason, bad: fsBad, sentBefore: fsBefore,
+    url: !!fsSent[fsBefore] && /\/rest\/v1\/rpc\/field_study_tally$/.test(fsSent[fsBefore].url),
+    tallyKeys: Object.keys(fsTB), anon: !!fsTH && fsTH.Authorization === 'Bearer ' + fsTH.apikey,
+    tally: fsT, notSetUp: fsNot.reason
+  });
+
   var termsSrc = fs.readFileSync(path.join(repo, 'app', 'terms.html'), 'utf8');
   var privSrc = fs.readFileSync(path.join(repo, 'app', 'privacy.html'), 'utf8');
   var appSrcK = fs.readFileSync(path.join(repo, 'app', 'inCommonApp v2.dc.html'), 'utf8');
@@ -4382,6 +4413,79 @@ async function runCloudTests() {
     asked, ['1990-03-15', '17:00', false, 'UTC']);
 })();
 
+/* ---- F: the Atlas lessons and lexicon (hd-atlas.js V1.1) ----------------
+   Asked for by the owner on 3 November 2026: twenty one lessons in three
+   tiers, named exactly as the request listed them. These rows hold the
+   shape of that writing, not its truth: the sources are recorded in
+   docs/hd-upgrade/03-atlas-lessons-sources.md and every open question is listed there. */
+(function () {
+  const A = ATLAS, sl = x => String(x).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const want = {
+    bedrock: ['Type', 'Strategy', 'Aura', 'Signature', 'Not-Self Theme', 'Inner Authority', 'Outer Authority'],
+    weather: ['Definition', 'Profile', 'Angle', 'Centers', 'Circuits', 'Streams', 'Rave Cosmology'],
+    horizon: ['Evolution', 'Conditioning', 'Cycles', 'Mechanics', 'Awareness', 'Variable', 'Left or Right']
+  };
+  t('F1', 'three tiers, Bedrock, Weather and Horizon, each with the seven lessons the owner named, in that order',
+    (A.TIERS || []).map(T => [T.name, (A.LESSONS || []).filter(l => l.tier === T.key).map(l => l.name)]),
+    [['Bedrock', want.bedrock], ['Weather', want.weather], ['Horizon', want.horizon]]);
+  const chapters = A.SECTIONS.map(s => s[0]);
+  /* The lessons are optional (owner, 4 November 2026): the reference
+     shelves come first and the three tiers follow them, before the lexicon. */
+  t('F2', 'each tier is a chapter of the Atlas, after the reference shelves and before the lexicon, and the room opens on the introduction',
+    [chapters[0], chapters.slice(chapters.indexOf('open') + 1, chapters.indexOf('terms'))],
+    ['intro', ['bedrock', 'weather', 'horizon']]);
+  /* The same ids atlasEntries() builds, chapter:slug. */
+  const ids = new Set(['intro:0', 'example:0', 'cross:what', 'cross:how', 'cross:angles']);
+  Object.keys(A.TYPES).forEach(k => ids.add('types:' + sl(k)));
+  [1, 2, 3, 4, 5, 6].forEach(n => ids.add('lines:' + n));
+  Object.keys(A.PROFILES).forEach(k => ids.add('profiles:' + sl(k)));
+  Object.keys(A.CENTERS).forEach(k => { ids.add('centers:' + sl(k)); ids.add('open:' + sl(k)); });
+  Object.keys(A.GATES).forEach(n => ids.add('gates:g' + n));
+  Object.keys(A.CHANNELS).forEach(k => ids.add('channels:' + sl(k)));
+  A.CIRCUITS.forEach(c => ids.add('circuitry:' + sl(c.name)));
+  A.DEFINITION.forEach(d => ids.add('definition:' + sl(d.name)));
+  A.STRATEGIES.forEach(x => ids.add('strategies:' + sl(x.name)));
+  A.AUTHORITIES.forEach(x => ids.add('authorities:' + sl(x.name)));
+  A.TERMS.forEach(x => ids.add('terms:' + sl(x.name)));
+  A.LESSONS.forEach(x => ids.add(x.tier + ':' + sl(x.name)));
+  const dangling = [];
+  A.LESSONS.forEach(l => (l.see || []).concat(l.words || []).forEach(([c, id]) => { if (!ids.has(c + ':' + sl(id))) dangling.push(l.name + ' -> ' + c + ':' + id); }));
+  A.TERMS.forEach(x => { if (x.see && !ids.has(x.see[0] + ':' + sl(x.see[1]))) dangling.push(x.name + ' -> ' + x.see.join(':')); });
+  t('F3', 'every link a lesson or a lexicon entry makes lands on a real Atlas entry', dangling, []);
+  const all = [].concat(...Object.values(A.CIRCUIT_OF || {}));
+  t('F4', 'the circuit table files each of the 36 channels exactly once, and only real channels',
+    [all.length, new Set(all).size, Object.keys(A.CHANNELS).filter(k => all.indexOf(k) === -1), all.filter(k => !A.CHANNELS[k])],
+    [36, 36, [], []]);
+  /* Every channel the Circuits lesson lists by number is in the family the table gives it. */
+  const L = A.LESSONS.find(x => x.name === 'Circuits'), wrong = [];
+  L.parts.forEach(([label, text]) => { const fam = label.split(' ')[0];
+    (text.match(/\b\d+-\d+\b/g) || []).forEach(k => { if (A.circuitOf(k) !== fam && !(fam === 'Integration' && k === '10-34')) wrong.push(fam + ' ' + k); }); });
+  t('F5', 'the Circuits lesson and the circuit table agree channel for channel', wrong, []);
+  const dash = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
+  const prose = [].concat(...A.LESSONS.map(l => [l.name, l.epi, l.lead].concat(...l.parts))).concat(...A.TERMS.map(x => [x.name, x.text]));
+  t('F6', 'no dash in any lesson or lexicon entry', prose.filter(x => dash.test(x)), []);
+  const names = A.TERMS.map(x => sl(x.name));
+  t('F7', 'the lexicon is alphabetical and no two entries share a slug',
+    [names.length === new Set(names).size, A.TERMS.every((x, i) => !i || A.TERMS[i - 1].name.toLowerCase() <= x.name.toLowerCase())], [true, true]);
+  t('F8', 'the Projector entry lists emotional authority, and the five types\' shares of people add to a hundred',
+    [/emotional/i.test(A.TYPES.Projector.authority), Object.keys(A.TYPES).reduce((n, k) => n + parseInt(String(A.TYPES[k].pct).replace(/\D+/g, ''), 10), 0)],
+    [true, 100]);
+  /* F9: the curriculum is the lessons. Each path's tutorial walks one tier in
+     order, every step lands on a lesson that exists, and no lesson is skipped. */
+  const appSrc = fs.readFileSync(path.join(__dirname, '..', 'app', 'inCommonApp v2.dc.html'), 'utf8');
+  const tutSrc = appSrc.slice(appSrc.indexOf('    hdatlas: {', appSrc.indexOf('  STUDY_TUT = {')), appSrc.indexOf('    astropedia: {', appSrc.indexOf('  STUDY_TUT = {')));
+  const slug = x => String(x).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const tiers = { first: 'bedrock', way: 'weather', deep: 'horizon' };
+  const walked = Object.keys(tiers).map(lv => {
+    const part = tutSrc.slice(tutSrc.indexOf('      ' + lv + ': ['), tutSrc.indexOf('      ]', tutSrc.indexOf('      ' + lv + ': [')));
+    const got = (part.match(new RegExp("'hd:" + tiers[lv] + ":[a-z0-9-]+'", 'g')) || []).map(x => x.slice(4, -1));
+    const want = A.LESSONS.filter(l => l.tier === tiers[lv]).map(l => tiers[lv] + ':' + slug(l.name));
+    return JSON.stringify(got) === JSON.stringify(want);
+  });
+  t('F9', 'each study path walks its tier of lessons in order, and every step names a lesson that exists',
+    walked, [true, true, true]);
+})();
+
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
@@ -4409,7 +4513,7 @@ runCloudTests().then(() => {
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
       ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['T', 'share-rules.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
-      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register']].forEach(([k, name]) => {
+      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register'], ['F', 'atlas lessons']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
     });

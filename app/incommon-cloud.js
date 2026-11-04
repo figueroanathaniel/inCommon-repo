@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.5';
+  var VERSION = '2.9.6';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -2123,6 +2123,66 @@
     }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
 
+  /* ---------- the field study ----------
+
+     A field note on a claim in the Human Design Atlas's modern study (the
+     owner, 4 November 2026). The note itself, and the reader's words in it,
+     stay on the device. Only the reader's own press sends a copy to
+     public.field_study_notes, through server/migrations/0018: the claim's
+     key, how well it fit (0 to 3, or null for not sure), how charged the
+     moment was (0 to 2) and whether the reader's chart holds what the claim
+     is about. Nothing else is sent, so no birth detail and no sentence can
+     travel (K75b). It needs a session, because the server keeps one note a
+     day per reader per claim. The tally is counts only and anybody may read
+     it. */
+  var FIELD_ITEM = /^[a-z0-9-]{2,48}$/;
+  function fieldRpc(name, body, needSession, opts) {
+    var doFetch = (opts && opts.fetch) || (typeof fetch === 'function' ? fetch : null);
+    if (!doFetch) return Promise.resolve({ ok: false, reason: 'offline' });
+    if (needSession && !(session && session.access_token)) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
+    var token = session && session.access_token ? session.access_token : key;
+    return Promise.resolve().then(function () {
+      return doFetch(url + '/rest/v1/rpc/' + name, {
+        method: 'POST',
+        headers: { apikey: key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    }).then(function (res) {
+      return Promise.resolve(res ? res.text() : '').catch(function () { return ''; }).then(function (t) {
+        var st = res ? res.status : 0;
+        if (res && res.ok) { var v = null; try { v = JSON.parse(t); } catch (e) {} return { ok: true, value: v }; }
+        if (/field_study_rate/.test(t)) return { ok: false, reason: 'rate' };
+        if (/field_study_signin/.test(t)) return { ok: false, reason: 'signedOut' };
+        if (st === 404 || /PGRST202|42883/.test(t)) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || st === 403) return { ok: false, reason: 'refused' };
+        return { ok: false, reason: 'error', error: String(t || st).slice(0, 200) };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+  function fieldStudySend(n, opts) {
+    n = n || {};
+    var item = String(n.item || ''), fit = n.fit, charge = n.charge, holds = n.holds;
+    if (!FIELD_ITEM.test(item)) return Promise.resolve({ ok: false, reason: 'item' });
+    if (fit !== null && !(fit === 0 || fit === 1 || fit === 2 || fit === 3)) return Promise.resolve({ ok: false, reason: 'fit' });
+    if (!(charge === 0 || charge === 1 || charge === 2)) return Promise.resolve({ ok: false, reason: 'charge' });
+    if (holds !== true && holds !== false) holds = null;
+    return fieldRpc('field_study_add', { p_item: item, p_fit: fit, p_charge: charge, p_holds: holds }, true, opts)
+      .then(function (r) { return r.ok ? { ok: true } : r; });
+  }
+  function fieldStudyTally(item, opts) {
+    item = String(item || '');
+    if (!FIELD_ITEM.test(item)) return Promise.resolve({ ok: false, reason: 'item' });
+    return fieldRpc('field_study_tally', { p_item: item }, false, opts).then(function (r) {
+      if (!r.ok) return r;
+      var row = Array.isArray(r.value) ? r.value[0] : r.value;
+      row = row || {};
+      var n = function (k) { var v = Number(row[k]); return isFinite(v) && v >= 0 ? Math.floor(v) : 0; };
+      return { ok: true, notes: n('notes'), sure: n('sure'), fit: n('fit'), quietSure: n('quiet_sure'), quietFit: n('quiet_fit'),
+        heldSure: n('held_sure'), heldFit: n('held_fit') };
+    });
+  }
+
   /* ---------- status ---------- */
 
   function status() {
@@ -2238,6 +2298,7 @@
     tarotRead: tarotRead,
     oracleVoice: oracleVoice,
     supportSend: supportSend,
+    fieldStudySend: fieldStudySend, fieldStudyTally: fieldStudyTally,
     SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
     SYNC_MEMORY_TYPES: SYNC_MEMORY_TYPES.slice(),
     billingStatus: billingStatus,

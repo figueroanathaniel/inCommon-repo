@@ -2772,7 +2772,7 @@ input[type="date"]{color-scheme:dark}
               </sc-for>
             </div>
             <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; {{ spTutPillLabel }}</button>
             </sc-if>
           </div>
           <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
@@ -2881,6 +2881,7 @@ input[type="date"]{color-scheme:dark}
               </div>
             </div>
             <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi);text-align:center;margin-bottom:-6px">{{ hdEpiLabel }}</div>
               <div style="display:flex;align-items:center;gap:12px">
                 <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
                 <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
@@ -2888,10 +2889,10 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
             <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
-              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ hdLeadSeg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
             </sc-if>
             <sc-if value="{{ hdLeadCap }}" hint-placeholder-val="{{ false }}">
-              <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+              <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ hdLeadSeg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
             </sc-if>
             <sc-if value="{{ hdNowOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;align-items:center;gap:8px;font:600 11px var(--fu);color:var(--blue)"><span aria-hidden="true" style="flex:none;width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);animation:pulseGentle 2.6s ease-in-out infinite"></span>{{ hdNow }}</div>
@@ -2915,7 +2916,7 @@ input[type="date"]{color-scheme:dark}
                 <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
                     <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
-                    <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
+                    <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ fc.seg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
                   </div>
                 </sc-for>
               </div>
@@ -2950,6 +2951,52 @@ input[type="date"]{color-scheme:dark}
                     <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
                   </button>
                 </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ fsOn }}" hint-placeholder-val="{{ false }}">
+              <div data-lift="box" style="display:flex;flex-direction:column;gap:12px;border:1px dashed rgba(var(--atmc),.8);border-radius:16px;padding:14px 15px;background:rgba(var(--atmc),.08)">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">&#10036; Field study</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fsAsk }}</div>
+                <sc-if value="{{ fsHoldsOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsHolds }}</div></sc-if>
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How well did it fit what happened" style="display:flex;flex-direction:column;gap:6px">
+                  <span aria-hidden="true" style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How well did it fit what happened</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <sc-for list="{{ fsFit }}" as="ff" hint-placeholder-count="3">
+                      <button data-lift onClick="{{ ff.go }}" role="radio" aria-checked="{{ ff.on }}" tabindex="{{ ff.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ ff.bd }};border-radius:999px;background:{{ ff.bg }};font:600 11.5px var(--fu);color:{{ ff.c }}">{{ ff.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How charged was the moment" style="display:flex;flex-direction:column;gap:6px">
+                  <span aria-hidden="true" style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How charged was the moment</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <sc-for list="{{ fsCharge }}" as="fc2" hint-placeholder-count="3">
+                      <button data-lift onClick="{{ fc2.go }}" role="radio" aria-checked="{{ fc2.on }}" tabindex="{{ fc2.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ fc2.bd }};border-radius:999px;background:{{ fc2.bg }};font:600 11.5px var(--fu);color:{{ fc2.c }}">{{ fc2.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <textarea data-lift="in" value="{{ fsNote }}" onChange="{{ fsTypeNote }}" rows="3" placeholder="What happened, in your own words. These stay on this device." aria-label="What happened, kept on this device" style="box-sizing:border-box;width:100%;resize:vertical;min-height:66px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                <sc-if value="{{ fsShareOn }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ fsShareGo }}" role="switch" aria-checked="{{ fsShare }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:10px;font:600 12px var(--fu);color:var(--tx)"><span aria-hidden="true" style="flex:none;width:34px;height:20px;border-radius:999px;border:1px solid var(--ac2-hi);background:rgba(var(--atmc),.2);display:flex;align-items:center;padding:0 2px;box-sizing:border-box;justify-content:{{ fsKnob }}"><span style="width:14px;height:14px;border-radius:50%;background:var(--ac2-hi)"></span></span>Add the fit and the charge to the study, without my words</button>
+                </sc-if>
+                <sc-if value="{{ fsShareOff }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsShareWhy }}</div></sc-if>
+                <button data-lift onClick="{{ fsSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:46px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu)">Keep this field note</button>
+                <sc-if value="{{ fsMsgOn }}" hint-placeholder-val="{{ false }}"><div role="status" style="font:400 12px var(--fu);color:var(--tx)">{{ fsMsg }}</div></sc-if>
+                <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
+                  <button data-lift onClick="{{ fsTallyGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">See the study so far</button>
+                  <sc-if value="{{ fsTallyOn }}" hint-placeholder-val="{{ false }}"><div role="status" style="font:400 12.5px/1.55 var(--fu);color:var(--tx);text-wrap:pretty">{{ fsTally }}</div></sc-if>
+                </div>
+                <sc-if value="{{ fsMineOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
+                    <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">Your field notes</div>
+                    <sc-for list="{{ fsMine }}" as="fn" hint-placeholder-count="1">
+                      <div style="display:flex;flex-direction:column;gap:3px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:9px 12px">
+                        <div style="font:600 11px var(--fu);color:var(--tx)">{{ fn.when }} · {{ fn.fit }} · {{ fn.charge }}</div>
+                        <sc-if value="{{ fn.textOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.5 var(--fb);color:var(--tx)">{{ fn.text }}</div></sc-if>
+                        <div style="font:400 11px var(--fu);color:var(--mut)">{{ fn.sent }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
               </div>
             </sc-if>
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:14px">
@@ -3037,7 +3084,7 @@ input[type="date"]{color-scheme:dark}
               </sc-for>
             </div>
             <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; {{ spTutPillLabel }}</button>
             </sc-if>
           </div>
           <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
@@ -3321,7 +3368,7 @@ input[type="date"]{color-scheme:dark}
               </sc-for>
             </div>
             <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; {{ spTutPillLabel }}</button>
             </sc-if>
           </div>
           <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
@@ -9505,7 +9552,7 @@ input[type="date"]{color-scheme:dark}
               </sc-for>
             </div>
             <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; {{ spTutPillLabel }}</button>
             </sc-if>
           </div>
           <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
@@ -9614,6 +9661,7 @@ input[type="date"]{color-scheme:dark}
               </div>
             </div>
             <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi);text-align:center;margin-bottom:-6px">{{ hdEpiLabel }}</div>
               <div style="display:flex;align-items:center;gap:12px">
                 <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
                 <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
@@ -9621,10 +9669,10 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
             <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
-              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ hdLeadSeg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
             </sc-if>
             <sc-if value="{{ hdLeadCap }}" hint-placeholder-val="{{ false }}">
-              <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+              <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ hdLeadSeg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
             </sc-if>
             <sc-if value="{{ hdNowOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;align-items:center;gap:8px;font:600 11px var(--fu);color:var(--blue)"><span aria-hidden="true" style="flex:none;width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);animation:pulseGentle 2.6s ease-in-out infinite"></span>{{ hdNow }}</div>
@@ -9648,7 +9696,7 @@ input[type="date"]{color-scheme:dark}
                 <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
                     <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
-                    <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
+                    <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ fc.seg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
                   </div>
                 </sc-for>
               </div>
@@ -9683,6 +9731,52 @@ input[type="date"]{color-scheme:dark}
                     <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
                   </button>
                 </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ fsOn }}" hint-placeholder-val="{{ false }}">
+              <div data-lift="box" style="display:flex;flex-direction:column;gap:12px;border:1px dashed rgba(var(--atmc),.8);border-radius:16px;padding:14px 15px;background:rgba(var(--atmc),.08)">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">&#10036; Field study</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fsAsk }}</div>
+                <sc-if value="{{ fsHoldsOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsHolds }}</div></sc-if>
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How well did it fit what happened" style="display:flex;flex-direction:column;gap:6px">
+                  <span aria-hidden="true" style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How well did it fit what happened</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <sc-for list="{{ fsFit }}" as="ff" hint-placeholder-count="3">
+                      <button data-lift onClick="{{ ff.go }}" role="radio" aria-checked="{{ ff.on }}" tabindex="{{ ff.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ ff.bd }};border-radius:999px;background:{{ ff.bg }};font:600 11.5px var(--fu);color:{{ ff.c }}">{{ ff.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How charged was the moment" style="display:flex;flex-direction:column;gap:6px">
+                  <span aria-hidden="true" style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How charged was the moment</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <sc-for list="{{ fsCharge }}" as="fc2" hint-placeholder-count="3">
+                      <button data-lift onClick="{{ fc2.go }}" role="radio" aria-checked="{{ fc2.on }}" tabindex="{{ fc2.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ fc2.bd }};border-radius:999px;background:{{ fc2.bg }};font:600 11.5px var(--fu);color:{{ fc2.c }}">{{ fc2.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <textarea data-lift="in" value="{{ fsNote }}" onChange="{{ fsTypeNote }}" rows="3" placeholder="What happened, in your own words. These stay on this device." aria-label="What happened, kept on this device" style="box-sizing:border-box;width:100%;resize:vertical;min-height:66px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                <sc-if value="{{ fsShareOn }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ fsShareGo }}" role="switch" aria-checked="{{ fsShare }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:10px;font:600 12px var(--fu);color:var(--tx)"><span aria-hidden="true" style="flex:none;width:34px;height:20px;border-radius:999px;border:1px solid var(--ac2-hi);background:rgba(var(--atmc),.2);display:flex;align-items:center;padding:0 2px;box-sizing:border-box;justify-content:{{ fsKnob }}"><span style="width:14px;height:14px;border-radius:50%;background:var(--ac2-hi)"></span></span>Add the fit and the charge to the study, without my words</button>
+                </sc-if>
+                <sc-if value="{{ fsShareOff }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsShareWhy }}</div></sc-if>
+                <button data-lift onClick="{{ fsSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:46px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu)">Keep this field note</button>
+                <sc-if value="{{ fsMsgOn }}" hint-placeholder-val="{{ false }}"><div role="status" style="font:400 12px var(--fu);color:var(--tx)">{{ fsMsg }}</div></sc-if>
+                <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
+                  <button data-lift onClick="{{ fsTallyGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">See the study so far</button>
+                  <sc-if value="{{ fsTallyOn }}" hint-placeholder-val="{{ false }}"><div role="status" style="font:400 12.5px/1.55 var(--fu);color:var(--tx);text-wrap:pretty">{{ fsTally }}</div></sc-if>
+                </div>
+                <sc-if value="{{ fsMineOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
+                    <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">Your field notes</div>
+                    <sc-for list="{{ fsMine }}" as="fn" hint-placeholder-count="1">
+                      <div style="display:flex;flex-direction:column;gap:3px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:9px 12px">
+                        <div style="font:600 11px var(--fu);color:var(--tx)">{{ fn.when }} · {{ fn.fit }} · {{ fn.charge }}</div>
+                        <sc-if value="{{ fn.textOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.5 var(--fb);color:var(--tx)">{{ fn.text }}</div></sc-if>
+                        <div style="font:400 11px var(--fu);color:var(--mut)">{{ fn.sent }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
               </div>
             </sc-if>
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:14px">
@@ -9770,7 +9864,7 @@ input[type="date"]{color-scheme:dark}
               </sc-for>
             </div>
             <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; {{ spTutPillLabel }}</button>
             </sc-if>
           </div>
           <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
@@ -10054,7 +10148,7 @@ input[type="date"]{color-scheme:dark}
               </sc-for>
             </div>
             <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; {{ spTutPillLabel }}</button>
             </sc-if>
           </div>
           <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
@@ -13775,7 +13869,7 @@ class Component extends DCLogic {
   NUM_MEANING = { 1: 'beginnings, initiative, standing alone', 2: 'pairs, patience, the quiet partner', 3: 'expression, play, the social voice', 4: 'foundations, work, the steady hand', 5: 'change, freedom, the restless turn', 6: 'care, home, the responsible heart', 7: 'inwardness, study, the seeker', 8: 'power, structure, the material test', 9: 'endings, compassion, letting go', 11: 'the intuitive: a 2 lit from within', 22: 'the builder: vision made concrete', 33: 'the teacher: care at scale' };
   TRADITIONS = [
     { key: 'human_design', name: 'Human Design', glyph: '◈', chipBg: 'rgba(139,92,246,.14)', chipC: '#b79bff', kind: 'body wisdom · lens', entries: [
-      { text: 'Strategy & Authority: let the body respond first, and let the mind advise, not the reverse.', sub: 'A full chart needs your exact birth time; this is the universal invitation.', reflection: 'Where did you override a clear body “no” this week?', source: 'Human Design · Ra Uru Hu' },
+      { text: 'Strategy & Authority: let the body respond first, and let the mind advise, not the reverse.', sub: 'A full chart needs your exact birth time; this is the universal invitation.', reflection: 'Where did you override a clear body “no” this week?', source: 'Human Design' },
       { text: 'Wait for the thing to come to you, then respond. Notice what has real energy behind it.', sub: '', reflection: 'What are you chasing that has not actually invited you?', source: 'Human Design · Strategy' },
       { text: 'The not-self signals (frustration, bitterness, anger, disappointment) are data, not failure.', sub: '', reflection: 'Which signal has been loudest, and what is it pointing at?', source: 'Human Design · Not-Self' },
       { text: 'Deconditioning: much of what you call “you” was absorbed from others. Notice what is borrowed.', sub: '', reflection: 'One belief you hold: did you choose it, or inherit it?', source: 'Human Design' },
@@ -20869,28 +20963,33 @@ class Component extends DCLogic {
   STUDY_TUT = {
     hdatlas: {
       first: [
-        ['The wiring', 'hd:intro:0', 'The diagram is the wiring, which the field calls a bodygraph: nine centres joined by thirty six channels, with sixty four gates set round them. When a chart of your own is on this device, its defined centres are filled with colour and the open ones are outlines. Tap a centre or a gate once to see its name, and again to open it.'],
-        ['Your type', 'hd:type', 'Type is the broadest thing the system says: how a person\u2019s energy tends to meet the world. There are five. The Strategy and Signature tiles are the parts the tradition treats as most practical.'],
-        ['Strategy', 'hd:strategy', 'Strategy is the type\u2019s way of engaging, the advice the system is best known for. It is offered as an experiment to try in ordinary life rather than a rule.'],
-        ['Authority', 'hd:authority', 'Authority is how a decision is best made in this wiring. The centre it comes from lights up on the diagram.'],
-        ['The centres', 'hd:centre', 'Nine centres, each with a function. A defined centre is read as consistent; an open one as the place the world is taken in and amplified, which the tradition treats as where wisdom can grow.'],
-        ['Your profile', 'hd:profile', 'The profile is two lines, one from the Sun in each of the two charts, read as the role a person tends to play. Each line has its own page under The six lines.'],
-        ['Gates and channels', 'hd:sungate', 'A gate is one of sixty four points on the wiring, and a channel joins two of them. When both gates of a channel are held, the channel and its two centres are defined. This is the gate your Sun holds, or the Sun\u2019s gate today.']
+        ['Type', 'hd:bedrock:type', 'The diagram in this room is the wiring, which the field calls a bodygraph: nine centres, thirty six channels and sixty four gates. Tap any part once for its name and again to open it. This lesson is the five types, and with a chart of your own on this device yours is named under In your chart. The words under each lesson open their own entries.'],
+        ['Strategy', 'hd:bedrock:strategy', 'Find the strategy beside your type. It is offered as an experiment for ordinary days, and the last tile sets it next to authority, which comes two lessons on.'],
+        ['Aura', 'hd:bedrock:aura', 'The aura is how a type is met before anything is said. Read the tile for your type, then the one on conditioning, which the Horizon lessons take further.'],
+        ['Signature', 'hd:bedrock:signature', 'Each type has one feeling the tradition reads as being on course. Notice which of the four you already know well.'],
+        ['Not-Self Theme', 'hd:bedrock:not-self-theme', 'The not-self theme is the signature turned inside out: a signal to stop and come back, never a verdict. The last two tiles carry the idea into the open centres and the mind.'],
+        ['Inner Authority', 'hd:bedrock:inner-authority', 'The authorities are listed in the order the tradition checks for them, and the first one a chart holds is its authority. With a chart of your own, yours is named under In your chart.'],
+        ['Outer Authority', 'hd:bedrock:outer-authority', 'The last Bedrock lesson is what the mind is for once it is not deciding. When this feels familiar, Finding my way opens the Weather lessons.']
       ],
       way: [
-        ['Definition', 'hd:definition', 'Definition is how the defined centres connect: in one piece, or in groups with gaps between them. The gaps are read as the places other people tend to complete.'],
-        ['The three circuits', 'hd:circuitry:individual-circuitry', 'Channels belong to circuits: Individual for mutation, Tribal for support, Collective for sharing. Step through all three with the arrows.'],
-        ['Open and defined', 'hd:open:head', 'The nine centres again, read by what changes when a centre is open. Notice the wisdom each open centre is said to hold.'],
-        ['The six lines', 'hd:lines:1', 'Every gate has six lines, and the six carry the same themes everywhere, from the foundation of the first to the long view of the sixth.'],
-        ['The Incarnation Cross', 'hd:cross:what', 'The four gates of the Sun and the Earth in both charts. With a chart of your own on this device, they are listed on this page and lit on the wiring.'],
-        ['Practice', 'hd:example:0', 'An example wiring that belongs to nobody, read in eight steps. Read it before the steps do, then compare the two.']
+        ['Definition', 'hd:weather:definition', 'Weather begins with how a chart is joined. With a chart of your own, its definition is named; the tiles go from one piece to four, and end with the bridging gates that join a split.'],
+        ['Profile', 'hd:weather:profile', 'Two numbers, one from the Sun on each side. Read the lower and upper lines, then find your own pair among the twelve.'],
+        ['Angle', 'hd:weather:angle', 'The angle is the shape of a life’s theme, and it comes from the profile you just read. Yours is named here when a chart of your own is on this device.'],
+        ['Centers', 'hd:weather:centers', 'The nine centres sorted by the work they do. Show me lights them on the wiring; tap any centre there to open its own page.'],
+        ['Circuits', 'hd:weather:circuits', 'Every channel belongs to one circuit. Read the seven families, then open a channel of your own and look for its family in the list.'],
+        ['Streams', 'hd:weather:streams', 'Streams are currents of gates running through the three awareness centres. Follow one stream on the wiring from its first gate to its last.'],
+        ['Rave Cosmology', 'hd:weather:rave-cosmology', 'The story the tradition tells about where the chart comes from. Each tile opens a term in the lexicon; read it as the system’s own account.'],
+        ['Practice', 'hd:example:0', 'An example wiring that belongs to nobody, read in eight steps. Read it with the Weather lessons beside it before the steps do, then compare. Deep study opens the Horizon lessons.']
       ],
       deep: [
-        ['Gate and hexagram', 'hd:sungate', 'Gate N is hexagram N of the Book of Changes. Open the hexagram from this page and read the two side by side.'],
-        ['Your channels', 'hd:channel', 'Read each defined channel in your chart in turn, and ask where its theme has shown itself.'],
-        ['The sky now', 'hd:skysun', 'The Sun crosses a gate in about six days. The blue rings on the wiring are the gates the sky holds this minute.'],
-        ['Hanging gates', 'hd:terms:hanging-gate', 'A gate held without its partner is read as reaching for someone else. Find the ones in your chart by opening each of your gates and following its channel.'],
-        ['Strategy and authority', 'hd:authority', 'Strategy says when to engage and authority says how to decide. Read both pages for your chart together.']
+        ['Evolution', 'hd:horizon:evolution', 'Horizon begins with the longest view: a body the tradition says is still changing. Read it as the system’s account of history, not as a forecast.'],
+        ['Conditioning', 'hd:horizon:conditioning', 'What the open centres take in, and how. Open each of your open centres afterwards and read what it is said to borrow.'],
+        ['Cycles', 'hd:horizon:cycles', 'The returns across a life, from the Moon’s month to the Kiron return. Find the one nearest your own age.'],
+        ['Mechanics', 'hd:horizon:mechanics', 'How a chart is built, from the two moments to a type. Then open your Sun’s gate and read its hexagram beside it, since gate N is hexagram N.'],
+        ['Awareness', 'hd:horizon:awareness', 'The three ways of knowing, and the fears, anxieties and nervousness each is said to carry. Show me lights the three centres.'],
+        ['Variable', 'hd:horizon:variable', 'The four arrows and the finest layers of a position. Notice which side of the chart each arrow comes from.'],
+        ['Left or Right', 'hd:horizon:left-or-right', 'The last Horizon lesson reads each arrow as left or right, sixteen combinations in all.'],
+        ['The sky now', 'hd:skysun', 'The Sun crosses a gate in about six days. The blue rings on the wiring are the gates the sky holds this minute, which is the transit field the Conditioning lesson describes.']
       ]
     },
     astropedia: {
@@ -21088,21 +21187,26 @@ class Component extends DCLogic {
       this.studyGo(room, steps[i - 1][1]);
       setTimeout(() => this.speak('Step ' + i + ' of ' + n + ', ' + steps[i - 1][0] + '.', 'polite'), 500);
     };
+    const hidden = tut.hidden === undefined ? room === 'hdatlas' : !!tut.hidden;
     const cur = at > 0 ? steps[at - 1] : null, pathName = this.STUDY_PATHS.find(x => x[0] === lv)[1];
     return { spOn: true,
       spPaths: this.STUDY_PATHS.map(([k, label]) => { const on = k === lv;
         return { label: label, on: on, bd: on ? 'var(--ac2-hi)' : 'var(--bd)', bg: on ? 'rgba(var(--atmc),.24)' : 'var(--sf)', c: on ? 'var(--tx)' : 'var(--mut)',
           go: () => { this.studySave({ path: k }); this.speak('Path: ' + label + '.', 'polite'); } }; }),
-      spTutOn: !tut.hidden, spTutPill: !!tut.hidden,
+      /* The Atlas's lessons are optional (owner, 4 November 2026): the room
+         opens on the reference with the tutorial folded to a pill, and only
+         a reader who asks for it sees the card. */
+      spTutOn: !hidden, spTutPill: hidden,
+      spTutPillLabel: room === 'hdatlas' ? 'Lessons, step by step' : 'Show the tutorial',
       spTutShow: () => saveTut({ hidden: false }),
       spTutHide: () => saveTut({ hidden: true }),
       spTutHead: 'Tutorial · ' + pathName,
       spTutCount: tut.done ? 'Finished' : at ? at + ' of ' + n : n + ' steps',
       spTutIntro: !at && !tut.done, spTutStepOn: at > 0 && !tut.done, spTutDone: !!tut.done,
       spTutIntroText: (room === 'hdatlas'
-        ? { first: 'A first walk through the wiring: your type, strategy and authority, the centres, your profile, and the gates and channels.',
-            way: 'The structure under the type: definition, the circuits, open and defined centres, the lines, the Cross, and a wiring to practise on.',
-            deep: 'Gate and hexagram, your channels, the gates in the sky now, hanging gates, and strategy beside authority.' }
+        ? { first: 'The seven Bedrock lessons, in order: type, strategy, aura, signature, not-self theme, inner and outer authority.',
+            way: 'The seven Weather lessons: definition, profile, angle, centres, circuits, streams and rave cosmology, then a wiring to practise on.',
+            deep: 'The seven Horizon lessons: evolution, conditioning, cycles, mechanics, awareness, variable, left or right, then the sky now.' }
         : room === 'astropedia'
         ? { first: 'A first walk through the sky: the wheel, the Sun and Moon signs, the houses, the bodies and the aspects.',
             way: 'The structure under the signs: elements, modalities, dignity, the kinds of house, orbs, and a chart to practise on.',
@@ -21680,7 +21784,9 @@ class Component extends DCLogic {
      the keyboard's way to every entry. */
   HD_SEC_GLYPH = { intro: '✧', types: '◉', lines: '☰', profiles: '⁄', centers: '◆', gates: '●',
     channels: '⟷', circuitry: '◎', definition: '◫', cross: '✚', strategies: '⤳', authorities: '⚖',
-    open: '◌', terms: '◇', example: '✎' };
+    open: '◌', terms: '◇', study: '✶', example: '✎', bedrock: '▣', weather: '≈', horizon: '◠' };
+  /* The lessons count in roman numerals on their tiles, one to seven a tier. */
+  HD_ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   HD_TYPE_LIGHT = { Generator: ['Sacral'], 'Manifesting Generator': ['Sacral', 'Throat'], Manifestor: ['Throat', 'Heart', 'Solar Plexus', 'Root'],
     Projector: ['G', 'Ajna'], Reflector: [] };
   /* Keyed by the first word of an authority's name as authOf() splits it, so
@@ -21726,6 +21832,7 @@ class Component extends DCLogic {
     const add = (ch, id, name, glyph, sub, d) => out.push({ ch: ch, slug: sl(id), key: ch + ':' + sl(id), name: name, glyph: glyph, sub: sub || '', d: d || {},
       hay: (name + ' ' + (sub || '') + ' ' + this.atlasHay(d)).toLowerCase() });
     add('intro', 0, 'What Human Design is', this.HD_SEC_GLYPH.intro, 'the system in brief', { essay: 'intro' });
+    (A.TIERS || []).forEach(T => (A.LESSONS || []).filter(l => l.tier === T.key).forEach((l, i) => add(T.key, l.name, l.name, this.HD_ROMAN[i] || String(i + 1), l.epi, { lesson: l.name })));
     Object.keys(A.TYPES).forEach(k => add('types', k, k, this.HD_SEC_GLYPH.types, A.TYPES[k].pct + ' of people', { type: k }));
     [1, 2, 3, 4, 5, 6].forEach(n => add('lines', n, 'Line ' + n + ', ' + A.LINES[n].name, String(n), A.LINES[n].theme, { line: n }));
     Object.keys(A.PROFILES).forEach(k => add('profiles', k, k + ', ' + A.PROFILES[k].name, k, A.PROFILES[k].line, { profile: k }));
@@ -21738,7 +21845,11 @@ class Component extends DCLogic {
     A.STRATEGIES.forEach(s => add('strategies', s.name, s.name, this.HD_SEC_GLYPH.strategies, s.who, { strategy: s.name }));
     A.AUTHORITIES.forEach(a => add('authorities', a.name, a.name, this.HD_SEC_GLYPH.authorities, this.apFirst(a.how, 48), { authority: a.name }));
     Object.keys(A.CENTERS).forEach(k => add('open', k, A.CENTERS[k].label + ', open and defined', this.HD_SEC_GLYPH.open, this.apFirst(A.CENTERS[k].wisdom, 48), { openc: k }));
-    (A.TERMS || []).forEach(t => add('terms', t.name, t.name, this.HD_SEC_GLYPH.terms, this.apFirst(t.text, 48), { term: t.name }));
+    (A.TERMS || []).forEach(t => add('terms', t.name, t.name, t.name.charAt(0).toUpperCase(), this.apFirst(t.text, 48), { term: t.name }));
+    if (A.STUDY) {
+      add('study', 'how', 'How the study is weighed', this.HD_SEC_GLYPH.study, 'five weights, and the field study', { studyIntro: 1 });
+      A.STUDY.forEach(x => { const W = A.weightOf(x.score); add('study', x.key, x.name, W.glyph, W.name + (W.field ? ', field study' : ''), { study: x.key }); });
+    }
     add('example', 0, 'An example wiring', this.HD_SEC_GLYPH.example, 'a chart that belongs to nobody', { essay: 'example' });
     this._hdEnt = out;
     return out;
@@ -21759,6 +21870,9 @@ class Component extends DCLogic {
     if (d.strategy) return v(A.STRATEGIES.find(x => x.name === d.strategy));
     if (d.authority) return v(A.AUTHORITIES.find(x => x.name === d.authority));
     if (d.term) return v((A.TERMS || []).find(x => x.name === d.term));
+    if (d.study) return v((A.STUDY || []).find(x => x.key === d.study));
+    if (d.studyIntro) return (A.WEIGHTS || []).map(w => w.name + ' ' + w.line).join(' ') + ' field study';
+    if (d.lesson) { const L = (A.LESSONS || []).find(x => x.name === d.lesson); return L ? [L.epi, L.lead].concat(L.parts.map(p => p.join(' '))).join(' ') : ''; }
     if (d.essay === 'intro') return A.INTRO.what + ' ' + A.INTRO.history;
     return '';
   }
@@ -21769,11 +21883,77 @@ class Component extends DCLogic {
     if (!this._gnow || this._gnow.ms !== ms) this._gnow = { ms: ms, r: HT.reading((n, t) => this.lonOf(n, t), ms, { wheel: W }) };
     return ((this._gnow.r || {}).activations || []).filter(a => a && a.gate);
   }
+  /* THE FIELD STUDY (the owner, 4 November 2026). A field note is kept on
+     this device, per profile, and only the reader's own press sends a copy
+     to the study: the claim's key, the fit, the charge and whether the
+     reader's chart holds what the claim is about. Never the words, never a
+     birth detail. The fit and the charge are asked apart and stored apart,
+     because a vivid moment is not evidence that a claim fit it. */
+  fieldKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.fieldStudy'; }
+  fieldNotes() { const v = this.readLS(this.fieldKey(), []); return Array.isArray(v) ? v : []; }
+  fieldVals(x, holds, sample) {
+    const A = this.A(), st = this.state, C = this.cloud, cs = st.cloudStatus || {};
+    const signedIn = !!(C && cs.mode === 'cloud'), canSend = signedIn && !sample;
+    const pick = (list, cur, keyName) => list.map(([v, label]) => { const on = cur === v;
+      return { label: label, on: on ? 'true' : 'false', tab: on || (cur == null && v === list[0][0]) ? '0' : '-1',
+        bd: on ? 'var(--ac2-hi)' : 'var(--bd)', bg: on ? 'rgba(var(--atmc),.24)' : 'var(--sf2)', c: on ? 'var(--tx)' : 'var(--mut)',
+        go: () => this.setState({ [keyName]: v, fsMsg: '' }) }; });
+    const fitName = v => ((A.FIELD_FIT.find(f => f[0] === (v == null ? '' : String(v))) || [])[1]) || '';
+    const chName = v => ((A.FIELD_CHARGE.find(f => f[0] === String(v)) || [])[1]) || '';
+    const mineNotes = this.fieldNotes().filter(n => n.key === x.key).slice(-6).reverse().map(n => ({
+      when: new Date(n.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }),
+      fit: 'Fit: ' + fitName(n.fit), charge: 'Charge: ' + chName(n.charge), text: n.text || '', textOn: !!n.text,
+      sent: n.sent ? 'In the study' : 'On this device' }));
+    const share = canSend && st.fsShare !== false;
+    const t = (st.fsTally || {})[x.key];
+    let tally = '';
+    if (t && t.ok) {
+      tally = t.notes < 10 ? t.notes + (t.notes === 1 ? ' field note' : ' field notes') + ' so far. The study reads them once there are ten.'
+        : t.notes + ' field notes. Of ' + t.sure + ' who were sure, ' + t.fit + ' said it fit mostly or exactly. In the quiet moments, ' + t.quietFit + ' of ' + t.quietSure + '.'
+          + (t.heldSure ? ' Where the chart holds it, ' + t.heldFit + ' of ' + t.heldSure + '.' : '');
+    } else if (t) tally = t.reason === 'notSetUp' ? 'The study is not open to readings yet.' : 'The study could not be reached. Try again in a moment.';
+    return { fsOn: true,
+      fsAsk: 'Has this shown up in your own life? Note it here. How well it fit and how charged it felt are asked apart, and only the fit counts toward the study.',
+      fsFit: pick(A.FIELD_FIT, st.fsFit, 'fsFit'), fsCharge: pick(A.FIELD_CHARGE, st.fsCharge, 'fsCharge'),
+      fsNote: st.fsNote || '', fsTypeNote: e => this.setState({ fsNote: String(e.target.value || '').slice(0, 2000) }),
+      fsHoldsOn: holds !== null, fsHolds: holds ? 'Your chart holds what this is about.' : 'Your chart does not hold what this is about.',
+      fsShareOn: canSend, fsShare: share ? 'true' : 'false', fsKnob: share ? 'flex-end' : 'flex-start', fsShareGo: () => this.setState({ fsShare: !share }),
+      fsShareOff: !canSend, fsShareWhy: sample ? 'A note can be added to the study once the chart on this device is your own.' : 'Sign in to add a note to the study. It is kept on this device either way.',
+      fsSave: () => this.fieldSave(x, holds, share),
+      fsMsg: st.fsMsg || '', fsMsgOn: !!st.fsMsg,
+      fsMine: mineNotes, fsMineOn: mineNotes.length > 0,
+      fsTallyGo: () => this.fieldTally(x.key), fsTally: tally, fsTallyOn: !!tally };
+  }
+  fieldSave(x, holds, share) {
+    const st = this.state;
+    if (st.fsFit == null || st.fsCharge == null) { this.setState({ fsMsg: 'Choose how well it fit and how charged the moment was.' }); return; }
+    const note = { key: x.key, fit: st.fsFit === '' ? null : Number(st.fsFit), charge: Number(st.fsCharge), holds: holds,
+      text: String(st.fsNote || '').trim(), at: Date.now(), sent: false };
+    const all = this.fieldNotes().concat([note]).slice(-500);
+    this.writeLS(this.fieldKey(), all);
+    this.setState({ fsFit: null, fsCharge: null, fsNote: '', fsMsg: share ? 'Kept on this device. Adding it to the study.' : 'Kept on this device.' });
+    this.speak('Field note kept.', 'polite');
+    const CL = typeof window !== 'undefined' ? window.InCommonCloud : null;
+    if (!share || !CL || !CL.fieldStudySend) return;
+    CL.fieldStudySend({ item: x.key, fit: note.fit, charge: note.charge, holds: note.holds }).then(r => {
+      if (r && r.ok) { const list = this.fieldNotes(); const m = list.find(n => n.at === note.at && n.key === note.key); if (m) m.sent = true; this.writeLS(this.fieldKey(), list); }
+      const msg = r && r.ok ? 'Kept on this device and added to the study.'
+        : r && r.reason === 'rate' ? 'Kept on this device. One note a day for each claim reaches the study, and today\u2019s is in.'
+        : r && r.reason === 'notSetUp' ? 'Kept on this device. The study is not open to notes yet.'
+        : 'Kept on this device. The study could not be reached.';
+      this.setState({ fsMsg: msg, fsTally: { ...(this.state.fsTally || {}), [x.key]: undefined } });
+    });
+  }
+  fieldTally(key) {
+    const CL = typeof window !== 'undefined' ? window.InCommonCloud : null;
+    if (!CL || !CL.fieldStudyTally) { this.setState({ fsTally: { ...(this.state.fsTally || {}), [key]: { ok: false, reason: 'offline' } } }); return; }
+    CL.fieldStudyTally(key).then(r => this.setState({ fsTally: { ...(this.state.fsTally || {}), [key]: r } }));
+  }
   atlasPick(key, scroll) {
     const e = this.atlasEntries().find(x => x.key === key);
     if (!e) return;
     this._atlasScrolled = e.slug;
-    this.setState({ atlasSec: e.ch, atlasItem: e.slug, atlasPeek: null, atlasFlip: (this.state.atlasFlip || 0) + 1 });
+    this.setState({ atlasSec: e.ch, atlasItem: e.slug, atlasPeek: null, atlasFlip: (this.state.atlasFlip || 0) + 1, fsFit: null, fsCharge: null, fsNote: '', fsMsg: '' });
     this.speak(e.name + '.', 'polite');
     if (scroll) setTimeout(() => {
       const f = document.querySelector('[data-hd-folio]');
@@ -21787,6 +21967,42 @@ class Component extends DCLogic {
       const y = box.scrollTop + f.getBoundingClientRect().top - box.getBoundingClientRect().top - 12;
       if (Math.abs(y - box.scrollTop) > 40) box.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
     }, 40);
+  }
+  /* The words a folio can open in the lexicon: every multiword term, the
+     single words that only ever mean the term, and the five types, which
+     open their own entries. Plain words such as tone, base, voice and
+     environment are left out, because in a sentence they are usually just
+     words. Built once. */
+  atlasDefs() {
+    if (this._atlasDefs) return this._atlasDefs;
+    const A = this.A(); if (!A) return [];
+    const SINGLE = { aura: 1, signature: 1, conditioning: 1, deconditioning: 1, transits: 1, homogenization: 1, penta: 1, biverse: 1, juxtaposition: 1, neutrino: 1 };
+    const out = Object.keys(A.TYPES).map(t => ({ name: t, key: 'types:' + this.atlasSlug(t) }));
+    (A.TERMS || []).forEach(t => { const n = t.name;
+      if (out.some(x => x.name.toLowerCase() === n.toLowerCase())) return;
+      if (n.indexOf(' ') === -1 && !SINGLE[n.toLowerCase()]) return;
+      out.push({ name: n, key: 'terms:' + this.atlasSlug(n) }); });
+    out.sort((a, b) => b.name.length - a.name.length);
+    return (this._atlasDefs = out);
+  }
+  /* A block of Atlas text as runs: the first use of each concept in bold,
+     the first use of each word the folio opens in italics, the rest plain.
+     Runs are spans rather than markup, because a hole cannot carry HTML. */
+  atlasFind(s, w, plural) {
+    const re = new RegExp('(^|[^A-Za-z])(' + String(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (plural ? 's?' : '') + ')(?![A-Za-z])', 'i');
+    const m = re.exec(s); if (!m) return null;
+    const a = m.index + m[1].length; return { a: a, b: a + m[2].length };
+  }
+  atlasRich(text, bold, ital) {
+    const s = String(text || ''), marks = [];
+    const take = (w, kind) => { if (!w) return; const r = this.atlasFind(s, w, kind === 'i'); if (!r) return;
+      if (marks.some(x => r.a < x.b && r.b > x.a)) return; marks.push({ a: r.a, b: r.b, kind: kind }); };
+    (bold || []).slice().sort((x, y) => y.length - x.length).forEach(w => take(w, 'b'));
+    (ital || []).slice().sort((x, y) => y.length - x.length).forEach(w => take(w, 'i'));
+    marks.sort((x, y) => x.a - y.a);
+    const out = [], seg = (t, k) => { if (t) out.push({ t: t, fw: k === 'b' ? '700' : '400', fs: k === 'i' ? 'italic' : 'normal' }); };
+    let at = 0; marks.forEach(m => { seg(s.slice(at, m.a), ''); seg(s.slice(m.a, m.b), m.kind); at = m.b; }); seg(s.slice(at), '');
+    return out;
   }
   atlasVals() {
     const st = this.state;
@@ -21823,6 +22039,10 @@ class Component extends DCLogic {
     if (d.authority) { const c = authOf(d.authority); if (c) litC.add(c); }
     if (d.strategy) { const s = A.STRATEGIES.find(x => x.name === d.strategy); Object.keys(this.HD_TYPE_LIGHT).forEach(t => { if (s && s.who.indexOf(t) !== -1) (this.HD_TYPE_LIGHT[t] || []).forEach(c => litC.add(c)); }); }
     if (d.cross) crossGates.forEach(a => litG.add(a.gate));
+    /* A lesson lights what its shelves light: the centres it points at and a type's centres. */
+    if (d.lesson) { const L = (A.LESSONS || []).find(x => x.name === d.lesson) || { see: [] };
+      (L.see || []).forEach(([c, id]) => { const x = find(c + ':' + this.atlasSlug(id)); if (!x) return;
+        if (x.d.center) litC.add(x.d.center); if (x.d.type) (this.HD_TYPE_LIGHT[x.d.type] || []).forEach(z => litC.add(z)); }); }
     if (d.essay === 'example') { (A.EXAMPLE.definedCenters || []).forEach(c => litC.add(c)); (A.EXAMPLE.channels || []).forEach(k => litK.add(k)); (A.EXAMPLE.gates || []).forEach(g => litG.add(g)); }
     const spots = this.hdGateSpots();
     const chans = Object.keys(A.CHANNELS).map(k => { const p = k.split('-').map(Number), a = spots[p[0]], b = spots[p[1]];
@@ -21850,73 +22070,122 @@ class Component extends DCLogic {
         go: peek('g:' + n, { l: pct(s.x, 300), t: pct(s.y, 520) }, 'Gate ' + n + ' · ' + (A.GATES[n] ? A.GATES[n][0] : ''), 'gates:g' + n) }; });
     /* The folio. */
     const facets = [], links = [], yours = [], terms = [];
-    let kicker = '', lead = '', essay = [], dropcap = false, epi = '', now = '';
+    let kicker = '', lead = '', essay = [], dropcap = false, epi = '', epiLabel = '', now = '', bold = [];
     const hexName = n => { const IC = this.IC(), h = IC && IC.hexagram ? IC.hexagram(n) : null; return h ? h.name : ''; };
     const skyLine = list => list.length ? 'In the sky now: ' + list.join(', ') : '';
     const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
-    const term = (label, key) => { const x = find(key); if (x && x.key !== e.key) terms.push({ label: label, g: '?', go: () => this.atlasPick(key, false) }); };
+    const term = (label, key) => { const x = find(key); if (x && x.key !== e.key && !terms.some(t => t.key === key)) terms.push({ label: label, key: key, g: '?', go: () => this.atlasPick(key, false) }); };
     const wiringGo = this.searchGo(this.searchSpirit('humanDesign', 0));
     const yourLine = (label, text) => yours.push({ label: label, text: text, go: wiringGo });
     if (d.type) { const t = A.TYPES[d.type];
-      kicker = t.pct + ' of people'; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim();
+      kicker = 'Share of people: ' + t.pct; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim(); epiLabel = 'Signature';
+      bold = (A.EMPHASIS && A.EMPHASIS.types[d.type]) || [];
       [['Aura', t.aura], ['Strategy', t.strategy], ['Authority', t.authority], ['Signature', t.signature], ['Not-self theme', t.notSelf],
         ['Strengths', t.strengths], ['Challenges', t.challenges], ['Opportunities', t.opportunities], ['Obstacles', t.obstacles],
-        ['In men', t.male], ['In women', t.female]].forEach(([l, x]) => x && facets.push({ label: l, text: x }));
+        ['Kinds, in modern use', t.kinds], ['In men', t.male], ['In women', t.female]].forEach(([l, x]) => x && facets.push({ label: l, text: x }));
       const s = A.STRATEGIES.find(x => x.who.indexOf(d.type) !== -1); if (s) link('Strategy, ' + s.name, '', 'strategies:' + this.atlasSlug(s.name));
       term('Aura', 'terms:aura'); term('Signature', 'terms:signature'); term('Not-self theme', 'terms:not-self-theme');
       if (yourType === d.type) yourLine('Your type', d.type); }
     if (d.line) { const L = A.LINES[d.line];
-      kicker = L.theme; lead = L.behavior; facets.push({ label: 'In men', text: L.male }, { label: 'In women', text: L.female });
+      kicker = 'Theme: ' + L.theme; lead = L.behavior; facets.push({ label: 'In men', text: L.male }, { label: 'In women', text: L.female });
       Object.keys(A.PROFILES).filter(k => k.split('/').indexOf(String(d.line)) !== -1).forEach(k => link('Profile ' + k, k, 'profiles:' + this.atlasSlug(k)));
       if (pr && pr.c === d.line) yourLine('Your conscious line', 'Personality Sun, line ' + pr.c);
       if (pr && pr.u === d.line) yourLine('Your unconscious line', 'Design Sun, line ' + pr.u); }
     if (d.profile) { const P = A.PROFILES[d.profile], ls = d.profile.split('/').map(Number);
-      kicker = P.name; lead = P.line; facets.push({ label: 'How it plays', text: P.how });
+      kicker = P.name; lead = P.line; facets.push({ label: 'How the profile plays out', text: P.how });
       ls.forEach((n, i) => link((i ? 'Unconscious' : 'Conscious') + ', line ' + n, String(n), 'lines:' + n));
-      term('Profile lines', 'lines:' + ls[0]);
+      term('Line', 'terms:line');
       if (pr && pr.key === d.profile) yourLine('Your profile', d.profile + ', ' + P.name); }
     if (d.center || d.openc) { const k = d.center || d.openc, C = A.CENTERS[k];
-      kicker = C.fn;
+      kicker = 'Function: ' + C.fn;
       if (d.center) facets.push({ label: 'Defined', text: C.defined }, { label: 'Undefined', text: C.open }, { label: 'Wisdom when open', text: C.wisdom });
       else { lead = C.wisdom; facets.push({ label: 'Defined means consistent', text: C.defined }, { label: 'Undefined means variable', text: C.open }); }
       link(d.center ? 'Open and defined, ' + C.label : C.label, '', (d.center ? 'open:' : 'centers:') + this.atlasSlug(k));
       Object.keys(A.GATES).map(Number).filter(n => this.hdCenterOf(n) === k).slice(0, 12).forEach(n => link('Gate ' + n, String(n), 'gates:g' + n));
-      term('Defined and undefined', 'open:' + this.atlasSlug(k)); term('Conditioning', 'terms:conditioning');
+      term('Defined Center', 'terms:defined-center'); term('Undefined Center', 'terms:undefined-center'); term('Conditioning', 'terms:conditioning');
       if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held');
       now = skyLine(sky.filter(a => this.hdCenterOf(a.gate) === k).map(a => a.body + ' in gate ' + a.gate)); }
     if (d.gate) { const g = A.GATES[d.gate];
-      kicker = this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate);
-      facets.push({ label: 'Held low', text: g[3] }, { label: 'Held high', text: g[4] });
+      kicker = 'In the ' + this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate); epiLabel = 'Hexagram ' + d.gate;
+      facets.push({ label: 'Low expression', text: g[3] }, { label: 'High expression', text: g[4] });
       link('Its centre, ' + this.hdCenterOf(d.gate), '', 'centers:' + this.atlasSlug(this.hdCenterOf(d.gate)));
       (A.channelsFor(d.gate) || []).forEach(c => link('Channel ' + c.key + ', ' + c.name, '⟷', 'channels:' + this.atlasSlug(c.key)));
       links.push({ label: 'Hexagram ' + d.gate + ' in the Book of Changes', glyph: '☷', c: 'var(--ac2-hi)', aria: 'Hexagram ' + d.gate + ' in the Book of Changes',
         go: () => this.setState({ libSub: 'readings', libView: 'iching', icSec: null, icHex: d.gate, icQuery: String(d.gate), selId: null }) });
-      term('Line', 'lines:1'); term('Hanging gate', 'terms:hanging-gate');
+      term('Line', 'terms:line'); term('Hanging Gate', 'terms:hanging-gate');
       if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line));
       now = skyLine(sky.filter(a => a.gate === d.gate).map(a => a.body + ', line ' + a.line)); }
     if (d.channel) { const c = A.CHANNELS[d.channel], p = d.channel.split('-').map(Number);
-      kicker = c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · ');
+      kicker = 'Keynote: ' + c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · '); epiLabel = 'Hexagrams ' + p.join(' and ');
       now = skyLine(sky.filter(a => p.indexOf(a.gate) !== -1).map(a => a.body + ' in gate ' + a.gate));
       p.forEach(n => link('Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''), String(n), 'gates:g' + n));
-      term('Circuitry', 'circuitry:individual-circuitry'); term('Definition', 'definition:single-definition');
+      { const ci = A.circuitOf ? A.circuitOf(d.channel) : ''; if (ci) term(ci + ' Circuit', 'terms:' + this.atlasSlug(ci + ' circuit')); }
+      term('Definition', 'definition:single-definition');
       if (myChan.has(d.channel)) yourLine('Defined in your chart', 'both gates held');
       else if (mine && p.some(n => myGates.has(n))) yourLine('Half held in your chart', 'gate ' + p.filter(n => myGates.has(n)).join(' and ') + ', a hanging gate'); }
-    if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = c.keynote; lead = c.text; facets.push({ label: 'Within it', text: c.sub }); }
+    if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = 'Keynote: ' + c.keynote; lead = c.text; facets.push({ label: 'Circuits within it', text: c.sub }); }
     if (d.definition) { const dn = A.DEFINITION.find(x => x.name === d.definition); lead = dn.text; dropcap = true;
       if (myDef && d.definition.toLowerCase().indexOf(myDef.toLowerCase()) === 0) yourLine('Your definition', myDef); }
     if (d.cross) { lead = A.CROSS[d.cross]; dropcap = true; link('Profiles', '', 'profiles:' + this.atlasSlug(Object.keys(A.PROFILES)[0]));
       crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line)); }
     if (d.strategy) { const s = A.STRATEGIES.find(x => x.name === d.strategy);
-      kicker = 'for ' + s.who; facets.push({ label: 'When', text: s.when }, { label: 'Correct timing', text: s.recognize }, { label: 'Ignored', text: s.ignored });
+      kicker = 'Strategy for the ' + s.who; facets.push({ label: 'When to use it', text: s.when }, { label: 'Correct timing', text: s.recognize }, { label: 'When it is ignored', text: s.ignored });
+      Object.keys(A.TYPES).filter(t => s.who.indexOf(t) !== -1).forEach(t => { bold = bold.concat((A.EMPHASIS && A.EMPHASIS.types[t]) || []); });
       Object.keys(A.TYPES).filter(t => s.who.indexOf(t) !== -1).forEach(t => link(t, '', 'types:' + this.atlasSlug(t)));
       term('Signature', 'terms:signature'); term('Not-self theme', 'terms:not-self-theme');
       if (myStrat && myStrat.name === d.strategy) yourLine('Your strategy', d.strategy); }
     if (d.authority) { const a = A.AUTHORITIES.find(x => x.name === d.authority);
-      lead = a.how; facets.push({ label: 'Recognising it', text: a.recognize }, { label: 'Following it', text: a.follow });
+      lead = a.how; facets.push({ label: 'How to recognise it', text: a.recognize }, { label: 'How to follow it', text: a.follow });
+      bold = (A.EMPHASIS && A.EMPHASIS.authorities[d.authority]) || [];
       const c = authOf(d.authority); if (c) link('Its centre, ' + c, '', 'centers:' + this.atlasSlug(c));
-      if (/emotional/i.test(d.authority)) term('The emotional wave', 'terms:emotional-wave');
+      if (/emotional/i.test(d.authority)) term('Emotional Wave', 'terms:emotional-wave');
       if (myAuth && myAuth.name === d.authority) yourLine('Your authority', String(hd.authority).split(':')[0]); }
-    if (d.term) { lead = A.TERMS.find(x => x.name === d.term).text; dropcap = true; }
+    if (d.term) { const tm = A.TERMS.find(x => x.name === d.term); lead = tm.text; dropcap = true;
+      if (tm.see) { const k = tm.see[0] + ':' + this.atlasSlug(tm.see[1]), x = find(k); if (x) link((A.LESSONS || []).some(l => l.name === x.name && l.tier === x.ch) ? 'The lesson, ' + x.name : x.name, x.glyph, k); } }
+    if (d.lesson) { const L = A.LESSONS.find(x => x.name === d.lesson), T = (A.TIERS || []).find(x => x.key === L.tier) || { name: '' };
+      const tier = A.LESSONS.filter(x => x.tier === L.tier), at = tier.indexOf(L);
+      kicker = T.name + ' lesson ' + (at + 1) + ' of ' + tier.length; lead = L.lead; dropcap = true; epi = L.epi; epiLabel = 'In short';
+      if (['Type', 'Strategy', 'Aura', 'Signature', 'Not-Self Theme'].indexOf(L.name) !== -1) Object.keys(A.TYPES).forEach(t => { bold = bold.concat((A.EMPHASIS && A.EMPHASIS.types[t]) || []); });
+      L.parts.forEach(([l, x]) => facets.push({ label: l, text: x }));
+      (L.see || []).forEach(([c, id]) => { const k = c + ':' + this.atlasSlug(id), x = find(k); if (x) link(x.name, x.glyph, k); });
+      (L.words || []).forEach(([c, id]) => { const lex = (A.TERMS || []).find(z => z.name.toLowerCase() === String(id).toLowerCase());
+        const k = lex ? 'terms:' + this.atlasSlug(lex.name) : c + ':' + this.atlasSlug(id), x = find(k); if (x) term(x.name, k); });
+      if (mine && L.name === 'Type') yourLine('Your type', hd.type);
+      if (mine && L.name === 'Strategy' && myStrat) yourLine('Your strategy', myStrat.name);
+      if (mine && L.name === 'Inner Authority') yourLine('Your authority', String(hd.authority).split(':')[0]);
+      if (mine && L.name === 'Profile' && pr) yourLine('Your profile', pr.key);
+      if (mine && L.name === 'Definition' && myDef) yourLine('Your definition', myDef);
+      if (mine && L.name === 'Angle') crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line)); }
+    if (d.studyIntro) {
+      kicker = 'Beyond what the tradition holds firmly';
+      lead = 'The modern study gathers what the field teaches past the Atlas\u2019s firm ground, each claim weighed by how surely the sources read for it state what the field teaches. A weight is never a judgement of whether a claim is true of anyone. Below seventy it becomes a field study, and what you notice in your own life is what it waits on.';
+      dropcap = true;
+      A.WEIGHTS.forEach(w => facets.push({ label: w.glyph + ' ' + w.name + ', ' + (w.min > 90 ? 'above 90' : w.min === 0 ? 'under 60' : w.min + ' to ' + w.max), text: w.line }));
+      facets.push({ label: 'Field notes', text: 'A field note asks two things and keeps them apart: how well the claim fit what happened, and how charged the moment felt. Only the fit is read as evidence. The charge is kept so a striking moment can be told from an ordinary one, and the study reports how often a claim fit in the quiet moments as well as in all of them.' });
+      A.STUDY.filter(x => A.weightOf(x.score).field).forEach(x => link(x.name, A.weightOf(x.score).glyph, 'study:' + this.atlasSlug(x.key)));
+    }
+    let fs = null;
+    if (d.study) { const x = A.STUDY.find(z => z.key === d.study), W = A.weightOf(x.score);
+      kicker = W.glyph + ' ' + W.name + ', weighed ' + (W.min === 0 ? 'under 60' : W.min + ' to ' + W.max) + ' in 100' + (W.field ? ' · a field study' : '');
+      lead = x.claim; epi = W.field ? 'Speculative' : ''; epiLabel = 'Standing';
+      facets.push({ label: 'Weight', text: W.line }, { label: 'Fidelity', text: x.note }, { label: 'Origins', text: x.from });
+      if (x.see) { const k = x.see[0] + ':' + this.atlasSlug(x.see[1]); link((find(k) || {}).name || x.see[1], '', k); }
+      link('How the study is weighed', this.HD_SEC_GLYPH.study, 'study:how');
+      const holds = !mine ? null : x.type ? hd.type === x.type : x.gates ? x.gates.some(g => myGates.has(g)) : null;
+      if (mine && x.gates) { const h = x.gates.filter(g => myGates.has(g)); yourLine(h.length ? 'Held in your chart' : 'Not held in your chart', h.length ? 'gate ' + h.join(', ') : 'none of gates ' + x.gates.join(', ')); }
+      if (mine && x.type) yourLine(hd.type === x.type ? 'Your type' : 'Not your type', hd.type);
+      if (W.field) fs = this.fieldVals(x, holds, sample);
+    }
+    /* Words here: the terms the folio names, then the lexicon words found in
+       its own text, in reading order, each opening its definition. */
+    { const blob = [lead].concat(facets.map(f => f.text)).join(' \n '), found = [];
+      this.atlasDefs().forEach(df => { if (df.key === e.key || terms.some(t => t.key === df.key)) return;
+        const r = this.atlasFind(blob, df.name, true); if (!r || found.some(f => r.a < f.b && r.b > f.a)) return;
+        if (find(df.key)) found.push({ a: r.a, b: r.b, name: df.name, key: df.key }); });
+      found.sort((x, y) => x.a - y.a).slice(0, Math.max(0, 8 - terms.length)).forEach(f => term(f.name, f.key));
+    }
+    const ital = terms.map(t => t.label);
+    facets.forEach(f => { f.seg = this.atlasRich(f.text, bold, ital); });
     if (d.essay) essay = this.atlasBlocks(d.essay).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));
     const sib = all.filter(x => x.ch === e.ch), at = sib.findIndex(x => x.key === e.key);
     const step = k => sib[(at + k + sib.length) % sib.length];
@@ -21950,14 +22219,15 @@ class Component extends DCLogic {
       hdAnim: (st.atlasFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
       hdFolioLabel: e.name, hdIcon: e.glyph, hdIconFs: String(e.glyph).length > 2 ? '20px' : '34px', hdName: e.name,
       hdChapterName: (A.SECTIONS.find(s => s[0] === e.ch) || ['', ''])[1],
-      hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi,
+      hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi, hdEpiLabel: epiLabel,
       hdNow: now, hdNowOn: !!now,
-      hdLeadOn: !!lead && !dropcap, hdLeadCap: !!lead && dropcap, hdLead: lead,
+      hdLeadOn: !!lead && !dropcap, hdLeadCap: !!lead && dropcap, hdLead: lead, hdLeadSeg: this.atlasRich(lead, bold, terms.map(t => t.label)),
       hdFamOn: lv === 'first' && where.length > 0, hdFam: where.slice(0, 2).join(' · '),
       hdEssay: essay, hdEssayOn: essay.length > 0,
       hdFacets: facets, hdFacetsOn: facets.length > 0,
       hdYours: yours, hdYoursOn: yours.length > 0,
       hdLinks: links, hdLinksOn: links.length > 0,
+      ...(fs || { fsOn: false }),
       hdTerms: terms, hdTermsOn: lv !== 'deep' && terms.length > 0,
       hdStepOn: sib.length > 1,
       hdPrevLabel: '‹ ' + step(-1).name, hdNextLabel: step(1).name + ' ›',
@@ -31071,6 +31341,8 @@ class Component extends DCLogic {
       if (AT.CROSS) hd.push({ glyph: '☩', title: 'The Incarnation Cross',
         sub: 'the four gates of the two Suns and the two Earths', keys: 'incarnation cross',
         body: AT.CROSS.what + ' ' + AT.CROSS.how, target: to('cross', 'what') });
+      (AT.LESSONS || []).forEach(l => hd.push({ glyph: '▣', title: l.name,
+        sub: 'lesson · ' + l.epi, keys: 'lesson ' + l.tier, body: l.lead, target: to(l.tier, l.name) }));
       (AT.TERMS || []).forEach(t => hd.push({ glyph: '○', title: t.name,
         sub: 'term · ' + cut(t.text, 60), keys: 'term glossary', body: t.text, target: to('terms', t.name) }));
       push('Human Design', this.searchRank(q, hd, 8));

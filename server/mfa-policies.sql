@@ -46,7 +46,7 @@ begin
     'accounts', 'profiles', 'memories', 'throughline_entries', 'oki_messages',
     'consent_events', 'pairs', 'oracle_readings', 'subscriptions', 'store_subscriptions',
     'luminary_unlocks', 'support_requests', 'cast_counters', 'entitlements',
-    'chart_versions', 'deleted_profiles', 'people'
+    'chart_versions', 'deleted_profiles', 'people', 'field_study_notes'
   ] loop
     if to_regclass('public.' || t) is not null then
       execute format('drop policy if exists "two-step sign in, when turned on" on public.%I', t);
