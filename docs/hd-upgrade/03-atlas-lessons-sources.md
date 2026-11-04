@@ -153,20 +153,36 @@ surface may take the name. Wa needs none: the gate bars the capital WA.
 | BG5 | BG5 Business Institute exists (its org chart and practitioners' pages); not on any Jovian page read | described only as the business and career application |
 | OC16 | one passing mention on the Wa Immersion page, as a business knowledge base for large groups | described only that far |
 
-## Everything in this branch that rests on my knowledge, not on a source read
+## The knowledge items, researched on 4 November 2026
 
-Written openly at the owner's request. None of these has been approved by the owner
-or checked by a Human Design reviewer.
+The twelve items below went in from memory, without a source read, and were
+listed here openly. The owner asked on 4 November 2026 that nothing rest on
+knowledge alone, so each was checked against published pages and then kept,
+corrected or removed. "Summary" means the page was read through a fetch tool's
+summary rather than verbatim.
 
-1. **The Penta's six channels**, 2-14, 5-15, 29-46, 1-8, 7-31 and 13-33. The source says Sacral, G and Throat only. The topology also joins the G to the Throat by 10-20, which the entry leaves out on the strength of knowledge alone.
-2. **Gap**: that whoever arrives to fill a gap is pulled into that role.
-3. **Cross of Planning** dated 1615 to 2027, and the Cross of the Sleeping Phoenix after it.
-4. **The four Quarters'** gates and themes.
-5. **Stream gate sequences** for the Spleen and the Ajna, and the Solar Plexus tribal and individual streams. Only 41-30-36-35 was confirmed.
-6. **Minor authority definitions** (ego manifested, ego projected, self-projected, mental, lunar): from the vault's derivation rule, not a page read.
-7. **Determination's left and right pairing.**
-8. **Energy, mental and classic Projector**, written as teachers' terms.
-9. **Splenic fears, Ajna anxieties, Solar Plexus nervousness.**
-10. **Exaltation and detriment** entry.
-11. **Sacral sounds**, rising for yes and falling for no.
-12. **Single source**: the base count of five, the Alpha, the Uranus opposition at 38 to 44.
+| # | Item | Found | Done |
+|---|---|---|---|
+| 1 | Penta channels 2-14, 5-15, 29-46, 1-8, 7-31, 13-33, not 10-20 | Barney and flo(w), "Penta": the six channels by name, G to Sacral and G to Throat; 10-20 not among them | kept |
+| 2 | Gap: a newcomer is pulled into the role | not found; the same page defines a gap only as energy nobody in the group carries | role clause removed |
+| 3 | Cross of Planning 1615 to 2027, then the Sleeping Phoenix | Jovian, "Global Cycles" and "The 2027 Cycle Transition", verbatim | kept |
+| 4 | Quarters, their gates and themes | humandesignlife, "Quarters and Godheads" (republished from Jovian): Initiation 13 to 24, Civilization 2 to 33, Duality 7 to 44, Mutation 1 to 19; purpose fulfilled through mind, form, bonding, transformation; the cross follows the Personality Sun | kept, opening gates and themes added |
+| 5 | Stream gate sequences | Jovian dictionary: the Ajna's three streams by name (verbatim), the Spleen's three themes and the wave's three variations (summary), and 41-30-36-35 (verbatim). No other gate sequence found | every unconfirmed sequence removed; names kept |
+| 6 | Minor authority definitions | Jovian "Minor Authorities": the three names and the open Solar Plexus, Sacral and Spleen; "No Direct Inner Authority": Reflectors and Mental Projectors. The wiring is the app's own derivation (`authOf()`), consistent with the type rules | kept; "also called environmental" removed, wording follows Jovian |
+| 7 | Determination left active, right passive | not found; Jovian "Left, Right and the 16 Variables" calls a left arrow strategic and a right arrow receptive | replaced with the published words |
+| 8 | Energy, mental and classic Projector | Jovian uses Mental Projector; Projector called "a non-energy Type"; energy and classic Projector not found as terms | only the mental Projector kept |
+| 9 | Splenic fears, Ajna anxieties, Solar Plexus nervousness | not found on any page read | removed |
+| 10 | Exaltation and detriment as astral bodies that fix a line | not found; the Jovian dictionary calls both "often misleading" terms for "a polarity of a Line" | rewritten to the dictionary's framing |
+| 11 | Sacral sounds rising and falling | "uh-huh" and "unh-unh" confirmed (Jovian, "Sacral Authority"); pitch not found. The Atlas never carried the pitch claim | nothing to change |
+| 12 | Base count of five, the Alpha, Uranus opposition 38 to 44 | five bases and 69,120 bases: Jovian dictionary, verbatim; 38 to 44: dictionary, "Mid-Life Point", verbatim; the Alpha only as part of the Wa, summary | kept; the Alpha entry already says little else was found |
+
+Left as it was on main: Reflector "about 28 days" predates this branch, and Jovian
+says only that the Moon passes all the gates in about a month.
+
+Pages: jovianarchive.com/pages/global-cycles-in-human-design,
+/pages/the-2027-cycle-transition-in-human-design, /pages/human-design-dictionary,
+/products/minor-authorities, /products/no-direct-inner-authority, /products/projector,
+/products/reflector, /products/advanced-1-left-right-and-the-16-variables,
+/pages/sacral-authority-in-human-design-trusting-the-gut-response;
+humandesignlife.squarespace.com/blog/2017/3/11/quarters-and-godheads-of-the-human-design-mandala;
+barneyandflow.com/penta.

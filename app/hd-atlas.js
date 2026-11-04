@@ -520,7 +520,7 @@
         ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for its surroundings. About 1 percent.'],
         ['Energy types and non-energy types', 'Manifestors and both kinds of Generator are called energy types. Projectors and Reflectors are non-energy types: the tradition holds they have no consistent working energy of their own and do best when they stop trying to keep pace with those who do.'],
         ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar, because the Moon’s monthly passage is what gives its decisions their shape.'],
-        ['Kinds of Projector', 'Teachers often sort Projectors by where their definition sits. An energy Projector has a motor defined that does not reach the Throat. A mental Projector has definition only at or above the Throat. Some teachers also name a classic Projector, with definition below the Throat and no motor.']
+        ['Kinds of Projector', 'The published material names one kind: the mental Projector, whose definition sits only at or above the Throat, so that it has no direct inner authority, a group it shares with the Reflector. Other labels that circulate among teachers were not found in the published sources and are left out here.']
       ],
       see: [['types', 'Manifestor'], ['types', 'Generator'], ['types', 'Manifesting Generator'], ['types', 'Projector'], ['types', 'Reflector']],
       words: [['bedrock', 'Strategy'], ['bedrock', 'Aura'], ['weather', 'Centers']] },
@@ -583,7 +583,7 @@
         ['4. Ego manifested', 'A defined Heart joined to the Throat, with the three above open: decisions run through what the will truly wants and can commit to. Manifestors only.'],
         ['5. Ego projected', 'A defined Heart joined to the G but not to the Throat. The will speaks through what you hear yourself say you want. Projectors only.'],
         ['6. Self-projected', 'A defined G joined to the Throat, nothing else above it in the order. Direction becomes clear by talking and listening to your own voice. Projectors only.'],
-        ['7. Mental, also called environmental', 'Definition only in the Head, Ajna or Throat, which the published convention calls no inner authority. Clarity comes from the right surroundings and from talking things over with trusted people. Projectors only. Ego, self-projected and mental together are sometimes called the minor authorities, a small share of people.'],
+        ['7. Mental', 'Definition only in the Head, Ajna or Throat, which the published material calls no direct inner authority. Clarity comes from the right surroundings and from talking things over with trusted people. Projectors only. Ego, self-projected and mental together are sometimes called the minor authorities, a small share of people.'],
         ['8. Lunar', 'No definition: the Reflector waits a lunar cycle and lets the decision take shape across it.']
       ],
       see: [['authorities', 'Emotional (Solar Plexus)'], ['authorities', 'Sacral'], ['authorities', 'Splenic'], ['authorities', 'Ego (Heart)'], ['authorities', 'Self-projected (G)'], ['authorities', 'Mental (environmental)'], ['authorities', 'Lunar (Reflector)']],
@@ -635,7 +635,7 @@
         ['Juxtaposition', 'The 4/1 profile only. The theme is described as fixed: a narrow line held steadily between the personal and the transpersonal.'],
         ['Left Angle', 'The four transpersonal profiles: 5/1, 5/2, 6/2 and 6/3. The theme is described as worked out through encounters with other people.'],
         ['How many crosses', 'The published convention counts 192 general Incarnation Crosses by angle.'],
-        ['The four Quarters', 'The wheel of 64 gates is divided into four Quarters of 16 hexagrams each: Initiation, Civilization, Duality and Mutation. A cross belongs to the Quarter its Personality Sun falls in.'],
+        ['The four Quarters', 'The wheel of 64 gates is divided into four Quarters of 16 hexagrams each: Initiation, Civilization, Duality and Mutation. Each is read as purpose fulfilled in its own way: through mind, through form, through bonding and through transformation. A cross belongs to the Quarter its Personality Sun falls in.'],
         ['A word on the older names', 'The founding literature gives the three angles older names that read as forecasts. inCommon keeps to personal, fixed and transpersonal, which describe the same geometry without one.']
       ],
       see: [['cross', 'what'], ['cross', 'angles'], ['profiles', '4/1']],
@@ -671,9 +671,9 @@
     { tier: 'weather', name: 'Streams', epi: 'Currents through awareness',
       lead: 'A stream is a run of gates carrying a potential from a pressure center through an awareness center toward expression. Each awareness center has three, so the wiring holds nine streams of awareness, and teachers follow each one gate by gate as a story of how that kind of knowing matures.',
       parts: [
-        ['Spleen: instinct, intuition and taste', 'The three splenic streams rise from the Root. Teachers trace instinct through gates 54, 32 and 44, intuition through 38, 28 and 57, and taste through 58, 18 and 48.'],
-        ['Ajna: abstract, logical, individual', 'The three mental streams fall from the Head. The abstract idea runs 64, 47, 11 and 56; the logical fact runs 63, 4, 17 and 62; the individual insight runs 61, 24, 43 and 23.'],
-        ['Solar Plexus: need, passion, desire', 'The three emotional streams rise from the Root. The tribal stream of need runs from 19 to 49 and on to 37 and 40 or 6 and 59; the individual stream runs 39, 55, 22 and 12; the collective stream of feeling runs 41, 30, 36 and 35.'],
+        ['Spleen: instinct, intuition and taste', 'The Spleen\u2019s awareness is read through three themes: instinct, intuition and taste.'],
+        ['Ajna: abstract, logical, individual', 'Conceptualizing runs in three streams: the abstract idea, the logical fact and the individual insight.'],
+        ['Solar Plexus: need, uncertainty, desire', 'The emotional wave is read in three variations: the tribal wave of need, the individual wave of uncertainty and the collective wave of desire. The collective stream of feeling runs through gates 41, 30, 36 and 35.'],
         ['Why streams matter', 'A stream shows a gate in context: what pressure feeds it, what awareness it carries, and where it wants to come out.']
       ],
       see: [['centers', 'Spleen'], ['centers', 'Ajna'], ['centers', 'Solar Plexus']],
@@ -751,7 +751,6 @@
         ['Splenic awareness', 'The oldest, concerned with survival and wellbeing, speaking once and only in the present.'],
         ['Mental awareness', 'The Ajna’s way: concepts, comparisons and research, working across time and best offered to others.'],
         ['Emotional awareness', 'The Solar Plexus’s way: clarity that comes across the wave, which the tradition expects to deepen after 2027.'],
-        ['Fears, anxieties and nervousness', 'The tradition gives each splenic gate a characteristic fear, each Ajna gate an anxiety, and each Solar Plexus gate a nervousness, and reads them as the shadow side of that awareness.'],
         ['Streams of awareness', 'Each awareness center carries three streams, nine in all, which follow a potential from pressure to expression.']
       ],
       see: [['centers', 'Spleen'], ['centers', 'Ajna'], ['centers', 'Solar Plexus']],
@@ -773,7 +772,7 @@
     { tier: 'horizon', name: 'Left or Right', epi: 'Strategic or receptive',
       lead: 'Each of the four arrows points left or right, and the direction comes from the tone beneath it: tones 1 to 3 point left, tones 4 to 6 point right. Left is described as strategic, focused and active. Right is described as receptive, peripheral and passive. Neither is better; they are two builds.',
       parts: [
-        ['Determination', 'Left is active, right is passive: how deliberately the body is said to need to approach nourishment.'],
+        ['Determination', 'An arrow pointing left is called strategic and one pointing right receptive, the published words for the two orientations of every arrow.'],
         ['Environment', 'Left is described as being observed, right as observing: whether the body does best seen within its setting or watching it.'],
         ['Motivation', 'Left is strategic, right is receptive: whether the mind is said to drive toward a goal or take in what arrives.'],
         ['Perspective', 'Left is focused, right is peripheral: whether the mind is said to see best narrowly or take in the wide field.'],
@@ -813,7 +812,7 @@
     { name: 'Awareness Centers', text: 'The Spleen, the Ajna and the Solar Plexus, the three centers that know rather than move: body, mind and the emerging awareness of spirit.', see: ['horizon', 'Awareness'] },
     { name: 'Alpha', text: 'In the published dictionary\u2019s account of the Wa, the one member beyond its three small groups. Little else written about it was found.', see: ['terms', 'Penta'] },
     { name: 'BG5', text: 'The business and career application of the system, taught by the BG5 Business Institute, which reads charts for work and for working groups.', see: ['terms', 'Penta'] },
-    { name: 'Gap', text: 'In a small group, a part of the group\u2019s own wiring that nobody present defines. The tradition says a group\u2019s attention keeps going to its gaps, and that whoever arrives to fill one is pulled into that role.', see: ['terms', 'Penta'] },
+    { name: 'Gap', text: 'In a small group, a part of the group\u2019s own wiring that nobody present defines. One published talk says a group\u2019s attention keeps going to its gaps.', see: ['terms', 'Penta'] },
     { name: 'OC16', text: 'The large-group business application of the system, named beside the Wa as a body of knowledge for working with large groups of people.', see: ['terms', 'Penta'] },
     { name: 'Penta', text: 'The group aura the tradition says forms when three to five people are regularly together, and which then leads the group. It is drawn from the six channels between the Sacral, the G and the Throat (2-14, 5-15, 29-46, 1-8, 7-31 and 13-33) and has no awareness center, no Heart and no Root of its own. Read as the ground of family and small-business life. Some pages say three or more.', see: ['channels', '5-15'] },
     { name: 'Trans-Auric Form', text: 'An aura made by several people together rather than by one, which the tradition says shapes everyone in it. There are two: the Penta and the Wa. Also called a transpersonal form.', see: ['terms', 'Penta'] },
@@ -841,7 +840,7 @@
     { name: 'Emotional Wave Types', text: 'Three shapes of emotional wave. The tribal wave builds by steps, one forward and one back, until it releases. The individual wave runs level and then spikes. The collective wave climbs gradually and falls sharply. Their themes are given as need, passion and desire; one entry in the published dictionary calls the individual theme uncertainty instead of passion.', see: ['weather', 'Streams'] },
     { name: 'Energy Type', text: 'Manifestors, Generators and Manifesting Generators: the types with a motor defined in a way that gives consistent access to working energy.', see: ['bedrock', 'Type'] },
     { name: 'Environment', text: 'The bottom left arrow, from the Design side: the kind of surroundings the body is said to do best in. Its six colors are Caves, Markets, Kitchens, Mountains, Valleys and Shores.', see: ['horizon', 'Variable'] },
-    { name: 'Exaltation and Detriment', text: 'Each line of each gate is given an astral body that expresses it at its best, its exaltation, and one that expresses it at its most strained, its detriment. A body sitting in its own exaltation or detriment is said to fix the line that way.', see: ['gates', 'g1'] },
+    { name: 'Exaltation and Detriment', text: 'The two poles of a line. The published dictionary calls both words often misleading, because they name a polarity within the line rather than a good and a bad version of it.', see: ['gates', 'g1'] },
     { name: 'Gate', text: 'One of the 64 divisions of the wheel, each matching a hexagram of the I Ching, and each housed in one center. Gate N is hexagram N.', see: ['gates', 'g1'] },
     { name: 'Generator', text: 'The type with a defined Sacral. In the published convention it is an umbrella with two kinds, the Pure Generator and the Manifesting Generator, together about seven in ten people. Strategy to respond, signature satisfaction, not-self theme frustration.', see: ['types', 'Generator'] },
     { name: 'Global Cycle', text: 'An era of history read as carrying the theme of one Incarnation Cross. The present one is the Cross of Planning.', see: ['horizon', 'Evolution'] },
@@ -878,7 +877,7 @@
     { name: 'Pressure Centers', text: 'The Head and the Root, which push rather than power: pressure to know and pressure to act.', see: ['weather', 'Centers'] },
     { name: 'Pure Generator', text: 'A Generator whose Throat is not joined to any motor. The published convention names it beside the Manifesting Generator as the two kinds of Generator, with the same strategy, signature and not-self theme. Given as about half of all Generators.', see: ['types', 'Generator'] },
     { name: 'Program', text: 'The tradition’s word for the patterned, cyclical effect of the neutrino stream on all life, carried by the moving astral bodies.', see: ['horizon', 'Conditioning'] },
-    { name: 'Quarter', text: 'One of four arcs of 16 hexagrams on the wheel: Initiation, Civilization, Duality and Mutation.', see: ['weather', 'Angle'] },
+    { name: 'Quarter', text: 'One of four arcs of 16 hexagrams on the wheel: Initiation, which opens at gate 13, Civilization at gate 2, Duality at gate 7 and Mutation at gate 1.', see: ['weather', 'Angle'] },
     { name: 'Rave', text: 'The tradition’s name for nine-centered human beings, which it dates from 1781.', see: ['horizon', 'Evolution'] },
     { name: 'Rave Children', text: 'The tradition’s name for children it expects to be born with a mutated Solar Plexus after 2027.', see: ['horizon', 'Evolution'] },
     { name: 'Rave Mandala', text: 'The wheel of 64 gates laid around the zodiac, from which every activation is read.', see: ['horizon', 'Mechanics'] },
