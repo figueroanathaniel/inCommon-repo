@@ -428,6 +428,13 @@ input[type="date"]{color-scheme:dark}
 }
 
 
+/* A phone short enough that the title and the chart tabs leave the chart a
+   strip (375x667 left 60px under the 46% sheet) gives that room back while a
+   reading is open: the My Charts title and the three chart tabs fold away and
+   come back the moment the sheet is lowered or closed. The 46% share is
+   unchanged. Hidden with display, so they take no focus while folded. */
+[data-vt][data-hd-pane-open="1"] [data-vt-charts-head] { display: none !important; }
+
 /* On the readable 2D view the SVG is the stage. Size it to the same
    top reserve used by the WebGL host while the mobile sheet is expanded. */
 [data-vt][data-hd-pane-open="1"] [data-chart="bodygraph"] {
@@ -1256,11 +1263,11 @@ input[type="date"]{color-scheme:dark}
 </section>
 <section data-vt-sec="Spirit" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Spirit" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
-  <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
+  <div data-vt-charts-head="1" style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
     <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">My Charts</h1>
   </div>
   <div data-vt-page="1" style="flex:1;min-height:0;display:flex;flex-direction:column">
-<div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Spirit views" style="flex:none;display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px">
+<div data-vt-charts-head="1" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Spirit views" style="flex:none;display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px">
   <sc-for list="{{ vtSpiritTabs }}" as="t" hint-placeholder-count="4">
     <button data-lift onClick="{{ t.go }}" role="tab" id="{{ t.id }}" aria-controls="{{ t.panelId }}" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};font:600 13px var(--fu);color:{{ t.c }}">{{ t.label }}</button>
   </sc-for>
