@@ -4484,6 +4484,18 @@ async function runCloudTests() {
   });
   t('F9', 'each study path walks its tier of lessons in order, and every step names a lesson that exists',
     walked, [true, true, true]);
+  /* F10: every word a lesson offers opens a lexicon entry, and each entry
+     made for a lesson word is long enough to be worth the read and points
+     back at its lesson. */
+  const lessonWords = [];
+  const tierKeys = A.TIERS.map(x => x.key);
+  A.LESSONS.forEach(l => (l.words || []).forEach(([c, id]) => { if (tierKeys.indexOf(c) !== -1 && lessonWords.indexOf(String(id)) === -1) lessonWords.push(String(id)); }));
+  const termOf = n => A.TERMS.find(z => z.name.toLowerCase() === n.toLowerCase());
+  const missing = lessonWords.filter(w => !termOf(w));
+  const lessonNamed = A.LESSONS.map(l => l.name).filter(n => lessonWords.indexOf(n) !== -1);
+  const thin = lessonNamed.filter(n => { const x = termOf(n); return !x || x.text.length < 500 || !x.see || x.see[1] !== n; });
+  t('F10', 'every lesson word opens a lexicon entry, and each lesson-word entry runs to 500 characters and points at its lesson',
+    [missing, thin], [[], []]);
 })();
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
