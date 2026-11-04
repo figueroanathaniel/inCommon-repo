@@ -63,6 +63,12 @@ const server = http.createServer((req, res) => {
         return {stage:{top:r.top,bottom:r.bottom,right:r.right,height:r.height},pane:{top:p.top,left:p.left},width:innerWidth,height:innerHeight};
       });
       check(width + ' stage clears reading', phone ? bounds.stage.bottom <= bounds.pane.top + 1 && bounds.stage.height > 0 : bounds.stage.right <= bounds.pane.left + 1, bounds);
+      if (phone) {
+        /* A clear stage can still be a strip: at 375x667 the title and chart
+           tabs left it 60px. The folded head gives it the room back. */
+        const head = await page.evaluate(() => [...document.querySelectorAll('[data-vt-charts-head]')].filter(e => e.getClientRects().length).length);
+        check(width + ' chart keeps a usable height while reading', bounds.stage.height >= 150 && head === 0, {stageHeight: bounds.stage.height, headShown: head});
+      }
       const selected = await page.evaluate(() => {
         const s=window.__incommonApp._hsS, c=s.cByName.Sacral;
         const v=c.mesh.position.clone(); v.z=.27;
@@ -74,6 +80,8 @@ const server = http.createServer((req, res) => {
       if (phone) {
         await page.evaluate(() => window.__incommonApp.hdPaneLow(true)); await page.waitForTimeout(300);
         await page.evaluate(() => window.__incommonApp.hdPaneLow(false)); await page.waitForTimeout(700);
+        check(width + ' lowered sheet brings the title and chart tabs back', await page.evaluate(() => { const app = window.__incommonApp; return new Promise(r => { app.hdPaneLow(true); setTimeout(() => { const n = [...document.querySelectorAll('[data-vt-charts-head]')].filter(e => e.getClientRects().length).length; app.hdPaneLow(false); r(n === 2); }, 400); }); }), null);
+        await page.waitForTimeout(700);
         check(width + ' restored sheet still clears stage', await page.evaluate(() => document.querySelector('[data-hs-scene]').getBoundingClientRect().bottom <= document.querySelector('[data-hd-pane]').getBoundingClientRect().top + 1), null);
       }
       if (shots) { fs.mkdirSync(shots,{recursive:true}); await page.screenshot({path:path.join(shots,width+'x'+height+'-open.png')}); }
