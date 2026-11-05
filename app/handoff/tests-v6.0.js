@@ -2171,6 +2171,11 @@
 
       await goD('#/library/readings', 800);
       var tarotG = dd.querySelector('[role="group"][aria-label="Tarot"]'), bookG = dd.querySelector('[role="group"][aria-label="The Book of Changes"]');
+      // The two halves enter on a staggered animation, so measure where they
+      // land rather than where they are mid flight: a world drawing behind
+      // the app can hold the first frame of it past the 800ms wait.
+      var settle = [tarotG, bookG].filter(Boolean).reduce(function (a, e) { return a.concat(e.getAnimations ? e.getAnimations().map(function (x) { return x.finished.catch(function () {}); }) : []); }, []);
+      await Promise.race([Promise.all(settle), sleep(4000)]);
       var tr = tarotG && tarotG.getBoundingClientRect(), br = bookG && bookG.getBoundingClientRect();
       var divEl = tarotG && tarotG.nextElementSibling, dr = divEl && divEl.getBoundingClientRect();
       var openedTarot = null, openedBook = null;
