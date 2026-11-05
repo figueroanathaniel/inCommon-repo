@@ -7,13 +7,15 @@ if ((source.match(/^  skyFrame\(/gm) || []).length !== 1 ||
     (source.match(/^  chartSkyFrame\(/gm) || []).length !== 1 ||
     /this\.skyFrame\(this\.t2000/.test(source)) throw Error('Canvas and astronomical frame methods collide');
 const HouseSystems = require('../app/house-systems.js');
-const app = calculator(['RAD'], ['norm360', 'chartSkyFrame', 'ascendant', 'vertexOf', 'houseCusps', 'houseOf', 'sectOf', 'expandedLonAt'], { Astronomy, HouseSystems });
+const app = calculator(['RAD'], ['norm360', 'chartSkyFrame', 'ascendant', 'vertexOf', 'signStart', 'houseCusps', 'houseOf', 'sectOf', 'expandedLonAt'], { Astronomy, HouseSystems });
 // The reader chooses the house system; these edges are read in Equal and in
 // Whole Sign, the default, through the app's own houseCusps and houseOf.
 let houseSystem = 'E';
 app.houseSys = () => houseSystem;
 app.signOf = lon => ({ sign: String(Math.floor(lon / 30)), deg: lon % 30, idx: Math.floor(lon / 30) });
 app.t2000 = d => tOf(d.toISOString());
+// The Swiss reference is tropical, so the chosen study's zodiac starts at 0.
+app.zodiacOff = () => 0;
 if (fixture.rows.length < 8) throw Error('Angle fixture lacks date coverage');
 const worst = { asc: 0, mc: 0, vertex: 0 };
 const at = {};
