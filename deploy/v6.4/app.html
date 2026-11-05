@@ -46273,6 +46273,7 @@ class Component extends DCLogic {
     window.removeEventListener('hashchange', this._onHash);
     window.removeEventListener('popstate', this._onPop);
     if (this._vtKey) document.removeEventListener('keydown', this._vtKey);
+    if (this._vtWheel) document.removeEventListener('wheel', this._vtWheel);
     if (this._vtTS) document.removeEventListener('touchstart', this._vtTS);
     if (this._vtTM) document.removeEventListener('touchmove', this._vtTM);
     if (this._vtTE) {
@@ -64407,7 +64408,6 @@ class Component extends DCLogic {
      fire, and it has to be built. It fires on release rather than mid drag, so
      a pull that turns into a scroll is not punished with a reload. */
   VT_BAND = 34;      /* the thin rectangle, top and bottom */
-  VT_SWITCH = 44;    /* travel inside a band before the section changes */
   /* PULL TO REFRESH ASKS FOR INTENT, NOT FOR A GESTURE.
    *
    * It was firing constantly, because one downward drag from the top of a page
@@ -64434,15 +64434,16 @@ class Component extends DCLogic {
   VT_ARM_MS = 6000;  /* how long an armed pull stays armed */
   VT_HSWIPE = 56;    /* sideways travel before a swipe moves to the next screen */
 
-  /* THE SIDEWAYS SWIPE IS ONE CHAIN, NOT THREE.
+  /* THE SIDEWAYS SWIPE STAYS INSIDE ITS SECTION.
 
-     Today, the three charts, the six Library tabs, the Oracle and Settings are
-     read as one line from left to right, so a swipe always has a neighbour:
-     the last chart hands on to the first Library tab, the last Library tab to
-     the Oracle, and back again the other way. The pager's own horizontal
-     scroll never fired on a phone, because the section column above it is
-     touch-action none and that value is inherited by what is inside it, so
-     the swipe is read here from the same touch listeners the section bands use.
+     It moves between the three charts and between the six Library tabs, and
+     stops at either end; on Today, the Oracle and Settings it does nothing.
+     Until 5 November 2026 it was one chain across every section, and a swipe
+     past the last chart landed in the Library: the owner asked that no
+     gesture change the section. The pager's own horizontal scroll never fired
+     on a phone, because the section column above it is touch-action none and
+     that value is inherited by what is inside it, so the swipe is read here
+     from the same touch listeners.
 
      Where it must not fire: on anything that scrolls sideways under the finger
      (the Library tab strip, a wide table, the wheel), in a field, inside a room
@@ -64460,31 +64461,25 @@ class Component extends DCLogic {
     }
     return false;
   }
-  /* dir is +1 for the next screen (a swipe to the left) and -1 for the one
-     before it. */
+  /* dir is +1 for the next page (a swipe to the left) and -1 for the one
+     before it. A swipe moves only INSIDE a section: between the three charts,
+     or between the six Library tabs, and it stops at either end. It never
+     changes the section (owner, 5 November 2026: "scrolling or swiping should
+     never switch between Today, Charts, Library, Oracle, and/or Settings").
+     Sections change by the nav bar or an address, nothing else. */
   vtSwipeStep(dir) {
-    const st = this.state, sec = st.vtSec || 0, last = this.VT_SECTIONS.length - 1;
+    const st = this.state, sec = st.vtSec || 0;
     if (st.libView || st.selId || st.placeSel || st.numSel || st.dpSel || st.aspSel || st.ddOpen) return;
     if (sec === 1) {
       const n = (st.vtTab || 0) + dir;
-      if (n >= 0 && n < this.VT_TABS.length) { this.vtGoTab(n); return; }
+      if (n >= 0 && n < this.VT_TABS.length) this.vtGoTab(n);
+      return;
     }
-    const subs = this.LIB_SUBS;
     if (sec === 2) {
+      const subs = this.LIB_SUBS;
       const n = subs.findIndex(x => x[0] === this.libSubOf()) + dir;
-      if (n >= 0 && n < subs.length) {
-        this.setState({ libSub: subs[n][0], libView: null, selId: null, arcSel: null, apSec: null });
-        return;
-      }
+      if (n >= 0 && n < subs.length) this.setState({ libSub: subs[n][0], libView: null, selId: null, arcSel: null, apSec: null });
     }
-    const to = sec + dir;
-    if (to < 0 || to > last) return;
-    const id = this.VT_SECTIONS[to][0];
-    const root = this.sectionRoot(id);
-    if (id === 'library') root.libSub = dir > 0 ? subs[0][0] : subs[subs.length - 1][0];
-    this.setState(root);
-    this.vtGoSection(to);
-    if (id === 'spirit') this.vtGoTab(dir > 0 ? 0 : this.VT_TABS.length - 1);
   }
 
   vtActivePage() {
@@ -64566,16 +64561,9 @@ class Component extends DCLogic {
       const t = e.touches[0], dy = t.clientY - sy, dx = t.clientX - sx;
       if (Math.abs(dx) > Math.abs(dy)) { armed = false; return; }
 
-      if (band) {
-        if (e.cancelable) e.preventDefault();
-        if (!fired && Math.abs(dy) > this.VT_SWITCH) {
-          fired = true;
-          const secs = this.vtSecEls(), i = this.state.vtSec || 0;
-          const to = Math.max(0, Math.min(secs.length - 1, i + (dy < 0 ? 1 : -1)));
-          if (to !== i) this.vtGoSection(to);
-        }
-        return;
-      }
+      /* The top and bottom bands used to change the section on a vertical
+         drag. They do nothing now: a gesture never leaves the section. */
+      if (band) return;
 
       /* Both have to be at the top: the page, and whatever was actually
          touched. If the finger landed on something with its own scroll that is
@@ -64656,6 +64644,23 @@ class Component extends DCLogic {
     document.addEventListener('touchmove', this._vtTM, { passive: false });
     document.addEventListener('touchend', this._vtTE, { passive: true });
     document.addEventListener('touchcancel', this._vtTE, { passive: true });
+    /* A wheel or trackpad at the end of a page must not carry on into the
+       section column either. The pages contain their own overscroll, but a
+       wheel over anything that is not inside a page that can still move that
+       way would scroll the column, so it is refused here. */
+    this._vtWheel = e => {
+      if (this.state.dtW >= this.BP.md || !e.deltaY) return;
+      const col = this._vtScroll;
+      if (!col || !col.contains(e.target)) return;
+      for (let n = e.target; n && n !== col; n = n.parentElement) {
+        if (n.nodeType !== 1) continue;
+        const c = getComputedStyle(n);
+        if (!/(auto|scroll)/.test(c.overflowY) || n.scrollHeight <= n.clientHeight + 2) continue;
+        if (e.deltaY < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1) return;
+      }
+      if (e.cancelable) e.preventDefault();
+    };
+    document.addEventListener('wheel', this._vtWheel, { passive: false });
   }
   vtBind() {
     this._vtKey = e => {

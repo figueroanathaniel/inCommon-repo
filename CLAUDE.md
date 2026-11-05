@@ -3053,19 +3053,26 @@ all six that test separation go red with the owner forced to null. Driven in
 the built bundle too: a device holding a guest profile, then account A (takes
 it), account B (the birth page), A again (its own profile), signed out (blank).
 
-## Swiping on the phone is one chain, read left to right
-The order is Today, the three charts (Human Design, Astrology, Numerology), the
-six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
-that line, so the last chart hands on to the first Library tab, the last Library
-tab to the Oracle, and the other way back (landing on the last chart or the last
-tab when going backwards). `vtSwipeStep(dir)` does the move and `vtBindTouch()`
-reads the gesture. Three things are easy to undo.
+## Swiping on the phone stays inside a section
+Decided by the owner on 5 November 2026: "Left and right okay between charts or
+library sections, but scrolling or swiping should never switch between Today,
+Charts, Library, Oracle, and/or Settings." A sideways swipe moves between the
+three charts (Human Design, Astrology, Numerology) or between the six Library
+tabs, and stops at either end; on Today, the Oracle and Settings it does
+nothing. **No gesture changes the section**: the nav bar and an address do. It
+used to be one chain across every section, so a swipe past the last chart
+landed in the Library, and a vertical drag in the top or bottom 34px band
+(`VT_BAND`) jumped a section; both are gone. The column is `touch-action:
+none`, every page contains its own overscroll, and `_vtWheel` refuses a wheel
+or trackpad scroll that would reach the column, so the end of a page is the end.
+`vtSwipeStep(dir)` does the move and `vtBindTouch()` reads the gesture. Three
+things are easy to undo.
 
 **The pager's own horizontal scroll never fired on a phone.** The section column
 is `touch-action: none` and what is inside inherits it, so a swipe on the
 My Charts pager did nothing at all; this was measured, the pager stayed at
 scrollLeft 0 through a real swipe. The swipe is read from the same touch
-listeners the section bands use. If the browser did move the pager under the
+listeners. If the browser did move the pager under the
 finger, `vtBindTouch` leaves it alone so a gesture is never handled twice.
 
 **It must not fire where a sideways gesture already means something.**
