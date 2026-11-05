@@ -47208,30 +47208,35 @@ class Component extends DCLogic {
      space. Returns { lead, paras } for the Sun or the Moon, or null. The Moon
      is withheld without a birth time, because noon can put its arrivals half
      a year out; the Sun keeps its years, to the year only. Memoised per day. */
-  progressedHandoff(name) {
+  /* kind 'secondary' is a day after birth for each year of life; 'tertiary' is a
+     day after birth for each lunar month of life, the tropical month of
+     27.32158 days (kerykeion.net, Astro*Index). One body walks the same path in
+     both; only the clock under it changes. */
+  progressedHandoff(name, kind) {
     if (name !== 'Sun' && name !== 'Moon') return null;
+    const ter = kind === 'tertiary';
     const nd = this.natalDate();
     if (!nd || isNaN(nd.getTime())) return null;
     const timed = !!this.ascendant();
     if (name === 'Moon' && !timed) return null;
     const memo = this._progMemo || (this._progMemo = {});
-    const mk = name + '|' + this.chartStamp() + '|' + new Date().toDateString();
+    const mk = name + '|' + (ter ? 't' : 's') + '|' + this.chartStamp() + '|' + new Date().toDateString();
     if (memo[mk] !== undefined) return memo[mk];
-    const YR = 365.2422 * 86400000, tN = this.t2000(nd);
+    const YEAR = 365.2422 * 86400000, YR = ter ? 27.32158 * 86400000 : YEAR, tN = this.t2000(nd);
     const age = (Date.now() - nd.getTime()) / YR;
     if (!(age > 0)) return (memo[mk] = null);
     const sgn = y => Math.floor(this.norm360(this.lonOf(name, tN + y)) / 30);
-    const step = name === 'Sun' ? 1 : 0.2;
+    const step = ter ? (name === 'Sun' ? 1 : 0.1) : (name === 'Sun' ? 1 : 0.2);
     const edge = (a, b) => { const s = sgn(a); for (let k = 0; k < 30; k++) { const m = (a + b) / 2; if (sgn(m) === s) a = m; else b = m; } return b; };
     const find = (from, dir, lim) => { const s0 = sgn(from); for (let y = from; dir > 0 ? y < from + lim : y > Math.max(0, from - lim); y += dir * step) {
       const y2 = dir > 0 ? y + step : Math.max(0, y - step); if (sgn(y2) !== s0) return dir > 0 ? edge(y, y2) : edge(y2, y); if (y2 === 0) break; } return null; };
     const lonNow = this.norm360(this.lonOf(name, tN + age)), si = Math.floor(lonNow / 30), sign = this.SIGNS12[si];
-    const natalSi = sgn(0), last = find(age, -1, name === 'Sun' ? 95 : 3.5), next = find(age, 1, name === 'Sun' ? 40 : 3.5);
+    const natalSi = sgn(0), last = find(age, -1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 95 : 3.5)), next = find(age, 1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 40 : 3.5));
     const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const when = y => { const d = new Date(nd.getTime() + y * YR); return timed ? 'in ' + MON[d.getMonth()] + ' ' + d.getFullYear() : 'around ' + d.getFullYear(); };
-    const old = y => { const n = Math.floor(y); return n < 1 ? 'in your first year' : 'the year you turned ' + n; };
+    const old = y => { const n = Math.floor(y * YR / YEAR); return n < 1 ? 'in your first year' : 'the year you turned ' + n; };
     const gone = Math.floor(lonNow % 30), ahead = 30 - (lonNow % 30);
-    const nm = 'progressed ' + name, paras = [];
+    const nm = (ter ? 'tertiary ' : 'progressed ') + name, paras = [];
     if (last != null) {
       const from = this.SIGNS12[(si + 11) % 12];
       paras.push('Your ' + nm + ' crossed from ' + from + ' into ' + sign + ' ' + when(last) + ', ' + old(last) + ', and has walked ' + (gone < 1 ? 'less than a degree' : gone === 1 ? 'one degree' : gone + ' degrees') + ' of it since.');
@@ -47243,11 +47248,14 @@ class Component extends DCLogic {
       const to = this.SIGNS12[(si + 1) % 12];
       paras.push((ahead < 3 && name === 'Sun' ? 'It stands on the threshold now, and reaches ' : 'It reaches ') + to + ' ' + when(next) + ', ' + old(next).replace('the year you turned', 'the year you turn') + '. ' + this.HANDOFF_PAIR[si]);
     }
-    const lead = name === 'Sun'
+    const lead = ter ? (name === 'Sun'
+      ? 'Under that clock runs a quicker one, which counts each day after birth as one month of the Moon. Read that way, your Sun walks a sign in about two and a half years.'
+      : 'Under that clock runs a quicker one, which counts each day after birth as one month of the Moon. Read that way, your Moon crosses a sign every two or three months, the weather of a season rather than of an era.')
+      : name === 'Sun'
       ? 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
       : 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Moon keeps walking, about a sign every two and a half years, and each crossing is a change of weather inside.';
     void natalSi;
-    return (memo[mk] = { heading: 'Your ' + name + ', progressed', lead: lead, paras: paras, last: last, next: next, age: age, lonNow: lonNow });
+    return (memo[mk] = { heading: 'Your ' + name + (ter ? ', by the month' : ', progressed'), lead: lead, paras: paras, last: last, next: next, age: age, lonNow: lonNow });
   }
   handoffDeg(d) { return d < this.HANDOFF_THRESHOLD ? (Math.round(d * 10) / 10) + '°' : Math.round(d) + '°'; }
   /* Who rules a sign, and where that ruler sits in this chart: { name, older }.
@@ -61349,6 +61357,8 @@ class Component extends DCLogic {
         : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') });
     const prog = (r.name === 'Sun' || r.name === 'Moon') && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
     if (prog) parts.push({ tab: 'The Hand-off', sec: { heading: prog.heading, lines: prog.paras.map(t => ({ text: t })) }, lead: prog.lead });
+    const ter = prog ? this.progressedHandoff(r.name, 'tertiary') : null;
+    if (ter) parts.push({ tab: 'The Month', sec: { heading: ter.heading, lines: ter.paras.map(t => ({ text: t })) }, lead: ter.lead });
     const core = this.PLNS.some(([pn]) => pn === r.name) && r.name !== 'South Node';
     const mir = core ? this.antisciaFor(r.name) : null;
     if (mir) parts.push({ tab: 'The Mirror', sec: { heading: 'Your ' + name + ', mirrored', lines: mir.paras.map(t => ({ text: t })) },

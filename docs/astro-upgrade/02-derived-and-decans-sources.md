@@ -132,9 +132,21 @@ the wheel, and solar arc directions.
 | Tertiary: "one day after birth equals one lunar month of life"; minor: "one lunar month after birth equals one year of life" | same | secondary, unsourced on the page |
 | Tertiary: "one day of life is equated to one lunar period rather than one solar year" | https://www.skyscript.co.uk/glossary/progressions | secondary |
 
-Not found: who devised the tertiary progression (no page named anyone, so the
-app names nobody), and the Naibod arc. Which lunar month (sidereal or
-synodic) the tertiary counts is not stated on any page read, so it is not
-built until a page says. astro.com's Astrowiki served a script check, not the
+| Tertiary: "one tropical lunar month (approximately 27.32 days)"; "formalized in the 20th century by Edward Troinski" | https://kerykeion.net/content/learn-astrology/traditional-tertiary-progressions | secondary |
+| "Three lunar periods are in current use: The tropical lunar month (27.32158 days), the sidereal lunar month (27.32166 days), and the synodic lunar month (29.53059 days)"; Prima's entry names the sidereal month | https://astrologysoftware.com/community/learn/dictionary/tertiary.html (Astro*Dictionary) | secondary |
+
+Built 5 November 2026, on the owner's word "Run absolute parallel to the
+definition if unable to become identical": `progressedHandoff(name,
+'tertiary')`, "The Month" chapter on the Sun's and the Moon's packet, a day
+after birth for each tropical lunar month of 27.32158 days, the same path and
+the same bisection as the secondary progression with the clock changed. The
+sources do not agree on the month: tropical and sidereal differ by 0.00008 of
+a day, which moves no date, and the synodic month (29.53 days) is the one real
+alternative and is not used. The Moon is withheld without a birth time, as in
+the secondary. Checked on four births against astronomy-engine directly: the
+longitude now matches and every last and next crossing is a sign edge. Not
+held to the Swiss Ephemeris the way `drive-progressions.js` holds the
+secondary. Troinski is not named on the page, since only one secondary page
+names him. The Naibod arc was not found. astro.com's Astrowiki served a script check, not the
 article. Solar arc is buildable from these: `progressedHandoff()` already
 bisects the progressed Sun, and the arc is that position less the natal Sun.

@@ -3427,7 +3427,9 @@ and the annual profection (`profection()`, whole signs from the Ascendant,
 The Vedic dossier carries each graha's drekkana and the Hellenistic dossier
 the profection, so only readers of those studies get a new dossier. The 10th
 is never a turned frame, because the sources disagree on which parent it is.
-The navamsa, the two relationship charts, a harmonic wheel and solar arc are
+The tertiary progression is a chapter too, The Month, on the Sun's and the
+Moon's packet (`progressedHandoff(name, 'tertiary')`, a day for each tropical
+lunar month of 27.32158 days). The navamsa, the two relationship charts, a harmonic wheel and solar arc are
 not built and wait on the owner.
 
 ## The hole is the middle of the screen, and the ring hugs it
