@@ -203,7 +203,7 @@ at that strength put white type under 4.5:1. Both were found by the T rows.
 
 **The faces.** Cyberspace's display face is Pixelify Sans, not the concept's
 VT323: `--fd` carries the readings' paragraphs as well as headings, and VT323
-reads at about two thirds of its size there. Pixelify Sans draws its 5 as an S, so the numerals come from Tiny5, loaded as a digits only subset (`text=0123456789`, the third entry of the face) and set first in `--fd`, so it draws the digits and nothing else. Roots is Spectral, the Biome is
+reads at about two thirds of its size there. Pixelify Sans draws its 5 as an S, so the numerals come from Tiny5, loaded as a digits only subset (`text=0123456789`, the third entry of the face) and set first in `--fd` and `--fu`, so it draws the digits and nothing else. The interface face (`--fu`, every label and subheader) is the same pixel stack, by the owner's word of 5 November 2026; the reading body (`--fb`) stays Verdana. Ligatures are off in Cyberspace, because Pixelify's fi joins into a glyph that reads as F. Roots is Spectral, the Biome is
 Comfortaa. None of the three is in `app/fonts/` yet, so a `--fonts self` build
 falls back to the interface face for them.
 
