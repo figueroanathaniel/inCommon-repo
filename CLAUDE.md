@@ -6295,6 +6295,19 @@ entered from here only** (the owner's choice, same day): Enter the Observatory
 (`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
 buttons are gone. N40 goes through both.
 
+**Expanded and Advanced** (owner, 5 November 2026). The 22 in `BLOOM_CORE`
+are the Expanded set and every point is Advanced: the dialog's two buttons say
+so. On the chart card the Expanded Chart draws the Expanded set alone
+(`coreSet` in the wheel vals, so the 3D and Orbital stage follow it), and an
+Advanced placements switch (`chartAdvanced`, per visit) draws every point. The
+dialog and the Observatory still place every point.
+
+**The forecast banner is one line until opened** (owner, 5 November 2026):
+the label and the forecast's first line, 46px, with the rest behind the press.
+The "Back to Today's Alignment" buttons and the alignment teaser on the chart
+pages are gone, and the last stop of a followed thread closes it rather than
+going to Today.
+
 ## The chart speaks gently, and stays intense
 Decided by the owner on 4 November 2026, after a voice sample he approved: the
 placement, sign, house and aspect writing reads as an invitation rather than a

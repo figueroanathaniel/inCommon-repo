@@ -31700,20 +31700,22 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">Your Wiring</div>
     </div>
     <sc-if value="{{ fbHdOn }}" hint-placeholder-val="{{ false }}">
-      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:6px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 12px 12px 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:0 12px 0 14px">
         <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
           <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
             <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
-            <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+            <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}"><span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span></sc-if><sc-if value="{{ r.shut }}" hint-placeholder-val="{{ true }}"><span style="flex:1;min-width:0;font:400 13px/1.3 var(--fd);color:var(--tx);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</span></sc-if>
             <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
           </button>
+          <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
           <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
           <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
           </sc-if>
+          </sc-if>
         </sc-for>
         <sc-if value="{{ fbHdOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:0 4px 12px 0;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
             <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
               <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
@@ -31907,7 +31909,6 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
           </div>
         </sc-for>
-        <button data-lift onClick="{{ goDaily }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 13px;border:1px solid rgba(47,255,143,.36);border-radius:12px;font:600 11px var(--fu);color:var(--ac)"><span style="font:400 13px var(--fb)">←</span> Back to Today’s Alignment</button>
       </div>
     </sc-if>
     <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconB }} center/contain no-repeat;mask:{{ bandIconB }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Bedrock</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
@@ -32110,20 +32111,22 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">Your Natal Chart</div>
     </div>
     <sc-if value="{{ fbAstroOn }}" hint-placeholder-val="{{ false }}">
-      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:6px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 12px 12px 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:0 12px 0 14px">
         <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
           <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
             <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
-            <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+            <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}"><span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span></sc-if><sc-if value="{{ r.shut }}" hint-placeholder-val="{{ true }}"><span style="flex:1;min-width:0;font:400 13px/1.3 var(--fd);color:var(--tx);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</span></sc-if>
             <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
           </button>
+          <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
           <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
           <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
           </sc-if>
+          </sc-if>
         </sc-for>
         <sc-if value="{{ fbAstroOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:0 4px 12px 0;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
             <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
               <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
@@ -32232,6 +32235,9 @@ input[type="date"]{color-scheme:dark}
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
+        <sc-if value="{{ chartAdvOn }}" hint-placeholder-val="{{ false }}">
+          <button data-lift onClick="{{ chartAdvGo }}" role="switch" aria-checked="{{ chartAdvPressed }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:0 0 auto;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ chartAdvBd }};background:{{ chartAdvBg }};font:600 11.5px var(--fu);color:var(--tx)">Advanced placements</button>
+        </sc-if>
         </div>
         <div style="position:relative">
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
@@ -32385,19 +32391,9 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
           </div>
         </sc-for>
-        <button data-lift onClick="{{ goDaily }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 13px;border:1px solid rgba(47,255,143,.36);border-radius:12px;font:600 11px var(--fu);color:var(--ac)"><span style="font:400 13px var(--fb)">←</span> Back to Today’s Alignment</button>
         </sc-if>
         </div>
       </div>
-    </sc-if>
-    <sc-if value="{{ astroTeaserShow }}" hint-placeholder-val="{{ true }}">
-      <button data-lift onClick="{{ goDaily }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:rgba(47,255,143,.08);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:12px;padding:12px 14px;width:100%">
-        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-          <span style="font:600 12.5px var(--fu);color:var(--tx)">Today’s Alignment</span>
-          <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ dailyTeaser }}</span>
-        </span>
-        <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-      </button>
     </sc-if>
     <div style="display:flex;flex-direction:column;gap:16px">
         <div role="group" aria-label="The sky now" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px">
@@ -32684,20 +32680,22 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
     </div>
     <sc-if value="{{ fbNumOn }}" hint-placeholder-val="{{ false }}">
-      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:6px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 12px 12px 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:0 12px 0 14px">
         <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
           <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
             <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
-            <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+            <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}"><span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span></sc-if><sc-if value="{{ r.shut }}" hint-placeholder-val="{{ true }}"><span style="flex:1;min-width:0;font:400 13px/1.3 var(--fd);color:var(--tx);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</span></sc-if>
             <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
           </button>
+          <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
           <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
           <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
           </sc-if>
+          </sc-if>
         </sc-for>
         <sc-if value="{{ fbNumOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:0 4px 12px 0;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
             <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
               <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
@@ -36650,7 +36648,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Show every point</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">The usual 22</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -36784,7 +36782,7 @@ input[type="date"]{color-scheme:dark}
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Show every point</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">The usual 22</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -38861,20 +38859,22 @@ input[type="date"]{color-scheme:dark}
         </div>
       </div>
       <sc-if value="{{ fbAstroOn }}" hint-placeholder-val="{{ false }}">
-        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:6px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 12px 12px 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:0 12px 0 14px">
           <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
             <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
               <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
-              <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}"><span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span></sc-if><sc-if value="{{ r.shut }}" hint-placeholder-val="{{ true }}"><span style="flex:1;min-width:0;font:400 13px/1.3 var(--fd);color:var(--tx);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</span></sc-if>
               <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
             </button>
+            <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
             <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
             <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
               <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
             </sc-if>
+            </sc-if>
           </sc-for>
           <sc-if value="{{ fbAstroOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:0 4px 12px 0;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
               <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
                 <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;flex-direction:column;gap:12px">
@@ -38983,6 +38983,9 @@ input[type="date"]{color-scheme:dark}
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
+        <sc-if value="{{ chartAdvOn }}" hint-placeholder-val="{{ false }}">
+          <button data-lift onClick="{{ chartAdvGo }}" role="switch" aria-checked="{{ chartAdvPressed }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:0 0 auto;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ chartAdvBd }};background:{{ chartAdvBg }};font:600 11.5px var(--fu);color:var(--tx)">Advanced placements</button>
+        </sc-if>
         </div>
         <div style="position:relative">
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
@@ -39547,20 +39550,22 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">Your Wiring</div>
       </div>
       <sc-if value="{{ fbHdOn }}" hint-placeholder-val="{{ false }}">
-        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:6px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 12px 12px 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:0 12px 0 14px">
           <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
             <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
               <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
-              <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}"><span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span></sc-if><sc-if value="{{ r.shut }}" hint-placeholder-val="{{ true }}"><span style="flex:1;min-width:0;font:400 13px/1.3 var(--fd);color:var(--tx);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</span></sc-if>
               <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
             </button>
+            <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
             <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
             <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
               <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
             </sc-if>
+            </sc-if>
           </sc-for>
           <sc-if value="{{ fbHdOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:0 4px 12px 0;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
               <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
                 <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;flex-direction:column;gap:12px">
@@ -39927,20 +39932,22 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
       </div>
       <sc-if value="{{ fbNumOn }}" hint-placeholder-val="{{ false }}">
-        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:6px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 12px 12px 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:0 12px 0 14px">
           <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
             <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
               <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
-              <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}"><span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span></sc-if><sc-if value="{{ r.shut }}" hint-placeholder-val="{{ true }}"><span style="flex:1;min-width:0;font:400 13px/1.3 var(--fd);color:var(--tx);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</span></sc-if>
               <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
             </button>
+            <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
             <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
             <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
               <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
             </sc-if>
+            </sc-if>
           </sc-for>
           <sc-if value="{{ fbNumOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:0 4px 12px 0;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
               <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
                 <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;flex-direction:column;gap:12px">
@@ -43466,7 +43473,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Show every point</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">The usual 22</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -43600,7 +43607,7 @@ input[type="date"]{color-scheme:dark}
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Show every point</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">The usual 22</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -54883,7 +54890,7 @@ class Component extends DCLogic {
      they belong to; the open and closed state is the same alignOpen key. */
   todayVals() {
     const v = this.todayValsBase(), rows = v.alignRows || [];
-    const pick = k => rows.filter(r => r.key === k);
+    const pick = k => rows.filter(r => r.key === k).map(r => ({ ...r, shut: !r.open }));
     const a = pick('astro'), h = pick('hd'), n = pick('num');
     return { ...v, fbAstro: a, fbAstroOn: a.length > 0, fbAstroOpen: !!(a[0] && a[0].open),
       fbHd: h, fbHdOn: h.length > 0, fbHdOpen: !!(h[0] && h[0].open),
@@ -55193,8 +55200,8 @@ class Component extends DCLogic {
     const t = this.holeTrail(), last = i >= t.length - 1;
     return { ...v,
       dpKicker: (v.dpKicker ? v.dpKicker + ' \u00b7 ' : '') + 'following the thread \u00b7 ' + (i + 1) + ' of ' + t.length,
-      dpGoLabel: last ? 'Back to Today\u2019s Alignment \u2192' : t[i + 1].lead,
-      dpGo: () => this.holeNext(),
+      dpGoLabel: last ? 'Close the thread' : t[i + 1].lead,
+      dpGo: last ? () => this.setState({ dpSel: null, hole: null }) : () => this.holeNext(),
       dpClose: () => this.setState({ dpSel: null, hole: null }) };
   }
   /* THE PILL SHEET HAS TWO TABS. General is what any reader would be told about the
@@ -62452,15 +62459,20 @@ class Component extends DCLogic {
             // default (see EXPANDED_REGISTRY's own comment): they still
             // reach chartExpandRows/the sub-tables below through `rows`
             // directly, just never placedRows, which only feeds the SVG.
-            const placedRows = rows.filter(r => r.lon != null && r.group !== 'angle' && (r.category !== 'comet' || showComets));
+            // The card's Expanded Chart draws the Expanded set (BLOOM_CORE)
+            // unless the reader switches on Advanced placements; the dialog
+            // and the Observatory keep every point (owner, 5 November 2026).
+            const coreSet = expanded && !st.chartBloom && !st.chartExpandOpen && !st.chartAdvanced ? this.bloomShowOf(true) : null;
+            const placedRows = rows.filter(r => r.lon != null && r.group !== 'angle' && (r.category !== 'comet' || showComets) && (!coreSet || coreSet[this.pointKey(r)]));
             // The expanded chart places every point it has, comets included,
             // and marks the ones not switched on (bx '1') so they glow in once
             // as it opens and are hidden after; the 22 in BLOOM_CORE start on.
             const bloomGrp = st.chartBloom ? this.bloomShowOf() : null;
             const bx = k => bloomGrp && !bloomGrp[k] ? '1' : '0';
             const svgRows = bloomGrp ? rows.filter(r => r.lon != null && r.group !== 'angle') : placedRows;
-            const svgLon = bloomGrp ? new Set(svgRows.filter(r => bloomGrp[this.pointKey(r)]).map(r => r.lon.toFixed(4))) : null;
-            const svgAsp = x => !svgLon || ((x.a.group === 'angle' ? !!bloomGrp[x.a.name] : (x.a.lon == null || svgLon.has(x.a.lon.toFixed(4)))) && (x.b.group === 'angle' ? !!bloomGrp[x.b.name] : (x.b.lon == null || svgLon.has(x.b.lon.toFixed(4)))));
+            const svgLon = bloomGrp ? new Set(svgRows.filter(r => bloomGrp[this.pointKey(r)]).map(r => r.lon.toFixed(4))) : coreSet ? new Set(placedRows.map(r => r.lon.toFixed(4))) : null;
+            const svgGrp = bloomGrp || coreSet;
+            const svgAsp = x => !svgLon || ((x.a.group === 'angle' ? !!svgGrp[x.a.name] : (x.a.lon == null || svgLon.has(x.a.lon.toFixed(4)))) && (x.b.group === 'angle' ? !!svgGrp[x.b.name] : (x.b.lon == null || svgLon.has(x.b.lon.toFixed(4)))));
             const asps = this.natalAspects(expanded, { rich: expanded, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true }), stel = this.stelliums(expanded);
             const zero = this.wheelZero(), P = (lon, r) => this.polar(lon, r);
             const CS = this.chartCusps(), mid = i => CS[i] + this.cuspSpan(CS, i) / 2;
@@ -62583,6 +62595,9 @@ class Component extends DCLogic {
               csHudMean: csRow ? (this.PL_MEAN[csRow.name] || csRow.mean || '') : '',
               csPrev: csMove(-1), csNext: csMove(1),
               csOpen: () => { if (csB) openBody(csB.key); },
+              chartAdvOn: expanded, chartAdvPressed: st.chartAdvanced ? 'true' : 'false',
+              chartAdvBg: st.chartAdvanced ? 'rgba(var(--atmc),.32)' : 'var(--sf2)', chartAdvBd: st.chartAdvanced ? 'var(--ac2-hi)' : 'var(--bd)',
+              chartAdvGo: () => this.setState({ chartAdvanced: !st.chartAdvanced, openBody: null, aspSel: null }),
               chartModes: [['basic', 'Basic Chart'], ['expanded', 'Expanded Chart']].map(([id, label]) => ({
                 label, on: st.chartMode === id,
                 bg: st.chartMode === id ? 'var(--ac)' : 'transparent',
