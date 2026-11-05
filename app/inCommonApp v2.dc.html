@@ -28520,8 +28520,25 @@ class Component extends DCLogic {
      only ever paid for somebody who reads them. */
   oracleDeepKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleDeep'; }
   oracleSlot(period, depth) {
-    const p = this.activeProfile();
-    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + this.chartStamp(p);
+    const p = this.activeProfile(), w = this.oracleWorld();
+    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + this.chartStamp(p) + (w === 'deepfield' ? '' : '|w' + w);
+  }
+  /* THE ORACLE SPEAKS IN THE STUDY AND THE WORLD THE READER CHOSE (the owner,
+     5 November 2026: "the Oracle voice should reflect the chart style and the
+     theme as well. This is why it costs extra to run it when the reader
+     changes the theme and chart-style"). The study already reached the
+     dossier through studyDossierLines() and the slot through chartStamp();
+     this adds the world. One line rides in the dossier, so the server's key
+     (a hash of the dossier) moves with either choice and a changed style is a
+     new reading that counts toward the day, and the server reads the same line
+     to choose the voice (STUDY_VOICE and WORLD_VOICE in server/oracle). The
+     defaults, a plain Western study in Deep Field, send no line, so a reading
+     kept before this is still the same reading. */
+  oracleWorld() { const k = this.state.themeKey; return this.THEMES[k] ? k : 'deepfield'; }
+  oracleStyleLine() {
+    const st = this.chartStudyOf(), w = this.oracleWorld(), sk = st ? st.key : 'western';
+    if (sk === 'western' && w === 'deepfield') return null;
+    return 'READING STYLE: study ' + sk + ' (' + (st ? st.name : 'Western, Whole Sign') + '); world ' + w + ' (' + this.THEMES[w].label + ')';
   }
   oracleCached(period, depth) {
     const all = this.readLS(this.oracleStoreKey(), {});
@@ -28657,6 +28674,8 @@ class Component extends DCLogic {
       lines.push('HD ACTIVATIONS: ' + acts.join(', '));
       if (nm) lines.push('NUMEROLOGY EXTRA: Maturity ' + keep(lp + nm.expression) + '; Karmic lessons ' + ([1, 2, 3, 4, 5, 6, 7, 8, 9].filter(n => !present.has(n)).join(', ') || 'none'));
     }
+    const style = this.oracleStyleLine ? this.oracleStyleLine() : null;
+    if (style) lines.push(style);
     return lines.join('\n');
   }
   /* The Codex's words for each way a reading can fail. Silent for now has no
@@ -29717,6 +29736,8 @@ class Component extends DCLogic {
     lines.push('PASSAGES (in the order they arrive):');
     ws.forEach((w, i) => lines.push((i + 1) + '. ' + w.mover + ' ' + w.asp + ' natal ' + w.natal + '. In orb ' + w.range + '. ' +
       (w.passes.length ? 'Exact on ' + w.passFull + '.' : 'Comes close without reaching exact.')));
+    const style = this.oracleStyleLine ? this.oracleStyleLine() : null;
+    if (style) lines.push(style);
     return lines.join('\n');
   }
   /* ONE PASSAGE AS A LEDGER (the owner's layout, 18 October 2026): a header
@@ -34940,7 +34961,7 @@ class Component extends DCLogic {
   orNoteLast(slot) {
     const s = String(slot).split('|');
     if (s[0] === 'cycle' || !s[2]) return;
-    this._orLast = { period: s[0], depth: s[2], stamp: this.chartStamp(this.activeProfile()) };
+    this._orLast = { period: s[0], depth: s[2], stamp: this.chartStamp(this.activeProfile()) + this.oracleWorld() };
   }
   sectionOpening(id) {
     if (id === 'today') return { hPage: 0, alignOpen: false, swOpen: false, cyOpen: false };
@@ -34948,7 +34969,7 @@ class Component extends DCLogic {
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) };
     if (id === 'library') return { libSub: 'study', libView: null };
     if (id === 'oracle') {
-      const L = this._orLast, here = L && L.stamp === this.chartStamp(this.activeProfile());
+      const L = this._orLast, here = L && L.stamp === this.chartStamp(this.activeProfile()) + this.oracleWorld();
       return { orPeriod: here ? L.period : 'daily', orDepth: here ? L.depth : 'standard' };
     }
     return {};

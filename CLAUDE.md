@@ -4910,6 +4910,28 @@ waits behind the same press: it shows at once and costs nothing. Driven with
 the cloud faked, both shells: nothing is asked on open or on switching to In
 Depth, and one press asks once and shows the reading.
 
+## The Oracle speaks in the reader's study and world
+Asked for by the owner on 5 November 2026: "the Oracle voice should reflect the
+chart style and the theme as well. This is why it costs extra to run it when
+the reader changes the theme and chart-style." `oracleStyleLine()` adds one
+line to every dossier, standard, in depth and the Cycle Audit:
+`READING STYLE: study <key> (<name>); world <key> (<label>)`. The server reads
+it in `voiceFor()`: the world (`WORLD_VOICE`, keyed by the app's theme keys,
+so `midnight` is Cyberspace, `dawn` Nature's Roots, `gold` the Subterranean
+Biome) sets the voice and the imagery in place of the hashed pair, and the
+study (`STUDY_VOICE`) sets the vocabulary. The emphasis is still hashed.
+
+**The cost is the dossier hash, on purpose.** The server keys a reading on a
+hash of its dossier, so a changed study or world is a new reading and counts
+toward the day's six; changing back finds the reading already kept. The slot
+on the device carries the world too (`|w<key>`, after `chartStamp()`, which
+already carries the study), and so does the Oracle's place for a second press
+on its tab (`_orLast`). **The defaults send no line**: a plain Western study in
+Deep Field is the dossier it was before, so no reading kept before this costs
+again. The voice reaches readers only once the Oracle function is redeployed;
+until then the line still separates the readings and the model sees it in the
+dossier.
+
 ## The in-depth reading is prepared ahead, and still opened with a press
 The owner asked on 10 October 2026 for the Luminary reading to load in seconds.
 It cannot be written in seconds: an in-depth reading is about six thousand
