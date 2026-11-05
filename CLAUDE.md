@@ -408,7 +408,7 @@ tiles by time, under three headed bands that read the same on all three charts:
 |---|---|
 | Bedrock | what the birth fixed. Astrology: the placements, Houses, Aspects (the placements are the Ledger's rows, see below). Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
 | Weather | what the sky is doing to it now. Astrology: the two transit lists, and the Ledger's Weather column. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
-| Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
+| Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design: the dates ahead when the Sun, a planet or Pluto enters the partner of one of the reader's hanging gates and completes that channel (`hdHorizonVals()`, the owner's ask of 5 November 2026; until then it had no Horizon, and with no such date in 180 days it still draws none). |
 
 **The bands are headings and nothing more.** A glyph (strata, a body on its
 orbit, a sun on the horizon line), the name in the display face and a rule. No
