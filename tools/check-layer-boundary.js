@@ -118,6 +118,9 @@ const LAYERS = {
     /* The world behind three of the four identities. Decoration: reads no
        chart, no data and no writing, and draws only for the active theme. */
     'theme-worlds.js',
+    /* The Oracle's nav symbol, alive in each identity. Ornament: reads no
+       chart, no data and no writing. */
+    'oracle-glyph.js',
     /* The Cycle Audit's scene. It draws what the app hands it and computes
        nothing: no ephemeris, no chart, no writing beyond its labels. */
     'cycle-scene.js',

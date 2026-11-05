@@ -175,6 +175,17 @@ contrast modifier (`data-world-hc`). The world itself is `app/theme-worlds.js`
 (shell layer, global `ThemeWorlds`), three.js scenes ported from the concept,
 drawn into `[data-atmos-world]` over the sky.
 
+**The Oracle's nav symbol is alive in every world** (the owner, 5 November
+2026): a contour line ring (`somatic()` in `build-ui-icons.js`) that
+shapeshifts in all four, with cosmic flare in Deep Field, tech rot in
+Cyberspace, clay being molded in Nature's Roots and liquid in the Biome.
+`app/oracle-glyph.js` (shell layer, global `OracleGlyph`) draws it on a
+canvas inside the nav span (`data-icon="oracle"`), called from `worldSync()`.
+The template still paints the static mask, and the head sheet drops it only
+once the span carries `data-glyph-live`, so a missing module or the contrast
+modifier leaves the plain icon. It is drawn in the span's own nav token, holds
+one frame under reduced motion, and pauses while the page is hidden.
+
 **All four are dark with light type, and that is forced.** `--ac` is fixed and
 written as text in over two hundred places, so a light identity fails the
 contrast gate wherever the action green is a word. The concept's light gray

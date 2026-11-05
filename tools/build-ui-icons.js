@@ -67,6 +67,38 @@ function lensAt(cx, cy, r) {
 }
 
 const S = 'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
+
+/* THE SOMATIC RING, for the Oracle. A rounded triangular torus seen a little
+   from above, drawn the way a body is drawn in light: the outer rim, the edge
+   of the hole, and two contour lines between them. The hole sits up and to the
+   right of the middle and the contours crowd the far side and open on the near
+   one, which is what makes a flat ring read as a body turning. Each loop is
+   sampled from one formula and smoothed into cubic curves, so the lines never
+   cross and nothing in it is hand placed. t runs 0 at the rim to 1 at the hole. */
+function somaticLoop(t) {
+  const n = 56, ro = 9.3, ri = 5.2, lobeO = 0.13, lobeI = 0.18, rot = -0.45;
+  const hx = 0.8, hy = -1.2, lean = 0.35, tw = 0.25;
+  const m = t * (1 - t) * 4, pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = i / n * 2 * Math.PI;
+    const te = t + lean * m * Math.sin(a - 0.6);
+    const r = (ro + (ri - ro) * te) * (1 + (lobeO + (lobeI - lobeO) * te) * Math.cos(3 * (a - rot - tw * te)));
+    pts.push([12 + hx * te + r * Math.cos(a), 12.2 + hy * te + r * Math.sin(a)]);
+  }
+  const f = v => v.toFixed(1);
+  let d = 'M' + f(pts[0][0]) + ' ' + f(pts[0][1]);
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+    d += 'C' + [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6,
+                p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6, p2[0], p2[1]].map(f).join(' ');
+  }
+  return d + 'Z';
+}
+function somatic() {
+  return [[0, 1.5], [0.33, 0.65], [0.66, 0.65], [1, 1.4]].map(([t, w]) =>
+    '<path d="' + somaticLoop(t) + '" fill="none" stroke="currentColor" stroke-width="' + w +
+    '" stroke-linecap="round" stroke-linejoin="round"/>').join('');
+}
 const F = 'fill="currentColor"';
 
 const ICONS = {
@@ -97,16 +129,13 @@ const ICONS = {
     '<path d="' + lensAt(12, 12, 2.6) + '" ' + F + '/>' +
     '<circle cx="12" cy="17.8" r="2.1" ' + S + '/>',
 
-  /* THE ORACLE. The sky as a whole, with the lens turned on its side inside
-     it, which is the shape of an eye: a reading is the sky looked at for one
-     person. The pupil is solid and the lens is drawn open, because what is
-     seen is the reader's and the seeing is only a way of looking. It took
-     Throughline's seat in the nav, and Throughline keeps its icon in the
-     Library, where the record went. */
-  oracle:
-    '<circle cx="12" cy="12" r="8.6" ' + S + '/>' +
-    '<path d="' + lensH(12, 12, 6.4) + '" ' + S + '/>' +
-    '<circle cx="12" cy="12" r="1.9" ' + F + '/>',
+  /* THE ORACLE. A body thinking: a ring of flesh and light drawn in contour
+     lines, the somatic form the owner chose on 5 November 2026 in place of
+     the eye. It is the one icon not built from the circle and the lens,
+     because a reading here is felt before it is seen. It took Throughline's
+     seat in the nav, and Throughline keeps its icon in the Library, where the
+     record went. */
+  oracle: somatic(),
 
   /* SETTINGS. Not a gear. Every control on that screen is a consent, so it is
      a switch: two positions on one track, and the filled one is the answer you
