@@ -486,13 +486,22 @@ tiles by time, under three headed bands that read the same on all three charts:
 |---|---|
 | Bedrock | what the birth fixed. Astrology: the placements, Houses, Aspects (the placements are the Ledger's rows, see below). Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
 | Weather | what the sky is doing to it now. Astrology: the two transit lists, and the Ledger's Weather column. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
-| Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
+| Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design: the dates ahead when the Sun, a planet or Pluto enters the partner of one of the reader's hanging gates and completes that channel (`hdHorizonVals()`, the owner's ask of 5 November 2026; until then it had no Horizon, and with no such date in 180 days it still draws none). |
 
-**The bands are headings and nothing more.** A glyph (strata, a body on its
-orbit, a sun on the horizon line), the name in the display face and a rule. No
-line under them says what a band means, by "Discovery belongs to the reader":
-the contents say it. The glyphs live in `BAND_SVG` on the logic class rather
-than `UI_ICONS`, because nothing asks `uiIcon()` for them.
+**The bands are quiet, and the chart leads** (the owner, 5 November 2026: "Make
+the bedrock weather and horizon concepts more subtle. They should be nearly
+exclusive to the library tutorials. The chart should be the main point of
+interaction across the entire charts section"). This replaces the band glyphs,
+the display face headings and the press-for-a-line tips of the same morning
+(`BAND_TIP` and `bandTip()` are gone). On the chart pages each band is a small
+uppercase label in `--mut` over a hairline, in plain words: **Natal**, **Now**
+and **Ahead** (`BAND_NAMES`), and the Ledger's columns read Aspects, Now and
+Ahead. The words Bedrock, Weather and Horizon appear only in the Library: the
+Human Design Atlas's lesson tiers, and one step each in the Astropedia's and
+the Book of Numbers' Finding my way tutorial, which names the three and the
+plain label each wears on My Charts. The phone Ledger rows keep their small
+band glyphs, in `--dim`, as the only key to the three cells. Do not bring a
+band name back to a chart page without the owner.
 
 **On the astrology page the bands became the Ledger's columns**, and the cards
 (Important Today, the retrogrades, the eclipses, the stellium) left them: see
@@ -3131,19 +3140,26 @@ all six that test separation go red with the owner forced to null. Driven in
 the built bundle too: a device holding a guest profile, then account A (takes
 it), account B (the birth page), A again (its own profile), signed out (blank).
 
-## Swiping on the phone is one chain, read left to right
-The order is Today, the three charts (Human Design, Astrology, Numerology), the
-six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
-that line, so the last chart hands on to the first Library tab, the last Library
-tab to the Oracle, and the other way back (landing on the last chart or the last
-tab when going backwards). `vtSwipeStep(dir)` does the move and `vtBindTouch()`
-reads the gesture. Three things are easy to undo.
+## Swiping on the phone stays inside a section
+Decided by the owner on 5 November 2026: "Left and right okay between charts or
+library sections, but scrolling or swiping should never switch between Today,
+Charts, Library, Oracle, and/or Settings." A sideways swipe moves between the
+three charts (Human Design, Astrology, Numerology) or between the six Library
+tabs, and stops at either end; on Today, the Oracle and Settings it does
+nothing. **No gesture changes the section**: the nav bar and an address do. It
+used to be one chain across every section, so a swipe past the last chart
+landed in the Library, and a vertical drag in the top or bottom 34px band
+(`VT_BAND`) jumped a section; both are gone. The column is `touch-action:
+none`, every page contains its own overscroll, and `_vtWheel` refuses a wheel
+or trackpad scroll that would reach the column, so the end of a page is the end.
+`vtSwipeStep(dir)` does the move and `vtBindTouch()` reads the gesture. Three
+things are easy to undo.
 
 **The pager's own horizontal scroll never fired on a phone.** The section column
 is `touch-action: none` and what is inside inherits it, so a swipe on the
 My Charts pager did nothing at all; this was measured, the pager stayed at
 scrollLeft 0 through a real swipe. The swipe is read from the same touch
-listeners the section bands use. If the browser did move the pager under the
+listeners. If the browser did move the pager under the
 finger, `vtBindTouch` leaves it alone so a gesture is never handled twice.
 
 **It must not fire where a sideways gesture already means something.**
@@ -3514,7 +3530,8 @@ not built and wait on the owner.
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
 (cazimis, moon phases, stations, meteor showers, alignments, the clusters),
 at least a day ahead, behind a weather icon at the top right of the
-horoscope on Today. `docs/astro-upgrade/03-sky-weather-sources.md` holds every
+horoscope on Today. On the screen it is called **Forecast** (the owner, 5
+November 2026); the code still says sky weather. `docs/astro-upgrade/03-sky-weather-sources.md` holds every
 rule and the page it was read on.
 
 **`app/sky-weather.js` is mechanics** (global `SkyWeather`): it reads
@@ -3552,9 +3569,19 @@ evening and morning, and four or more is a parade, one event per run of
 nights. Uranus and Neptune never count, because they need a telescope. The
 two 3s are chosen, not read: the phrase is not a term of astronomy, and those
 are the figures that reproduce Kielder Observatory's dated list when run from
-Kielder (SW6). Do not tune them without rerunning SW6. The place is the
-profile's (`swPlace()`), the memo key carries it, and the sample has none, so
-it shows no parade.
+Kielder (SW6). Do not tune them without rerunning SW6. The place is where
+the reader is (the owner, 5 November 2026, reversing the profile place he
+chose that morning): opening the sheet asks the device for a coarse position
+(`swLocate()`), kept as `incommon.here`, rounded to two decimals, never sent,
+and named by the nearest town in the gazetteer (`swNearest()`), renamed from
+the world list once it lands. Refused or unavailable, `swPlace()` falls back
+to the profile's birth place; the sample has none, so then there is no
+parade. The memo key carries the place. `Permissions-Policy` in the bundle's
+`_headers` allows `geolocation=(self)` for this, and the Privacy Policy's
+section 3 says so. The store apps ask through the web view: iOS has
+`NSLocationWhenInUseUsageDescription` in `Info.plist` and Android declares
+`ACCESS_COARSE_LOCATION`, with no plugin, because the browser's own
+`navigator.geolocation` is what the page calls. Not yet run on a device.
 
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
@@ -6372,6 +6399,19 @@ entered from here only** (the owner's choice, same day): Enter the Observatory
 (`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
 buttons are gone. N40 goes through both.
 
+**Expanded and Advanced** (owner, 5 November 2026). The 22 in `BLOOM_CORE`
+are the Expanded set and every point is Advanced: the dialog's two buttons say
+so. On the chart card the Expanded Chart draws the Expanded set alone
+(`coreSet` in the wheel vals, so the 3D and Orbital stage follow it), and an
+Advanced placements switch (`chartAdvanced`, per visit) draws every point. The
+dialog and the Observatory still place every point.
+
+**The forecast banner is one line until opened** (owner, 5 November 2026):
+the label and the forecast's first line, 46px, with the rest behind the press.
+The "Back to Today's Alignment" buttons and the alignment teaser on the chart
+pages are gone, and the last stop of a followed thread closes it rather than
+going to Today.
+
 ## The chart speaks gently, and stays intense
 Decided by the owner on 4 November 2026, after a voice sample he approved: the
 placement, sign, house and aspect writing reads as an invitation rather than a
@@ -7562,3 +7602,19 @@ serving the site, and that address cannot be removed. Deploy previews and
 branch deploys are other hosts and are not redirected. If the address moves, change
 the three together, then submit the sitemap again in Search Console.
 Description copy follows the voice rules: no method, no fate, no dash.
+
+## About is in the profile menu
+Asked for by the owner on 5 November 2026: an About page that does not get in
+the way of the tabs, in the profile icon's menu, "dedicated and decorated
+according to the concept of gaining insight". The menu row sits after Settings
+(`pmAboutGo`) and opens a dialog in both shells (`aboutOpen`, cleared by
+`dialogEscape()`): the mark drawn as a lens (two whole circles, the warm light
+where they meet, faint rays, a twinkling field, `data-pl` so it breathes by
+opacity only and is still under reduced motion), then what inCommon is, insight
+rather than instruction, the name, and the four places it holds. It says what
+inCommon is and never how anything is worked out, by "No disclaimers", and it
+carries no legal link, so K55's counts are unchanged. **The company line is
+`ABOUT_COMPANY`**, empty until the owner confirms the legal name: while it is
+empty the "Kept by" line is not drawn and only the credit line shows. Measured
+with the harness's own `contrastFails()` and `tapTargets()` over the dialog,
+four identities hardened and not, at 1440, 390 and 375: clean.

@@ -161,7 +161,7 @@ Celestron calls three of them impractical; the sheet names any planet under
 10 degrees as low in the twilight.
 
 **It needs a place.** It is read from the place on the profile, the one place
-the app holds, and a profile with none (the sample) has no parade. Whether that
-should be the device's location or a place typed into the sheet is the
-owner's decision, asked on 5 November 2026.
+the app holds, and a profile with none (the sample) has no parade. The owner
+chose it on 5 November 2026 over the device's location (which would need a new
+Privacy Policy paragraph) and a place typed into the sheet.
 
