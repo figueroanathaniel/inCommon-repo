@@ -143,10 +143,11 @@ the same bisection as the secondary progression with the clock changed. The
 sources do not agree on the month: tropical and sidereal differ by 0.00008 of
 a day, which moves no date, and the synodic month (29.53 days) is the one real
 alternative and is not used. The Moon is withheld without a birth time, as in
-the secondary. Checked on four births against astronomy-engine directly: the
-longitude now matches and every last and next crossing is a sign edge. Not
-held to the Swiss Ephemeris the way `drive-progressions.js` holds the
-secondary. Troinski is not named on the page, since only one secondary page
+the secondary. Held to the Swiss Ephemeris by `drive-progressions.js` row PR4,
+over the same 500 births, against `tools/fixtures/tertiary-swiss.json` (the
+same C reference program, the age passed in months): worst ingress 0.014 days
+of life, worst longitude 3.89 arcseconds. Swapping in the synodic month turns
+PR4 red. Troinski is not named on the page, since only one secondary page
 names him. The Naibod arc was not found. astro.com's Astrowiki served a script check, not the
 article. Solar arc is buildable from these: `progressedHandoff()` already
 bisects the progressed Sun, and the arc is that position less the natal Sun.

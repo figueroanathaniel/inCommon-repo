@@ -11,6 +11,10 @@
  *   PR2  the progressed longitude now is within 10 arcseconds
  *   PR3  the month and year the page prints is the reference's month (a date
  *        within three days of a month's edge may print either)
+ *   PR4  the tertiary progression (a day after birth for each tropical lunar
+ *        month, 27.32158 days) over the same births, held to
+ *        tools/fixtures/tertiary-swiss.json: every last and next ingress within
+ *        half a day of life of the reference, and the longitude now within 10"
  *
  * The reference was computed by a small C program against the Swiss Ephemeris
  * 2.10.03 (Moshier, no data files) from the pyswisseph source, with the app's
@@ -27,6 +31,7 @@ try { ({ chromium } = require('playwright')); } catch (e) { console.log('drive-p
 const http = require('http'), fs = require('fs'), path = require('path');
 const REPO = path.resolve(__dirname, '..');
 const FX = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/progressions-swiss.json'), 'utf8'));
+const TX = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/tertiary-swiss.json'), 'utf8'));
 const TYPES = { '.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 const srv = http.createServer((q, r) => { const f = path.join(REPO, decodeURIComponent(q.url.split('?')[0].split('#')[0]));
   if (!f.startsWith(REPO)) { r.writeHead(403); r.end(); return; }
@@ -42,9 +47,11 @@ const srv = http.createServer((q, r) => { const f = path.join(REPO, decodeURICom
   const got = await pg.evaluate(births => { const A = window.__incommonApp, PM = window.ProfileManager;
     return births.map(x => { PM.updateProfile(PM.activeId(), { birthDate: x.date, birthTime: x.time, birthLocation: x.place }); A._progMemo = {};
       const nd = A.natalDate(), S = A.progressedHandoff('Sun'), M = A.progressedHandoff('Moon');
-      return { jd: nd.getTime() / 86400000 + 2440587.5, sun: S && [S.last, S.next, S.lonNow, S.paras[0]], moon: M && [M.last, M.next, M.lonNow, M.paras[0]] }; }); }, FX.births);
+      const TS = A.progressedHandoff('Sun', 'tertiary'), TM = A.progressedHandoff('Moon', 'tertiary');
+      return { jd: nd.getTime() / 86400000 + 2440587.5, sun: S && [S.last, S.next, S.lonNow, S.paras[0]], moon: M && [M.last, M.next, M.lonNow, M.paras[0]],
+        tsun: TS && [TS.last, TS.next, TS.lonNow], tmoon: TM && [TM.last, TM.next, TM.lonNow] }; }); }, FX.births);
   const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const fails = { PR1: [], PR2: [], PR3: [], PR0: [] }; let worstD = 0, worstL = 0;
+  const fails = { PR1: [], PR2: [], PR3: [], PR0: [], PR4: [] }; let worstD = 0, worstL = 0, worstTD = 0, worstTL = 0;
   const dd = (a, r) => (a == null || a < 0) && r < 0 ? 0 : (a == null || a < 0 || r < 0) ? Infinity : Math.abs(a - r) * FX.yearDays;
   FX.births.forEach((x, i) => { const g = got[i];
     if (Math.abs(g.jd - x.jdUt) > 1e-6) { fails.PR0.push(x.date + ' ' + x.time + ' birth instant moved'); return; }
@@ -54,11 +61,19 @@ const srv = http.createServer((q, r) => { const f = path.join(REPO, decodeURICom
       let l = Math.abs(a[2] - R[2]); if (l > 180) l = 360 - l; l *= 3600; worstL = Math.max(worstL, l); if (!(l <= 10)) fails.PR2.push(x.date + ' ' + nm + ' ' + l.toFixed(2) + '"');
       if (R[0] >= 0) { const t = (x.jdUt - 2440587.5) * 86400000 + R[0] * FX.yearDays * 86400000, ok = [-3, 0, 3].some(o => { const dt = new Date(t + o * 86400000); return a[3].indexOf(MON[dt.getMonth()] + ' ' + dt.getFullYear()) !== -1; });
         if (!ok) fails.PR3.push(x.date + ' ' + nm + ': ' + a[3]); } }); });
+  const td = (a, r) => (a == null || a < 0) && r < 0 ? 0 : (a == null || a < 0 || r < 0) ? Infinity : Math.abs(a - r) * TX.monthDays;
+  TX.births.forEach((x, i) => { const g = got[i];
+    if (x.date !== FX.births[i].date || x.time !== FX.births[i].time) { fails.PR4.push('fixtures out of step at ' + i); return; }
+    [['tsun', 'sun', 'Sun'], ['tmoon', 'moon', 'Moon']].forEach(([k, rk, nm]) => { const a = g[k], R = x[rk];
+      if (!a) { fails.PR4.push(x.date + ' tertiary ' + nm + ' no answer'); return; }
+      const d = Math.max(td(a[0], R[0]), td(a[1], R[1])); worstTD = Math.max(worstTD, d); if (!(d <= 0.5)) fails.PR4.push(x.date + ' ' + x.time + ' tertiary ' + nm + ' ' + d.toFixed(3) + ' days');
+      let l = Math.abs(a[2] - R[2]); if (l > 180) l = 360 - l; l *= 3600; worstTL = Math.max(worstTL, l); if (!(l <= 10)) fails.PR4.push(x.date + ' tertiary ' + nm + ' ' + l.toFixed(2) + '"'); }); });
   const row = (id, txt) => { const f = fails[id]; console.log((f.length ? 'FAIL ' : 'pass ') + id + ' ' + txt + (f.length ? ' (' + f.length + ') ' + f.slice(0, 3).join('; ') : '')); };
   row('PR0', 'the app draws each fixture birth for the instant the reference used');
   row('PR1', 'ingresses within half a day of the Swiss Ephemeris, worst ' + worstD.toFixed(3) + ' days');
   row('PR2', 'progressed longitude within 10", worst ' + worstL.toFixed(2) + '"');
   row('PR3', 'the printed month is the reference month');
+  row('PR4', 'tertiary ingresses within half a day of life, worst ' + worstTD.toFixed(3) + ' days; longitude worst ' + worstTL.toFixed(2) + '"');
   if (errs.length) console.log('page errors:', errs.slice(0, 3));
   await b.close(); srv.close();
   process.exit(Object.values(fails).some(f => f.length) || errs.length ? 1 : 0);
