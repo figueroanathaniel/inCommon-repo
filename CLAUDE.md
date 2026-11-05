@@ -7746,3 +7746,31 @@ carries no legal link, so K55's counts are unchanged. **It has no subheaders and
 empty the "Kept by" line is not drawn and only the credit line shows. Measured
 with the harness's own `contrastFails()` and `tapTargets()` over the dialog,
 four identities hardened and not, at 1440, 390 and 375: clean.
+
+## The Observatory starts in a cabin, and its contacts open a window
+Asked for by the owner on 5 November 2026. **The cabin** (`obsRoom`,
+`obsRoomVals()`, `obsRoomPaint()`) is where the Observatory opens and where
+Station returns: a log room drawn as pixel art on a 160 by 120 canvas,
+redrawn about twelve times a second by `obsRoomSync()` from the one
+`componentDidUpdate`, held still under reduced motion and paused while the
+page is hidden. The telescope is Enter Observatory, the book on the table is
+Explore (a window saying what the Observatory is), and the one who keeps the
+room waves when pressed. Its colours are the room's own, like the worlds',
+and none is text; the controls over it are real buttons in tokens. The
+flight controls card waits for the first press of the telescope. The rails,
+the drawer, the touch pad and the view switch are not drawn in the cabin.
+
+**A reading opened in the Observatory is the glance over it**, never the
+packet that closes it (Open the reading, the O key, a See button), and the
+glance carries **Back to Flight Mode** (`obsFlyBack()`), which flies to that
+placement with no drawer pulled up. Open the focused read still leaves for
+the packet.
+
+**An aspect row, a contact chip or a ribbon opens the contact's window**
+(`obsAspWin`): its line, its nature, where it meets in the chart and its
+question, from the same tables the chart's aspect sheet reads. The four minor
+contacts have their writing in `ASP_MINOR`, which `aspectLines()` and the
+aspect sheet fall back to; `ASP_CLOSE` is untouched. Anything drawn over the
+flight carries `data-flight-off`, which `Flight.claimedElsewhere()` honours,
+or W in the cabin would fly the camera behind it. Escape closes the book, a
+glance, then the window, then the Observatory.

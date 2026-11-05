@@ -120,6 +120,7 @@ button{font-family:inherit;transition:background-color .2s ease,border-color .3s
 .obs:has(.obs-sheet) [data-obs-hud],.obs:has(.obs-keys) [data-obs-hud]{visibility:hidden}
 .obs-sheet [data-obs-pip]{max-height:22vh}
 @media (max-width:480px){.obs-mark{display:none!important}.obs-title{font-size:17px!important}.obs-top{gap:6px}.obs-view{min-width:46px!important;padding:0 8px!important}}
+.obs-room{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:calc(var(--obs-top) + 8px) max(14px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:radial-gradient(90% 70% at 50% 60%,rgba(var(--atmc2),.14),transparent 70%),var(--bg);animation:veilIn .45s ease-out}.obs-room-frame{position:relative;width:min(100%,calc((100svh - var(--obs-top) - 28px) * 4 / 3),960px);aspect-ratio:4/3;border:1px solid var(--bd);border-radius:18px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.55)}.obs-room-frame canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}.obs-room-hit{all:unset;position:absolute;box-sizing:border-box;min-width:44px;min-height:44px;cursor:pointer;border-radius:12px;display:flex;align-items:flex-end;justify-content:center;transition:box-shadow .2s ease}.obs-room-hit:hover,.obs-room-hit:focus-visible{box-shadow:0 0 0 2px var(--ac2-hi),0 0 22px rgba(var(--atmc2),.45)}.obs-room-tag{margin-bottom:-4px;padding:6px 12px;border-radius:999px;border:1px solid var(--ac2-hi);background:var(--bg);font:700 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--tx);white-space:nowrap}.obs-room-go{border-color:var(--ac);background:var(--ac);color:var(--onac)}.obs:has(.obs-room) [data-obs-hud]{visibility:hidden}
 .obs-keys{animation-name:obsKeysIn}@keyframes obsKeysIn{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:1;transform:translate(-50%,-50%)}}
 input,textarea{transition:border-color .2s ease}
 input:focus-visible,textarea:focus-visible{outline:2px solid #2fff8f;outline-offset:-2px}
@@ -5923,6 +5924,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <p style="margin:0;font:italic 400 15.5px/1.6 var(--fb);color:var(--tx);border-left:2px solid rgba(var(--atmc2),.6);padding-left:12px;text-wrap:pretty">{{ pgEpi }}</p>
       </sc-if>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+        <sc-if value="{{ pgFlyOn }}" hint-placeholder-val="{{ false }}">
+          <button data-lift onClick="{{ pgFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid var(--ac);background:var(--ac);font:700 11.5px var(--fc);color:var(--onac)">Back to Flight Mode<span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+        </sc-if>
         <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fc);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
         <sc-if value="{{ pgSealOn }}" hint-placeholder-val="{{ false }}">
           <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;border:1px solid {{ pgSealC }};font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:{{ pgSealC }}"><span aria-hidden="true" style="flex:none;width:5px;height:5px;transform:rotate(45deg);background:{{ pgSealC }}"></span>{{ pgSeal }}</span>
@@ -6315,11 +6319,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
         </div>
         <span style="flex:1"></span>
+<sc-if value="{{ obsFlightOn }}" hint-placeholder-val="{{ true }}">
         <div data-lift="box" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <sc-for list="{{ obsViews }}" as="v" hint-placeholder-count="2">
             <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" class="obs-view" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:56px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fc);letter-spacing:.08em;color:{{ v.c }}">{{ v.label }}</button>
           </sc-for>
         </div>
+        </sc-if>
         <sc-if value="{{ obsWide }}" hint-placeholder-val="{{ true }}">
           <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
           <button onClick="{{ obsPanelsGo }}" aria-pressed="{{ obsPanelsOn }}" class="obs-btn"><span aria-hidden="true" class="obs-ico">&#9707;</span>Panels</button>
@@ -6641,8 +6647,35 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
 
+      <sc-if value="{{ obsRoomOn }}" hint-placeholder-val="{{ false }}">
+        <div data-obs-room="1" data-flight-off="1" role="group" aria-label="The cabin" class="obs-room">
+          <div class="obs-room-frame">
+            <canvas width="160" height="120" aria-hidden="true"></canvas>
+            <button onClick="{{ obsRoomWave }}" aria-label="Wave hello" class="obs-room-hit" style="left:8%;top:45%;width:17%;height:44%"></button>
+            <button onClick="{{ obsRoomExplore }}" aria-expanded="{{ obsExploreOn }}" class="obs-room-hit" style="left:31%;top:52%;width:21%;height:34%"><span class="obs-room-tag">Explore</span></button>
+            <button onClick="{{ obsRoomEnter }}" class="obs-room-hit" style="left:64%;top:40%;width:26%;height:52%"><span class="obs-room-tag obs-room-go">Enter Observatory</span></button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ obsExploreOn }}" hint-placeholder-val="{{ false }}">
+        <div data-obs-explore="1" data-flight-off="1" role="dialog" aria-modal="false" aria-label="The Observatory" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
+          <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--bd)">
+            <span style="flex:1;font:400 20px/1.2 var(--fd);color:var(--tx)">The Observatory</span>
+            <button onClick="{{ obsRoomExploreClose }}" aria-label="Close the book" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#215;</span></button>
+          </div>
+          <div class="obs-scroll" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px">
+            <p style="margin:0;font:400 14px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">Through the telescope is your chart, opened out into a sky you can travel. Every celestial body and point stands at the place it held the moment you were born, and as you come close to one it grows from a glyph into a world.</p>
+            <p style="margin:0;font:400 14px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">Fly to a placement and read it where it hangs. Follow a contact and the two ends come into view together. Step through the houses, or simply drift and see what you notice first.</p>
+            <p style="margin:0;font:italic 400 14px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">This room is always here. Station brings you back to the candle.</p>
+          </div>
+          <div style="flex:none;display:flex;padding:10px 12px;border-top:1px solid var(--bd)">
+            <button data-lift onClick="{{ obsRoomEnter }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);font:700 11px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--onac)">Enter Observatory <span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+          </div>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ obsAspOn }}" hint-placeholder-val="{{ false }}">
-        <div role="dialog" aria-modal="false" aria-label="{{ obsAspTitle }}" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
+        <div data-flight-off="1" role="dialog" aria-modal="false" aria-label="{{ obsAspTitle }}" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
           <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--bd)">
             <span aria-hidden="true" style="flex:none;display:flex;align-items:center;gap:6px;font:400 20px/1 Georgia,serif;color:var(--ac2-hi)">{{ obsAspGA }}<span style="width:18px;height:0;border-top:2px solid {{ obsAspC }}"></span>{{ obsAspGB }}</span>
             <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
@@ -13341,11 +13374,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
         </div>
         <span style="flex:1"></span>
+<sc-if value="{{ obsFlightOn }}" hint-placeholder-val="{{ true }}">
         <div data-lift="box" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <sc-for list="{{ obsViews }}" as="v" hint-placeholder-count="2">
             <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" class="obs-view" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:56px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fc);letter-spacing:.08em;color:{{ v.c }}">{{ v.label }}</button>
           </sc-for>
         </div>
+        </sc-if>
         <sc-if value="{{ obsWide }}" hint-placeholder-val="{{ true }}">
           <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
           <button onClick="{{ obsPanelsGo }}" aria-pressed="{{ obsPanelsOn }}" class="obs-btn"><span aria-hidden="true" class="obs-ico">&#9707;</span>Panels</button>
@@ -13667,8 +13702,35 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
 
+      <sc-if value="{{ obsRoomOn }}" hint-placeholder-val="{{ false }}">
+        <div data-obs-room="1" data-flight-off="1" role="group" aria-label="The cabin" class="obs-room">
+          <div class="obs-room-frame">
+            <canvas width="160" height="120" aria-hidden="true"></canvas>
+            <button onClick="{{ obsRoomWave }}" aria-label="Wave hello" class="obs-room-hit" style="left:8%;top:45%;width:17%;height:44%"></button>
+            <button onClick="{{ obsRoomExplore }}" aria-expanded="{{ obsExploreOn }}" class="obs-room-hit" style="left:31%;top:52%;width:21%;height:34%"><span class="obs-room-tag">Explore</span></button>
+            <button onClick="{{ obsRoomEnter }}" class="obs-room-hit" style="left:64%;top:40%;width:26%;height:52%"><span class="obs-room-tag obs-room-go">Enter Observatory</span></button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ obsExploreOn }}" hint-placeholder-val="{{ false }}">
+        <div data-obs-explore="1" data-flight-off="1" role="dialog" aria-modal="false" aria-label="The Observatory" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
+          <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--bd)">
+            <span style="flex:1;font:400 20px/1.2 var(--fd);color:var(--tx)">The Observatory</span>
+            <button onClick="{{ obsRoomExploreClose }}" aria-label="Close the book" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#215;</span></button>
+          </div>
+          <div class="obs-scroll" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px">
+            <p style="margin:0;font:400 14px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">Through the telescope is your chart, opened out into a sky you can travel. Every celestial body and point stands at the place it held the moment you were born, and as you come close to one it grows from a glyph into a world.</p>
+            <p style="margin:0;font:400 14px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">Fly to a placement and read it where it hangs. Follow a contact and the two ends come into view together. Step through the houses, or simply drift and see what you notice first.</p>
+            <p style="margin:0;font:italic 400 14px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">This room is always here. Station brings you back to the candle.</p>
+          </div>
+          <div style="flex:none;display:flex;padding:10px 12px;border-top:1px solid var(--bd)">
+            <button data-lift onClick="{{ obsRoomEnter }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);font:700 11px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--onac)">Enter Observatory <span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+          </div>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ obsAspOn }}" hint-placeholder-val="{{ false }}">
-        <div role="dialog" aria-modal="false" aria-label="{{ obsAspTitle }}" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
+        <div data-flight-off="1" role="dialog" aria-modal="false" aria-label="{{ obsAspTitle }}" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
           <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--bd)">
             <span aria-hidden="true" style="flex:none;display:flex;align-items:center;gap:6px;font:400 20px/1 Georgia,serif;color:var(--ac2-hi)">{{ obsAspGA }}<span style="width:18px;height:0;border-top:2px solid {{ obsAspC }}"></span>{{ obsAspGB }}</span>
             <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
@@ -14683,6 +14745,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <p style="margin:0;font:italic 400 15.5px/1.6 var(--fb);color:var(--tx);border-left:2px solid rgba(var(--atmc2),.6);padding-left:12px;text-wrap:pretty">{{ pgEpi }}</p>
       </sc-if>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+        <sc-if value="{{ pgFlyOn }}" hint-placeholder-val="{{ false }}">
+          <button data-lift onClick="{{ pgFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid var(--ac);background:var(--ac);font:700 11.5px var(--fc);color:var(--onac)">Back to Flight Mode<span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+        </sc-if>
         <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fc);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
         <sc-if value="{{ pgSealOn }}" hint-placeholder-val="{{ false }}">
           <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;border:1px solid {{ pgSealC }};font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:{{ pgSealC }}"><span aria-hidden="true" style="flex:none;width:5px;height:5px;transform:rotate(45deg);background:{{ pgSealC }}"></span>{{ pgSeal }}</span>
@@ -15974,6 +16039,7 @@ class Component extends DCLogic {
     this.syncTrap();
     this.announceChanges();
     this.skySync();
+    this.obsRoomSync();
     this.worldSync();
     this.syncSectionToTab();
     this.syncAtlasItem();
@@ -19169,6 +19235,154 @@ class Component extends DCLogic {
   /* A control that closes a part of the station takes its own focus away
      with it, and focus left on the page is outside the dialog's trap, where
      Escape and the flight keys no longer reach. So it comes back inside. */
+  /* Back to Flight Mode (owner, 5 November 2026): from a reading opened in
+     the Observatory, back to the sky in front of that placement, with no
+     manifest or drawer pulled up over it. */
+  obsFlyBack(k) {
+    this.setState({ plGlance: null, numGlance: null, obsDrawer: false, obsRoom: false, obsExplore: false, obsAspWin: false, csFocus: k || this.state.csFocus },
+      () => this.obsRefocus());
+    const S = this._csS;
+    if (S && k) { try { S.setFocus(k, false); S.flyTo(k); } catch (e) {} }
+  }
+  /* THE CABIN (owner, 5 November 2026): the Observatory starts in a small
+     log room, drawn as pixel art on a canvas of 160 by 120. The telescope
+     enters the flight, the book on the table says what the Observatory is,
+     and the one who keeps the room waves when pressed. The colours are the
+     room's own, like the worlds' (body-globes.js): wood, brass and candle
+     light do not change with a theme, and none of them is text. */
+  obsRoomVals() {
+    const st = this.state;
+    return {
+      obsRoomOn: !!st.chartExpandOpen && !!st.obsRoom,
+      obsExploreOn: !!st.obsRoom && !!st.obsExplore,
+      obsRoomEnter: () => {
+        const first = !!this._obsKeysFirst; this._obsKeysFirst = false;
+        this.setState({ obsRoom: false, obsExplore: false, obsKeys: first }, () => this.obsRefocus());
+        this.speak('Through the telescope.', 'polite');
+      },
+      obsRoomExplore: () => this.setState({ obsExplore: !st.obsExplore }, () => this.obsRefocus('[data-obs-explore] button')),
+      obsRoomExploreClose: () => this.setState({ obsExplore: false }, () => this.obsRefocus('[data-obs-room] button')),
+      obsRoomWave: () => { this._roomWave = Date.now(); this._roomDirty = true; this.speak('A wave back from the cabin.', 'polite'); }
+    };
+  }
+  obsRoomSync() {
+    const cv = typeof document !== 'undefined' ? document.querySelector('[data-obs-room] canvas') : null;
+    if (!cv) { if (this._roomRaf) { cancelAnimationFrame(this._roomRaf); this._roomRaf = 0; } this._roomCv = null; return; }
+    if (this._roomCv === cv && this._roomRaf) return;
+    this._roomCv = cv;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let last = 0;
+    const tick = now => {
+      if (!cv.isConnected) { this._roomRaf = 0; this._roomCv = null; return; }
+      this._roomRaf = requestAnimationFrame(tick);
+      if (document.hidden) return;
+      if (reduced && !this._roomDirty && last && Date.now() - (this._roomWave || 0) > 1600) return;
+      if (!reduced && now - last < 83) return;
+      last = now; this._roomDirty = false;
+      this.obsRoomPaint(ctx, reduced ? 0 : now, this._roomWave ? Date.now() - this._roomWave : 1e9, reduced);
+    };
+    this._roomRaf = requestAnimationFrame(tick);
+  }
+  obsRoomPaint(c, now, waveAge, reduced) {
+    const W = 160, H = 120;
+    const P = {
+      logA: '#5b3a24', logB: '#674227', gap: '#2a180d', end: '#7b5333', ring: '#4b2e1b',
+      floor: '#3d2616', plank: '#29180d', rug: '#5a2a3a', rugE: '#7a3d50',
+      frame: '#36210f', sky: '#0c1534', sky2: '#16224a', star: '#fff3d1', moon: '#f1e3bd',
+      top: '#7a4d2b', edge: '#58361d', leg: '#462a17', page: '#eee1c3', pageL: '#b8a67f', cover: '#6b2b2b',
+      wax: '#efe5cf', waxS: '#cfc3a8', fo: '#ffae45', fi: '#fff1a3',
+      brass: '#c8a04a', brassD: '#8a6a2a', brassL: '#e8cf86', lens: '#9fd2ff', tri: '#33200f',
+      hair: '#2b1b12', skin: '#b27a52', skinS: '#8f5d3c', robe: '#4a3a8a', robeS: '#352a68', belt: '#c8a04a', boot: '#24170f', eye: '#160d08'
+    };
+    const r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
+    const line = (x0, y0, x1, y1, w, col) => {
+      const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0;
+      for (let i = 0; i <= n; i++) { const t = n ? i / n : 0; r(Math.round(x0 + (x1 - x0) * t - w / 2), Math.round(y0 + (y1 - y0) * t - w / 2), w, w, col); }
+    };
+    const t = now / 1000;
+    const flick = reduced ? 1 : 0.86 + 0.08 * Math.sin(t * 9.1) + 0.06 * Math.sin(t * 23.7 + 1.3);
+    c.imageSmoothingEnabled = false;
+    c.globalCompositeOperation = 'source-over';
+    // the logs of the back wall
+    for (let y = 0, i = 0; y < 86; y += 9, i++) {
+      r(0, y, W, 8, i % 2 ? P.logB : P.logA);
+      r(0, y + 8, W, 1, P.gap);
+      for (let x = (i * 23) % 31; x < W; x += 31) r(x, y + 3, 6, 1, P.gap);
+      r(0, y + 1, 3, 6, P.end); r(1, y + 3, 1, 2, P.ring);
+      r(W - 3, y + 1, 3, 6, P.end); r(W - 2, y + 3, 1, 2, P.ring);
+    }
+    // the floor
+    r(0, 86, W, H - 86, P.floor);
+    for (let y = 92; y < H; y += 7) r(0, y, W, 1, P.plank);
+    for (let x = 11, k = 0; x < W; x += 19, k++) r(x, 86 + (k % 3) * 7, 1, 7, P.plank);
+    r(0, 86, W, 1, P.gap);
+    // a rug under the table
+    r(36, 100, 56, 10, P.rug); r(36, 100, 56, 1, P.rugE); r(36, 109, 56, 1, P.rugE);
+    for (let x = 38; x < 92; x += 4) r(x, 104, 2, 2, P.rugE);
+    // the window and the sky in it
+    r(92, 10, 50, 40, P.frame);
+    r(95, 13, 44, 34, P.sky);
+    r(95, 30, 44, 17, P.sky2);
+    const stars = [[99, 17], [106, 23], [113, 15], [121, 27], [131, 19], [101, 35], [117, 39], [135, 33], [126, 41], [109, 31]];
+    stars.forEach(([x, y], i) => {
+      const a = reduced ? 1 : 0.55 + 0.45 * Math.sin(t * (0.9 + i * 0.27) + i * 1.7);
+      if (a > 0.25) { r(x, y, 1, 1, P.star); if (a > 0.85) { r(x - 1, y, 1, 1, P.sky2); r(x + 1, y, 1, 1, P.sky2); } }
+    });
+    for (let y = -5; y <= 5; y++) for (let x = -5; x <= 5; x++) {
+      if (x * x + y * y <= 25 && !((x - 2) * (x - 2) + (y + 1) * (y + 1) <= 18)) r(129 + x, 21 + y, 1, 1, P.moon);
+    }
+    r(116, 13, 2, 34, P.frame); r(95, 29, 44, 2, P.frame);
+    r(90, 49, 54, 3, P.edge);
+    // the telescope on its tripod, aimed at the window
+    line(121, 84, 110, 106, 2, P.tri); line(121, 84, 122, 108, 2, P.tri); line(121, 84, 133, 106, 2, P.tri);
+    r(118, 82, 6, 4, P.brassD);
+    for (let i = 0; i <= 30; i++) {
+      const u = i / 30, x = 108 + 28 * u, y = 90 - 34 * u, w = 3 + Math.round(u * 2);
+      line(x, y, x, y + w, 1, i % 6 === 0 ? P.brassD : P.brass);
+      r(Math.round(x), Math.round(y), 1, 1, P.brassL);
+    }
+    r(134, 53, 4, 6, P.brassD); r(136, 54, 2, 4, P.lens);
+    r(105, 90, 4, 3, P.brassD);
+    // the table, the book and the candle
+    r(38, 74, 50, 4, P.top); r(38, 78, 50, 2, P.edge);
+    r(41, 80, 3, 22, P.leg); r(82, 80, 3, 22, P.leg); r(48, 80, 2, 12, P.leg); r(76, 80, 2, 12, P.leg);
+    r(56, 70, 22, 4, P.cover); r(57, 69, 10, 4, P.page); r(67, 69, 10, 4, P.page); r(67, 69, 1, 5, P.pageL);
+    for (let y = 70; y < 73; y += 2) { r(58, y, 7, 1, P.pageL); r(69, y, 7, 1, P.pageL); }
+    r(46, 64, 4, 10, P.wax); r(49, 64, 1, 10, P.waxS); r(44, 73, 8, 1, P.brassD);
+    r(47, 63, 1, 1, P.eye);
+    const fh = reduced ? 4 : 3 + Math.round((flick - 0.8) * 10);
+    r(47, 63 - fh, 2, fh, P.fo); r(47, 62 - Math.max(1, fh - 2), 1, Math.max(1, fh - 2), P.fi);
+    // the one who keeps the room
+    const waving = waveAge < 1600;
+    r(17, 100, 6, 4, P.boot); r(26, 100, 6, 4, P.boot);
+    for (let y = 74; y < 100; y++) { const sp = Math.floor((y - 74) / 4); r(19 - sp, y, 12 + sp * 2, 1, P.robe); }
+    r(23, 74, 4, 26, P.robeS); r(14, 86, 22, 2, P.belt);
+    r(20, 71, 10, 3, P.skinS);
+    r(19, 59, 12, 12, P.skin); r(19, 57, 12, 4, P.hair); r(18, 58, 2, 9, P.hair); r(30, 58, 2, 6, P.hair);
+    r(22, 64, 2, 2, P.eye); r(27, 64, 2, 2, P.eye); r(24, 68, 3, 1, P.skinS);
+    r(15, 76, 4, 13, P.robe); r(15, 89, 3, 3, P.skin);
+    if (waving) {
+      const sway = reduced ? 0 : (Math.floor(waveAge / 180) % 2 ? 2 : -1);
+      line(33, 77, 37 + sway, 64, 3, P.robe); r(35 + sway, 60, 4, 4, P.skin);
+      r(25, 68, 1, 1, P.eye); r(26, 68, 1, 1, P.skinS);
+    } else {
+      r(31, 76, 4, 13, P.robe); r(32, 89, 3, 3, P.skin);
+    }
+    // candle light and moonlight, then the dark of the room
+    c.fillStyle = 'rgba(8,5,16,.42)'; c.fillRect(0, 0, W, H);
+    c.globalCompositeOperation = 'lighter';
+    let g = c.createRadialGradient(48, 60, 2, 48, 64, 78);
+    g.addColorStop(0, 'rgba(255,176,90,' + (0.42 * flick).toFixed(3) + ')');
+    g.addColorStop(0.45, 'rgba(255,140,60,' + (0.14 * flick).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    g = c.createRadialGradient(117, 30, 4, 117, 60, 70);
+    g.addColorStop(0, 'rgba(120,150,255,.16)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.globalCompositeOperation = 'source-over';
+  }
   obsRefocus(sel) {
     setTimeout(() => {
       const d = document.querySelector('[data-obs]');
@@ -19181,7 +19395,7 @@ class Component extends DCLogic {
     const st = this.state, S = this._csS;
     const wide = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) >= 1100;
     const deep = this.chartSceneOn() || this.scenePending('ChartScene'), live = !!st.csLive;
-    const tab = st.obsTab || 'bodies', panels = st.obsPanels !== false;
+    const tab = st.obsTab || 'bodies', panels = st.obsPanels !== false, room = !!st.obsRoom;
     const known = allRows.filter(r => r.known);
     const key = st.csFocus || (known[0] && known[0].id) || null;
     const row = allRows.find(r => r.id === key) || null, src = rows.find(r => this.pointKey(r) === key) || null;
@@ -19203,12 +19417,13 @@ class Component extends DCLogic {
     }));
     const flying = !!st.csFlying;
     return {
-      obsDeep: deep, obsFlat: !deep, obsWide: wide, obsNarrow: !wide,
+      obsDeep: deep, obsFlat: !deep, obsWide: wide && !room, obsNarrow: !wide && !room, obsFlightOn: !room,
+      ...this.obsRoomVals(),
       obsVeilO: live ? '0' : '1', obsVeilV: live ? 'hidden' : 'visible',
       obsUiO: live || !deep ? '1' : '0', obsUiV: live || !deep ? 'visible' : 'hidden',
       obsPanelsAttr: wide && panels ? '1' : '0', obsDrawerAttr: !wide && st.obsDrawer ? '1' : '0',
-      obsRailsOn: wide && panels, obsDrawerOn: !wide && !!st.obsDrawer,
-      obsTouch: deep && this.touchUi(),
+      obsRailsOn: wide && panels && !room, obsDrawerOn: !wide && !!st.obsDrawer && !room,
+      obsTouch: deep && this.touchUi() && !room,
       obsStatus: flying ? 'In flight' : 'At station', obsStatusDot: flying ? 'var(--ac2-hi)' : 'var(--mut)',
       obsAria: 'The Observatory: your chart in open space. W, A, S and D fly, E and Q climb and descend, the arrows look, brackets step between bodies and Enter flies to the one in front.',
       obsViews: [['orbit', 'Orbital'], ['3d', '3D']].map(([id, label]) => {
@@ -19216,7 +19431,9 @@ class Component extends DCLogic {
         return { label, on, bg: on ? 'rgba(var(--atmc),.34)' : 'transparent', bd: on ? 'var(--ac2)' : 'transparent', c: on ? 'var(--tx)' : 'var(--dim)',
           go: () => this.setState({ chartView: id }) };
       }),
-      obsHomeGo: () => { if (S) S.home(); this.setState({ obsDrawer: false }, () => this.obsRefocus()); },
+      /* Station is the cabin (owner, 5 November 2026): the camera goes home
+         behind it, so the telescope lands the reader where flight begins. */
+      obsHomeGo: () => { if (S) S.home(); this.setState({ obsDrawer: false, obsRoom: true, obsExplore: false, obsAspWin: false, obsKeys: false }, () => this.obsRefocus('[data-obs-room] button')); },
       obsPanelsGo: () => this.setState({ obsPanels: !panels }),
       obsPanelsOn: panels,
       obsKeysOn: !!st.obsKeys, obsKeysGo: () => this.setState({ obsKeys: !st.obsKeys, obsDrawer: false }, () => this.obsRefocus()),
@@ -19237,7 +19454,7 @@ class Component extends DCLogic {
       obsTIdx: at < 0 ? '' : (at + 1) + ' of ' + known.length,
       obsTPrev: stepT(-1), obsTNext: stepT(1),
       obsTFly: () => { if (S && key) S.flyTo(key); this.setState({ obsDrawer: false }, () => this.obsRefocus()); },
-      obsTOpen: () => { if (key) this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }); },
+      obsTOpen: () => { if (key) this.setState({ plGlance: key }); },
       obsTContacts: contacts, obsTContactsOn: contacts.length > 0
     };
   }
@@ -19325,7 +19542,8 @@ class Component extends DCLogic {
       bloomObsGo: () => {
         let seen = true;
         try { seen = !!localStorage.getItem('incommon.obs.keys'); localStorage.setItem('incommon.obs.keys', '1'); } catch (e) {}
-        this.setState({ chartBloom: false, chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsAspWin: false, obsDrawer: false, obsHouse: null, obsKeys: !seen });
+        this.setState({ chartBloom: false, chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsAspWin: false, obsDrawer: false, obsHouse: null, obsKeys: false, obsRoom: true, obsExplore: false });
+        this._obsKeysFirst = !seen;
       }
     };
   }
@@ -19353,9 +19571,10 @@ class Component extends DCLogic {
         /* The first visit opens on the flight controls, once per device. */
         let seen = true;
         try { seen = !!localStorage.getItem('incommon.obs.keys'); localStorage.setItem('incommon.obs.keys', '1'); } catch (e) {}
-        this.setState({ chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsAspWin: false, obsDrawer: false, obsHouse: null, obsKeys: !seen });
+        this.setState({ chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsAspWin: false, obsDrawer: false, obsHouse: null, obsKeys: false, obsRoom: true, obsExplore: false });
+        this._obsKeysFirst = !seen;
       },
-      chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false }),
+      chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false, obsRoom: false, obsExplore: false }),
       chartExpandSwallow: e => { if (e && e.stopPropagation) e.stopPropagation(); }
     };
     if (!st.chartExpandOpen) return base;
@@ -30490,7 +30709,7 @@ class Component extends DCLogic {
         const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
         if (b && how === 'key') this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
       },
-      onOpen: key => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }),
+      onOpen: key => this.setState({ plGlance: key }),
       onAspect: i => this.setState(this.state.chartExpandOpen ? { chartExpandAspSel: i, obsTab: 'aspects', obsAspWin: true } : { aspSel: i }),
       onHouse: n => this.setState(this.state.chartExpandOpen ? { obsHouse: n } : { dpSel: { kind: 'house', h: n } }),
       lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t))),
@@ -32065,11 +32284,12 @@ class Component extends DCLogic {
        glance, then a contact's window) before it closes the Observatory. */
     const o = this.state;
     if (o.chartExpandOpen && (o.plGlance || o.numGlance)) { this.setState({ plGlance: null, numGlance: null }, () => this.obsRefocus()); return; }
+    if (o.chartExpandOpen && o.obsRoom && o.obsExplore) { this.setState({ obsExplore: false }, () => this.obsRefocus('[data-obs-room] button')); return; }
     if (o.chartExpandOpen && o.obsAspWin) { this.setState({ obsAspWin: false }, () => this.obsRefocus()); return; }
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, aboutOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false,
+      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false, obsRoom: false, obsExplore: false,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
@@ -32299,7 +32519,8 @@ class Component extends DCLogic {
     const v = this.placementVals(k);
     if (!v || !v.spiritPlacement) return { pgOpen: false };
     const close = () => this.setState({ plGlance: null, numGlance: null });
-    const base = { pgOpen: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgClose: close, pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
+    const base = { pgOpen: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgClose: close,
+      pgFlyOn: !!this.state.chartExpandOpen, pgFly: () => this.obsFlyBack(k), pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
       pgTitle: v.plTitle || (v.plName ? v.plName.charAt(0) + v.plName.slice(1).toLowerCase() : ''), pgGlyph: v.plGlyph || '',
       pgKind: v.plKind || '', pgFocus: () => this.setState({ plGlance: null, numGlance: null, tab: 'spirit', spiritView: 'placement', placeSel: k, aspSel: null,
         ...(this.state.chartExpandOpen ? { chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false } : {}),
