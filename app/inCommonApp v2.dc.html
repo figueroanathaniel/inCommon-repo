@@ -22397,13 +22397,13 @@ class Component extends DCLogic {
       /* A pixel face that is still a reading face: the display face carries the
          readings' paragraphs as well as the headings, and VT323, the concept's
          label face, reads at about two thirds of its size there. */
-      face: ['Pixelify Sans', 'Pixelify+Sans:wght@400;500;600'],
+      face: ['Pixelify Sans', 'Pixelify+Sans:wght@400;500;600', 'Tiny5&text=0123456789'],
       shared: { '--tx': '#f4f6ff', '--ok': '#8fe0ad', '--dim': 'rgba(244,246,255,.76)', '--mut': 'rgba(244,246,255,.76)',
         '--atmc': '16,132,208', '--atmc2': '62,232,255', '--atmc3': '0,0,128', '--atmo': '.9',
         '--ac2': '#a98cff', '--ac2-hi': '#d4c4ff', '--blue': '#7fe9ff', '--mood': '#7fe9ff',
         '--sf-g': 'rgba(52,56,72,.93)', '--chl': '#4a4f62', '--chl2': '#373b4b',
         '--rail1': 'rgba(26,29,40,.94)', '--rail2': 'rgba(14,16,24,.94)',
-        '--fd': "'Pixelify Sans',Tahoma,Verdana,sans-serif", '--fb': "Verdana,Tahoma,'DejaVu Sans',sans-serif", '--fu': "Tahoma,Verdana,'DejaVu Sans',sans-serif",
+        '--fd': "'Tiny5','Pixelify Sans',Tahoma,Verdana,sans-serif", '--fb': "Verdana,Tahoma,'DejaVu Sans',sans-serif", '--fu': "Tahoma,Verdana,'DejaVu Sans',sans-serif",
         '--lift': 'inset 1px 1px 0 rgba(255,255,255,.45),inset -1px -1px 0 rgba(0,0,0,.7),inset 2px 2px 0 rgba(255,255,255,.12),inset -2px -2px 0 rgba(0,0,0,.35),3px 3px 0 rgba(0,0,20,.55)',
         '--lift-hi': 'inset 1px 1px 0 rgba(255,255,255,.6),inset -1px -1px 0 rgba(0,0,0,.7),inset 2px 2px 0 rgba(127,233,255,.25),inset -2px -2px 0 rgba(0,0,0,.35),4px 4px 0 rgba(0,0,20,.6)',
         '--lift-in': 'inset 1px 1px 0 rgba(0,0,0,.7),inset -1px -1px 0 rgba(255,255,255,.4),inset 2px 2px 0 rgba(0,0,0,.35),inset -2px -2px 0 rgba(255,255,255,.1)',
@@ -22515,6 +22515,15 @@ class Component extends DCLogic {
       l.onload = () => { this._faces[fam] = 'ready'; if (this.state.themeFaceOffline) this.setState({ themeFaceOffline: false }); };
       l.onerror = () => { this._faces[fam] = 'failed'; if (this.state.themeKey === key) this.setState({ themeFaceOffline: true }); };
       document.head.appendChild(l);
+      /* A third entry is a digits only face from Google (text= subset), set
+         ahead of the face in --fd so it draws the numerals and nothing else:
+         Pixelify Sans draws its 5 as an S. Skipped when self hosted. */
+      if (t.face[2] && this.FONTS !== 'self') {
+        const d = document.createElement('link');
+        d.rel = 'stylesheet';
+        d.href = 'https://fonts.googleapis.com/css2?family=' + t.face[2] + '&display=swap';
+        document.head.appendChild(d);
+      }
     } catch (e) { this._faces[fam] = 'failed'; }
   }
   themeIdlePrefetch() {
