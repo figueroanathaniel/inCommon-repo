@@ -180,6 +180,9 @@ const MODULES = [
   'house-systems.js',
   /* Ayanamsas, nakshatras and the Chinese calendar for the chart studies. */
   'chart-traditions.js',
+  /* The sky's dated events for the weather on Today. Reads astronomy-engine
+     by name, so it follows it. */
+  'sky-weather.js',
   /* The gates the sky stands in at one instant. Reads the wheel above by
      name, so it has to follow it. */
   'hd-transit.js',

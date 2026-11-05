@@ -3432,6 +3432,42 @@ Moon's packet (`progressedHandoff(name, 'tertiary')`, a day for each tropical
 lunar month of 27.32158 days). The navamsa, the two relationship charts, a harmonic wheel and solar arc are
 not built and wait on the owner.
 
+## The sky weather, and the star clusters among the bodies
+Asked for by the owner on 5 November 2026: a forecast of the sky's own events
+(cazimis, moon phases, stations, meteor showers, alignments, the clusters),
+at least a day ahead, behind a weather icon at the top right of the
+horoscope on Today. `docs/astro-upgrade/03-sky-weather-sources.md` holds every
+rule and the page it was read on.
+
+**`app/sky-weather.js` is mechanics** (global `SkyWeather`): it reads
+astronomy-engine and returns dated events with numbers and names, and reads no
+clock. `swWindow()` hands it tomorrow, local, for thirty days (`SW_DAYS`), so
+nothing is forecast for less than a day ahead; `swFind()` memoises per local
+day and `swSoon()` runs it a tick after the sheet opens, behind Loading.
+`skyWeatherVals()` writes the sentences. The sheet is a bottom sheet on the
+phone and a centred dialog on the desktop (`swOpen`, closed by
+`dialogEscape()` and `vtSheetClose`). It is a forecast of the sky for
+everyone, so it carries no chart and no reading, and the "No reading until
+requested" rule is not touched by it.
+
+**`tools/check-sky-weather.js` is the gate**: every event held to the Swiss
+Ephemeris over 2026 and 2027, the moon phases to USNO, the shower maxima to
+IMO's 2026 dates, the clusters' precession, and no clock read.
+
+**A cazimi is 17' in longitude**, Lilly's figure; the sheet adds a sentence
+when the body is inside Bonatti's 16' in latitude too. The sources disagree and
+the doc says so.
+
+**The five clusters are points of the Expanded Chart** (category `cluster`,
+"Star Clusters", ring 2, `--blue`): the Pleiades, the Hyades, Praesepe, the
+Coma Star Cluster and the Double Cluster, at the ecliptic longitude of the
+birth instant. They are read as the Astropedia reads a fixed star, by
+conjunction alone and within one degree (`natalAspects`), never by any other
+angle. The globes draw them as lattices of light, not worlds. Each has a
+placement entry in `placement-content.js` whose definition says only what
+Ptolemy (Tetrabiblos I.9) and the cluster's own page say; the Astropedia has a
+Star Clusters concept. Do not add a cluster's myth from memory.
+
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
 perfectly center"). The cover's camera looked at a point wandering half a unit
@@ -7028,7 +7064,7 @@ Until 15 October 2026 they shipped unrewritten, and from a site root that
 address is answered by the catch all with the app, so a home screen icon was
 an HTML page.
 
-`tools/` holds thirty four scripts. Twenty one are gates and are worth running
+`tools/` holds thirty five scripts. Twenty two are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -7036,7 +7072,7 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
-`check-astral-bodies.js`, `check-timing-lexicon.js`.
+`check-astral-bodies.js`, `check-timing-lexicon.js`, `check-sky-weather.js`.
 Ten generate:
 `build-bundle.js`, `build-number-matrix.js` (`app/number-matrix.js`, from the owner's Book of Numbers CSV), `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`

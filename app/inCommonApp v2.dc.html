@@ -409,6 +409,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-wheel.js"></script>
 <script src="./house-systems.js"></script>
 <script src="./chart-traditions.js"></script>
+<script src="./sky-weather.js"></script>
 <!-- The gates the sky stands in now. Reads HDWheel by name, so it follows it. -->
 <script src="./hd-transit.js"></script>
 <!-- The People Library, and the cache that stands in front of the composite.
@@ -850,7 +851,8 @@ input[type="date"]{color-scheme:dark}
         <div style="display:flex;flex-direction:column;gap:11px">
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:11px">
-              <div style="display:flex;flex-direction:column;gap:13px;border-top:3px solid {{ hpEdge }};padding-top:15px">
+              <div style="position:relative;display:flex;flex-direction:column;gap:13px;border-top:3px solid {{ hpEdge }};padding-top:15px">
+                <button data-lift onClick="{{ swGo }}" aria-label="Sky weather, the next thirty days" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:8px;right:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:var(--sf);color:var(--tx)"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.5" cy="8" r="3.2" style="stroke:var(--ac2-hi)"></circle><path d="M15.5 2.2v1.2M20.6 4.4l-.9.9M22.3 9.5h-1.2" style="stroke:var(--ac2-hi)"></path><path d="M6.5 19.5h9a3.6 3.6 0 0 0 .4-7.2 5 5 0 0 0-9.6 1.1 3.1 3.1 0 0 0 .2 6.1z" style="fill:var(--sf)"></path></svg></button>
                 <div style="display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center">
                   <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
                   <span style="font:400 26px/1.25 var(--fd);color:var(--tx);text-wrap:balance">{{ hpTitle }}</span>
@@ -5716,6 +5718,49 @@ input[type="date"]{color-scheme:dark}
     </div>
   </div>
 </sc-if>
+<!-- Sky weather: the sky's dated events, from tomorrow on. -->
+<sc-if value="{{ swOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ swClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
+    <div onClick="{{ swStop }}" role="dialog" aria-modal="true" aria-label="Sky weather" data-vt-sheet="1" style="box-sizing:border-box;width:100%;max-height:88svh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border-top:1px solid rgba(var(--atmc),.5);border-radius:26px 26px 0 0;box-shadow:0 -10px 60px rgba(var(--atmc),.3);animation:vtSheet .26s cubic-bezier(.22,1,.36,1);padding:20px 20px calc(26px + env(safe-area-inset-bottom))">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:rgba(var(--atmc),.14);box-shadow:0 0 22px rgba(var(--atmc),.3);font:400 22px var(--fb);color:var(--tx)">☁︎</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Sky weather</span>
+          <div role="heading" aria-level="2" style="font:400 26px/1.15 var(--fd);color:var(--tx)">The next thirty days</div>
+          <span style="font:400 13px var(--fu);color:var(--mut)">{{ swSpan }}</span>
+        </div>
+        <button data-lift onClick="{{ swClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:400 17px var(--fb);color:var(--mut)">×</button>
+      </div>
+      <sc-if value="{{ swBusy }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="padding:28px 0;text-align:center;font:400 14px var(--fu);color:var(--mut)">Loading...</div>
+      </sc-if>
+      <sc-if value="{{ swNone }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx)">A quiet sky. Nothing in these thirty days is dated.</p>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <sc-for list="{{ swDays }}" as="g" hint-placeholder-count="0">
+          <section aria-label="{{ g.head }}, {{ g.sub }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--bd);padding-bottom:6px">
+              <span style="font:400 19px var(--fd);color:var(--tx)">{{ g.head }}</span>
+              <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ g.sub }}</span>
+            </div>
+            <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span aria-hidden="true" style="flex:none;min-width:40px;height:40px;padding:0 6px;box-sizing:border-box;border-radius:20px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.45);background:rgba(var(--atmc2),.1);font:400 15px var(--fb);color:var(--tx);white-space:nowrap">{{ it.glyph }}</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ it.kind }}</span>
+                  <span style="font:600 14.5px/1.35 var(--fu);color:var(--tx)">{{ it.title }}</span>
+                  <span style="font:400 12px var(--fu);color:var(--mut)">{{ it.when }}</span>
+                  <p style="margin:2px 0 0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.line }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
     <div onClick="{{ pgStop }}" role="dialog" aria-modal="true" aria-label="{{ pgTitle }}" data-vt-sheet="1" style="box-sizing:border-box;width:100%;max-height:88svh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc2),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border-top:1px solid rgba(var(--atmc2),.5);border-radius:26px 26px 0 0;box-shadow:0 -10px 60px rgba(var(--atmc2),.3);animation:vtSheet .26s cubic-bezier(.22,1,.36,1);padding:20px 20px calc(26px + env(safe-area-inset-bottom))">
@@ -7889,7 +7934,8 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:14px">
               <div style="display:flex;flex-direction:column;gap:12px">
-                <div style="display:flex;flex-direction:column;gap:16px;border-top:3px solid {{ hpEdge }};padding-top:18px">
+                <div style="position:relative;display:flex;flex-direction:column;gap:16px;border-top:3px solid {{ hpEdge }};padding-top:18px">
+                  <button data-lift onClick="{{ swGo }}" aria-label="Sky weather, the next thirty days" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:var(--sf);color:var(--tx)"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.5" cy="8" r="3.2" style="stroke:var(--ac2-hi)"></circle><path d="M15.5 2.2v1.2M20.6 4.4l-.9.9M22.3 9.5h-1.2" style="stroke:var(--ac2-hi)"></path><path d="M6.5 19.5h9a3.6 3.6 0 0 0 .4-7.2 5 5 0 0 0-9.6 1.1 3.1 3.1 0 0 0 .2 6.1z" style="fill:var(--sf)"></path></svg></button>
                   <div style="display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center">
                     <span style="font:600 9.5px var(--fu);letter-spacing:.17em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
                     <span style="font:400 clamp(30px,2.6vw,40px)/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ hpTitle }}</span>
@@ -14114,6 +14160,49 @@ input[type="date"]{color-scheme:dark}
      that did NOT force the tab, "Gate N" and "Personal Day N" on Today, set
      dpSel and rendered nothing at all: wired, pressable, and dead on desktop
      while working on mobile. One drawer at one level fixes both. -->
+<!-- Sky weather: the sky's dated events, from tomorrow on. -->
+<sc-if value="{{ swOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ swClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(8,7,11,.7);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .18s ease">
+    <div onClick="{{ swStop }}" role="dialog" aria-modal="true" aria-label="Sky weather" style="box-sizing:border-box;width:100%;max-width:640px;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border:1px solid rgba(var(--atmc),.45);border-radius:22px;box-shadow:0 0 0 1px rgba(var(--atmc),.12),0 0 70px rgba(var(--atmc),.24),0 30px 80px rgba(0,0,0,.55);padding:22px 24px 26px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:rgba(var(--atmc),.14);box-shadow:0 0 22px rgba(var(--atmc),.3);font:400 22px var(--fb);color:var(--tx)">☁︎</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Sky weather</span>
+          <div role="heading" aria-level="2" style="font:400 26px/1.15 var(--fd);color:var(--tx)">The next thirty days</div>
+          <span style="font:400 13px var(--fu);color:var(--mut)">{{ swSpan }}</span>
+        </div>
+        <button data-lift onClick="{{ swClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:400 17px var(--fb);color:var(--mut)">×</button>
+      </div>
+      <sc-if value="{{ swBusy }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="padding:28px 0;text-align:center;font:400 14px var(--fu);color:var(--mut)">Loading...</div>
+      </sc-if>
+      <sc-if value="{{ swNone }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx)">A quiet sky. Nothing in these thirty days is dated.</p>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <sc-for list="{{ swDays }}" as="g" hint-placeholder-count="0">
+          <section aria-label="{{ g.head }}, {{ g.sub }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--bd);padding-bottom:6px">
+              <span style="font:400 19px var(--fd);color:var(--tx)">{{ g.head }}</span>
+              <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ g.sub }}</span>
+            </div>
+            <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span aria-hidden="true" style="flex:none;min-width:40px;height:40px;padding:0 6px;box-sizing:border-box;border-radius:20px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.45);background:rgba(var(--atmc2),.1);font:400 15px var(--fb);color:var(--tx);white-space:nowrap">{{ it.glyph }}</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ it.kind }}</span>
+                  <span style="font:600 14.5px/1.35 var(--fu);color:var(--tx)">{{ it.title }}</span>
+                  <span style="font:400 12px var(--fu);color:var(--mut)">{{ it.when }}</span>
+                  <p style="margin:2px 0 0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.line }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
 <!-- The glance: the reading in passing, a plain radiant pop up. The packet is one press further in. -->
 <sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(8,7,11,.7);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .18s ease">
@@ -16654,7 +16743,7 @@ class Component extends DCLogic {
     if (['Pallas', 'Juno', 'Vesta', 'Hygiea'].indexOf(n) !== -1) return 'asteroid';
     return 'celestial body';
   }
-  CAT_LABEL = { body: 'Luminaries & Planets', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
+  CAT_LABEL = { body: 'Luminaries & Planets', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints', cluster: 'Star Clusters' };
   // Fixed hues, not themed, the same way --ac/--ac2/--crisis are fixed: a
   // category colour has to mean the same thing under every identity. TNO
   // reuses --ac2 (violet) rather than a fourth new token, node/hypothetical
@@ -16664,7 +16753,7 @@ class Component extends DCLogic {
   /* The four elements as the wheel colours them, fire, earth, air, water, in
      sign order. One table, read by the 2D wheel and handed to the 3D one. */
   SIGN_EL_C = ['#e08d7d', '#2fff8f', '#7eb8da', '#59b37d'];
-  CAT_COLOR = { body: 'var(--ac)', angle: '#2fff8f', asteroid: 'var(--cat-ast)', centaur: 'var(--cat-cen)', tno: 'var(--ac2)', comet: 'var(--cat-com)', node: 'var(--dim)', hypothetical: 'var(--dim)', derived: 'var(--ac2-hi)' };
+  CAT_COLOR = { body: 'var(--ac)', angle: '#2fff8f', asteroid: 'var(--cat-ast)', centaur: 'var(--cat-cen)', tno: 'var(--ac2)', comet: 'var(--cat-com)', node: 'var(--dim)', hypothetical: 'var(--dim)', derived: 'var(--ac2-hi)', cluster: 'var(--blue)' };
 
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
   UNCOMPUTED_WHY = 'no orbital elements sourced for this body';
@@ -17319,7 +17408,7 @@ class Component extends DCLogic {
   // tighter than a Sun-Mars trine).
   EXPANDED_ASPECTS = [[0, 'conjunct'], [60, 'sextile'], [90, 'square'], [120, 'trine'], [180, 'opposite'], [150, 'quincunx'], [30, 'semisextile'], [45, 'semisquare'], [135, 'sesquisquare']];
   EXPANDED_ORBS = { conjunct: 6, opposite: 6, trine: 6, square: 6, sextile: 4, quincunx: 3, semisextile: 1.5, semisquare: 2, sesquisquare: 2 };
-  MINOR_CATS = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical'];
+  MINOR_CATS = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'cluster'];
   norm360(x) { return ((x % 360) + 360) % 360; }
   t2000(d) { return d.getTime() / 86400000 + 2440587.5 - 2451545.0; }
   /* The memo sits here rather than at the call sites because this is the one
@@ -18190,7 +18279,7 @@ class Component extends DCLogic {
   // The natal set, cached per birth-data stamp and mode so dragging the wheel
   // never recomputes an ephemeris.
   fullChart(expanded) {
-    const p = this.activeProfile(), stamp = this.chartStamp(p) + '|' + (expanded ? 'x' : 'b');
+    const p = this.activeProfile(), stamp = this.chartStamp(p) + '|' + (expanded ? 'x' : 'b') + (window.SkyWeather ? 'c' : '');
     if (this._fcStamp === stamp) return this._fc;
     const t = this.t2000(this.natalDate());
     // Central-difference speed (deg/day) for any PLNS body via the same
@@ -18226,6 +18315,20 @@ class Component extends DCLogic {
         rows.push({ id: reg.id, name: reg.name, glyph: reg.glyph, lon: r.lon, sign: s.sign, deg: s.deg, idx: s.idx,
           mean: reg.tooltip, reference: reg.reference, group: 'extra', category: reg.category, ring: ring,
           speed: sp, retro: sp != null && sp < 0, status: r.status });
+      });
+    }
+    /* The star clusters, as points: each cluster's ecliptic longitude of the
+       birth date, which moves only by precession (sky-weather.js). */
+    if (expanded && window.SkyWeather && window.Astronomy) {
+      if (!this._swMake) this._swMake = window.SkyWeather.make(window.Astronomy);
+      const PCb = window.PlacementContent ? window.PlacementContent.bodies : {};
+      window.SkyWeather.CLUSTERS.forEach(c => {
+        const lon = this._swMake.clusterLon(c.id, this.natalDate());
+        if (lon == null || !isFinite(lon)) return;
+        const s = this.signOf(lon), pc = PCb[c.id] || {};
+        rows.push({ id: c.id, name: c.name, glyph: c.glyph, lon, sign: s.sign, deg: s.deg, idx: s.idx,
+          mean: pc.energy || '', reference: '', group: 'extra', category: 'cluster', ring: 2,
+          speed: 0, retro: false, status: 'ok' });
       });
     }
     this.anglePoints().forEach(a => rows.push({ ...a, category: 'angle', ring: 1, speed: null, retro: false, status: 'ok' }));
@@ -18342,9 +18445,13 @@ class Component extends DCLogic {
       if (a.group === 'extra' && b.group === 'extra' && a.ring === 2 && b.ring === 2) return;
       let d = Math.abs(this.norm360(a.lon - b.lon)); if (d > 180) d = 360 - d;
       const scale = Math.min(scaleOf(a), scaleOf(b));
+      /* A star cluster is read as the fixed stars are, by conjunction alone
+         and within a degree, the Astropedia's own figure for a fixed star. */
+      const fixed = a.category === 'cluster' || b.category === 'cluster';
       table.forEach(([ang, nm]) => {
+        if (fixed && ang !== 0) return;
         const off = Math.abs(d - ang);
-        if (off <= orbOf(nm) * scale) out.push({ a, b, asp: nm, orb: off });
+        if (off <= (fixed ? 1 : orbOf(nm) * scale)) out.push({ a, b, asp: nm, orb: off });
       });
     }));
     return out.sort((x, y) => x.orb - y.orb);
@@ -18414,7 +18521,7 @@ class Component extends DCLogic {
   // Categories broken out as their own collapsible sub-tables below the main
   // one. 'astral body' and 'angle' stay out of this list: they are the sixteen
   // core points, always visible in the main table, never folded away.
-  SUBTABLE_CATS = ['asteroid', 'centaur', 'tno', 'node', 'hypothetical', 'comet', 'derived'];
+  SUBTABLE_CATS = ['asteroid', 'centaur', 'tno', 'node', 'hypothetical', 'comet', 'derived', 'cluster'];
   /* THE OBSERVATORY (owner, 19 October 2026): "Make the full screen expansion
      an Observatory. People should feel like they're going in a certified
      space expedition facility." The overlay the maximize button opened is the
@@ -18579,7 +18686,7 @@ class Component extends DCLogic {
       };
     };
     const left = ['body', 'node', 'angle', 'derived'].map(group).filter(Boolean);
-    const right = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical'].map(group).filter(Boolean);
+    const right = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'cluster'].map(group).filter(Boolean);
     const total = left.concat(right).reduce((n, g) => n + g.rows.length, 0);
     const p = this.activeProfile ? this.activeProfile() : null;
     return {
@@ -20454,6 +20561,109 @@ class Component extends DCLogic {
         bg: k === i ? p[3] : 'transparent', bd: k === i ? p[3] : 'var(--bd)',
         w: k === i ? '22px' : '8px', c: k === i ? 'var(--tx)' : 'var(--mut)', go: go(k) })) };
   }
+  /* ---- Sky weather ----------------------------------------------------- *
+     The weather icon on the horoscope opens a forecast of the sky's own
+     events, from tomorrow through the next thirty days, never today: what is
+     shown is always at least a day ahead. sky-weather.js finds the events
+     (mechanics); the sentences are written here. The search costs a few
+     tenths of a second, so it runs on the tick after the sheet opens and is
+     kept for the local day. */
+  SW_DAYS = 30;
+  SW_PHASE = ['New Moon', 'First Quarter', 'Full Moon', 'Last Quarter'];
+  SW_PHASE_GLYPH = ['●︎', '◑︎', '○︎', '◐︎'];
+  SW_PHASE_LINE = [
+    'The Moon goes dark beside the Sun. A clean page, kind to whatever wants beginning.',
+    'Half lit and growing. What was started at the dark Moon meets its first real resistance.',
+    'The Moon stands opposite the Sun, fully lit. What has been building comes into view.',
+    'Half lit and thinning. A time for sorting what to keep from what has run its course.'
+  ];
+  SW_COUNT = ['', '', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+  swWindow() {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + 1);
+    const to = new Date(d); to.setDate(to.getDate() + this.SW_DAYS);
+    return { from: d, to, key: d.toDateString() };
+  }
+  swFind() {
+    const S = window.SkyWeather, A = window.Astronomy, w = this.swWindow();
+    if (!S || !A) return null;
+    if (this._swKey === w.key) return this._sw;
+    if (!this._swMake) this._swMake = S.make(A);
+    let ev = [];
+    try { ev = this._swMake.events(w.from, w.to); } catch (e) { ev = []; }
+    this._swKey = w.key; this._sw = ev;
+    return ev;
+  }
+  swSoon() {
+    if (this._swTimer) return;
+    this._swTimer = setTimeout(() => { this._swTimer = null; this.swFind(); this.setState({ swTick: Date.now() }); }, 30);
+  }
+  swAt(lon) { const s = this.signOf(lon); return Math.floor(s.deg) + '° ' + s.sign; }
+  swGlyph(n) { const p = this.PLNS.find(x => x[0] === n); return p ? p[1] + '︎' : '✦︎'; }
+  swList(names) { return names.length < 3 ? names.join(' and ') : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]; }
+  swTime(d) { try { return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); } catch (e) { return d.toISOString().slice(11, 16); } }
+  swItem(e) {
+    const deg = x => x.toFixed(1) + '°', t = this.swTime(e.t), cl = (window.SkyWeather.CLUSTERS || []).find(c => c.id === e.cluster);
+    switch (e.kind) {
+      case 'phase': return { glyph: this.SW_PHASE_GLYPH[e.quarter], kind: 'Moon phase', title: this.SW_PHASE[e.quarter] + ' in ' + this.signOf(e.moon).sign,
+        line: this.SW_PHASE_LINE[e.quarter], when: t + ' · ' + this.swAt(e.moon) };
+      case 'eclipse': return { glyph: e.body === 'Sun' ? '☉︎' : '☽︎', kind: 'Eclipse',
+        title: e.type.charAt(0).toUpperCase() + e.type.slice(1) + ' eclipse of the ' + e.body,
+        line: e.body === 'Sun' ? 'The new Moon crosses the face of the Sun. Eclipses are read as turning points that unfold over the months after.'
+          : 'The full Moon passes through the Earth’s shadow. What has been hidden tends to surface around it.',
+        when: t + ' · ' + this.swAt(e.body === 'Sun' ? e.sun : e.moon) };
+      case 'station': return { glyph: e.dir === 'retrograde' ? '℞︎' : this.swGlyph(e.body), kind: 'Station',
+        title: e.body + (e.dir === 'retrograde' ? ' stations retrograde' : ' stations direct'),
+        line: e.dir === 'retrograde' ? e.body + ' slows, holds still and begins to walk back over its last degrees. Whatever it touches next, it will touch more than once.'
+          : e.body + ' holds still and turns forward again, ready to cross for a third time the ground it just retraced.',
+        when: t + ' · ' + this.swAt(e.lon) };
+      case 'cazimi': return { glyph: this.swGlyph(e.body), kind: 'Cazimi', title: e.body + ' in the heart of the Sun',
+        line: 'Within seventeen minutes of the Sun from ' + this.swTime(e.from) + ' to ' + this.swTime(e.to) + ', the closest place beside the light, which the tradition reads as strength rather than burning.'
+          + (e.inLat ? ' It is inside the Sun’s disk in latitude too, which is rarer.' : ''),
+        when: t + ' · ' + this.swAt(e.lon) };
+      case 'meet': return { glyph: this.swGlyph(e.a) + ' ☌︎ ' + this.swGlyph(e.b), kind: e.a === 'Moon' ? 'Moon meeting' : 'Conjunction',
+        title: (e.a === 'Moon' ? 'The Moon passes ' : e.a + ' meets ') + e.b + ' in ' + this.signOf(e.lon).sign,
+        line: e.a === 'Moon' ? 'Side by side in the sky, ' + deg(e.sep) + ' apart. For a few hours the Moon carries ' + e.b + '’s colour.'
+          : 'One degree of longitude for both, ' + deg(e.sep) + ' apart in latitude. Two natures speak through the same part of the zodiac for a while.',
+        when: t + ' · ' + this.swAt(e.lon) };
+      case 'gather': return { glyph: e.names.map(n => this.swGlyph(n)).join(''), kind: 'Gathering',
+        title: this.SW_COUNT[e.names.length] + ' gather in ' + this.signOf(e.lon + e.span / 2).sign,
+        line: this.swList(e.names) + ' within ' + deg(e.span) + ' of one another, at their closest.', when: t + ' · ' + this.swAt(e.lon) };
+      case 'shower': return { glyph: '☄︎', kind: 'Meteors', title: 'The ' + e.name + ' peak',
+        line: 'As many as ' + e.zhr + ' meteors an hour under a perfectly dark sky. The Moon is ' + Math.round(e.moonLit * 100) + '% lit'
+          + (e.moonLit < 0.35 ? ', so the faint ones will show.' : e.moonLit > 0.75 ? ', and its light will hide the faint ones.' : '.'),
+        when: t };
+      case 'cluster': return { glyph: this.swGlyph(e.body) + ' ✦︎', kind: 'Star cluster',
+        title: (e.body === 'Moon' ? 'The Moon' : e.body) + ' passes the ' + e.name,
+        line: deg(e.sep) + ' apart in latitude. Ptolemy gave this cluster the nature of ' + (cl ? this.swList(cl.like.map(n => n === 'Moon' ? 'the Moon' : n)) : 'its stars') + '.',
+        when: t + ' · ' + this.swAt(e.lon) };
+    }
+    return null;
+  }
+  skyWeatherVals() {
+    const open = !!this.state.swOpen;
+    const go = () => { this.setState({ swOpen: true }); this.swSoon(); };
+    const close = () => this.setState({ swOpen: false });
+    const base = { swGo: go, swClose: close, swOpen: open, swStop: e => { if (e && e.stopPropagation) e.stopPropagation(); } };
+    if (!open) return { ...base, swBusy: false, swNone: false, swDays: [], swSpan: '' };
+    const w = this.swWindow(), ready = this._swKey === w.key, ev = ready ? (this._sw || []) : [];
+    if (!ready) this.swSoon();
+    const last = new Date(w.to); last.setDate(last.getDate() - 1);
+    const fmt = (d, o) => { try { return d.toLocaleDateString(undefined, o); } catch (e) { return d.toDateString(); } };
+    const days = [];
+    ev.forEach(e => {
+      const it = this.swItem(e); if (!it) return;
+      const k = e.t.toDateString();
+      let g = days[days.length - 1];
+      if (!g || g.k !== k) {
+        const diff = Math.round((new Date(k) - w.from) / 864e5);
+        g = { k, head: diff === 0 ? 'Tomorrow' : fmt(e.t, { weekday: 'long' }), sub: fmt(e.t, { month: 'long', day: 'numeric' }), items: [] };
+        days.push(g);
+      }
+      g.items.push(it);
+    });
+    return { ...base, swBusy: !ready, swNone: ready && !days.length, swDays: days,
+      swSpan: fmt(w.from, { month: 'long', day: 'numeric' }) + ' to ' + fmt(last, { month: 'long', day: 'numeric' }) };
+  }
   FCKEY = 'incommon.forecast.open';
   fcIsOpen() { const v = this.state.fcOpen; return (v === null || v === undefined) ? this.readLS(this.FCKEY, false) : !!v; }
   fcVals() {
@@ -21156,7 +21366,7 @@ class Component extends DCLogic {
     const row = x => ({ anchor: x.anchor || '', glyph: x.glyph || '', glyphOn: !!x.glyph, title: x.title, hi: x.hi || '', hiOn: !!x.hi,
       meta: x.meta || '', metaOn: !!x.meta, sub: x.sub || '', edge: x.edge || 'transparent', go: x.go || null, btn: !!x.go, plain: !x.go,
       aria: x.aria || [x.title, x.hi, x.lit ? 'lit now' : '', x.sub].filter(Boolean).join(', '), litOn: !!x.lit, arrow: x.go ? '›' : '' });
-    const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived'];
+    const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived', 'cluster'];
     const LABEL = { ...this.CAT_LABEL, body: 'Luminaries & Planets' };
     const pts = CATS.map(cat => {
       const rs = o.rows.filter(r => r.category === cat);
@@ -30857,7 +31067,7 @@ class Component extends DCLogic {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
+      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
@@ -31012,7 +31222,7 @@ class Component extends DCLogic {
     });
     const kind = r.category === 'angle' ? 'angle' : r.category === 'node' ? 'lunar point'
       : r.category === 'derived' ? 'point' : r.category === 'hypothetical' ? 'hypothetical point'
-      : r.category === 'comet' ? 'comet' : r.category === 'tno' ? 'trans-Neptunian object' : this.bodyType(r.name);
+      : r.category === 'comet' ? 'comet' : r.category === 'cluster' ? 'star cluster' : r.category === 'tno' ? 'trans-Neptunian object' : this.bodyType(r.name);
     const ICON = { Strengths: 'M12 3v18M3 12h18M6 6l12 12M18 6L6 18',
       Challenges: 'M15 3a9 9 0 1 0 6 13A7 7 0 0 1 15 3z',
       Opportunities: 'M3 18h18M6 18a6 6 0 0 1 12 0M12 5v3M5.5 9.5l2 2M18.5 9.5l-2 2',
@@ -31442,6 +31652,7 @@ class Component extends DCLogic {
           ...this.dreamVals(),
           ...this.oracleVals(),
           ...this.cycleWidgetVals(),
+          ...this.skyWeatherVals(),
           ...this.studyPanelVals(),
           ...this.cycleSheetVals(),
           ...this.tarotLibVals(),
@@ -33952,7 +34163,7 @@ class Component extends DCLogic {
         if (dy > 110) this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 });
         else this.setState({ vtDragY: 0 });
       },
-      vtSheetClose: () => this.setState({ plGlance: null, numGlance: null, placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
+      vtSheetClose: () => this.setState({ plGlance: null, numGlance: null, swOpen: false, placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
       isToday: true, isSpirit: true, spiritMain: false,
       spiritAstro: true, spiritHd: true, spiritNumer: true,
       isOracle: true, isSettings: true,

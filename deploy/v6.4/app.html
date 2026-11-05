@@ -6952,6 +6952,44 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       shadows: ['need to be first to feel worthwhile', 'forget the ones who made the crossing possible', 'stay on the threshold and never settle'],
       growth: ['make a map for the next traveller', 'let the new ground become home'],
       blocks: ['a field with no one ready to follow', 'recognition that arrives decades late'] },
+    /* star clusters: read as the fixed stars are, by conjunction. The
+       natures are Ptolemy's, Tetrabiblos I.9 (Robbins). The positions move
+       only by precession, about a degree in 72 years. */
+    pleiades: { label: 'The Pleiades', kind: 'star cluster', energy: 'a gathering of sisters, a season opening',
+      definition: 'The Pleiades are the bright knot of stars in Taurus, nearly always imagined as seven sisters, though only six are seen, and their myths explain the missing one. The season of navigation once began at their first rising before dawn, and around 2330 BC they marked the spring equinox. Ptolemy gave them the nature of the Moon and Jupiter.',
+      role: 'Where the Pleiades fall in your chart is a place of company and of seasons: what you take up with others, what opens when the time is right, and what may be grieved together.',
+      verb: 'gathers', gifts: ['find your people and keep faith with them', 'sense when a season is opening', 'hold a loss without losing the rest'],
+      shadows: ['wait for the group before moving at all', 'carry one absence as if it were everything', 'mistake mood for timing'],
+      growth: ['begin when the season turns, even alone', 'let a circle widen rather than close'],
+      blocks: ['companions scattered by circumstance', 'a season that opens late'] },
+    hyades: { label: 'The Hyades', kind: 'star cluster', energy: 'patient labour, a long road',
+      definition: 'The Hyades are the cluster in the head of the Bull, about 150 light years away. Ptolemy gave the stars of the head the nature of Saturn and, more gently, of Mercury, and set the bright and somewhat reddish one of the Hyades, which he called the Torch, apart as like Mars.',
+      role: 'Where the Hyades fall in your chart is a place for patient work: thought that has to be carried a long way, and effort that keeps going when conditions are poor.',
+      verb: 'endures', gifts: ['keep working when conditions are poor', 'think a problem through to its end', 'turn a long grief into steady care'],
+      shadows: ['treat every difficulty as a storm', 'brood instead of acting', 'take on weight that belongs to others'],
+      growth: ['let rest be part of the work', 'name what the weather is and wait it out'],
+      blocks: ['a long run of unhelpful conditions', 'labour nobody sees'] },
+    praesepe: { label: 'Praesepe', kind: 'star cluster', energy: 'the manger, what feeds and what clouds',
+      definition: 'Praesepe, the Beehive, is the misty patch in the breast of the Crab. The name is Latin for the manger, and the Greeks and Romans saw the two stars beside it as donkeys eating from it. Ptolemy called it the cloud-like cluster in the breast and gave it the nature of Mars and the Moon; Chinese astronomy set it in the Ghost, the twenty third lunar mansion.',
+      role: 'Where Praesepe falls in your chart is a place of nourishment and of haze: what feeds you and others, and where the view can blur until you look again.',
+      verb: 'nourishes', gifts: ['feed what is hungry around you', 'find shelter in a crowded place', 'see the whole of something faint'],
+      shadows: ['act before the mist clears', 'take more than the manger holds', 'let worry cloud what is plain'],
+      growth: ['wait for a clear look before deciding', 'share what feeds you'],
+      blocks: ['news that arrives unclear', 'a crowd competing for the same thing'] },
+    comacluster: { label: 'The Coma Star Cluster', kind: 'star cluster', energy: 'a soft light, tenderness kept in the sky',
+      definition: 'The Coma Star Cluster is the loose spray of stars in Coma Berenices, the Hair of Berenice. Ptolemy placed it beneath the tail of the Great Bear and gave it the nature of the Moon and Venus. It lies well north of the zodiac, so it meets the chart only by its degree.',
+      role: 'Where the Coma Star Cluster falls in your chart is a place of tenderness: what you would give for someone you love, and the beauty that keeps it in memory.',
+      verb: 'offers', gifts: ['give something precious freely', 'keep a promise made in love', 'find beauty in what is faint'],
+      shadows: ['give in order to be owed', 'sacrifice what should be kept', 'mourn a gift once given'],
+      growth: ['let an offering be finished once it is made', 'tend your own beauty as well as others\u2019'],
+      blocks: ['separation from someone dear', 'a gift that is not noticed'] },
+    doublecluster: { label: 'The Double Cluster', kind: 'star cluster', energy: 'the jewelled hilt, a sharp mind in reach',
+      definition: 'The Double Cluster is a pair of star clusters in Perseus, catalogued by Hipparchus as a patch of light as early as 130 BC. It is read as the jewelled handle of the hero\u2019s sword. Ptolemy gave the cluster in the hilt of the sword the nature of Mars and Mercury. It lies far north of the zodiac, so it meets the chart only by its degree.',
+      role: 'Where the Double Cluster falls in your chart is a place to keep your edge within reach: quick decisions, words that cut cleanly, and the courage that has to be held by the handle.',
+      verb: 'arms', gifts: ['decide quickly when it counts', 'say the clear thing', 'act with courage and with thought together'],
+      shadows: ['cut where a word would do', 'treat every exchange as a contest', 'rush a judgement'],
+      growth: ['keep the blade sheathed until it is needed', 'pair speed with care'],
+      blocks: ['conflict that asks for a stand', 'too many fronts at once'] },
     /* comets: mundane astrology, read for eras and nations. A birth chart
        records where one was, which is a fact about the year. */
     halley: { label: 'Halley’s Comet', kind: 'comet', energy: 'the close of an era',
@@ -12828,6 +12866,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     { name: 'Sect', text: 'Every chart is read as either a day chart or a night chart, decided by whether the Sun sits above or below the horizon at the moment in question. Day charts favor the Sun, Jupiter, and Saturn as their sect’s own team; night charts favor the Moon, Venus, and Mars. A body of its own sect is read as working with more ease and self possession than the same body would show in the opposite chart, a distinction the older tradition weighed as heavily as sign or house.' },
     { name: 'Intercepted Signs', text: 'Except under equal house division, houses vary in size, and an unusually wide house can enclose an entire sign between its cusps without that sign ever touching either edge. That sign is intercepted, present in the chart but given no doorway of its own, and the sign opposite it in the neighboring house is intercepted too. The tradition reads an intercepted sign as a quality the person carries but was not handed an obvious entrance to, something to be found rather than simply used.' },
     { name: 'Fixed Stars', text: 'Beyond the moving bodies and the zodiac they travel, a handful of fixed stars close to the ecliptic have carried their own reputations since antiquity: Regulus for a certain kind of public fortune, Algol for a severity the tradition treats with real caution, Spica for a grace that arrives already finished. They are used sparingly, by conjunction to a personal point within about a degree, since a chart read through every fixed star ever cataloged stops saying anything in particular.' },
+    { name: 'Star Clusters', text: 'A star cluster is a crowd of stars born together and still travelling together, and the tradition read the brightest of them as single lights with natures of their own. Ptolemy names five: the Pleiades in Taurus, like the Moon and Jupiter; the Hyades in its head, like Saturn and, more gently, Mercury, with one bright reddish star among them, the Torch, like Mars; Praesepe, the misty manger in the breast of the Crab, like Mars and the Moon; the Hair of Berenice, like the Moon and Venus; and the cluster in the hilt of the sword of Perseus, the Double Cluster, like Mars and Mercury. A cluster barely moves against the stars, so its zodiacal degree creeps forward only by precession, about fifty seconds of arc a year: the Pleiades stood near the end of Taurus in 2000 and stand there still, a little further on. They are read as fixed stars are, by conjunction to a body or an angle within a degree or so, and the chart gives each the same narrow welcome: a cluster joins nothing at a wider angle.' },
     { name: 'Eclipses', text: 'Every month the Moon meets the Sun and every month it opposes it, and most of those lunations miss each other’s shadow, because the Moon’s path is tilted about five degrees against the Sun’s and the two only cross at the lunar nodes. When a New Moon or Full Moon happens close enough to one of those crossings, the shadow lands: a solar eclipse is a New Moon with the light taken out of it, a beginning insisted upon rather than argued with; a lunar eclipse is a Full Moon that goes dark at its height, a revelation arriving whether or not it was wanted. Eclipses arrive in pairs and clusters rather than at random, and the tradition reads them as turned up in volume, not as a different kind of event.' },
     { name: 'Aspect Patterns', text: 'Three or more aspects can lock together into a shape the tradition reads as a unit rather than as separate contacts. A grand trine links three bodies by trine into a closed triangle, a flow so complete it can run without friction and without much effort either. A T square sets two bodies in opposition with a third squaring them both, a pressure point that usually becomes the chart’s engine. A yod links two bodies in sextile, both quincunx a third, a narrow channel the tradition calls the finger of fate, more a persistent adjustment than a fate exactly. A grand cross squares four bodies around the wheel in two oppositions, the T square’s tension on every side at once, exhausting to carry and hard to set down.' }
   ];
@@ -18115,6 +18154,248 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
 </script>
 <script>
+/* sky-weather.js: the sky's own events, dated ahead. Mechanics layer: it
+   returns times, bodies, signs and separations, and no writing about what any
+   of it means. It reads no clock and no storage; the app hands it the window
+   to search and the vendored astronomy-engine.
+
+   What it finds, inside the window it is given:
+   - The Moon's four phases (astronomy-engine SearchMoonQuarter).
+   - Eclipses of the Sun and the Moon (SearchGlobalSolarEclipse,
+     SearchLunarEclipse).
+   - Stations of Mercury to Pluto: the instant the daily motion in ecliptic
+     longitude of date changes sign, bisected to a minute.
+   - The conjunction of each of Mercury to Pluto with the Sun. A body is
+     cazimi while within 17 minutes of the Sun in longitude (Skyscript
+     glossary, after Lilly), and the module also says whether the latitude is
+     inside that disk too, because Bonatti asks for both (Liber Astronomiae,
+     Dykes 2007 p.211, as quoted by Anthony Louis).
+   - Conjunctions in longitude between two of Mercury to Pluto, and of the
+     Moon with Mercury to Saturn when the two are within MOON_MEET degrees
+     of latitude.
+   - Gatherings: three or more of the Sun and Mercury to Pluto inside
+     GATHER degrees, each set dated at the day it is tightest.
+   - Meteor shower maxima: the instant the Sun reaches the shower's solar
+     longitude of maximum, J2000, as the IMO lists it (SHOWERS, with the
+     source of every value), and how lit the Moon is then.
+   - Passes of the Moon and Mercury to Pluto by the star clusters near the
+     ecliptic: the conjunction in longitude of date, kept when the latitude
+     difference is inside CLUSTER_NEAR.
+
+   CLUSTERS also serves the chart: clusterLon() gives any cluster's ecliptic
+   longitude of date at any instant, which is how a cluster becomes a point.
+
+   Times are Date objects in UTC. Nothing here is rounded for display. */
+(function (root) {
+  'use strict';
+  const norm = x => ((x % 360) + 360) % 360;
+  const wrap = x => { x = norm(x); return x > 180 ? x - 360 : x; };
+  const DAY = 86400000;
+  const PLANETS = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  const MOON_PLANETS = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+  const CAZIMI = 17 / 60, CAZIMI_LAT = 16 / 60;
+  const MOON_MEET = 4, GATHER = 10, CLUSTER_NEAR = 6;
+
+  /* J2000 right ascension and declination, from each cluster's Wikipedia
+     infobox, read 5 November 2026. The temperaments are Ptolemy's,
+     Tetrabiblos I.9 (Robbins, Loeb 1940, at penelope.uchicago.edu):
+     the Pleiades "like those of the moon and Jupiter"; of the Hyades, the
+     bright reddish one (the Torch) like Mars, "the others, like that of Saturn
+     and moderately like that of Mercury"; "the cloud-like cluster in the
+     breast, called the Manger, the same as Mars and the moon"; "the cluster of
+     the Coma Berenices beneath the Bear's tail, to that of the moon and Venus";
+     "the cluster in the hilt of the sword" of Perseus, "of Mars and Mercury". */
+  const CLUSTERS = [
+    { id: 'pleiades', name: 'Pleiades', glyph: 'M45', ra: 3 + 46 / 60 + 38 / 3600, dec: 24 + 10 / 60 + 41 / 3600, mag: 1.6, con: 'Taurus', like: ['Moon', 'Jupiter'] },
+    { id: 'hyades', name: 'Hyades', glyph: 'Hy', ra: 4 + 27 / 60, dec: 15 + 52 / 60, mag: 0.5, con: 'Taurus', like: ['Saturn', 'Mercury'] },
+    { id: 'praesepe', name: 'Praesepe', glyph: 'M44', ra: 8 + 40.4 / 60, dec: 19 + 59 / 60, mag: 3.7, con: 'Cancer', like: ['Mars', 'Moon'] },
+    { id: 'comacluster', name: 'Coma Star Cluster', glyph: 'Mel', ra: 12 + 22.5 / 60, dec: 25 + 51 / 60, mag: 1.8, con: 'Coma Berenices', like: ['Moon', 'Venus'] },
+    { id: 'doublecluster', name: 'Double Cluster', glyph: 'hχ', ra: 2 + 20 / 60, dec: 57 + 8 / 60, mag: 3.7, con: 'Perseus', like: ['Mars', 'Mercury'] }
+  ];
+
+  /* Solar longitude of maximum, J2000, from the IMO Meteor Shower Calendar.
+     src names where each number was read: c24, c25 and c26 are the 2024,
+     2025 and 2026 calendars' own shower sections; t is the calendar's
+     working list (Table 5) as read through a summary, held instead by the
+     2026 calendar's dates, which tools/check-sky-weather.js compares. ZHR and
+     radiant are from imo.net/resources/calendar unless src says otherwise. */
+  const SHOWERS = [
+    { id: 'QUA', name: 'Quadrantids', lam: 283.15, src: 'c25', zhr: 80, ra: 229.5, dec: 49.5 },
+    { id: 'LYR', name: 'Lyrids', lam: 32.32, src: 'c26', zhr: 18, ra: 271, dec: 34 },
+    { id: 'ETA', name: 'Eta Aquariids', lam: 45.5, src: 'c25', zhr: 50, ra: 338, dec: -1 },
+    { id: 'SDA', name: 'Southern Delta Aquariids', lam: 128, src: 'c25', zhr: 25, ra: 340, dec: -16.4 },
+    { id: 'CAP', name: 'Alpha Capricornids', lam: 128, src: 'c25', zhr: 5, ra: 307, dec: -10.2 },
+    { id: 'PER', name: 'Perseids', lam: 140.0, src: 'c24', zhr: 100, ra: 48, dec: 58 },
+    { id: 'DRA', name: 'Draconids', lam: 195.4, src: 'c26', zhr: 5, ra: 263, dec: 56 },
+    { id: 'ORI', name: 'Orionids', lam: 208, src: 'c25', zhr: 20, ra: 95, dec: 15.5 },
+    { id: 'STA', name: 'Southern Taurids', lam: 223, src: 't', zhr: 5, ra: 52, dec: 15 },
+    { id: 'NTA', name: 'Northern Taurids', lam: 230, src: 't', zhr: 5, ra: 58, dec: 22.7 },
+    { id: 'LEO', name: 'Leonids', lam: 235.27, src: 't', zhr: 10, ra: 152, dec: 21.6 },
+    { id: 'GEM', name: 'Geminids', lam: 262.2, src: 'c24', zhr: 150, ra: 112, dec: 32.2 },
+    { id: 'URS', name: 'Ursids', lam: 270.7, src: 't', zhr: 10, ra: 217, dec: 74.8 }
+  ];
+
+  function make(A) {
+    const T = d => A.MakeTime(d);
+    const at = (name, d) => {
+      const t = T(d);
+      if (name === 'Sun') { const s = A.SunPosition(t); return { lon: s.elon, lat: s.elat }; }
+      if (name === 'Moon') { const m = A.EclipticGeoMoon(t); return { lon: m.lon, lat: m.lat }; }
+      const e = A.Ecliptic(A.GeoVector(name, t, true)); return { lon: e.elon, lat: e.elat };
+    };
+    const lon = (n, d) => at(n, d).lon;
+    const clusterPos = (c, d) => {
+      const e = A.Ecliptic(A.VectorFromSphere(new A.Spherical(c.dec, c.ra * 15, 1), T(d)));
+      return { lon: e.elon, lat: e.elat };
+    };
+    const D = ms => new Date(ms);
+    /* Bisect f between a and b (ms) where f changes sign, to a minute. */
+    const bisect = (f, a, b) => {
+      let fa = f(a);
+      for (let i = 0; i < 40 && b - a > 60000; i++) {
+        const m = (a + b) / 2, fm = f(m);
+        if ((fm < 0) === (fa < 0)) { a = m; fa = fm; } else b = m;
+      }
+      return (a + b) / 2;
+    };
+    /* Zero crossings of f, sampled every step ms. A jump of more than 180
+       degrees is a wrap, not a crossing. */
+    const crossings = (f, a, b, step) => {
+      const out = []; let t0 = a, f0 = f(a);
+      for (let t1 = a + step; t0 < b; t1 += step) {
+        const f1 = f(t1);
+        if ((f0 < 0) !== (f1 < 0) && Math.abs(f1 - f0) < 180) out.push(bisect(f, t0, t1));
+        t0 = t1; f0 = f1;
+      }
+      return out;
+    };
+    const speed = (n, ms) => wrap(lon(n, D(ms + DAY / 4)) - lon(n, D(ms - DAY / 4))) * 2;
+
+    function phases(a, b) {
+      const out = []; let q = A.SearchMoonQuarter(T(D(a)));
+      while (q.time.date.getTime() < b) {
+        const t = q.time.date.getTime();
+        if (t >= a) out.push({ kind: 'phase', t: D(t), quarter: q.quarter, moon: lon('Moon', D(t)) });
+        q = A.NextMoonQuarter(q);
+      }
+      return out;
+    }
+    function eclipses(a, b) {
+      const out = [];
+      let s = A.SearchGlobalSolarEclipse(T(D(a)));
+      while (s.peak.date.getTime() < b) { out.push({ kind: 'eclipse', body: 'Sun', t: s.peak.date, type: s.kind, sun: lon('Sun', s.peak.date) }); s = A.NextGlobalSolarEclipse(s.peak); }
+      let l = A.SearchLunarEclipse(T(D(a)));
+      while (l.peak.date.getTime() < b) { out.push({ kind: 'eclipse', body: 'Moon', t: l.peak.date, type: l.kind, moon: lon('Moon', l.peak.date) }); l = A.NextLunarEclipse(l.peak); }
+      return out.filter(e => e.t.getTime() >= a);
+    }
+    function stations(a, b) {
+      const out = [];
+      PLANETS.forEach(n => {
+        crossings(ms => speed(n, ms), a, b, DAY / 2).forEach(t => {
+          const after = speed(n, t + DAY);
+          out.push({ kind: 'station', t: D(t), body: n, dir: after < 0 ? 'retrograde' : 'direct', lon: lon(n, D(t)) });
+        });
+      });
+      return out;
+    }
+    function sunMeetings(a, b) {
+      const out = [];
+      PLANETS.forEach(n => {
+        const f = ms => wrap(lon(n, D(ms)) - lon('Sun', D(ms)));
+        crossings(f, a, b, DAY / 2).forEach(t => {
+          /* The edges of the 17 minute disk, found either side of the exact instant. */
+          const g = ms => Math.abs(f(ms)) - CAZIMI;
+          const win = DAY * 3;
+          const enter = g(t - win) > 0 ? bisect(g, t - win, t) : t - win;
+          const leave = g(t + win) > 0 ? bisect(ms => -g(ms), t, t + win) : t + win;
+          const p = at(n, D(t)), s = at('Sun', D(t));
+          out.push({ kind: 'cazimi', t: D(t), body: n, lon: p.lon, from: D(enter), to: D(leave),
+            dlat: p.lat - s.lat, inLat: Math.abs(p.lat - s.lat) <= CAZIMI_LAT, retro: speed(n, t) < 0 });
+        });
+      });
+      return out;
+    }
+    function meetings(a, b) {
+      const out = [];
+      for (let i = 0; i < PLANETS.length; i++) for (let j = i + 1; j < PLANETS.length; j++) {
+        const x = PLANETS[i], y = PLANETS[j];
+        crossings(ms => wrap(lon(x, D(ms)) - lon(y, D(ms))), a, b, DAY / 2).forEach(t => {
+          const p = at(x, D(t)), q = at(y, D(t));
+          out.push({ kind: 'meet', t: D(t), a: x, b: y, lon: p.lon, sep: Math.abs(p.lat - q.lat) });
+        });
+      }
+      MOON_PLANETS.forEach(y => {
+        crossings(ms => wrap(lon('Moon', D(ms)) - lon(y, D(ms))), a, b, DAY / 8).forEach(t => {
+          const p = at('Moon', D(t)), q = at(y, D(t)), sep = Math.abs(p.lat - q.lat);
+          if (sep <= MOON_MEET) out.push({ kind: 'meet', t: D(t), a: 'Moon', b: y, lon: p.lon, sep });
+        });
+      });
+      return out;
+    }
+    function clusterPasses(a, b) {
+      const out = [];
+      CLUSTERS.forEach(c => {
+        ['Moon'].concat(PLANETS).forEach(n => {
+          const f = ms => wrap(lon(n, D(ms)) - clusterPos(c, D(ms)).lon);
+          crossings(f, a, b, n === 'Moon' ? DAY / 8 : DAY / 2).forEach(t => {
+            const p = at(n, D(t)), q = clusterPos(c, D(t)), sep = Math.abs(p.lat - q.lat);
+            if (sep <= CLUSTER_NEAR) out.push({ kind: 'cluster', t: D(t), body: n, cluster: c.id, name: c.name, lon: q.lon, sep });
+          });
+        });
+      });
+      return out;
+    }
+    function gatherings(a, b) {
+      const names = ['Sun'].concat(PLANETS), best = {};
+      for (let ms = a; ms < b; ms += DAY / 4) {
+        const pts = names.map(n => ({ n, l: norm(lon(n, D(ms))) })).sort((x, y) => x.l - y.l);
+        const k = pts.length;
+        for (let i = 0; i < k; i++) {
+          const set = [pts[i]];
+          for (let j = 1; j < k; j++) { const q = pts[(i + j) % k]; if (norm(q.l - pts[i].l) <= GATHER) set.push(q); else break; }
+          if (set.length < 3) continue;
+          const key = set.map(s => s.n).sort().join('|'), span = norm(set[set.length - 1].l - set[0].l);
+          if (!best[key] || span < best[key].span) best[key] = { span, ms, names: set.map(s => s.n), lon: set[0].l };
+        }
+      }
+      /* A set inside a larger set on the same day is the larger one. */
+      const all = Object.keys(best).map(k => best[k]);
+      return all.filter(g => !all.some(h => h !== g && h.names.length > g.names.length && g.names.every(n => h.names.indexOf(n) !== -1) && Math.abs(h.ms - g.ms) < DAY * 3))
+        .map(g => ({ kind: 'gather', t: D(g.ms), names: g.names, span: g.span, lon: g.lon }));
+    }
+    const sunJ2000 = ms => {
+      const v = A.RotateVector(A.Rotation_EQJ_ECL(), A.GeoVector('Sun', T(D(ms)), true));
+      return A.SphereFromVector(v).lon;
+    };
+    function showers(a, b) {
+      const out = [];
+      SHOWERS.forEach(s => {
+        crossings(ms => wrap(sunJ2000(ms) - s.lam), a - DAY, b + DAY, DAY / 2).forEach(t => {
+          if (t < a || t >= b) return;
+          const ill = A.Illumination('Moon', T(D(t)));
+          out.push({ kind: 'shower', t: D(t), id: s.id, name: s.name, zhr: s.zhr, lam: s.lam, ra: s.ra, dec: s.dec, moonLit: ill.phase_fraction });
+        });
+      });
+      return out;
+    }
+    /* Everything in [a, b), sorted by time. */
+    function events(from, to) {
+      const a = +from, b = +to;
+      return [].concat(phases(a, b), eclipses(a, b), stations(a, b), sunMeetings(a, b), meetings(a, b),
+        clusterPasses(a, b), gatherings(a, b), showers(a, b))
+        .filter(e => +e.t >= a && +e.t < b).sort((x, y) => x.t - y.t);
+    }
+    return { events, lon, phases, eclipses, stations, sunMeetings, meetings, clusterPasses, gatherings, showers, sunJ2000,
+      clusterLon: (id, d) => { const c = CLUSTERS.find(x => x.id === id); return c ? clusterPos(c, d).lon : null; } };
+  }
+
+  const api = { CLUSTERS, SHOWERS, PLANETS, CAZIMI, CAZIMI_LAT, MOON_MEET, GATHER, CLUSTER_NEAR, make };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  root.SkyWeather = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
 /*! hd-transit.js: the gates the sky stands in at one instant. V1.0.0 (UMD)
  *
  * WHAT IT IS. Every body's gate and line at an instant the caller names, in an
@@ -19293,7 +19574,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var k = keyOf(b), sd = hash(b.key || b.name);
     if (k) { var s = spec(BY[k]); s.seed = sd * 50; s.id = k; return s; }
     var cat = b.cat || '';
-    if (cat === 'node' || cat === 'derived' || cat === 'hypothetical' || cat === 'angle' || /node|lilith|selena|vertex|part of|aries point|midpoint/i.test(b.name || '')) {
+    if (cat === 'node' || cat === 'derived' || cat === 'hypothetical' || cat === 'angle' || cat === 'cluster' || /node|lilith|selena|vertex|part of|aries point|midpoint/i.test(b.name || '')) {
       var nm = String(b.name || '');
       return { kind: SIGIL, seed: sd * 50, dark: /lilith/i.test(nm) ? 1 : 0, dash: cat === 'hypothetical' ? 1 : 0, nodes: /node/i.test(nm), id: 'sigil' };
     }
@@ -30776,6 +31057,7 @@ input[type="date"]{color-scheme:dark}
 
 
 
+
 <!-- The gates the sky stands in now. Reads HDWheel by name, so it follows it. -->
 
 <!-- The People Library, and the cache that stands in front of the composite.
@@ -31217,7 +31499,8 @@ input[type="date"]{color-scheme:dark}
         <div style="display:flex;flex-direction:column;gap:11px">
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:11px">
-              <div style="display:flex;flex-direction:column;gap:13px;border-top:3px solid {{ hpEdge }};padding-top:15px">
+              <div style="position:relative;display:flex;flex-direction:column;gap:13px;border-top:3px solid {{ hpEdge }};padding-top:15px">
+                <button data-lift onClick="{{ swGo }}" aria-label="Sky weather, the next thirty days" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:8px;right:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:var(--sf);color:var(--tx)"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.5" cy="8" r="3.2" style="stroke:var(--ac2-hi)"></circle><path d="M15.5 2.2v1.2M20.6 4.4l-.9.9M22.3 9.5h-1.2" style="stroke:var(--ac2-hi)"></path><path d="M6.5 19.5h9a3.6 3.6 0 0 0 .4-7.2 5 5 0 0 0-9.6 1.1 3.1 3.1 0 0 0 .2 6.1z" style="fill:var(--sf)"></path></svg></button>
                 <div style="display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center">
                   <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
                   <span style="font:400 26px/1.25 var(--fd);color:var(--tx);text-wrap:balance">{{ hpTitle }}</span>
@@ -36083,6 +36366,49 @@ input[type="date"]{color-scheme:dark}
     </div>
   </div>
 </sc-if>
+<!-- Sky weather: the sky's dated events, from tomorrow on. -->
+<sc-if value="{{ swOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ swClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
+    <div onClick="{{ swStop }}" role="dialog" aria-modal="true" aria-label="Sky weather" data-vt-sheet="1" style="box-sizing:border-box;width:100%;max-height:88svh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border-top:1px solid rgba(var(--atmc),.5);border-radius:26px 26px 0 0;box-shadow:0 -10px 60px rgba(var(--atmc),.3);animation:vtSheet .26s cubic-bezier(.22,1,.36,1);padding:20px 20px calc(26px + env(safe-area-inset-bottom))">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:rgba(var(--atmc),.14);box-shadow:0 0 22px rgba(var(--atmc),.3);font:400 22px var(--fb);color:var(--tx)">☁︎</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Sky weather</span>
+          <div role="heading" aria-level="2" style="font:400 26px/1.15 var(--fd);color:var(--tx)">The next thirty days</div>
+          <span style="font:400 13px var(--fu);color:var(--mut)">{{ swSpan }}</span>
+        </div>
+        <button data-lift onClick="{{ swClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:400 17px var(--fb);color:var(--mut)">×</button>
+      </div>
+      <sc-if value="{{ swBusy }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="padding:28px 0;text-align:center;font:400 14px var(--fu);color:var(--mut)">Loading...</div>
+      </sc-if>
+      <sc-if value="{{ swNone }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx)">A quiet sky. Nothing in these thirty days is dated.</p>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <sc-for list="{{ swDays }}" as="g" hint-placeholder-count="0">
+          <section aria-label="{{ g.head }}, {{ g.sub }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--bd);padding-bottom:6px">
+              <span style="font:400 19px var(--fd);color:var(--tx)">{{ g.head }}</span>
+              <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ g.sub }}</span>
+            </div>
+            <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span aria-hidden="true" style="flex:none;min-width:40px;height:40px;padding:0 6px;box-sizing:border-box;border-radius:20px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.45);background:rgba(var(--atmc2),.1);font:400 15px var(--fb);color:var(--tx);white-space:nowrap">{{ it.glyph }}</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ it.kind }}</span>
+                  <span style="font:600 14.5px/1.35 var(--fu);color:var(--tx)">{{ it.title }}</span>
+                  <span style="font:400 12px var(--fu);color:var(--mut)">{{ it.when }}</span>
+                  <p style="margin:2px 0 0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.line }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
     <div onClick="{{ pgStop }}" role="dialog" aria-modal="true" aria-label="{{ pgTitle }}" data-vt-sheet="1" style="box-sizing:border-box;width:100%;max-height:88svh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc2),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border-top:1px solid rgba(var(--atmc2),.5);border-radius:26px 26px 0 0;box-shadow:0 -10px 60px rgba(var(--atmc2),.3);animation:vtSheet .26s cubic-bezier(.22,1,.36,1);padding:20px 20px calc(26px + env(safe-area-inset-bottom))">
@@ -38256,7 +38582,8 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:14px">
               <div style="display:flex;flex-direction:column;gap:12px">
-                <div style="display:flex;flex-direction:column;gap:16px;border-top:3px solid {{ hpEdge }};padding-top:18px">
+                <div style="position:relative;display:flex;flex-direction:column;gap:16px;border-top:3px solid {{ hpEdge }};padding-top:18px">
+                  <button data-lift onClick="{{ swGo }}" aria-label="Sky weather, the next thirty days" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:var(--sf);color:var(--tx)"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.5" cy="8" r="3.2" style="stroke:var(--ac2-hi)"></circle><path d="M15.5 2.2v1.2M20.6 4.4l-.9.9M22.3 9.5h-1.2" style="stroke:var(--ac2-hi)"></path><path d="M6.5 19.5h9a3.6 3.6 0 0 0 .4-7.2 5 5 0 0 0-9.6 1.1 3.1 3.1 0 0 0 .2 6.1z" style="fill:var(--sf)"></path></svg></button>
                   <div style="display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center">
                     <span style="font:600 9.5px var(--fu);letter-spacing:.17em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
                     <span style="font:400 clamp(30px,2.6vw,40px)/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ hpTitle }}</span>
@@ -44481,6 +44808,49 @@ input[type="date"]{color-scheme:dark}
      that did NOT force the tab, "Gate N" and "Personal Day N" on Today, set
      dpSel and rendered nothing at all: wired, pressable, and dead on desktop
      while working on mobile. One drawer at one level fixes both. -->
+<!-- Sky weather: the sky's dated events, from tomorrow on. -->
+<sc-if value="{{ swOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ swClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(8,7,11,.7);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .18s ease">
+    <div onClick="{{ swStop }}" role="dialog" aria-modal="true" aria-label="Sky weather" style="box-sizing:border-box;width:100%;max-width:640px;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border:1px solid rgba(var(--atmc),.45);border-radius:22px;box-shadow:0 0 0 1px rgba(var(--atmc),.12),0 0 70px rgba(var(--atmc),.24),0 30px 80px rgba(0,0,0,.55);padding:22px 24px 26px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:rgba(var(--atmc),.14);box-shadow:0 0 22px rgba(var(--atmc),.3);font:400 22px var(--fb);color:var(--tx)">☁︎</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Sky weather</span>
+          <div role="heading" aria-level="2" style="font:400 26px/1.15 var(--fd);color:var(--tx)">The next thirty days</div>
+          <span style="font:400 13px var(--fu);color:var(--mut)">{{ swSpan }}</span>
+        </div>
+        <button data-lift onClick="{{ swClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:400 17px var(--fb);color:var(--mut)">×</button>
+      </div>
+      <sc-if value="{{ swBusy }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="padding:28px 0;text-align:center;font:400 14px var(--fu);color:var(--mut)">Loading...</div>
+      </sc-if>
+      <sc-if value="{{ swNone }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx)">A quiet sky. Nothing in these thirty days is dated.</p>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <sc-for list="{{ swDays }}" as="g" hint-placeholder-count="0">
+          <section aria-label="{{ g.head }}, {{ g.sub }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--bd);padding-bottom:6px">
+              <span style="font:400 19px var(--fd);color:var(--tx)">{{ g.head }}</span>
+              <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ g.sub }}</span>
+            </div>
+            <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span aria-hidden="true" style="flex:none;min-width:40px;height:40px;padding:0 6px;box-sizing:border-box;border-radius:20px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.45);background:rgba(var(--atmc2),.1);font:400 15px var(--fb);color:var(--tx);white-space:nowrap">{{ it.glyph }}</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ it.kind }}</span>
+                  <span style="font:600 14.5px/1.35 var(--fu);color:var(--tx)">{{ it.title }}</span>
+                  <span style="font:400 12px var(--fu);color:var(--mut)">{{ it.when }}</span>
+                  <p style="margin:2px 0 0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.line }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
 <!-- The glance: the reading in passing, a plain radiant pop up. The packet is one press further in. -->
 <sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(8,7,11,.7);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .18s ease">
@@ -47021,7 +47391,7 @@ class Component extends DCLogic {
     if (['Pallas', 'Juno', 'Vesta', 'Hygiea'].indexOf(n) !== -1) return 'asteroid';
     return 'celestial body';
   }
-  CAT_LABEL = { body: 'Luminaries & Planets', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
+  CAT_LABEL = { body: 'Luminaries & Planets', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints', cluster: 'Star Clusters' };
   // Fixed hues, not themed, the same way --ac/--ac2/--crisis are fixed: a
   // category colour has to mean the same thing under every identity. TNO
   // reuses --ac2 (violet) rather than a fourth new token, node/hypothetical
@@ -47031,7 +47401,7 @@ class Component extends DCLogic {
   /* The four elements as the wheel colours them, fire, earth, air, water, in
      sign order. One table, read by the 2D wheel and handed to the 3D one. */
   SIGN_EL_C = ['#e08d7d', '#2fff8f', '#7eb8da', '#59b37d'];
-  CAT_COLOR = { body: 'var(--ac)', angle: '#2fff8f', asteroid: 'var(--cat-ast)', centaur: 'var(--cat-cen)', tno: 'var(--ac2)', comet: 'var(--cat-com)', node: 'var(--dim)', hypothetical: 'var(--dim)', derived: 'var(--ac2-hi)' };
+  CAT_COLOR = { body: 'var(--ac)', angle: '#2fff8f', asteroid: 'var(--cat-ast)', centaur: 'var(--cat-cen)', tno: 'var(--ac2)', comet: 'var(--cat-com)', node: 'var(--dim)', hypothetical: 'var(--dim)', derived: 'var(--ac2-hi)', cluster: 'var(--blue)' };
 
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
   UNCOMPUTED_WHY = 'no orbital elements sourced for this body';
@@ -47686,7 +48056,7 @@ class Component extends DCLogic {
   // tighter than a Sun-Mars trine).
   EXPANDED_ASPECTS = [[0, 'conjunct'], [60, 'sextile'], [90, 'square'], [120, 'trine'], [180, 'opposite'], [150, 'quincunx'], [30, 'semisextile'], [45, 'semisquare'], [135, 'sesquisquare']];
   EXPANDED_ORBS = { conjunct: 6, opposite: 6, trine: 6, square: 6, sextile: 4, quincunx: 3, semisextile: 1.5, semisquare: 2, sesquisquare: 2 };
-  MINOR_CATS = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical'];
+  MINOR_CATS = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'cluster'];
   norm360(x) { return ((x % 360) + 360) % 360; }
   t2000(d) { return d.getTime() / 86400000 + 2440587.5 - 2451545.0; }
   /* The memo sits here rather than at the call sites because this is the one
@@ -48557,7 +48927,7 @@ class Component extends DCLogic {
   // The natal set, cached per birth-data stamp and mode so dragging the wheel
   // never recomputes an ephemeris.
   fullChart(expanded) {
-    const p = this.activeProfile(), stamp = this.chartStamp(p) + '|' + (expanded ? 'x' : 'b');
+    const p = this.activeProfile(), stamp = this.chartStamp(p) + '|' + (expanded ? 'x' : 'b') + (window.SkyWeather ? 'c' : '');
     if (this._fcStamp === stamp) return this._fc;
     const t = this.t2000(this.natalDate());
     // Central-difference speed (deg/day) for any PLNS body via the same
@@ -48593,6 +48963,20 @@ class Component extends DCLogic {
         rows.push({ id: reg.id, name: reg.name, glyph: reg.glyph, lon: r.lon, sign: s.sign, deg: s.deg, idx: s.idx,
           mean: reg.tooltip, reference: reg.reference, group: 'extra', category: reg.category, ring: ring,
           speed: sp, retro: sp != null && sp < 0, status: r.status });
+      });
+    }
+    /* The star clusters, as points: each cluster's ecliptic longitude of the
+       birth date, which moves only by precession (sky-weather.js). */
+    if (expanded && window.SkyWeather && window.Astronomy) {
+      if (!this._swMake) this._swMake = window.SkyWeather.make(window.Astronomy);
+      const PCb = window.PlacementContent ? window.PlacementContent.bodies : {};
+      window.SkyWeather.CLUSTERS.forEach(c => {
+        const lon = this._swMake.clusterLon(c.id, this.natalDate());
+        if (lon == null || !isFinite(lon)) return;
+        const s = this.signOf(lon), pc = PCb[c.id] || {};
+        rows.push({ id: c.id, name: c.name, glyph: c.glyph, lon, sign: s.sign, deg: s.deg, idx: s.idx,
+          mean: pc.energy || '', reference: '', group: 'extra', category: 'cluster', ring: 2,
+          speed: 0, retro: false, status: 'ok' });
       });
     }
     this.anglePoints().forEach(a => rows.push({ ...a, category: 'angle', ring: 1, speed: null, retro: false, status: 'ok' }));
@@ -48709,9 +49093,13 @@ class Component extends DCLogic {
       if (a.group === 'extra' && b.group === 'extra' && a.ring === 2 && b.ring === 2) return;
       let d = Math.abs(this.norm360(a.lon - b.lon)); if (d > 180) d = 360 - d;
       const scale = Math.min(scaleOf(a), scaleOf(b));
+      /* A star cluster is read as the fixed stars are, by conjunction alone
+         and within a degree, the Astropedia's own figure for a fixed star. */
+      const fixed = a.category === 'cluster' || b.category === 'cluster';
       table.forEach(([ang, nm]) => {
+        if (fixed && ang !== 0) return;
         const off = Math.abs(d - ang);
-        if (off <= orbOf(nm) * scale) out.push({ a, b, asp: nm, orb: off });
+        if (off <= (fixed ? 1 : orbOf(nm) * scale)) out.push({ a, b, asp: nm, orb: off });
       });
     }));
     return out.sort((x, y) => x.orb - y.orb);
@@ -48781,7 +49169,7 @@ class Component extends DCLogic {
   // Categories broken out as their own collapsible sub-tables below the main
   // one. 'astral body' and 'angle' stay out of this list: they are the sixteen
   // core points, always visible in the main table, never folded away.
-  SUBTABLE_CATS = ['asteroid', 'centaur', 'tno', 'node', 'hypothetical', 'comet', 'derived'];
+  SUBTABLE_CATS = ['asteroid', 'centaur', 'tno', 'node', 'hypothetical', 'comet', 'derived', 'cluster'];
   /* THE OBSERVATORY (owner, 19 October 2026): "Make the full screen expansion
      an Observatory. People should feel like they're going in a certified
      space expedition facility." The overlay the maximize button opened is the
@@ -48946,7 +49334,7 @@ class Component extends DCLogic {
       };
     };
     const left = ['body', 'node', 'angle', 'derived'].map(group).filter(Boolean);
-    const right = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical'].map(group).filter(Boolean);
+    const right = ['asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'cluster'].map(group).filter(Boolean);
     const total = left.concat(right).reduce((n, g) => n + g.rows.length, 0);
     const p = this.activeProfile ? this.activeProfile() : null;
     return {
@@ -50821,6 +51209,109 @@ class Component extends DCLogic {
         bg: k === i ? p[3] : 'transparent', bd: k === i ? p[3] : 'var(--bd)',
         w: k === i ? '22px' : '8px', c: k === i ? 'var(--tx)' : 'var(--mut)', go: go(k) })) };
   }
+  /* ---- Sky weather ----------------------------------------------------- *
+     The weather icon on the horoscope opens a forecast of the sky's own
+     events, from tomorrow through the next thirty days, never today: what is
+     shown is always at least a day ahead. sky-weather.js finds the events
+     (mechanics); the sentences are written here. The search costs a few
+     tenths of a second, so it runs on the tick after the sheet opens and is
+     kept for the local day. */
+  SW_DAYS = 30;
+  SW_PHASE = ['New Moon', 'First Quarter', 'Full Moon', 'Last Quarter'];
+  SW_PHASE_GLYPH = ['●︎', '◑︎', '○︎', '◐︎'];
+  SW_PHASE_LINE = [
+    'The Moon goes dark beside the Sun. A clean page, kind to whatever wants beginning.',
+    'Half lit and growing. What was started at the dark Moon meets its first real resistance.',
+    'The Moon stands opposite the Sun, fully lit. What has been building comes into view.',
+    'Half lit and thinning. A time for sorting what to keep from what has run its course.'
+  ];
+  SW_COUNT = ['', '', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+  swWindow() {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + 1);
+    const to = new Date(d); to.setDate(to.getDate() + this.SW_DAYS);
+    return { from: d, to, key: d.toDateString() };
+  }
+  swFind() {
+    const S = window.SkyWeather, A = window.Astronomy, w = this.swWindow();
+    if (!S || !A) return null;
+    if (this._swKey === w.key) return this._sw;
+    if (!this._swMake) this._swMake = S.make(A);
+    let ev = [];
+    try { ev = this._swMake.events(w.from, w.to); } catch (e) { ev = []; }
+    this._swKey = w.key; this._sw = ev;
+    return ev;
+  }
+  swSoon() {
+    if (this._swTimer) return;
+    this._swTimer = setTimeout(() => { this._swTimer = null; this.swFind(); this.setState({ swTick: Date.now() }); }, 30);
+  }
+  swAt(lon) { const s = this.signOf(lon); return Math.floor(s.deg) + '° ' + s.sign; }
+  swGlyph(n) { const p = this.PLNS.find(x => x[0] === n); return p ? p[1] + '︎' : '✦︎'; }
+  swList(names) { return names.length < 3 ? names.join(' and ') : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]; }
+  swTime(d) { try { return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); } catch (e) { return d.toISOString().slice(11, 16); } }
+  swItem(e) {
+    const deg = x => x.toFixed(1) + '°', t = this.swTime(e.t), cl = (window.SkyWeather.CLUSTERS || []).find(c => c.id === e.cluster);
+    switch (e.kind) {
+      case 'phase': return { glyph: this.SW_PHASE_GLYPH[e.quarter], kind: 'Moon phase', title: this.SW_PHASE[e.quarter] + ' in ' + this.signOf(e.moon).sign,
+        line: this.SW_PHASE_LINE[e.quarter], when: t + ' · ' + this.swAt(e.moon) };
+      case 'eclipse': return { glyph: e.body === 'Sun' ? '☉︎' : '☽︎', kind: 'Eclipse',
+        title: e.type.charAt(0).toUpperCase() + e.type.slice(1) + ' eclipse of the ' + e.body,
+        line: e.body === 'Sun' ? 'The new Moon crosses the face of the Sun. Eclipses are read as turning points that unfold over the months after.'
+          : 'The full Moon passes through the Earth’s shadow. What has been hidden tends to surface around it.',
+        when: t + ' · ' + this.swAt(e.body === 'Sun' ? e.sun : e.moon) };
+      case 'station': return { glyph: e.dir === 'retrograde' ? '℞︎' : this.swGlyph(e.body), kind: 'Station',
+        title: e.body + (e.dir === 'retrograde' ? ' stations retrograde' : ' stations direct'),
+        line: e.dir === 'retrograde' ? e.body + ' slows, holds still and begins to walk back over its last degrees. Whatever it touches next, it will touch more than once.'
+          : e.body + ' holds still and turns forward again, ready to cross for a third time the ground it just retraced.',
+        when: t + ' · ' + this.swAt(e.lon) };
+      case 'cazimi': return { glyph: this.swGlyph(e.body), kind: 'Cazimi', title: e.body + ' in the heart of the Sun',
+        line: 'Within seventeen minutes of the Sun from ' + this.swTime(e.from) + ' to ' + this.swTime(e.to) + ', the closest place beside the light, which the tradition reads as strength rather than burning.'
+          + (e.inLat ? ' It is inside the Sun’s disk in latitude too, which is rarer.' : ''),
+        when: t + ' · ' + this.swAt(e.lon) };
+      case 'meet': return { glyph: this.swGlyph(e.a) + ' ☌︎ ' + this.swGlyph(e.b), kind: e.a === 'Moon' ? 'Moon meeting' : 'Conjunction',
+        title: (e.a === 'Moon' ? 'The Moon passes ' : e.a + ' meets ') + e.b + ' in ' + this.signOf(e.lon).sign,
+        line: e.a === 'Moon' ? 'Side by side in the sky, ' + deg(e.sep) + ' apart. For a few hours the Moon carries ' + e.b + '’s colour.'
+          : 'One degree of longitude for both, ' + deg(e.sep) + ' apart in latitude. Two natures speak through the same part of the zodiac for a while.',
+        when: t + ' · ' + this.swAt(e.lon) };
+      case 'gather': return { glyph: e.names.map(n => this.swGlyph(n)).join(''), kind: 'Gathering',
+        title: this.SW_COUNT[e.names.length] + ' gather in ' + this.signOf(e.lon + e.span / 2).sign,
+        line: this.swList(e.names) + ' within ' + deg(e.span) + ' of one another, at their closest.', when: t + ' · ' + this.swAt(e.lon) };
+      case 'shower': return { glyph: '☄︎', kind: 'Meteors', title: 'The ' + e.name + ' peak',
+        line: 'As many as ' + e.zhr + ' meteors an hour under a perfectly dark sky. The Moon is ' + Math.round(e.moonLit * 100) + '% lit'
+          + (e.moonLit < 0.35 ? ', so the faint ones will show.' : e.moonLit > 0.75 ? ', and its light will hide the faint ones.' : '.'),
+        when: t };
+      case 'cluster': return { glyph: this.swGlyph(e.body) + ' ✦︎', kind: 'Star cluster',
+        title: (e.body === 'Moon' ? 'The Moon' : e.body) + ' passes the ' + e.name,
+        line: deg(e.sep) + ' apart in latitude. Ptolemy gave this cluster the nature of ' + (cl ? this.swList(cl.like.map(n => n === 'Moon' ? 'the Moon' : n)) : 'its stars') + '.',
+        when: t + ' · ' + this.swAt(e.lon) };
+    }
+    return null;
+  }
+  skyWeatherVals() {
+    const open = !!this.state.swOpen;
+    const go = () => { this.setState({ swOpen: true }); this.swSoon(); };
+    const close = () => this.setState({ swOpen: false });
+    const base = { swGo: go, swClose: close, swOpen: open, swStop: e => { if (e && e.stopPropagation) e.stopPropagation(); } };
+    if (!open) return { ...base, swBusy: false, swNone: false, swDays: [], swSpan: '' };
+    const w = this.swWindow(), ready = this._swKey === w.key, ev = ready ? (this._sw || []) : [];
+    if (!ready) this.swSoon();
+    const last = new Date(w.to); last.setDate(last.getDate() - 1);
+    const fmt = (d, o) => { try { return d.toLocaleDateString(undefined, o); } catch (e) { return d.toDateString(); } };
+    const days = [];
+    ev.forEach(e => {
+      const it = this.swItem(e); if (!it) return;
+      const k = e.t.toDateString();
+      let g = days[days.length - 1];
+      if (!g || g.k !== k) {
+        const diff = Math.round((new Date(k) - w.from) / 864e5);
+        g = { k, head: diff === 0 ? 'Tomorrow' : fmt(e.t, { weekday: 'long' }), sub: fmt(e.t, { month: 'long', day: 'numeric' }), items: [] };
+        days.push(g);
+      }
+      g.items.push(it);
+    });
+    return { ...base, swBusy: !ready, swNone: ready && !days.length, swDays: days,
+      swSpan: fmt(w.from, { month: 'long', day: 'numeric' }) + ' to ' + fmt(last, { month: 'long', day: 'numeric' }) };
+  }
   FCKEY = 'incommon.forecast.open';
   fcIsOpen() { const v = this.state.fcOpen; return (v === null || v === undefined) ? this.readLS(this.FCKEY, false) : !!v; }
   fcVals() {
@@ -51523,7 +52014,7 @@ class Component extends DCLogic {
     const row = x => ({ anchor: x.anchor || '', glyph: x.glyph || '', glyphOn: !!x.glyph, title: x.title, hi: x.hi || '', hiOn: !!x.hi,
       meta: x.meta || '', metaOn: !!x.meta, sub: x.sub || '', edge: x.edge || 'transparent', go: x.go || null, btn: !!x.go, plain: !x.go,
       aria: x.aria || [x.title, x.hi, x.lit ? 'lit now' : '', x.sub].filter(Boolean).join(', '), litOn: !!x.lit, arrow: x.go ? '›' : '' });
-    const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived'];
+    const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived', 'cluster'];
     const LABEL = { ...this.CAT_LABEL, body: 'Luminaries & Planets' };
     const pts = CATS.map(cat => {
       const rs = o.rows.filter(r => r.category === cat);
@@ -61224,7 +61715,7 @@ class Component extends DCLogic {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
+      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
@@ -61379,7 +61870,7 @@ class Component extends DCLogic {
     });
     const kind = r.category === 'angle' ? 'angle' : r.category === 'node' ? 'lunar point'
       : r.category === 'derived' ? 'point' : r.category === 'hypothetical' ? 'hypothetical point'
-      : r.category === 'comet' ? 'comet' : r.category === 'tno' ? 'trans-Neptunian object' : this.bodyType(r.name);
+      : r.category === 'comet' ? 'comet' : r.category === 'cluster' ? 'star cluster' : r.category === 'tno' ? 'trans-Neptunian object' : this.bodyType(r.name);
     const ICON = { Strengths: 'M12 3v18M3 12h18M6 6l12 12M18 6L6 18',
       Challenges: 'M15 3a9 9 0 1 0 6 13A7 7 0 0 1 15 3z',
       Opportunities: 'M3 18h18M6 18a6 6 0 0 1 12 0M12 5v3M5.5 9.5l2 2M18.5 9.5l-2 2',
@@ -61809,6 +62300,7 @@ class Component extends DCLogic {
           ...this.dreamVals(),
           ...this.oracleVals(),
           ...this.cycleWidgetVals(),
+          ...this.skyWeatherVals(),
           ...this.studyPanelVals(),
           ...this.cycleSheetVals(),
           ...this.tarotLibVals(),
@@ -64319,7 +64811,7 @@ class Component extends DCLogic {
         if (dy > 110) this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 });
         else this.setState({ vtDragY: 0 });
       },
-      vtSheetClose: () => this.setState({ plGlance: null, numGlance: null, placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
+      vtSheetClose: () => this.setState({ plGlance: null, numGlance: null, swOpen: false, placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
       isToday: true, isSpirit: true, spiritMain: false,
       spiritAstro: true, spiritHd: true, spiritNumer: true,
       isOracle: true, isSettings: true,

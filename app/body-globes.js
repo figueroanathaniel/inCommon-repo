@@ -248,7 +248,7 @@
     var k = keyOf(b), sd = hash(b.key || b.name);
     if (k) { var s = spec(BY[k]); s.seed = sd * 50; s.id = k; return s; }
     var cat = b.cat || '';
-    if (cat === 'node' || cat === 'derived' || cat === 'hypothetical' || cat === 'angle' || /node|lilith|selena|vertex|part of|aries point|midpoint/i.test(b.name || '')) {
+    if (cat === 'node' || cat === 'derived' || cat === 'hypothetical' || cat === 'angle' || cat === 'cluster' || /node|lilith|selena|vertex|part of|aries point|midpoint/i.test(b.name || '')) {
       var nm = String(b.name || '');
       return { kind: SIGIL, seed: sd * 50, dark: /lilith/i.test(nm) ? 1 : 0, dash: cat === 'hypothetical' ? 1 : 0, nodes: /node/i.test(nm), id: 'sigil' };
     }
