@@ -3475,7 +3475,8 @@ nights. Uranus and Neptune never count, because they need a telescope. The
 two 3s are chosen, not read: the phrase is not a term of astronomy, and those
 are the figures that reproduce Kielder Observatory's dated list when run from
 Kielder (SW6). Do not tune them without rerunning SW6. The place is the
-profile's (`swPlace()`), the memo key carries it, and the sample has none, so
+profile's (`swPlace()`, the owner's choice over the device's location or a
+typed place), the memo key carries it, and the sample has none, so
 it shows no parade.
 
 ## The hole is the middle of the screen, and the ring hugs it

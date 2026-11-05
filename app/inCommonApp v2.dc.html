@@ -20584,8 +20584,8 @@ class Component extends DCLogic {
     return { from: d, to, key: d.toDateString() };
   }
   /* Where a planet parade is seen from: the place on the profile, the one
-     place the app holds for the reader (the owner's choice is pending; see
-     docs/astro-upgrade/03-sky-weather-sources.md). None, no parade. */
+     place the app holds for the reader (the owner's choice, 5 November
+     2026, over the device's location or a typed place). None, no parade. */
   swPlace() {
     const p = this.activeProfile();
     if (!p || !Number.isFinite(+p.birthLat) || !Number.isFinite(+p.birthLon) || p.birthLat === null || p.birthLon === null) return null;
