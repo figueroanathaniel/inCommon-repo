@@ -201,11 +201,33 @@ It is still a pastel, never the action green. And the life ribbon's current
 segment is washed at `.34` of `--atmc`, not `.48`, because the Biome's cyan
 at that strength put white type under 4.5:1. Both were found by the T rows.
 
-**The faces.** Cyberspace's display face is Pixelify Sans, not the concept's
-VT323: `--fd` carries the readings' paragraphs as well as headings, and VT323
-reads at about two thirds of its size there. Pixelify Sans draws its 5 as an S, so the numerals come from Tiny5, loaded as a digits only subset (`text=0123456789`, the third entry of the face) and set first in `--fd` and `--fu`, so it draws the digits and nothing else. The interface face (`--fu`, every label and subheader) is the same pixel stack, by the owner's word of 5 November 2026; the reading body (`--fb`) stays Verdana. Ligatures are off in Cyberspace, because Pixelify's fi joins into a glyph that reads as F. Roots is Spectral, the Biome is
-Comfortaa. None of the three is in `app/fonts/` yet, so a `--fonts self` build
-falls back to the interface face for them.
+**The faces.** Each identity sets six faces, by the owner's word of 5
+November 2026, and four tokens joined the three to carry them: `--fg` the
+greeting (the one line per screen that wears a fill, `[data-greet]`, styled
+in the head sheet and plain under the contrast modifier), `--fk` kickers and
+tabs (every `--fu` style that is uppercase), `--fm` data (times, degrees,
+gates: the tabular and monospace styles and the clock), and `--fc` controls
+(every other button that was `--fu`). All four are declared in the three
+roots, and the contrast modifier sets `--fg` and `--fk` to Karla with `--fd`.
+Cyberspace: Pixelify Sans headlines with Tiny5 digits (Pixelify draws its 5
+as an S, so Tiny5 is loaded as a digits only subset, the third entry of the
+face, and set first in `--fd` and `--fu`), Audiowide in chrome, Silkscreen,
+VT323, Verdana, Tahoma bold; ligatures are off, because Pixelify's fi joins
+into a glyph that reads as F. Nature's Roots: Grenze, Macondo with an ember
+glow, Cinzel, Courier Prime, Spectral, Alegreya Sans. The Biome: Comfortaa,
+Sniglet lit cyan into magenta, Quicksand, Share Tech Mono, Nunito, Varela
+Round. Deep Field, the owner's pick of three on 5 November 2026: Cormorant
+Unicase headlines, Pinyon Script greeting in gold, Josefin Sans kickers and
+controls, Space Mono data, Newsreader reading. Roots and the Biome also set
+`--fu` (Alegreya Sans, Nunito), because the owner asked for the Biome's look
+on every screen and a label left in `--fu` was the last thing still in Karla.
+A paragraph is `--fb`, never `--fd`: headline faces are not reading faces, and
+the paragraphs that wore `--fd` were moved. The wheel's numbers, degrees and
+angles are `var(--fm)` and its centre name `var(--fd)`, written into the `f`
+shorthand the wheel labels carry; the sign and body glyphs keep Georgia, for
+the symbols. A theme's other faces ride in one request from its `more` list.
+None of them is in `app/fonts/`, so a `--fonts self` build falls back along
+each token's stack.
 
 ## A category is not a semantic colour
 `--ac` means a primary action, `--ok` means a confirmed value, `--crisis` means
