@@ -810,7 +810,7 @@ input[type="date"]{color-scheme:dark}
     <button data-lift onClick="{{ sampleGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--ac2-hi);border-radius:999px;font:600 10.5px var(--fu);color:var(--ac2-hi)">Use mine</button>
   </div>
 </sc-if>
-<div data-vt-scroll="1" role="main" data-main-region="1" aria-label="Your readings" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-y:scroll;overflow-x:hidden;scroll-behavior:smooth">
+<div data-vt-scroll="1" role="main" data-main-region="1" aria-label="Your readings" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow:hidden;scroll-behavior:smooth">
 <section data-vt-sec="Today" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Today" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div data-vt-page="1" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column">
@@ -15753,6 +15753,7 @@ class Component extends DCLogic {
     this._startPath = this.hashPath() || null;
     this.dtBind();
     this.vtBind();
+    this.listChainBind();
     this._onErr = e => this.setState({ errBanner: 'Something broke quietly: ' + (e.message || 'unknown error') + '. The rest of the app keeps working.' });
     window.addEventListener('error', this._onErr);
     this._onNet = () => { this.setState({ online: navigator.onLine }); if (navigator.onLine) setTimeout(() => { this.flushOutbox(); this.cloudSync(true); }, 400); };
@@ -15890,6 +15891,7 @@ class Component extends DCLogic {
     window.removeEventListener('popstate', this._onPop);
     if (this._vtKey) document.removeEventListener('keydown', this._vtKey);
     if (this._vtWheel) document.removeEventListener('wheel', this._vtWheel);
+    if (this._lcStart) { document.removeEventListener('touchstart', this._lcStart, true); document.removeEventListener('touchmove', this._lcMove, true); document.removeEventListener('touchend', this._lcEnd, true); document.removeEventListener('scroll', this._lcScroll, true); document.removeEventListener('wheel', this._lcWheel, true); }
     if (this._vtTS) document.removeEventListener('touchstart', this._vtTS);
     if (this._vtTM) document.removeEventListener('touchmove', this._vtTM);
     if (this._vtTE) {
@@ -18028,7 +18030,21 @@ class Component extends DCLogic {
     const x = this.chartStudyOf(), T = window.ChartTraditions;
     if (!x || x.zodiac !== 'lahiri' || !T || !r || r.lon == null) return null;
     const s = this.signOf(r.lon), sid = s.idx * 30 + s.deg, n = T.nakshatra(sid);
-    return { rashi: T.RASHI[s.idx], sign: s.sign, nak: n.name, pada: n.pada, lord: n.lord, dignity: T.dignity(r.name, sid), sid };
+    return { rashi: T.RASHI[s.idx], sign: s.sign, nak: n.name, pada: n.pada, lord: n.lord, dignity: T.dignity(r.name, sid), sid, combust: this.vedicCombust(r) };
+  }
+  /* Asta: a graha too close to the Sun to be seen. The limits are the ones
+     OnlineJyotish's lesson on combustion gives (Moon 12, Mars 17, Mercury 14
+     or 12 retrograde, Jupiter 11, Venus 10 or 8 retrograde, Saturn 15). The
+     separation is the same in every zodiac, so it is read on the tropical
+     longitudes. */
+  ASTA = { Moon: 12, Mars: 17, Mercury: 14, Jupiter: 11, Venus: 10, Saturn: 15 };
+  vedicCombust(r) {
+    const lim0 = this.ASTA[r.name];
+    if (!lim0 || r.lon == null) return false;
+    const sun = { lon: this.lonOf('Sun', this.t2000(this.natalDate())) };
+    if (!isFinite(sun.lon)) return false;
+    const lim = r.retro && r.name === 'Mercury' ? 12 : r.retro && r.name === 'Venus' ? 8 : lim0;
+    return Math.abs(((r.lon - sun.lon + 540) % 360) - 180) < lim;
   }
   /* Rahu and Ketu are the Vedic names of the nodes; the key stays the name,
      so every reading and lookup is unchanged. */
@@ -21972,7 +21988,7 @@ class Component extends DCLogic {
         .concat(stel.house.filter(g => g.names.indexOf(r.name) !== -1).map(g => 'H' + g.key));
       const ved = off ? null : this.vedicOf(r);
       const hel = off ? null : this.helioPos(r);
-      const tags = (ved ? [{ t: ved.rashi + ' \u00b7 ' + ved.nak + ' ' + ved.pada + (ved.dignity ? ' \u00b7 ' + ved.dignity : '') }] : [])
+      const tags = (ved ? [{ t: ved.rashi + ' \u00b7 ' + ved.nak + ' ' + ved.pada + (ved.dignity ? ' \u00b7 ' + ved.dignity : '') + (ved.combust ? ' \u00b7 combust' : '') }] : [])
         .concat(hel ? [{ t: (hel.body === 'Earth' ? 'Earth ' : 'From the Sun ') + Math.floor(hel.deg) + '\u00b0 ' + this.SIGN_GLYPHS[hel.idx] }] : []).concat(gIn.length ? [{ t: gIn.join(' ') + ' gathering' }] : []);
       const cs = off ? [] : this.impactContacts(r.lon), top = cs[0];
       const nx = nextOn[r.name];
@@ -29993,8 +30009,8 @@ class Component extends DCLogic {
         return { row: String(row), col: String(col), rashi: T.RASHI[i], glyph: this.SIGN_GLYPHS[i], lagna: isLag,
           bd: isLag ? 'var(--ac2-hi)' : 'var(--bd)', bg: isLag ? 'rgba(var(--atmc2),.14)' : 'rgba(var(--atmc),.06)',
           grahas: here.map(r => { const sg = this.signOf(r.lon), v = this.vedicOf(r);
-            return { ab: AB[r.name], deg: Math.floor(sg.deg) + '\u00b0', retro: r.retro ? ' R' : '', key: this.pointKey(r),
-              aria: this.studyName(r.name) + ', ' + Math.floor(sg.deg) + ' degrees ' + T.RASHI[i] + (v ? ', ' + v.nak + ' pada ' + v.pada : '') + (r.retro ? ', retrograde' : '') + '. Open the reading.',
+            return { ab: AB[r.name], deg: Math.floor(sg.deg) + '\u00b0', retro: (r.retro ? ' R' : '') + (v && v.combust ? ' c' : ''), key: this.pointKey(r),
+              aria: this.studyName(r.name) + ', ' + Math.floor(sg.deg) + ' degrees ' + T.RASHI[i] + (v ? ', ' + v.nak + ' pada ' + v.pada : '') + (r.retro ? ', retrograde' : '') + (v && v.combust ? ', combust' : '') + '. Open the reading.',
               go: () => openBody(this.pointKey(r)) }; }),
           aria: T.RASHI[i] + (isLag ? ', the Lagna' : '') };
       });
@@ -31868,6 +31884,7 @@ class Component extends DCLogic {
     const out = ['Your ' + name + ' stands at ' + dm(v.sid % 30) + ' ' + v.rashi + ', the sign called ' + v.sign + ' in the West, in the sidereal zodiac of the Lahiri ayanamsa.',
       'That is ' + dm(inNak) + ' into ' + v.nak + ', the ' + ord(T.NAKSHATRAS.indexOf(v.nak) + 1) + ' nakshatra, in its ' + ord(v.pada) + ' pada. In the Vimshottari order ' + v.nak + ' is held by ' + (v.lord === 'Ketu' ? 'Ketu' : v.lord === 'Rahu' ? 'Rahu' : v.lord) + '.'];
     if (v.dignity) out.push(v.dignity === 'exalted' ? name + ' is exalted in ' + v.rashi + ', by Parashara.' : v.dignity === 'debilitated' ? name + ' is debilitated in ' + v.rashi + ', by Parashara.' : v.rashi + ' is one of ' + name + '\u2019s own signs, by Parashara.');
+    if (v.combust) out.push(name + ' stands close enough to the Sun to be combust, asta: lost in its light, the tradition says, so what it gives is given through the Sun.');
     if (r.name === 'Moon') {
       const nd = this.natalDate(), jd = this.t2000(nd) + 2451545, now = this.t2000(new Date()) + 2451545;
       const ds = T.vimshottari(v.sid, jd, 18), cur = ds.find(d => d.start <= now && now < d.end);
@@ -34366,36 +34383,9 @@ class Component extends DCLogic {
      taps, and cannot be hit by a screen reader or the keyboard, both of which
      already have their own way between sections.
 
-     Everywhere else, a hard pull down from the top of a page refreshes, which
-     is what a decade of phones has taught everybody to expect. The document
-     itself never scrolls here, so the browser's own pull to refresh can never
-     fire, and it has to be built. It fires on release rather than mid drag, so
-     a pull that turns into a scroll is not punished with a reload. */
+     There is no pull to refresh any more (owner, 5 November 2026): a drag
+     down at the top of a page scrolls, and nothing reloads. */
   VT_BAND = 34;      /* the thin rectangle, top and bottom */
-  /* PULL TO REFRESH ASKS FOR INTENT, NOT FOR A GESTURE.
-   *
-   * It was firing constantly, because one downward drag from the top of a page
-   * was the whole condition, and reading with a thumb produces those all day.
-   * A refresh throws away scroll position and reloads several megabytes, so it
-   * should cost something to ask for. Four conditions now, and all of them have
-   * to hold.
-   *
-   *   THE PAGE IS AT THE TOP.        As before.
-   *   WHAT YOU TOUCHED IS AT THE TOP. The nearest scrollable thing under the
-   *                                   finger, not just the page behind it, so a
-   *                                   list mid scroll never counts.
-   *   THE PULL IS LONG AND SLOW.      160px rather than 92, and at least 350ms,
-   *                                   so a flick cannot reach it however far it
-   *                                   travels.
-   *   YOU ASK TWICE.                  The first qualifying pull arms and lets
-   *                                   go; a second from the same place within
-   *                                   six seconds refreshes. That is the part
-   *                                   that reflects intent: an accidental drag
-   *                                   is not repeated on purpose.
-   */
-  VT_PULL = 160;     /* travel from the top of a page before it counts */
-  VT_PULL_MS = 350;  /* and the least time that travel may take */
-  VT_ARM_MS = 6000;  /* how long an armed pull stays armed */
   VT_HSWIPE = 56;    /* sideways travel before a swipe moves to the next screen */
 
   /* THE SIDEWAYS SWIPE STAYS INSIDE ITS SECTION.
@@ -34463,20 +34453,6 @@ class Component extends DCLogic {
     }
     return null;
   }
-  vtPullPaint(px) {
-    const el = this._vtScroll;
-    if (!el) return;
-    el.style.transition = px ? 'none' : 'transform .22s ease';
-    el.style.transform = px ? 'translateY(' + px + 'px)' : '';
-    if (!px) setTimeout(() => { if (el) el.style.transition = ''; }, 240);
-  }
-  /* Refresh THIS page, not the app's front door. A reload keeps the hash, but
-     the vertical shell opens on section zero regardless, so the section is
-     handed forward and picked up on the next boot. */
-  vtRefresh() {
-    try { sessionStorage.setItem('incommon.vtsec', String(this.state.vtSec || 0)); } catch (e) {}
-    try { location.reload(); } catch (e) {}
-  }
   vtRestoreSection() {
     let n = null;
     try { n = sessionStorage.getItem('incommon.vtsec'); sessionStorage.removeItem('incommon.vtsec'); } catch (e) {}
@@ -34494,6 +34470,73 @@ class Component extends DCLogic {
       this.setState({ vtSec: i });
       setTimeout(() => { el.style.scrollSnapType = snap || ''; }, 60);
     }, 260);
+  }
+  /* A LIST HANDS THE SCROLL ON (owner, 5 November 2026: "When scrolling a
+     list inside the app, let it continue scrolling the larger page ... Give
+     it a quick pause before continuing the scroll, and let a second attempt
+     at scrolling in the same direction continue scrolling the page."). Every
+     inner list contains its overscroll, so a flick that reaches its end
+     stops there. Reaching the end in one gesture arms the list; once the
+     gesture is over and LIST_PAUSE has passed, the list lets its overscroll
+     chain, so the next gesture the same way scrolls the page it sits on.
+     Scrolling the list back off its end takes the chaining away again.
+     Only vertical: a sideways strip stays dead at its end, as asked. */
+  LIST_PAUSE = 350;
+  listOf(n) {
+    for (; n && n.nodeType === 1; n = n.parentElement) {
+      if (n.matches('[data-vt-scroll],[data-vt-page],[data-vt-pager],[data-dt-scroll],body,html')) return null;
+      if (n.scrollHeight > n.clientHeight + 2) {
+        const cs = getComputedStyle(n);
+        if (/auto|scroll/.test(cs.overflowY) && cs.overscrollBehaviorY !== 'auto') return n;
+        if (/auto|scroll/.test(cs.overflowY) && n._lcArm) return n;
+      }
+    }
+    return null;
+  }
+  listEdge(el) { return { top: el.scrollTop <= 1, bot: el.scrollTop + el.clientHeight >= el.scrollHeight - 1 }; }
+  listArm(el, dir) {
+    clearTimeout(el._lcT);
+    el._lcDir = dir;
+    el._lcT = setTimeout(() => {
+      const e = this.listEdge(el);
+      if ((dir < 0 && e.top) || (dir > 0 && e.bot)) { el._lcArm = dir; el.style.overscrollBehaviorY = 'auto'; }
+    }, this.LIST_PAUSE);
+  }
+  listDisarm(el) { clearTimeout(el._lcT); if (el._lcArm) { el._lcArm = 0; el.style.overscrollBehaviorY = ''; } }
+  listChainBind() {
+    let el = null, y0 = 0, hit = 0;
+    this._lcStart = e => {
+      el = this.listOf(e.target); hit = 0;
+      if (!el || !e.touches || e.touches.length !== 1) { el = null; return; }
+      y0 = e.touches[0].clientY;
+      if (el._lcT) clearTimeout(el._lcT);
+    };
+    this._lcMove = e => {
+      if (!el || !e.touches) return;
+      const dy = y0 - e.touches[0].clientY, ed = this.listEdge(el);
+      if (dy < -6 && ed.top) hit = -1; else if (dy > 6 && ed.bot) hit = 1;
+      if (el._lcArm && el._lcArm !== Math.sign(dy) && Math.abs(dy) > 6) this.listDisarm(el);
+    };
+    this._lcEnd = () => { if (el && hit && !el._lcArm) this.listArm(el, hit); el = null; };
+    this._lcScroll = e => {
+      const t = e.target;
+      if (!t || t.nodeType !== 1 || !t._lcArm) return;
+      const ed = this.listEdge(t);
+      if (!(t._lcArm < 0 ? ed.top : ed.bot)) this.listDisarm(t);
+    };
+    this._lcWheel = e => {
+      if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      const l = this.listOf(e.target);
+      if (!l) return;
+      const ed = this.listEdge(l), dir = Math.sign(e.deltaY);
+      if (l._lcArm && l._lcArm !== dir) { this.listDisarm(l); return; }
+      if (!l._lcArm && ((dir < 0 && ed.top) || (dir > 0 && ed.bot))) this.listArm(l, dir);
+    };
+    document.addEventListener('touchstart', this._lcStart, { passive: true, capture: true });
+    document.addEventListener('touchmove', this._lcMove, { passive: true, capture: true });
+    document.addEventListener('touchend', this._lcEnd, { passive: true, capture: true });
+    document.addEventListener('scroll', this._lcScroll, { passive: true, capture: true });
+    document.addEventListener('wheel', this._lcWheel, { passive: true, capture: true });
   }
   vtBindTouch() {
     let sy = 0, sx = 0, band = 0, page = null, inner = null;
@@ -34529,21 +34572,10 @@ class Component extends DCLogic {
          drag. They do nothing now: a gesture never leaves the section. */
       if (band) return;
 
-      /* Both have to be at the top: the page, and whatever was actually
-         touched. If the finger landed on something with its own scroll that is
-         part way down, this is a scroll and nothing else. */
-      const pageTop = page && page.scrollTop <= 0;
-      const innerTop = !inner || inner.scrollTop <= 0;
-      if (dy > 0 && pageTop && innerTop) {
-        pull = dy;
-        if (e.cancelable) e.preventDefault();
-        /* Heavier damping than before, so the same travel of thumb produces
-           less movement and the threshold is further away than it looks. */
-        this.vtPullPaint(Math.min(72, dy * 0.3));
-      } else if (pull) {
-        pull = 0;
-        this.vtPullPaint(0);
-      }
+      /* NO PULL TO REFRESH (owner, 5 November 2026: "Instead of pulling down
+         to refresh the page, let the user continue to scroll up the page").
+         A drag down at the top of a page is a scroll and nothing else; a
+         list at its top hands the next drag to the page (listChainBind). */
     };
 
     this._vtTE = e => {
@@ -34583,24 +34615,6 @@ class Component extends DCLogic {
       };
       if (Object.keys(back).length) this.setState(back, finish); else finish();
       hz = 0; hzY = 0; hzOK = false; hzFlight = false;
-      const slowEnough = Date.now() - startAt >= this.VT_PULL_MS;
-      if (pull > this.VT_PULL && slowEnough) {
-        const now = Date.now();
-        const sameSpot = this._vtArmSpot === (this.state.vtSec || 0);
-        if (armed !== false && this._vtArmAt && now - this._vtArmAt < this.VT_ARM_MS && sameSpot) {
-          this._vtArmAt = 0; this._vtArmSpot = null;
-          this.vtBuzz(16);
-          this.vtPullPaint(0);
-          this.vtRefresh();
-          return;
-        }
-        /* First ask. Arm it, say so quietly, and let go. */
-        this._vtArmAt = now;
-        this._vtArmSpot = this.state.vtSec || 0;
-        this.vtBuzz(8);
-        this.speak('Pull down again to refresh this page.', 'polite');
-      }
-      if (pull) this.vtPullPaint(0);
       armed = false; band = 0; pull = 0; page = null; inner = null;
     };
 

@@ -3130,6 +3130,33 @@ finishes the move where it was going. `tools/drive-swipe.js` holds it, in
 Chromium and with a touch that stops both scrollers in place as WebKit does,
 since no WebKit is installed here; W1 and W3 fail without the fix.
 
+## A list hands the scroll on to its page, and nothing pulls to refresh
+Asked for by the owner on 5 November 2026, after the swipe fault came back on
+his iPhone ("swiping up and down at the ends of pages moves to the next tab").
+**The section column (`[data-vt-scroll]`) is `overflow: hidden`**, not
+`overflow-y: scroll`, so no gesture and no chained overscroll can move it:
+only `vtGoSection()` moves it, by writing `scrollTop`. Chromium never chained
+into it, which is why W5 in `tools/drive-swipe.js` passed on the old code too;
+the iPhone fault can only be confirmed on a device.
+
+**A list at its end hands the next gesture to the page** (`listChainBind()`,
+`LIST_PAUSE` 350ms). Every inner list contains its overscroll, so a flick that
+reaches its top or bottom stops there; the end of that gesture arms the list,
+and once the pause has passed the list's `overscroll-behavior-y` is set to
+`auto`, so the next gesture the same way scrolls the page it sits on. A new
+touch before the pause cancels the arming, so a quick second flick stays dead.
+Scrolling the list back off its end disarms it. Wheel and touch both arm.
+Vertical only: a sideways strip stays dead at its end, as the owner asked.
+
+**There is no pull to refresh.** The app built its own (two slow pulls from
+the top of a page reloaded it), and the owner asked for a drag at the top to
+keep scrolling instead. `vtRefresh()`, `vtPullPaint()` and the `VT_PULL`
+constants are gone; `vtRestoreSection()` stays only to drain an old
+`incommon.vtsec` key. Driven in Chromium at an iPhone's size with real touch
+events through the DevTools protocol: down to the list's end, an immediate
+flick holds, a flick after the pause moves the page 285px; the same upward;
+the section column never moves.
+
 ## A row of pills becomes a dropdown when it is a choice of one
 The Human Design readings (My Type, Chart, Mood, Work, Sleep, Diet & Exercise,
 Health, Synastry, Just Me, At Me) and the Throughline filter were rows of pills,
@@ -3403,7 +3430,11 @@ Earth in `--blue`). Every other study has none and opens on 2D.
 and Parashara dignity; the Ledger tags each row with them, the nodes are Rahu
 and Ketu (`studyName()`), and the packet has The Nakshatra chapter, with the
 Vimshottari dasha on the Moon. Progressions, the Mirror and the Year are
-Western techniques and are left out under Vedic and Heliocentric.
+Western techniques and are left out under Vedic and Heliocentric. A graha within its combustion distance of the Sun (Moon 12, Mars 17,
+Mercury 14 or 12 retrograde, Jupiter 11, Venus 10 or 8 retrograde, Saturn 15,
+from OnlineJyotish's lesson 148, which cites no classical text) is marked
+combust: `c` in the square, a Ledger tag and a line in The Nakshatra chapter
+(`vedicCombust()`).
 
 **Heliocentric** (`helioChart()`, `helioPos()`; the older `helioOf(el, t)` is
 the Kepler helper and is unrelated) tags the Ledger with each planet from the

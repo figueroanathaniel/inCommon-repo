@@ -22,6 +22,13 @@
  *       is on the first chart, the pager on a page and the column on a section.
  *   W3  A tap while a swipe is still travelling: the move is finished where it
  *       was going, on the second chart, and the pager is on a page.
+ *   W5  Three flicks on past the end of a page and three past its top: the
+ *       section column never moves (the column is overflow: hidden now, so
+ *       nothing can chain into it; only vtGoSection() moves it). Chromium
+ *       never chained into the column, so this row passed on the old code
+ *       too: it guards the behaviour, and the iPhone fault itself (WebKit
+ *       chaining a page's overscroll into a scrollable column) can only be
+ *       confirmed on a device.
  *   W4  A vertical drag in the bottom band and one in the top band, and a
  *       sideways swipe on Today: the section never changes.
  *
@@ -161,6 +168,21 @@ function t(id, name, expected, actual) {
     await swipe(-200); await p.waitForTimeout(1500);
     const w4b = await where();
     out.w4 = { afterBottomBand: w4u.tab, afterTopBand: w4a.tab, afterTodaySwipe: w4b.tab, columnOnSection: w4b.columnOnSection };
+    /* W5: flicks past the end of a page (owner, 5 November 2026: "swiping up
+       and down at the ends of pages moves to the next tab"). The page is
+       scrolled to its end, then flicked on toward the next section three
+       times; then to its top and flicked back three times. */
+    const page = () => p.evaluate(() => { const c = document.querySelector('[data-vt-scroll]'); const s = [...document.querySelectorAll('[data-vt-sec]')]; const i = Math.round(c.scrollTop / c.clientHeight); const pg = s[i] && (s[i].querySelector('[data-vt-page]') || s[i]); return { i, top: c.scrollTop }; });
+    const toEnd = end => p.evaluate(end => { document.querySelectorAll('[data-vt-sec] *').forEach(n => { if (n.scrollHeight > n.clientHeight + 4 && /auto|scroll/.test(getComputedStyle(n).overflowY)) n.scrollTop = end ? n.scrollHeight : 0; }); }, end);
+    await toEnd(true); await p.waitForTimeout(400);
+    for (let k = 0; k < 3; k++) { await drag(h * 0.7, -h * 0.5); await p.waitForTimeout(250); }
+    await p.waitForTimeout(1500);
+    const w5a = await where(), pa = await page();
+    await toEnd(false); await p.waitForTimeout(400);
+    for (let k = 0; k < 3; k++) { await drag(h * 0.3, h * 0.5); await p.waitForTimeout(250); }
+    await p.waitForTimeout(1500);
+    const w5b = await where(), pb = await page();
+    out.w5 = { afterFlicksDown: w5a.tab, afterFlicksUp: w5b.tab, columnStill: pa.i === 0 && pb.i === 0, columnOnSection: w5b.columnOnSection };
     await ctx.close();
     return out;
   }
@@ -184,6 +206,9 @@ function t(id, name, expected, actual) {
     const W4 = { afterBottomBand: 'spirit', afterTopBand: 'spirit', afterTodaySwipe: 'today', columnOnSection: true };
     t('W4', 'A drag in either band and a swipe on Today never change the section',
       { chromium: W4, iphone: W4 }, { chromium: chromiumRun.w4, iphone: iphoneRun.w4 });
+    const W5 = { afterFlicksDown: 'today', afterFlicksUp: 'today', columnStill: true, columnOnSection: true };
+    t('W5', 'Flicks past either end of a page never move to the next section',
+      { chromium: W5, iphone: W5 }, { chromium: chromiumRun.w5, iphone: iphoneRun.w5 });
   } catch (e) {
     t('W-ERR', 'drive failure: ' + (e && e.message), 'no error', String(e && e.message));
   } finally {
