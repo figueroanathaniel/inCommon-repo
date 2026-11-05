@@ -1063,7 +1063,7 @@
     var tv = Math.tan((this.baseFov || this.cam.fov) * Math.PI / 360);
     var ins = this.mode === 'obs' && this.inset ? this.inset : null;
     var asp = ins && this.H ? Math.max(0.45, (this.W - ins.l - ins.r) / this.H) : this.cam.aspect;
-    var dw = Rc / (tv * asp), dh = (Rc * Math.sin(pitch) + 2.6 * Math.cos(pitch)) / tv;
+    var dw = Rc / (tv * asp), dh = (Rc * Math.abs(Math.sin(pitch)) + 2.6 * Math.abs(Math.cos(pitch))) / tv;
     return Math.max(dw, dh) * 1.04;
   };
   P.turnTo = function (key) {
@@ -1079,7 +1079,7 @@
     var pitch = this.user.pitch != null ? this.user.pitch : this.defaultPitch();
     return {
       yaw: this.user.yaw + drift + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.x * 0.05 : 0),
-      pitch: clamp(pitch - 0.04 * c + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.y * 0.03 : 0), 0.2, 1.42),
+      pitch: pitch - 0.04 * c + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.y * 0.03 : 0),
       dist: this.fit() / this.user.zoom * (1 - 0.04 * c)
     };
   };
@@ -1097,9 +1097,14 @@
     if (!this.rig) this.rig = { yaw: g.yaw, pitch: g.pitch, dist: g.dist };
     var r = this.rig;
     r.yaw = damp(r.yaw, g.yaw, k); r.pitch = damp(r.pitch, g.pitch, k); r.dist = damp(r.dist, g.dist, k);
-    var cp = Math.cos(r.pitch), ty = 0.35;
-    this.cam.position.set(Math.sin(r.yaw) * cp * r.dist, ty + Math.sin(r.pitch) * r.dist, Math.cos(r.yaw) * cp * r.dist);
+    var cp = Math.cos(r.pitch), sp = Math.sin(r.pitch), ty = 0.35;
+    this.cam.position.set(Math.sin(r.yaw) * cp * r.dist, ty + sp * r.dist, Math.cos(r.yaw) * cp * r.dist);
     this.cam.rotation.order = 'XYZ';
+    /* The chart turns all the way round, over the top and under (owner,
+       5 November 2026: "360 in every direction"). Up is the direction the
+       pitch is moving the camera in, which stays defined through both poles,
+       so the view never flips as it passes over them. */
+    this.cam.up.set(-Math.sin(r.yaw) * sp, cp, -Math.cos(r.yaw) * sp);
     this.cam.lookAt(0, ty, 0);
     this.cam.updateMatrixWorld();
     this._settled = Math.abs(r.yaw - g.yaw) < 0.0005 && Math.abs(r.pitch - g.pitch) < 0.0005 && Math.abs(r.dist - g.dist) < 0.005;
@@ -1571,7 +1576,12 @@
       return;
     }
     if (dir === 0 && this.flying()) this.flyRelease();
-    if (dir === 0) { this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null; }
+    if (dir === 0) {
+      /* Home the short way: a chart turned over several times comes back by
+         the nearest turn rather than unwinding every one. */
+      if (this.rig) { var T = Math.PI * 2; this.rig.yaw -= Math.round(this.rig.yaw / T) * T; this.rig.pitch -= Math.round((this.rig.pitch - this.defaultPitch()) / T) * T; }
+      this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null;
+    }
     else this.user.zoom = clamp(this.user.zoom * (dir < 0 ? 1.25 : 0.8), 0.6, 3.2);
     this.lift(0.15);
     this.kick();
@@ -1695,7 +1705,7 @@
       } else if (dn.axis === 'x' || dn.axis === 'free') {
         var Wd = this.W || 300;
         this.user.yaw = dn.yaw - dx / Wd * Math.PI * 1.1;
-        if (dn.axis === 'free') this.user.pitch = clamp(dn.pitch + dy * 0.005, 0.2, 1.42);
+        if (dn.axis === 'free') this.user.pitch = dn.pitch + dy * 0.005;
         this.lift(0.02);
       }
     }
@@ -1752,8 +1762,8 @@
     if (k === 'ArrowRight' || k === 'ArrowLeft') {
       var nk = this.step(k === 'ArrowRight' ? 1 : -1);
       if (nk) { this.setFocus(nk); if (this.o.onFocus) this.o.onFocus(nk, 'key'); }
-    } else if (k === 'ArrowUp') this.user.pitch = clamp((this.user.pitch != null ? this.user.pitch : this.defaultPitch()) + 0.08, 0.2, 1.42);
-    else if (k === 'ArrowDown') this.user.pitch = clamp((this.user.pitch != null ? this.user.pitch : this.defaultPitch()) - 0.08, 0.2, 1.42);
+    } else if (k === 'ArrowUp') this.user.pitch = (this.user.pitch != null ? this.user.pitch : this.defaultPitch()) + 0.08;
+    else if (k === 'ArrowDown') this.user.pitch = (this.user.pitch != null ? this.user.pitch : this.defaultPitch()) - 0.08;
     else if (k === '+' || k === '=') this.zoom(-1);
     else if (k === '-' || k === '_') this.zoom(1);
     else if (k === '0' || k === 'Home') this.zoom(0);
