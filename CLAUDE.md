@@ -7613,7 +7613,7 @@ where they meet, faint rays, a twinkling field, `data-pl` so it breathes by
 opacity only and is still under reduced motion), then what inCommon is, insight
 rather than instruction, the name, and the four places it holds. It says what
 inCommon is and never how anything is worked out, by "No disclaimers", and it
-carries no legal link, so K55's counts are unchanged. **The company line is
+carries no legal link, so K55's counts are unchanged. **It has no subheaders and nothing on it is gray** (the owner, 5 November 2026: "No grayed subheaders", then "None of those gray-now-purple headers ... Regular paragraph format is fine"): the three sections are plain paragraphs with no label and no rule beside them, the company name stands alone without a "Kept by" label, and the tile lines and the credit line wear `--tx`. Only the "About" kicker over the title stays. **The company line is
 `ABOUT_COMPANY`**, empty until the owner confirms the legal name: while it is
 empty the "Kept by" line is not drawn and only the credit line shows. Measured
 with the harness's own `contrastFails()` and `tapTargets()` over the dialog,
