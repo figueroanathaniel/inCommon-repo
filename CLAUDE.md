@@ -3443,7 +3443,8 @@ not built and wait on the owner.
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
 (cazimis, moon phases, stations, meteor showers, alignments, the clusters),
 at least a day ahead, behind a weather icon at the top right of the
-horoscope on Today. `docs/astro-upgrade/03-sky-weather-sources.md` holds every
+horoscope on Today. On the screen it is called **Forecast** (the owner, 5
+November 2026); the code still says sky weather. `docs/astro-upgrade/03-sky-weather-sources.md` holds every
 rule and the page it was read on.
 
 **`app/sky-weather.js` is mechanics** (global `SkyWeather`): it reads
