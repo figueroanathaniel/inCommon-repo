@@ -38,9 +38,43 @@ gives one.
 | Varahamihira follows the Parashari method (Brihat Jataka ch. XXVII); other Indian lordship rules exist (Somanatha, Jaimini) | https://en.wikipedia.org/wiki/Drekkana | secondary |
 
 The app's Chaldean table in `placement-content.js` matches Firmicus for every
-sign (checked against his list). Not verified, so not used: the Golden Dawn
-attribution of the minor arcana 2 to 10 to the decans (the Book of Thoth text
-was not reached verbatim), Manilius's system, and the Picatrix images.
+sign (checked against his list). The Picatrix images were not read and are
+not used.
+
+### Loaded on 5 November 2026, on the owner's ask ("Get the three sources to load")
+
+**The Golden Dawn small cards.** Read in Book T ("Of the Thirty-Six Decans"),
+from the scan at
+https://archive.org/download/andrew.chumbleyazoetia/Book%20T%20-%20The%20Tarot.pdf
+(a scanned copy, so a secondary witness to the text). The table gives card,
+title, lord and sign, for example "45 2 of Wands Dominion Mars Aries", "48 5 of
+Pentacles Material Trouble Mercury Taurus", "21 5 of Wands Strife Saturn Leo".
+The count begins at Leo: "the beginning of the Decanates is from the royal Star
+of Leo, the great Star Cor Leonis: and therefore is the first Decan that of
+Saturn in Leo." From the table (our reading of it, not a sentence of the book): the suit follows the element (Wands fire, Cups water, Swords air,
+Pentacles earth) and run Two, Three, Four in cardinal signs, Five, Six, Seven
+in fixed, Eight, Nine, Ten in mutable. All 36 lords in the table match the
+Chaldean faces in `placement-content.js`, so Book T is the same system with a
+card on each face. Only the first 39,359 characters of the PDF were read
+verbatim; the table and the Leo sentence are inside them. sacred-texts.com and
+hermetic.com refused the fetch. Built: one sentence in the Astropedia's Decans
+entry. Not built: a card on the placement's degree, which waits on the owner.
+
+**Manilius.** Read in the Latin at https://www.thelatinlibrary.com/manilius4.html
+(Astronomica IV; no translation on the page; line numbers counted from the
+page's five line markers, so approximate). The term: "quam partem Graiae
+dixere decanica gentes" (c. 298). The decans go to signs, not bodies. Aries:
+"namque Aries primam partem sibi vindicat ipsi, / altera sors Tauro, Geminis
+pars tertia cedit" (c. 311). Taurus: "Cancro primam mediamque Leoni, / extremam
+Erigonae tribuit" (c. 317). Gemini: "Libra decem partes Geminorum prima
+capessit, / Scorpios adiunctas; Centauri tertia pars est" (c. 320). Read
+through all twelve, the scheme runs on through the signs in order (Cancer to
+Capricorn, Aquarius, Pisces: "Cancer in adversum Capricorni derigit astrum";
+Leo to Aries, Taurus, Gemini; and so on) except Pisces, which the text gives
+to Aries, Taurus and Pisces itself: "Lanigero primos ... perque decem medias
+partes tu, Taure, receptus; / quod superest, ipsi sumunt". Readings past Gemini
+are ours from the Latin, not a translator's. Built: one sentence in the
+Astropedia's Decans entry. Not built in the chart.
 
 Built: `decanPair()` names both decans on the placement detail and in the
 packet's degree section; the Vedic study's Oracle dossier carries each
@@ -83,8 +117,24 @@ which is off by one against the rule above, and is corrected.
 | Composite (midpoints) | Astropedia entry | Townley, "The Composite Chart" (1973), per https://theastrologypodcast.com/2017/10/13/composite-charts-with-originator-john-townley/ | not yet |
 | Relationship (Davison) | none | "cast for the midpoint in time and space between two births", https://astrologysoftware.com/community/learn/dictionary/relationship_chart.html; 1977 per the podcast | Astropedia entry |
 | Harmonic charts | `ephemeris/harmonic.ts`, no screen | Addey, Harmonics in Astrology (1975 or 1976; Wikipedia gives both) | Astropedia entry |
-| Solar arc, tertiary progressions, solar and lunar returns | Solar Return entry only | every page tried failed | not yet |
+| Solar arc, tertiary progressions, solar and lunar returns | Solar Return entry only | loaded 5 November, below | not yet |
 
 What is left needs a decision from the owner, because each is a new screen:
 the navamsa chart, the two relationship charts in Synastry, a harmonic view of
 the wheel, and solar arc directions.
+
+### Solar arc and tertiary, loaded 5 November 2026
+
+| Claim | Source | Kind |
+|---|---|---|
+| Solar arc: "the angular distance between the natal Sun and the secondary progressed Sun"; "This number or arc is then added to all of the bodies and sensitive points of the natal chart"; about a degree a year, varying by season | https://astrologysoftware.com/community/learn/articles/article_90.html (Piechowski) | secondary |
+| "the planets are made to move the same distance as was travelled by the sun in secondary progression" | https://en.wikipedia.org/wiki/Astrological_progression | secondary |
+| Tertiary: "one day after birth equals one lunar month of life"; minor: "one lunar month after birth equals one year of life" | same | secondary, unsourced on the page |
+| Tertiary: "one day of life is equated to one lunar period rather than one solar year" | https://www.skyscript.co.uk/glossary/progressions | secondary |
+
+Not found: who devised the tertiary progression (no page named anyone, so the
+app names nobody), and the Naibod arc. Which lunar month (sidereal or
+synodic) the tertiary counts is not stated on any page read, so it is not
+built until a page says. astro.com's Astrowiki served a script check, not the
+article. Solar arc is buildable from these: `progressedHandoff()` already
+bisects the progressed Sun, and the arc is that position less the natal Sun.
