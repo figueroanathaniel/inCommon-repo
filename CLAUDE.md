@@ -186,6 +186,14 @@ once the span carries `data-glyph-live`, so a missing module or the contrast
 modifier leaves the plain icon. It is drawn in the span's own nav token, holds
 one frame under reduced motion, and pauses while the page is hidden.
 
+**The Oracle page's loading orb is the same symbol**, at 76px (the owner, 5
+November 2026: "The Oracle orb is still the same"). The gradient ball that
+stood over the loading line is gone; the span carries `data-icon="oracle"` and
+`data-glyph-orb`, paints the static mask in `--ac2-hi` until the module draws
+in it, and the head sheet gives it a soft halo in `--atmc2` once it is live.
+`scan()` finds it by the same selector, so nothing in `oracle-glyph.js` knows
+it is there.
+
 **All four are dark with light type, and that is forced.** `--ac` is fixed and
 written as text in over two hundred places, so a light identity fails the
 contrast gate wherever the action green is a word. The concept's light gray

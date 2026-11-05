@@ -218,7 +218,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 /* The Oracle's symbol, alive (oracle-glyph.js). The template paints the
    static mask; once the module has a canvas inside the span it marks it live,
    and only then is the mask dropped, so the plain icon is the fallback. */
-[data-icon="oracle"][data-glyph-live]{-webkit-mask:none!important;mask:none!important;background:transparent!important;position:relative;overflow:visible}
+[data-icon="oracle"][data-glyph-live]{-webkit-mask:none!important;mask:none!important;background:transparent!important;position:relative;overflow:visible}[data-glyph-orb][data-glyph-live]{border-radius:50%;box-shadow:0 0 54px rgba(var(--atmc2),.28)}
 /* The greeting is the one line per screen that wears a fill: horizon gold in
    Deep Field, brushed chrome in Cyberspace, an ember glow in Nature's Roots and
    bioluminescence in the Biome. The colour underneath stays --dim, which is
@@ -5087,7 +5087,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
-          <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <span aria-hidden="true" data-icon="oracle" data-glyph-orb="1" style="flex:none;display:block;width:76px;height:76px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat"></span>
           <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fb);color:var(--mut)">{{ orLoadingText }}</p>
           <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
           <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
@@ -12596,7 +12596,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
-          <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <span aria-hidden="true" data-icon="oracle" data-glyph-orb="1" style="flex:none;display:block;width:76px;height:76px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat"></span>
           <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fb);color:var(--mut)">{{ orLoadingText }}</p>
           <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
           <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
