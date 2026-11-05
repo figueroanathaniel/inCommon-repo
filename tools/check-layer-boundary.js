@@ -115,6 +115,9 @@ const LAYERS = {
     /* The worlds a body becomes up close, generated on the GPU from noise.
        Computes no position: the scene places each one on its orb. */
     'body-globes.js',
+    /* The world behind three of the four identities. Decoration: reads no
+       chart, no data and no writing, and draws only for the active theme. */
+    'theme-worlds.js',
     /* The Cycle Audit's scene. It draws what the app hands it and computes
        nothing: no ephemeris, no chart, no writing beyond its labels. */
     'cycle-scene.js',
