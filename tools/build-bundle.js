@@ -195,6 +195,8 @@ const MODULES = [
   /* The world behind Cyberspace, Nature's Roots and the Subterranean Biome.
      Reads nothing above it and imports three.module.js on first use. */
   'theme-worlds.js',
+  /* The Oracle's nav symbol, drawn alive per identity. Reads nothing above it. */
+  'oracle-glyph.js',
   /* The Cycle Audit drawn in depth. Reads nothing above it and imports
      three.module.js, which sits beside the bundle for the cover, on first use. */
   'cycle-scene.js',

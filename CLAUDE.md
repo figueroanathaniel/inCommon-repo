@@ -175,6 +175,17 @@ contrast modifier (`data-world-hc`). The world itself is `app/theme-worlds.js`
 (shell layer, global `ThemeWorlds`), three.js scenes ported from the concept,
 drawn into `[data-atmos-world]` over the sky.
 
+**The Oracle's nav symbol is alive in every world** (the owner, 5 November
+2026): a contour line ring (`somatic()` in `build-ui-icons.js`) that
+shapeshifts in all four, with cosmic flare in Deep Field, tech rot in
+Cyberspace, clay being molded in Nature's Roots and liquid in the Biome.
+`app/oracle-glyph.js` (shell layer, global `OracleGlyph`) draws it on a
+canvas inside the nav span (`data-icon="oracle"`), called from `worldSync()`.
+The template still paints the static mask, and the head sheet drops it only
+once the span carries `data-glyph-live`, so a missing module or the contrast
+modifier leaves the plain icon. It is drawn in the span's own nav token, holds
+one frame under reduced motion, and pauses while the page is hidden.
+
 **All four are dark with light type, and that is forced.** `--ac` is fixed and
 written as text in over two hundred places, so a light identity fails the
 contrast gate wherever the action green is a word. The concept's light gray
@@ -3208,6 +3219,47 @@ finishes the move where it was going. `tools/drive-swipe.js` holds it, in
 Chromium and with a touch that stops both scrollers in place as WebKit does,
 since no WebKit is installed here; W1 and W3 fail without the fix.
 
+## A list hands the scroll on to its page, and nothing pulls to refresh
+Asked for by the owner on 5 November 2026, after the swipe fault came back on
+his iPhone ("swiping up and down at the ends of pages moves to the next tab").
+**The section column (`[data-vt-scroll]`) is `overflow: hidden`**, not
+`overflow-y: scroll`, so no gesture and no chained overscroll can move it:
+only `vtGoSection()` moves it, by writing `scrollTop`. Chromium never chained
+into it, which is why W5 in `tools/drive-swipe.js` passed on the old code too;
+the iPhone fault can only be confirmed on a device.
+
+**A list at its end hands the next gesture to the page** (`listChainBind()`,
+`LIST_PAUSE` 350ms). Every inner list contains its overscroll, so a flick that
+reaches its top or bottom stops there; the end of that gesture arms the list,
+and once the pause has passed the list's `overscroll-behavior-y` is set to
+`auto`, so the next gesture the same way scrolls the page it sits on. A new
+touch before the pause cancels the arming, so a quick second flick stays dead.
+Scrolling the list back off its end disarms it. Wheel and touch both arm.
+Vertical only: a sideways strip stays dead at its end, as the owner asked.
+
+**There is no pull to refresh.** The app built its own (two slow pulls from
+the top of a page reloaded it), and the owner asked for a drag at the top to
+keep scrolling instead. `vtRefresh()`, `vtPullPaint()` and the `VT_PULL`
+constants are gone; `vtRestoreSection()` stays only to drain an old
+`incommon.vtsec` key. Driven in Chromium at an iPhone's size with real touch
+events through the DevTools protocol: down to the list's end, an immediate
+flick holds, a flick after the pause moves the page 285px; the same upward;
+the section column never moves.
+
+## A second press on a tab is a fresh start
+Asked for by the owner on 5 November 2026. Pressing the section the reader is
+already in (the phone's tab bar, the desktop sidebar and rail) runs
+`navAgain()`: the section's root (`sectionRoot()`), then its opening
+(`sectionOpening()`), then every scroller inside the section back to the top
+(never `[data-vt-scroll]` or a pager). Today opens on the astrology horoscope
+(`hPage` 0); My Charts on the Human Design chart (page 0 on the phone,
+`spiritView: 'humanDesign'` on the desktop); the Library on Study; Settings at
+its top. The Oracle opens on the last reading the reader opened or had written
+this visit (`orNoteLast()`, kept in `_orLast` with the chart's stamp), and on
+the standard daily reading when there is none or the chart has changed since.
+**It never asks for a reading**: it only chooses which press is on screen.
+A first press on another tab is unchanged.
+
 ## A row of pills becomes a dropdown when it is a choice of one
 The Human Design readings (My Type, Chart, Mood, Work, Sleep, Diet & Exercise,
 Health, Synastry, Just Me, At Me) and the Throughline filter were rows of pills,
@@ -3448,13 +3500,51 @@ bhavas, nakshatras, dignities and current mahadasha; the sidereal or draconic
 positions; the heliocentric bodies; the Four Pillars and the animal year; the
 Hellenistic sect and chart ruler. The astrology page draws the same lines as
 a card above the Cycle Audit (`studyPanelVals()`, both shells), without the
-bracketed method, and draws nothing for the four plain Western studies. The
-wheel, the Ledger and the placement
-pages are still drawn in the tropical zodiac under every study. Relabelling
-them is the next step and needs the ayanamsa at each instant a sign is read,
-so it was not done by shifting `chartAt()`: transits are read through
-`lonOf()` directly in several places, and a shift in one would set the two
-frames 24 degrees apart.
+bracketed method, and draws nothing for the four plain Western studies. Since
+5 November 2026 the chart itself follows the study too: see "The chart is
+drawn in the study's own zodiac".
+
+## The chart is drawn in the study's own zodiac
+Asked for by the owner on 5 November 2026: "When changing which chart to read,
+it should change all of the information to that chart's specific features.
+Placements and chart visuals alike."
+
+**Every longitude stays tropical; only the reading of it moves.** Aspects,
+transits, the Human Design gates and every scan are computed on tropical
+longitudes, so nothing is shifted in `chartAt()` or `lonOf()`. `zodiacOff(t)`
+is where the study's 0 Aries stands in the tropical frame: the Lahiri or
+Fagan-Bradley ayanamsa plus nutation for a sidereal study (memoised per
+quarter day), the natal mean North Node for Draconic, 0 otherwise.
+`signOf(lon, t)` reads a sign through it, `signStart()` gives the study's sign
+boundary (whole sign houses, the solar chart and the wheel's zero start
+there), and `signOfT()` stays tropical for the gate hand-off, because the
+wiring is tropical by definition. The 2D wheel's sign band turns by the
+offset and the 3D and Orbital stage take it as `uSignOff`.
+
+**Each tradition has its own first view** (`chartNative()`, chart view
+`native`, ahead of 2D, Orbital and 3D, and the zoom cluster is hidden on it):
+the South Indian square for Vedic (Lagna marked, grahas by rashi, the Moon's
+nakshatra in the middle), the Four Pillars for Chinese (stems and branches,
+the Day Master, the five elements counted), and From the Sun for Heliocentric
+(an orrery not to scale, the true heliocentric longitude round the Sun, the
+Earth in `--blue`). Every other study has none and opens on 2D.
+
+**Vedic reads as Jyotish.** `vedicOf()` gives the rashi, nakshatra, pada, lord
+and Parashara dignity; the Ledger tags each row with them, the nodes are Rahu
+and Ketu (`studyName()`), and the packet has The Nakshatra chapter, with the
+Vimshottari dasha on the Moon. Progressions, the Mirror and the Year are
+Western techniques and are left out under Vedic and Heliocentric. A graha within its combustion distance of the Sun (Moon 12, Mars 17,
+Mercury 14 or 12 retrograde, Jupiter 11, Venus 10 or 8 retrograde, Saturn 15,
+from OnlineJyotish's lesson 148, which cites no classical text) is marked
+combust: `c` in the square, a Ledger tag and a line in The Nakshatra chapter
+(`vedicCombust()`).
+
+**Heliocentric** (`helioChart()`, `helioPos()`; the older `helioOf(el, t)` is
+the Kepler helper and is unrelated) tags the Ledger with each planet from the
+Sun and the Sun's row with the Earth, and adds a From the Sun chapter. The
+Moon, the nodes, the angles and the houses have no heliocentric place and get
+no tag. Measured over the three native views, four identities hardened and
+not, at 1440 and 375: 48 cases, clean.
 
 ## A house that crosses a sign is a hand-off
 Approved by the owner on 4 November 2026 ("Hand off plan works, proceed"), from
@@ -4830,6 +4920,28 @@ remembers the in-depth wish only for an in-depth one), and a kept reading
 waits behind the same press: it shows at once and costs nothing. Driven with
 the cloud faked, both shells: nothing is asked on open or on switching to In
 Depth, and one press asks once and shows the reading.
+
+## The Oracle speaks in the reader's study and world
+Asked for by the owner on 5 November 2026: "the Oracle voice should reflect the
+chart style and the theme as well. This is why it costs extra to run it when
+the reader changes the theme and chart-style." `oracleStyleLine()` adds one
+line to every dossier, standard, in depth and the Cycle Audit:
+`READING STYLE: study <key> (<name>); world <key> (<label>)`. The server reads
+it in `voiceFor()`: the world (`WORLD_VOICE`, keyed by the app's theme keys,
+so `midnight` is Cyberspace, `dawn` Nature's Roots, `gold` the Subterranean
+Biome) sets the voice and the imagery in place of the hashed pair, and the
+study (`STUDY_VOICE`) sets the vocabulary. The emphasis is still hashed.
+
+**The cost is the dossier hash, on purpose.** The server keys a reading on a
+hash of its dossier, so a changed study or world is a new reading and counts
+toward the day's six; changing back finds the reading already kept. The slot
+on the device carries the world too (`|w<key>`, after `chartStamp()`, which
+already carries the study), and so does the Oracle's place for a second press
+on its tab (`_orLast`). **The defaults send no line**: a plain Western study in
+Deep Field is the dossier it was before, so no reading kept before this costs
+again. The voice reaches readers only once the Oracle function is redeployed;
+until then the line still separates the readings and the model sees it in the
+dossier.
 
 ## The in-depth reading is prepared ahead, and still opened with a press
 The owner asked on 10 October 2026 for the Luminary reading to load in seconds.
@@ -6399,12 +6511,28 @@ entered from here only** (the owner's choice, same day): Enter the Observatory
 (`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
 buttons are gone. N40 goes through both.
 
-**Expanded and Advanced** (owner, 5 November 2026). The 22 in `BLOOM_CORE`
-are the Expanded set and every point is Advanced: the dialog's two buttons say
-so. On the chart card the Expanded Chart draws the Expanded set alone
-(`coreSet` in the wheel vals, so the 3D and Orbital stage follow it), and an
-Advanced placements switch (`chartAdvanced`, per visit) draws every point. The
+**Basic, Advanced and Expert** (owner, 5 November 2026, renamed the same
+evening). The chart card's only control above the wheel is Basic / Advanced /
+Expert (`chartModes`): Basic is `chartMode: 'basic'`; Advanced is the 22 in
+`BLOOM_CORE` (`coreSet` in the wheel vals, so the 3D and Orbital stage follow
+it); Expert is every point (`chartAdvanced` true, per visit). In Expert the
+points beyond the 22 carry `data-xin="1"` and arrive one after another in
+order of longitude (`animation-delay` 120ms plus 55ms each), fading in with a
+glow in `--atmc2`, so the glow is the identity's own; under reduced motion
+they simply appear. The dialog's two buttons read Advanced and Expert, and the
 dialog and the Observatory still place every point.
+
+**The view switch and the lock live in a rail inside the chart**
+(`data-chart-rail`, top right of the drawing, both charts, both shells): the
+views as a small vertical radiogroup (2D, Orbital, 3D, and the study's own
+first view, named Rashi, Pillars or Sun), and under it a lock that holds the
+page still so a finger turns the chart freely (`csFree`/`hsFree`, the same
+`setExplore()` Free look used; offered in the deep views on every device).
+The Human Design card keeps only Design / Personality / Both above its
+drawing. A native view pads its right edge (`railPad`) so the rail sits
+beside the square, not on it. **3D turns a full circle in every direction**:
+pitch is not clamped, the camera's up vector turns with it, and the reset
+homes the short way round.
 
 **The forecast banner is one line until opened** (owner, 5 November 2026):
 the label and the forecast's first line, 46px, with the rest behind the press.
