@@ -22441,7 +22441,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      uniforms, which is what lets the zodiac slide outward in the morph. */
   var F_DISC = FOG + [
     'uniform vec3 uBg; uniform vec3 uLine; uniform vec3 uAtm; uniform vec3 uAtm2; uniform vec3 uHi; uniform vec3 uAc2; uniform vec3 uSel;',
-    'uniform float uZero; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
+    'uniform float uZero; uniform float uSignOff; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
     'uniform vec2 uPtr; uniform float uPtrOn; uniform float uBreath; uniform float uHouse; uniform float uTimed; uniform vec3 uOrbits[12]; uniform float uNOrb; uniform float uCusp[12];',
     'varying vec2 vUv; varying vec3 vW;',
     'float ring(float r, float at, float w){ float fw = fwidth(r) * 1.2 + 0.002; return 1.0 - smoothstep(w, w + fw, abs(r - at)); }',
@@ -22449,7 +22449,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     ' vec2 p = vec2(vW.x, -vW.z); float r = length(p);',
     ' if (r > uOut + 0.9) discard;',
     ' float th = atan(p.y, p.x); float lon = mod(degrees(th) - 180.0 + uZero + 720.0, 360.0);',
-    ' float rel = mod(lon - uZero + 720.0, 360.0);',
+    ' float rel = mod(lon - uZero + 720.0, 360.0); float zl = mod(lon - uSignOff + 720.0, 360.0);',
     ' float fw = fwidth(r) * 1.2 + 0.002; float w1 = 1.0 - uK;',
     ' vec3 c = uBg;',
     /* the inner field: a lens of warm light under the aspects */
@@ -22457,12 +22457,12 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     ' c += uAtm * 0.05 * smoothstep(uOut + 0.4, 0.0, r);',
     /* the sign band */
     ' float inSign = smoothstep(uSignIn - fw, uSignIn + fw, r) * (1.0 - smoothstep(uSignOut - fw, uSignOut + fw, r));',
-    ' float alt = step(0.5, fract(lon / 60.0));',
+    ' float alt = step(0.5, fract(zl / 60.0));',
     ' c += uAc2 * inSign * (0.035 + 0.03 * alt);',
-    ' float sd = abs(fract(lon / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
+    ' float sd = abs(fract(zl / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
     ' c += uLine * inSign * (1.0 - smoothstep(0.012, 0.012 + fw, sd)) * 0.32;',
     /* a tick for every degree on the band\'s inner edge, longer at five and ten */
-    ' float dd = abs(fract(lon + 0.5) - 0.5) * 0.01745 * r; float d5 = abs(fract(lon / 5.0 + 0.5) - 0.5) * 5.0 * 0.01745 * r; float d10 = abs(fract(lon / 10.0 + 0.5) - 0.5) * 10.0 * 0.01745 * r;',
+    ' float dd = abs(fract(zl + 0.5) - 0.5) * 0.01745 * r; float d5 = abs(fract(zl / 5.0 + 0.5) - 0.5) * 5.0 * 0.01745 * r; float d10 = abs(fract(zl / 10.0 + 0.5) - 0.5) * 10.0 * 0.01745 * r;',
     ' float tl = mix(0.1, 0.17, step(d5, 0.03)); tl = mix(tl, 0.26, step(d10, 0.03));',
     ' float inTick = step(uSignIn, r) * (1.0 - step(uSignIn + tl, r));',
     ' c += uLine * inTick * (1.0 - smoothstep(0.006, 0.006 + fw, min(dd, min(d5, d10)))) * 0.42;',
@@ -22920,7 +22920,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.discMat = new T.ShaderMaterial({ vertexShader: V_UV, fragmentShader: F_DISC, transparent: true, depthWrite: false,
       uniforms: { uCam: this.U.uCam, uFog: this.U.uFog, uBreath: this.U.uBreath, uBg: { value: new T.Vector3() }, uLine: { value: new T.Vector3() }, uAtm: { value: new T.Vector3() },
         uAtm2: { value: new T.Vector3() }, uHi: { value: new T.Vector3() }, uAc2: { value: new T.Vector3() }, uSel: { value: new T.Vector3() },
-        uZero: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
+        uZero: { value: 0 }, uSignOff: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
         uPtr: { value: new T.Vector2() }, uPtrOn: { value: 0 }, uHouse: { value: -1 }, uTimed: { value: 1 }, uOrbits: { value: orbV }, uNOrb: { value: 0 }, uCusp: { value: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] } } });
     var disc = new T.Mesh(new T.CircleGeometry(13.4, 160), this.discMat);
     disc.rotation.x = -Math.PI / 2;
@@ -23155,6 +23155,8 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.content = g; this.bodies = []; this.aspects = []; this.signs = []; this.houseLabels = []; this.angleObjs = [];
     this.world.add(g);
     this.discMat.uniforms.uZero.value = m.zero;
+    /* the study's 0 Aries, as a tropical longitude: sidereal and draconic charts turn the band, never the bodies */
+    this.discMat.uniforms.uSignOff.value = m.signOff || 0;
     this.discMat.uniforms.uCusp.value = this.cuspRel();
     this.discMat.uniforms.uTimed.value = m.timed ? 1 : 0;
 
@@ -23163,7 +23165,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     (m.signs || []).forEach(function (s, i) {
       var col = self.colorOf(s.c);
       var spr = self.medallion(s.glyph, { size: Math.round(28 * ui), ring: false, color: col.c, scale: 0.78, anchorY: 0.5 });
-      spr.userData.lon = i * 30 + 15;
+      spr.userData.lon = i * 30 + 15 + (m.signOff || 0);
       g.add(spr);
       self.signs.push(spr);
     });
@@ -23385,7 +23387,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var tv = Math.tan((this.baseFov || this.cam.fov) * Math.PI / 360);
     var ins = this.mode === 'obs' && this.inset ? this.inset : null;
     var asp = ins && this.H ? Math.max(0.45, (this.W - ins.l - ins.r) / this.H) : this.cam.aspect;
-    var dw = Rc / (tv * asp), dh = (Rc * Math.sin(pitch) + 2.6 * Math.cos(pitch)) / tv;
+    var dw = Rc / (tv * asp), dh = (Rc * Math.abs(Math.sin(pitch)) + 2.6 * Math.abs(Math.cos(pitch))) / tv;
     return Math.max(dw, dh) * 1.04;
   };
   P.turnTo = function (key) {
@@ -23401,7 +23403,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var pitch = this.user.pitch != null ? this.user.pitch : this.defaultPitch();
     return {
       yaw: this.user.yaw + drift + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.x * 0.05 : 0),
-      pitch: clamp(pitch - 0.04 * c + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.y * 0.03 : 0), 0.2, 1.42),
+      pitch: pitch - 0.04 * c + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.y * 0.03 : 0),
       dist: this.fit() / this.user.zoom * (1 - 0.04 * c)
     };
   };
@@ -23419,9 +23421,14 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (!this.rig) this.rig = { yaw: g.yaw, pitch: g.pitch, dist: g.dist };
     var r = this.rig;
     r.yaw = damp(r.yaw, g.yaw, k); r.pitch = damp(r.pitch, g.pitch, k); r.dist = damp(r.dist, g.dist, k);
-    var cp = Math.cos(r.pitch), ty = 0.35;
-    this.cam.position.set(Math.sin(r.yaw) * cp * r.dist, ty + Math.sin(r.pitch) * r.dist, Math.cos(r.yaw) * cp * r.dist);
+    var cp = Math.cos(r.pitch), sp = Math.sin(r.pitch), ty = 0.35;
+    this.cam.position.set(Math.sin(r.yaw) * cp * r.dist, ty + sp * r.dist, Math.cos(r.yaw) * cp * r.dist);
     this.cam.rotation.order = 'XYZ';
+    /* The chart turns all the way round, over the top and under (owner,
+       5 November 2026: "360 in every direction"). Up is the direction the
+       pitch is moving the camera in, which stays defined through both poles,
+       so the view never flips as it passes over them. */
+    this.cam.up.set(-Math.sin(r.yaw) * sp, cp, -Math.cos(r.yaw) * sp);
     this.cam.lookAt(0, ty, 0);
     this.cam.updateMatrixWorld();
     this._settled = Math.abs(r.yaw - g.yaw) < 0.0005 && Math.abs(r.pitch - g.pitch) < 0.0005 && Math.abs(r.dist - g.dist) < 0.005;
@@ -23814,7 +23821,8 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.readInset();
     var fw = new T.Vector3(); cam.getWorldDirection(fw);
     var th = Math.atan2(-fw.z, fw.x), lon = ((th / RAD - 180 + (this.model ? this.model.zero : 0)) % 360 + 720) % 360;
-    H.tel.hdg.textContent = SIGNS3[Math.floor(lon / 30) % 12] + ' ' + Math.floor(lon % 30) + '°';
+    var zl = ((lon - ((this.model && this.model.signOff) || 0)) % 360 + 360) % 360;
+    H.tel.hdg.textContent = SIGNS3[Math.floor(zl / 30) % 12] + ' ' + Math.floor(zl % 30) + '°';
     H.tel.alt.textContent = this.fmt(Math.abs(cam.position.y)) + (cam.position.y < 0 ? ' S' : '');
     var sp = f && f.active ? f.speedNow : 0;
     H.tel.vel.textContent = this.fmt(sp);
@@ -23892,7 +23900,12 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       return;
     }
     if (dir === 0 && this.flying()) this.flyRelease();
-    if (dir === 0) { this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null; }
+    if (dir === 0) {
+      /* Home the short way: a chart turned over several times comes back by
+         the nearest turn rather than unwinding every one. */
+      if (this.rig) { var T = Math.PI * 2; this.rig.yaw -= Math.round(this.rig.yaw / T) * T; this.rig.pitch -= Math.round((this.rig.pitch - this.defaultPitch()) / T) * T; }
+      this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null;
+    }
     else this.user.zoom = clamp(this.user.zoom * (dir < 0 ? 1.25 : 0.8), 0.6, 3.2);
     this.lift(0.15);
     this.kick();
@@ -24016,7 +24029,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       } else if (dn.axis === 'x' || dn.axis === 'free') {
         var Wd = this.W || 300;
         this.user.yaw = dn.yaw - dx / Wd * Math.PI * 1.1;
-        if (dn.axis === 'free') this.user.pitch = clamp(dn.pitch + dy * 0.005, 0.2, 1.42);
+        if (dn.axis === 'free') this.user.pitch = dn.pitch + dy * 0.005;
         this.lift(0.02);
       }
     }
@@ -24073,8 +24086,8 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (k === 'ArrowRight' || k === 'ArrowLeft') {
       var nk = this.step(k === 'ArrowRight' ? 1 : -1);
       if (nk) { this.setFocus(nk); if (this.o.onFocus) this.o.onFocus(nk, 'key'); }
-    } else if (k === 'ArrowUp') this.user.pitch = clamp((this.user.pitch != null ? this.user.pitch : this.defaultPitch()) + 0.08, 0.2, 1.42);
-    else if (k === 'ArrowDown') this.user.pitch = clamp((this.user.pitch != null ? this.user.pitch : this.defaultPitch()) - 0.08, 0.2, 1.42);
+    } else if (k === 'ArrowUp') this.user.pitch = (this.user.pitch != null ? this.user.pitch : this.defaultPitch()) + 0.08;
+    else if (k === 'ArrowDown') this.user.pitch = (this.user.pitch != null ? this.user.pitch : this.defaultPitch()) - 0.08;
     else if (k === '+' || k === '=') this.zoom(-1);
     else if (k === '-' || k === '_') this.zoom(1);
     else if (k === '0' || k === 'Home') this.zoom(0);
@@ -31300,6 +31313,11 @@ input[type="date"]{color-scheme:dark}
 @keyframes bloomWheel{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
 .bloom-row:hover,.bloom-row:focus-visible{background:rgba(var(--atmc),.2)}
 [data-bloom-x="1"]{opacity:0;visibility:hidden;pointer-events:none}
+[data-xin="1"]{animation:expertIn 1.5s ease backwards}
+button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease backwards}
+@keyframes expertIn{0%{opacity:0}100%{opacity:1}}
+@keyframes expertGlow{0%,30%{text-shadow:0 0 14px rgba(var(--atmc2),1),0 0 4px rgba(var(--atmc2),.9)}100%{text-shadow:none}}
+@media (prefers-reduced-motion:reduce){[data-xin="1"]{animation:none!important}}
 [data-bloom-intro="1"] [data-bloom-x="1"]{animation:bloomFlash 3.2s ease both}
 [data-bloom-intro="1"] span[data-bloom-x="1"]{animation:bloomFlash 3.2s ease both,bloomFlashGlow 3.2s ease both}
 @keyframes bloomFlash{0%{opacity:0;visibility:visible}28%{opacity:1;visibility:visible}62%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden}}
@@ -32012,7 +32030,7 @@ input[type="date"]{color-scheme:dark}
     <button data-lift onClick="{{ sampleGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--ac2-hi);border-radius:999px;font:600 10.5px var(--fc);color:var(--ac2-hi)">Use mine</button>
   </div>
 </sc-if>
-<div data-vt-scroll="1" role="main" data-main-region="1" aria-label="Your readings" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-y:scroll;overflow-x:hidden;scroll-behavior:smooth">
+<div data-vt-scroll="1" role="main" data-main-region="1" aria-label="Your readings" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow:hidden;scroll-behavior:smooth">
 <section data-vt-sec="Today" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Today" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div data-vt-page="1" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column">
@@ -32236,13 +32254,6 @@ input[type="date"]{color-scheme:dark}
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
         <div style="position:relative;z-index:4;display:flex;flex-wrap:wrap;gap:6px;padding:10px 10px 0">
-      <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
-        <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="flex:1 1 170px;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-          <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
-            <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 16px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fc);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
-          </sc-for>
-        </div>
-      </sc-if>
       <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="flex:1 1 170px;display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
         <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
           <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
@@ -32250,6 +32261,18 @@ input[type="date"]{color-scheme:dark}
       </div>
         </div>
         <div style="position:relative">
+        <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
+          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+              <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ hsLockOn }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" aria-label="Screen lock, turn the wiring freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ hsFreeBd }};border-radius:12px;background:{{ hsFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ hsLockPath }}"></path></svg></button>
+            </sc-if>
+          </div>
+        </sc-if>
         <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
           <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
@@ -32288,7 +32311,7 @@ input[type="date"]{color-scheme:dark}
                Wheel views into this host; the 2D wiring above is the third view and the
                fallback (hdViewNow). -->
           <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:3/4;max-height:68vh;min-height:380px;outline:none;background:var(--bg)"></div>
-          <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
           <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ hsVeilO }};visibility:{{ hsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
           <button data-lift onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
@@ -32707,23 +32730,116 @@ input[type="date"]{color-scheme:dark}
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
         <div style="position:relative;z-index:4;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 10px 0">
         <button data-lift onClick="{{ chartBloomGo }}" aria-label="Open the expanded chart" title="Expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:radial-gradient(circle at 50% 35%,rgba(var(--atmc),.32),rgba(var(--atmc),.08) 70%);color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M12.5 3.5h4v4M7.5 16.5h-4v-4M16.5 3.5l-4.6 4.6M3.5 16.5l4.6-4.6"></path></svg></button>
-      <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
-        <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="flex:1 1 150px;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-          <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
-            <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fc);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
-          </sc-for>
-        </div>
-      </sc-if>
         <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart detail" style="flex:1 1 150px;display:flex;gap:7px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-          <sc-for list="{{ chartModes }}" as="m" hint-placeholder-count="2">
+          <sc-for list="{{ chartModes }}" as="m" hint-placeholder-count="3">
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
-        <sc-if value="{{ chartAdvOn }}" hint-placeholder-val="{{ false }}">
-          <button data-lift onClick="{{ chartAdvGo }}" role="switch" aria-checked="{{ chartAdvPressed }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:0 0 auto;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ chartAdvBd }};background:{{ chartAdvBg }};font:600 11.5px var(--fc);color:var(--tx)">Advanced placements</button>
-        </sc-if>
         </div>
-        <div style="position:relative">
+        <div style="position:relative;padding-right:{{ railPad }}">
+        <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
+          <!-- THE VIEWS ARE A RAIL ON THE RIGHT (owner, 5 November 2026): only the
+               detail switch sits above the chart; the views and the lock live here. -->
+          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+              <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ csLockOn }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cvNative }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ sqOn }}" hint-placeholder-val="{{ false }}">
+          <div data-chart="square" role="group" aria-label="Rashi chart, South Indian style" style="position:relative;box-sizing:border-box;width:100%;max-width:640px;margin:0 auto;aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:3px;padding:6px">
+            <sc-for list="{{ sqCells }}" as="q" hint-placeholder-count="12">
+              <div role="group" aria-label="{{ q.aria }}" style="grid-row:{{ q.row }};grid-column:{{ q.col }};position:relative;min-width:0;min-height:0;box-sizing:border-box;border:1px solid {{ q.bd }};background:{{ q.bg }};border-radius:6px;padding:6px 6px 4px;display:flex;flex-direction:column;gap:2px;overflow:hidden">
+                <span aria-hidden="true" style="display:flex;justify-content:space-between;align-items:baseline;gap:4px;font:600 8.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ q.rashi }}</span><span style="font:400 12px var(--fb);color:var(--dim)">{{ q.glyph }}</span></span>
+                <sc-if value="{{ q.lagna }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;top:0;left:0;width:22px;height:22px;background:linear-gradient(135deg,var(--ac2-hi) 0 1.5px,transparent 1.5px)"></span><span style="font:600 9px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">LAGNA</span></sc-if>
+                <span style="display:flex;flex-wrap:wrap;gap:2px 6px;align-content:flex-start">
+                  <sc-for list="{{ q.grahas }}" as="g" hint-placeholder-count="1">
+                    <button onClick="{{ g.go }}" aria-label="{{ g.aria }}" style="all:unset;cursor:pointer;font:600 13px/1.25 var(--fu);color:var(--tx);white-space:nowrap">{{ g.ab }}<span style="font:400 10px var(--fu);color:var(--mut)"> {{ g.deg }}{{ g.retro }}</span></button>
+                  </sc-for>
+                </span>
+              </div>
+            </sc-for>
+            <div style="grid-row:2 / span 2;grid-column:2 / span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border-radius:10px;background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%)">
+              <span style="font:400 clamp(18px,4vw,26px) var(--fd);color:var(--tx)">{{ sqTitle }}</span>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">Rashi · Lahiri</span>
+              <span style="font:400 13px var(--fb);color:var(--tx)">{{ sqSub }}</span>
+              <span style="font:400 12px var(--fb);color:var(--mut)">{{ sqLagna }}</span>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ pilOn }}" hint-placeholder-val="{{ false }}">
+          <div role="group" aria-label="The Four Pillars" style="display:flex;flex-direction:column;gap:14px;padding:8px 4px 4px">
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ pillars }}" as="c" hint-placeholder-count="4">
+                <div role="group" aria-label="{{ c.label }} pillar" style="box-sizing:border-box;min-width:0;border:1px solid {{ c.bd }};border-radius:12px;background:radial-gradient(circle at 50% 20%,rgba(var(--atmc2),.14),rgba(var(--atmc),.06) 70%);padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+                  <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ c.label }}</span>
+                  <sc-if value="{{ c.known }}" hint-placeholder-val="{{ true }}">
+                    <span aria-hidden="true" style="font:400 clamp(30px,6vw,46px)/1 serif;color:{{ c.stemC }}">{{ c.stemCh }}</span>
+                    <span style="font:600 12px var(--fu);color:var(--tx)">{{ c.stem }}</span>
+                    <span style="font:400 11px var(--fu);color:var(--mut)">{{ c.stemEl }}</span>
+                    <span aria-hidden="true" style="width:60%;height:1px;background:var(--bd)"></span>
+                    <span aria-hidden="true" style="font:400 clamp(30px,6vw,46px)/1 serif;color:{{ c.branchC }}">{{ c.branchCh }}</span>
+                    <span style="font:600 12px var(--fu);color:var(--tx)">{{ c.branch }}</span>
+                    <span style="font:400 11px var(--fu);color:var(--mut)">{{ c.animal }} · {{ c.branchEl }}</span>
+                  </sc-if>
+                  <sc-if value="{{ c.unknown }}" hint-placeholder-val="{{ false }}"><span style="font:400 12px var(--fb);color:var(--mut);padding:30px 0">No birth time</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;font:400 13px var(--fb);color:var(--tx)"><span>{{ pilMaster }}</span><span style="color:var(--mut)">{{ pilAnimal }}</span></div>
+            <div role="list" aria-label="The five elements in the eight characters" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ pilEls }}" as="e" hint-placeholder-count="5">
+                <div role="listitem" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="display:flex;justify-content:space-between;font:600 11px var(--fu);color:var(--tx)"><span>{{ e.el }}</span><span>{{ e.n }}</span></span><span aria-hidden="true" style="height:4px;border-radius:2px;background:var(--bd);overflow:hidden"><span style="display:block;height:100%;width:{{ e.w }};background:{{ e.c }}"></span></span></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ heOn }}" hint-placeholder-val="{{ false }}">
+          <div role="group" aria-label="The chart from the Sun" style="display:flex;flex-direction:column;gap:12px;padding:6px 2px 2px">
+            <div data-chart="helio" style="position:relative;width:100%;max-width:640px;margin:0 auto;aspect-ratio:1">
+              <svg viewBox="0 0 800 800" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+                <circle cx="400" cy="400" r="390" style="fill:rgba(var(--atmc),.06);stroke:var(--chl);stroke-width:1.5"></circle>
+                <circle cx="400" cy="400" r="350" style="fill:none;stroke:var(--chl);stroke-width:1"></circle>
+                <sc-for list="{{ heTicks }}" as="k" hint-placeholder-count="12">
+                  <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" style="stroke:var(--chl);stroke-width:1"></line>
+                </sc-for>
+                <sc-for list="{{ heOrbits }}" as="o" hint-placeholder-count="9">
+                  <circle cx="400" cy="400" r="{{ o.r }}" style="fill:none;stroke:rgba(var(--atmc),.5);stroke-width:1;stroke-dasharray:2 5"></circle>
+                </sc-for>
+                <circle cx="400" cy="400" r="40" style="fill:rgba(var(--atmc2),.22)"></circle>
+                <circle cx="400" cy="400" r="18" style="fill:rgb(var(--atmc2))"></circle>
+                <sc-for list="{{ heBodies }}" as="b" hint-placeholder-count="9">
+                  <circle cx="{{ b.x }}" cy="{{ b.y }}" r="{{ b.rr }}" style="fill:{{ b.c }}"></circle>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ heSigns }}" as="g" hint-placeholder-count="12">
+                <span aria-hidden="true" style="position:absolute;left:{{ g.l }};top:{{ g.t }};transform:translate(-50%,-50%);font:400 clamp(11px,2.4vw,16px) var(--fu);color:var(--mut);pointer-events:none">{{ g.g }}</span>
+              </sc-for>
+              <sc-for list="{{ heLabels }}" as="g" hint-placeholder-count="9">
+                <span aria-hidden="true" style="position:absolute;left:{{ g.l }};top:{{ g.t }};transform:translate(-50%,-50%);font:600 clamp(11px,2.2vw,15px) var(--fu);color:var(--tx);pointer-events:none">{{ g.g }}</span>
+              </sc-for>
+            </div>
+            <div role="list" aria-label="The planets from the Sun" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px">
+              <sc-for list="{{ heRows }}" as="h" hint-placeholder-count="9">
+                <div role="listitem" style="min-width:0">
+                  <sc-if value="{{ h.btn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ h.go }}" aria-label="{{ h.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf2)"><span aria-hidden="true" style="font:400 16px var(--fu);color:var(--ac2-hi)">{{ h.glyph }}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font:600 13px var(--fu);color:var(--tx)">{{ h.name }}</span><span style="font:400 12px var(--fu);color:var(--mut)">{{ h.pos }}</span></span></button>
+                  </sc-if>
+                  <sc-if value="{{ h.txt }}" hint-placeholder-val="{{ false }}">
+                    <div style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--bd);border-radius:12px"><span aria-hidden="true" style="font:400 16px var(--fu);color:var(--blue)">{{ h.glyph }}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font:600 13px var(--fu);color:var(--tx)">{{ h.name }}</span><span style="font:400 12px var(--fu);color:var(--mut)">{{ h.pos }}</span></span></div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        </sc-if>
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:pan-y;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="position:relative;display:block;width:100%;height:auto">
@@ -32756,7 +32872,7 @@ input[type="date"]{color-scheme:dark}
               </g>
             </sc-for>
             <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="11">
-              <g data-wb="{{ p.key }}" onClick="{{ p.go }}" style="cursor:pointer">
+              <g data-wb="{{ p.key }}" data-xin="{{ p.xin }}" onClick="{{ p.go }}" style="cursor:pointer;animation-delay:{{ p.xd }}">
                 <title>{{ p.tip }}</title>
                 <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
                 <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
@@ -32764,7 +32880,7 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
           </svg>
           <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-            <button data-wb="{{ w.wb }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="all:unset;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
+            <button data-wb="{{ w.wb }}" data-xin="{{ w.xin }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="all:unset;cursor:{{ w.cur }};animation-delay:{{ w.xd }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
           </sc-for>
         </div>
         </sc-if>
@@ -32774,14 +32890,14 @@ input[type="date"]{color-scheme:dark}
                fallback (chartViewNow). -->
           <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:4/5;max-height:72vh;outline:none;background:var(--bg)"></div>
           <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
-          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
           <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
         </sc-if>
         <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
           <button data-lift onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
         </sc-if>
-        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px;opacity:{{ zmUiO }};visibility:{{ zmUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <span id="incommon-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the chart wheel. Use plus and minus to adjust, or the centre button to reset.</span>
           <button data-lift onClick="{{ zoomIn }}" aria-label="Zoom in" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">+</button>
           <button data-lift onClick="{{ zoomOut }}" aria-label="Zoom out" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">−</button>
@@ -36758,7 +36874,7 @@ input[type="date"]{color-scheme:dark}
                 <button data-lift onClick="{{ a.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;flex-direction:column;gap:8px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(165deg,var(--sf),var(--sf-g));padding:15px 16px">
                   <span style="display:flex;align-items:center;gap:11px;width:100%"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid {{ a.edge }};font:400 15px var(--fb);color:var(--tx)">{{ a.glyph }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left"><span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ a.title }}</span><span style="font:400 10.5px var(--fu);color:var(--mut)">{{ a.meta }}</span></span></span>
                   <span style="font:400 13px/1.65 var(--fb);color:var(--tx);text-align:left;text-wrap:pretty">{{ a.text }}</span>
-                  <span style="font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ a.cta }}</span>
+                  <span style="font:600 10.5px var(--fc);letter-spacing:.06em;color:var(--ac2-hi)">{{ a.cta }}</span>
                 </button>
               </sc-for>
             </div>
@@ -37132,7 +37248,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -37266,7 +37382,7 @@ input[type="date"]{color-scheme:dark}
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -37794,7 +37910,7 @@ input[type="date"]{color-scheme:dark}
       <textarea data-lift="in" value="{{ recLive }}" onChange="{{ recEdit }}" rows="6" placeholder="{{ recPlaceholder }}" aria-label="Transcript" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 13px;font:400 13.5px/1.65 var(--fb);color:var(--tx)"></textarea>
       <div style="display:flex;align-items:center;gap:10px">
         <div style="flex:1;font:italic 400 11.5px/1.5 var(--fb);color:var(--dim)">{{ recHint }}</div>
-        <div style="flex:none;font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--dim)">{{ recWords }}</div>
+        <div style="flex:none;font:600 10.5px var(--fc);letter-spacing:.06em;color:var(--dim)">{{ recWords }}</div>
       </div>
       <sc-if value="{{ recHasErr }}" hint-placeholder-val="{{ false }}">
         <div style="background:rgba(224,141,125,.12);border:1px solid rgba(224,141,125,.4);border-radius:12px;padding:11px 13px;font:400 12px/1.6 var(--fb);color:var(--warn)">{{ recErr }}</div>
@@ -39533,23 +39649,116 @@ input[type="date"]{color-scheme:dark}
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
         <div style="position:relative;z-index:4;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 12px 0">
         <button data-lift onClick="{{ chartBloomGo }}" aria-label="Open the expanded chart" title="Expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:radial-gradient(circle at 50% 35%,rgba(var(--atmc),.32),rgba(var(--atmc),.08) 70%);color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M12.5 3.5h4v4M7.5 16.5h-4v-4M16.5 3.5l-4.6 4.6M3.5 16.5l4.6-4.6"></path></svg></button>
-        <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
-          <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="flex:1 1 220px;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-            <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
-              <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;padding:0 18px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fc);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
-            </sc-for>
-          </div>
-        </sc-if>
         <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart detail" style="flex:1 1 220px;display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-          <sc-for list="{{ chartModes }}" as="m" hint-placeholder-count="2">
+          <sc-for list="{{ chartModes }}" as="m" hint-placeholder-count="3">
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
-        <sc-if value="{{ chartAdvOn }}" hint-placeholder-val="{{ false }}">
-          <button data-lift onClick="{{ chartAdvGo }}" role="switch" aria-checked="{{ chartAdvPressed }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:0 0 auto;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ chartAdvBd }};background:{{ chartAdvBg }};font:600 11.5px var(--fc);color:var(--tx)">Advanced placements</button>
-        </sc-if>
         </div>
-        <div style="position:relative">
+        <div style="position:relative;padding-right:{{ railPad }}">
+        <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
+          <!-- THE VIEWS ARE A RAIL ON THE RIGHT (owner, 5 November 2026): only the
+               detail switch sits above the chart; the views and the lock live here. -->
+          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+              <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ csLockOn }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cvNative }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ sqOn }}" hint-placeholder-val="{{ false }}">
+          <div data-chart="square" role="group" aria-label="Rashi chart, South Indian style" style="position:relative;box-sizing:border-box;width:100%;max-width:640px;margin:0 auto;aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:3px;padding:6px">
+            <sc-for list="{{ sqCells }}" as="q" hint-placeholder-count="12">
+              <div role="group" aria-label="{{ q.aria }}" style="grid-row:{{ q.row }};grid-column:{{ q.col }};position:relative;min-width:0;min-height:0;box-sizing:border-box;border:1px solid {{ q.bd }};background:{{ q.bg }};border-radius:6px;padding:6px 6px 4px;display:flex;flex-direction:column;gap:2px;overflow:hidden">
+                <span aria-hidden="true" style="display:flex;justify-content:space-between;align-items:baseline;gap:4px;font:600 8.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ q.rashi }}</span><span style="font:400 12px var(--fb);color:var(--dim)">{{ q.glyph }}</span></span>
+                <sc-if value="{{ q.lagna }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;top:0;left:0;width:22px;height:22px;background:linear-gradient(135deg,var(--ac2-hi) 0 1.5px,transparent 1.5px)"></span><span style="font:600 9px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">LAGNA</span></sc-if>
+                <span style="display:flex;flex-wrap:wrap;gap:2px 6px;align-content:flex-start">
+                  <sc-for list="{{ q.grahas }}" as="g" hint-placeholder-count="1">
+                    <button onClick="{{ g.go }}" aria-label="{{ g.aria }}" style="all:unset;cursor:pointer;font:600 13px/1.25 var(--fu);color:var(--tx);white-space:nowrap">{{ g.ab }}<span style="font:400 10px var(--fu);color:var(--mut)"> {{ g.deg }}{{ g.retro }}</span></button>
+                  </sc-for>
+                </span>
+              </div>
+            </sc-for>
+            <div style="grid-row:2 / span 2;grid-column:2 / span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border-radius:10px;background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%)">
+              <span style="font:400 clamp(18px,4vw,26px) var(--fd);color:var(--tx)">{{ sqTitle }}</span>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">Rashi · Lahiri</span>
+              <span style="font:400 13px var(--fb);color:var(--tx)">{{ sqSub }}</span>
+              <span style="font:400 12px var(--fb);color:var(--mut)">{{ sqLagna }}</span>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ pilOn }}" hint-placeholder-val="{{ false }}">
+          <div role="group" aria-label="The Four Pillars" style="display:flex;flex-direction:column;gap:14px;padding:8px 4px 4px">
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ pillars }}" as="c" hint-placeholder-count="4">
+                <div role="group" aria-label="{{ c.label }} pillar" style="box-sizing:border-box;min-width:0;border:1px solid {{ c.bd }};border-radius:12px;background:radial-gradient(circle at 50% 20%,rgba(var(--atmc2),.14),rgba(var(--atmc),.06) 70%);padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+                  <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ c.label }}</span>
+                  <sc-if value="{{ c.known }}" hint-placeholder-val="{{ true }}">
+                    <span aria-hidden="true" style="font:400 clamp(30px,6vw,46px)/1 serif;color:{{ c.stemC }}">{{ c.stemCh }}</span>
+                    <span style="font:600 12px var(--fu);color:var(--tx)">{{ c.stem }}</span>
+                    <span style="font:400 11px var(--fu);color:var(--mut)">{{ c.stemEl }}</span>
+                    <span aria-hidden="true" style="width:60%;height:1px;background:var(--bd)"></span>
+                    <span aria-hidden="true" style="font:400 clamp(30px,6vw,46px)/1 serif;color:{{ c.branchC }}">{{ c.branchCh }}</span>
+                    <span style="font:600 12px var(--fu);color:var(--tx)">{{ c.branch }}</span>
+                    <span style="font:400 11px var(--fu);color:var(--mut)">{{ c.animal }} · {{ c.branchEl }}</span>
+                  </sc-if>
+                  <sc-if value="{{ c.unknown }}" hint-placeholder-val="{{ false }}"><span style="font:400 12px var(--fb);color:var(--mut);padding:30px 0">No birth time</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;font:400 13px var(--fb);color:var(--tx)"><span>{{ pilMaster }}</span><span style="color:var(--mut)">{{ pilAnimal }}</span></div>
+            <div role="list" aria-label="The five elements in the eight characters" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ pilEls }}" as="e" hint-placeholder-count="5">
+                <div role="listitem" style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="display:flex;justify-content:space-between;font:600 11px var(--fu);color:var(--tx)"><span>{{ e.el }}</span><span>{{ e.n }}</span></span><span aria-hidden="true" style="height:4px;border-radius:2px;background:var(--bd);overflow:hidden"><span style="display:block;height:100%;width:{{ e.w }};background:{{ e.c }}"></span></span></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ heOn }}" hint-placeholder-val="{{ false }}">
+          <div role="group" aria-label="The chart from the Sun" style="display:flex;flex-direction:column;gap:12px;padding:6px 2px 2px">
+            <div data-chart="helio" style="position:relative;width:100%;max-width:640px;margin:0 auto;aspect-ratio:1">
+              <svg viewBox="0 0 800 800" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+                <circle cx="400" cy="400" r="390" style="fill:rgba(var(--atmc),.06);stroke:var(--chl);stroke-width:1.5"></circle>
+                <circle cx="400" cy="400" r="350" style="fill:none;stroke:var(--chl);stroke-width:1"></circle>
+                <sc-for list="{{ heTicks }}" as="k" hint-placeholder-count="12">
+                  <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" style="stroke:var(--chl);stroke-width:1"></line>
+                </sc-for>
+                <sc-for list="{{ heOrbits }}" as="o" hint-placeholder-count="9">
+                  <circle cx="400" cy="400" r="{{ o.r }}" style="fill:none;stroke:rgba(var(--atmc),.5);stroke-width:1;stroke-dasharray:2 5"></circle>
+                </sc-for>
+                <circle cx="400" cy="400" r="40" style="fill:rgba(var(--atmc2),.22)"></circle>
+                <circle cx="400" cy="400" r="18" style="fill:rgb(var(--atmc2))"></circle>
+                <sc-for list="{{ heBodies }}" as="b" hint-placeholder-count="9">
+                  <circle cx="{{ b.x }}" cy="{{ b.y }}" r="{{ b.rr }}" style="fill:{{ b.c }}"></circle>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ heSigns }}" as="g" hint-placeholder-count="12">
+                <span aria-hidden="true" style="position:absolute;left:{{ g.l }};top:{{ g.t }};transform:translate(-50%,-50%);font:400 clamp(11px,2.4vw,16px) var(--fu);color:var(--mut);pointer-events:none">{{ g.g }}</span>
+              </sc-for>
+              <sc-for list="{{ heLabels }}" as="g" hint-placeholder-count="9">
+                <span aria-hidden="true" style="position:absolute;left:{{ g.l }};top:{{ g.t }};transform:translate(-50%,-50%);font:600 clamp(11px,2.2vw,15px) var(--fu);color:var(--tx);pointer-events:none">{{ g.g }}</span>
+              </sc-for>
+            </div>
+            <div role="list" aria-label="The planets from the Sun" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px">
+              <sc-for list="{{ heRows }}" as="h" hint-placeholder-count="9">
+                <div role="listitem" style="min-width:0">
+                  <sc-if value="{{ h.btn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ h.go }}" aria-label="{{ h.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf2)"><span aria-hidden="true" style="font:400 16px var(--fu);color:var(--ac2-hi)">{{ h.glyph }}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font:600 13px var(--fu);color:var(--tx)">{{ h.name }}</span><span style="font:400 12px var(--fu);color:var(--mut)">{{ h.pos }}</span></span></button>
+                  </sc-if>
+                  <sc-if value="{{ h.txt }}" hint-placeholder-val="{{ false }}">
+                    <div style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--bd);border-radius:12px"><span aria-hidden="true" style="font:400 16px var(--fu);color:var(--blue)">{{ h.glyph }}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font:600 13px var(--fu);color:var(--tx)">{{ h.name }}</span><span style="font:400 12px var(--fu);color:var(--mut)">{{ h.pos }}</span></span></div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        </sc-if>
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:none;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="position:relative;display:block;width:100%;height:auto">
@@ -39582,7 +39791,7 @@ input[type="date"]{color-scheme:dark}
               </g>
             </sc-for>
             <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="11">
-              <g data-wb="{{ p.key }}" onClick="{{ p.go }}" style="cursor:pointer">
+              <g data-wb="{{ p.key }}" data-xin="{{ p.xin }}" onClick="{{ p.go }}" style="cursor:pointer;animation-delay:{{ p.xd }}">
                 <title>{{ p.tip }}</title>
                 <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
                 <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
@@ -39590,7 +39799,7 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
           </svg>
           <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-            <button data-wb="{{ w.wb }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="all:unset;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
+            <button data-wb="{{ w.wb }}" data-xin="{{ w.xin }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="all:unset;cursor:{{ w.cur }};animation-delay:{{ w.xd }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
           </sc-for>
         </div>
         </sc-if>
@@ -39600,14 +39809,14 @@ input[type="date"]{color-scheme:dark}
                fallback (chartViewNow). -->
           <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:1/1;max-height:78vh;min-height:420px;outline:none;background:var(--bg)"></div>
           <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
-          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
           <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
         </sc-if>
         <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
           <button data-lift onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
         </sc-if>
-        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px;opacity:{{ zmUiO }};visibility:{{ zmUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <span id="incommon-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the chart wheel. Use plus and minus to adjust, or the centre button to reset.</span>
           <button data-lift onClick="{{ zoomIn }}" aria-label="Zoom in" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">+</button>
           <button data-lift onClick="{{ zoomOut }}" aria-label="Zoom out" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">−</button>
@@ -40051,7 +40260,7 @@ input[type="date"]{color-scheme:dark}
                   <button data-lift onClick="{{ a.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;flex-direction:column;gap:8px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(165deg,var(--sf),var(--sf-g));padding:15px 16px">
                     <span style="display:flex;align-items:center;gap:11px;width:100%"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid {{ a.edge }};font:400 15px var(--fb);color:var(--tx)">{{ a.glyph }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left"><span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ a.title }}</span><span style="font:400 10.5px var(--fu);color:var(--mut)">{{ a.meta }}</span></span></span>
                     <span style="font:400 13px/1.65 var(--fb);color:var(--tx);text-align:left;text-wrap:pretty">{{ a.text }}</span>
-                    <span style="font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ a.cta }}</span>
+                    <span style="font:600 10.5px var(--fc);letter-spacing:.06em;color:var(--ac2-hi)">{{ a.cta }}</span>
                   </button>
                 </sc-for>
               </div>
@@ -40166,13 +40375,6 @@ input[type="date"]{color-scheme:dark}
             <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
               <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
             <div style="position:relative;z-index:4;display:flex;flex-wrap:wrap;gap:8px;padding:12px 12px 0">
-              <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
-                <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="flex:1 1 240px;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-                  <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
-                    <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 16px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fc);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
-                  </sc-for>
-                </div>
-              </sc-if>
               <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="flex:1 1 240px;display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                 <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
                   <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
@@ -40180,7 +40382,19 @@ input[type="date"]{color-scheme:dark}
               </div>
             </div>
         <div style="position:relative">
-              <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
+          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+              <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ hsLockOn }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" aria-label="Screen lock, turn the wiring freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ hsFreeBd }};border-radius:12px;background:{{ hsFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ hsLockPath }}"></path></svg></button>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
           <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
               <div aria-hidden="true" style="position:absolute;inset:-4% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 52%,rgba(var(--atmc2),.12),rgba(var(--atmc),.16) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
@@ -40218,7 +40432,7 @@ input[type="date"]{color-scheme:dark}
                      Wheel views into this host; the 2D wiring above is the third view and the
                      fallback (hdViewNow). -->
                 <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:6/5;max-height:78vh;min-height:460px;outline:none;background:var(--bg)"></div>
-                <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+                <span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
                 <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ hsVeilO }};visibility:{{ hsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
                 <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
                 <button data-lift onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
@@ -44035,7 +44249,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -44169,7 +44383,7 @@ input[type="date"]{color-scheme:dark}
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expanded</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -44698,7 +44912,7 @@ input[type="date"]{color-scheme:dark}
       <textarea data-lift="in" value="{{ recLive }}" onChange="{{ recEdit }}" rows="6" placeholder="{{ recPlaceholder }}" aria-label="Transcript" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 13px;font:400 13.5px/1.65 var(--fb);color:var(--tx)"></textarea>
       <div style="display:flex;align-items:center;gap:10px">
         <div style="flex:1;font:italic 400 11.5px/1.5 var(--fb);color:var(--dim)">{{ recHint }}</div>
-        <div style="flex:none;font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--dim)">{{ recWords }}</div>
+        <div style="flex:none;font:600 10.5px var(--fc);letter-spacing:.06em;color:var(--dim)">{{ recWords }}</div>
       </div>
       <sc-if value="{{ recHasErr }}" hint-placeholder-val="{{ false }}">
         <div style="background:rgba(224,141,125,.12);border:1px solid rgba(224,141,125,.4);border-radius:12px;padding:11px 13px;font:400 12px/1.6 var(--fb);color:var(--warn)">{{ recErr }}</div>
@@ -46260,7 +46474,7 @@ class Component extends DCLogic {
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false, aboutOpen: false, cyOpen: false, cyView: '2d', cwSceneFail: false, cwSceneLive: false, gazTick: 0,
-    chartView: '2d', csFail: false, csFocus: null, csToday: false,
+    chartView: 'native', csFail: false, csFocus: null, csToday: false,
     hdView: '2d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
     csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
     csFlying: false, obsTab: 'bodies', obsPanels: true, obsKeys: false, obsDrawer: false, obsHouse: null,
@@ -46800,6 +47014,7 @@ class Component extends DCLogic {
     this._startPath = this.hashPath() || null;
     this.dtBind();
     this.vtBind();
+    this.listChainBind();
     this._onErr = e => this.setState({ errBanner: 'Something broke quietly: ' + (e.message || 'unknown error') + '. The rest of the app keeps working.' });
     window.addEventListener('error', this._onErr);
     this._onNet = () => { this.setState({ online: navigator.onLine }); if (navigator.onLine) setTimeout(() => { this.flushOutbox(); this.cloudSync(true); }, 400); };
@@ -46940,6 +47155,7 @@ class Component extends DCLogic {
     window.removeEventListener('popstate', this._onPop);
     if (this._vtKey) document.removeEventListener('keydown', this._vtKey);
     if (this._vtWheel) document.removeEventListener('wheel', this._vtWheel);
+    if (this._lcStart) { document.removeEventListener('touchstart', this._lcStart, true); document.removeEventListener('touchmove', this._lcMove, true); document.removeEventListener('touchend', this._lcEnd, true); document.removeEventListener('scroll', this._lcScroll, true); document.removeEventListener('wheel', this._lcWheel, true); }
     if (this._vtTS) document.removeEventListener('touchstart', this._vtTS);
     if (this._vtTM) document.removeEventListener('touchmove', this._vtTM);
     if (this._vtTE) {
@@ -48290,7 +48506,7 @@ class Component extends DCLogic {
     const a = this.antiscionOf(me.lon), s = this.signOf(a);
     const hits = rows.filter(r => r.name !== name && Math.abs(((r.lon - a + 540) % 360) - 180) <= 1)
       .map(r => ({ name: r.name, orb: Math.abs(((r.lon - a + 540) % 360) - 180) }));
-    const paras = ['Mirrored across the solstices, your ' + name + ' at ' + Math.floor(me.lon % 30) + '° ' + me.sign + ' falls at ' + Math.floor(s.deg) + '° ' + s.sign +
+    const paras = ['Mirrored across the solstices, your ' + name + ' at ' + Math.floor(this.signOf(me.lon).deg) + '° ' + me.sign + ' falls at ' + Math.floor(s.deg) + '° ' + s.sign +
       '. The old astrologers called that point its antiscion: two degrees the same distance from the turning of the year, which share the length of their days.'];
     if (hits.length) hits.forEach(h => paras.push('Your ' + h.name + ' stands on that mirror, within ' + h.orb.toFixed(1) + '°. There is no aspect between them, and still the tradition counts the two as linked.'));
     else paras.push('Nothing of yours stands on that mirror. It is a quiet point, worth knowing when the sky crosses it.');
@@ -48308,7 +48524,7 @@ class Component extends DCLogic {
     const [by, bm, bd] = p.birthDate.split('-').map(Number), now = new Date();
     const age = now.getFullYear() - by - ((now.getMonth() + 1 < bm || (now.getMonth() + 1 === bm && now.getDate() < bd)) ? 1 : 0);
     if (!(age >= 0)) return null;
-    const ai = Math.floor(this.norm360(asc.asc) / 30), house = (age % 12) + 1, si = (ai + age) % 12, lord = this.TRAD_RULER[si];
+    const ai = this.signOf(asc.asc).idx, house = (age % 12) + 1, si = (ai + age) % 12, lord = this.TRAD_RULER[si];
     const ord = k => k + (k % 10 === 1 && k !== 11 ? 'st' : k % 10 === 2 && k !== 12 ? 'nd' : k % 10 === 3 && k !== 13 ? 'rd' : 'th');
     const room = (window.PlacementContent && window.PlacementContent.houses[house - 1]) || null;
     return { age: age, house: house, sign: this.SIGNS12[si], lord: lord, lordName: lord.replace(/^the /, '').replace(/^./, c => c.toUpperCase()),
@@ -48339,17 +48555,17 @@ class Component extends DCLogic {
     const YEAR = 365.2422 * 86400000, YR = ter ? 27.32158 * 86400000 : YEAR, tN = this.t2000(nd);
     const age = (Date.now() - nd.getTime()) / YR;
     if (!(age > 0)) return (memo[mk] = null);
-    const sgn = y => Math.floor(this.norm360(this.lonOf(name, tN + y)) / 30);
+    const sgn = y => this.signOf(this.lonOf(name, tN + y), tN + y).idx;
     const step = ter ? (name === 'Sun' ? 1 : 0.1) : (name === 'Sun' ? 1 : 0.2);
     const edge = (a, b) => { const s = sgn(a); for (let k = 0; k < 30; k++) { const m = (a + b) / 2; if (sgn(m) === s) a = m; else b = m; } return b; };
     const find = (from, dir, lim) => { const s0 = sgn(from); for (let y = from; dir > 0 ? y < from + lim : y > Math.max(0, from - lim); y += dir * step) {
       const y2 = dir > 0 ? y + step : Math.max(0, y - step); if (sgn(y2) !== s0) return dir > 0 ? edge(y, y2) : edge(y2, y); if (y2 === 0) break; } return null; };
-    const lonNow = this.norm360(this.lonOf(name, tN + age)), si = Math.floor(lonNow / 30), sign = this.SIGNS12[si];
+    const lonNow = this.norm360(this.lonOf(name, tN + age)), sNow = this.signOf(lonNow, tN + age), si = sNow.idx, sign = this.SIGNS12[si];
     const natalSi = sgn(0), last = find(age, -1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 95 : 3.5)), next = find(age, 1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 40 : 3.5));
     const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const when = y => { const d = new Date(nd.getTime() + y * YR); return timed ? 'in ' + MON[d.getMonth()] + ' ' + d.getFullYear() : 'around ' + d.getFullYear(); };
     const old = y => { const n = Math.floor(y * YR / YEAR); return n < 1 ? 'in your first year' : 'the year you turned ' + n; };
-    const gone = Math.floor(lonNow % 30), ahead = 30 - (lonNow % 30);
+    const gone = Math.floor(sNow.deg), ahead = 30 - sNow.deg;
     const nm = (ter ? 'tertiary ' : 'progressed ') + name, paras = [];
     if (last != null) {
       const from = this.SIGNS12[(si + 11) % 12];
@@ -48409,7 +48625,7 @@ class Component extends DCLogic {
     }
     if (segs.length === 1) {
       const s = segs[0], next = this.signOf(cs[n % 12]), prev = this.signOf(cs[(i + 11) % 12]);
-      const nextSame = next.sign === s.sign && this.norm360(cs[n % 12]) % 30 > 1e-6, prevSame = prev.sign === s.sign && i !== 0;
+      const nextSame = next.sign === s.sign && this.signOf(cs[n % 12]).deg > 1e-6, prevSame = prev.sign === s.sign && i !== 0;
       if (!nextSame && !prevSame) return null;
       if (nextSame) paras.push(s.sign + ' also opens your ' + ord(n % 12 + 1) + ' house, so the same sign hands itself on: what ' + s.sign + ' keeps in this room, it carries next door. ' + both(R(s.sign), 'runs both.'));
       if (prevSame) paras.push(s.sign + ' reaches this house from your ' + ord((i + 11) % 12 + 1) + ', where it began. One sign holds two rooms in a row here. ' + both(R(s.sign), 'runs both.'));
@@ -48426,7 +48642,7 @@ class Component extends DCLogic {
     const start = W.norm360(W.gateStart(g)), GD = 360 / 64, LD = GD / 6;
     const end = start + GD, cut = Math.ceil(start / 30) * 30;
     if (!(cut > start + 1e-9 && cut < end - 1e-9)) return null;
-    const a = this.signOf(start), b = this.signOf(cut % 360);
+    const a = this.signOfT(start), b = this.signOfT(cut % 360);
     return { gate: g, a: a.sign, b: b.sign, aDeg: cut - start, bDeg: end - cut, line: Math.floor((cut - start) / LD) + 1, cut: cut % 360 };
   }
   gateHandoffText(g, act) {
@@ -48438,7 +48654,7 @@ class Component extends DCLogic {
       (thin ? 'The share in ' + h.b + ' is a sliver, a few hours of the Sun\u2019s travel, so ' + h.b + ' is a threshold at the gate\u2019s far edge rather than a second home.'
             : 'So this gate has two sign colourings: ' + h.a + ' at its opening, ' + h.b + ' toward its close.');
     if (act && act.lon != null) {
-      const side = this.signOf(act.lon).sign;
+      const side = this.signOfT(act.lon).sign;
       t += ' Your ' + act.body + ' here sits on the ' + side + ' side' + (act.line === h.line ? ', on the very line where the sign turns' : '') + '.';
     }
     return t;
@@ -49031,7 +49247,106 @@ class Component extends DCLogic {
     const p = helio(el), earth = helio(this.EARTH_EL);
     return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
   }
-  signOf(lon) { const l = this.norm360(lon), i = Math.floor(l / 30); return { sign: this.SIGNS12[i], deg: l - i * 30, idx: i }; }
+  /* THE ZODIAC FOLLOWS THE CHART STUDY (the owner, 5 November 2026: "When
+     changing which chart to read, it should change all of the information to
+     that chart's specific features. Placements and chart visuals alike.")
+     Every longitude in the app stays tropical, because the ephemeris, the
+     aspects, the transits and the Human Design gates are all measured there,
+     and a frame shifted in one place and not another sets two readings 24
+     degrees apart. What moves is where a sign begins: zodiacOff(t) is the
+     tropical longitude of the study's 0 Aries at instant t (days from J2000),
+     and signOf() reads a sign and a degree from there. Sidereal studies put
+     it at the ayanamsa plus the nutation, at the instant of the position, as
+     the Swiss Ephemeris does; the Draconic study at the natal North Node, for
+     the natal chart and the sky alike. signOfT() is the tropical reading, for
+     the Human Design wheel, which is tropical whatever is studied. */
+  zodiacOff(t) {
+    const x = this.chartStudyOf();
+    if (!x || x.zodiac === 'tropical') return 0;
+    if (t == null) {
+      const p = this.activeProfile(), k = (p ? p.birthStamp : '') + '|' + x.key;
+      if (!this._zNat || this._zNat.k !== k) this._zNat = { k, t: this.t2000(this.natalDate()) };
+      t = this._zNat.t;
+    }
+    if (x.zodiac === 'draconic') {
+      const p = this.activeProfile(), k = (p ? p.birthStamp : '') + '|dr';
+      if (!this._zDr || this._zDr.k !== k) { const nn = this.lonOf('North Node', this.t2000(this.natalDate())); this._zDr = { k, v: nn == null ? 0 : this.norm360(nn) }; }
+      return this._zDr.v;
+    }
+    const T = window.ChartTraditions;
+    if (!T) return 0;
+    const day = Math.round(t * 4) / 4, k = x.zodiac + '|' + day, m = this._zSid || (this._zSid = new Map());
+    if (m.has(k)) return m.get(k);
+    const jd = day + 2451545, A = window.Astronomy;
+    let nut = null;
+    try { if (A && A.e_tilt) nut = A.e_tilt(A.MakeTime(new Date((jd - 2440587.5) * 864e5))).dpsi / 3600; } catch (e) { nut = null; }
+    const v = this.norm360(T.ayanamsa(x.zodiac, jd) + (nut != null ? nut : T.dpsi(jd)));
+    if (m.size > 4000) m.clear();
+    m.set(k, v);
+    return v;
+  }
+  signOf(lon, t) { const l = this.norm360(lon - this.zodiacOff(t)), i = Math.floor(l / 30); return { sign: this.SIGNS12[i], deg: l - i * 30, idx: i }; }
+  /* The Vedic reading of one point: its rashi, nakshatra, pada and the
+     nakshatra's lord in the Vimshottari order, and the Parashara dignity of
+     the seven grahas. Arithmetic only, from chart-traditions.js; null under
+     any other study. */
+  vedicOf(r) {
+    const x = this.chartStudyOf(), T = window.ChartTraditions;
+    if (!x || x.zodiac !== 'lahiri' || !T || !r || r.lon == null) return null;
+    const s = this.signOf(r.lon), sid = s.idx * 30 + s.deg, n = T.nakshatra(sid);
+    return { rashi: T.RASHI[s.idx], sign: s.sign, nak: n.name, pada: n.pada, lord: n.lord, dignity: T.dignity(r.name, sid), sid, combust: this.vedicCombust(r) };
+  }
+  /* Asta: a graha too close to the Sun to be seen. The limits are the ones
+     OnlineJyotish's lesson on combustion gives (Moon 12, Mars 17, Mercury 14
+     or 12 retrograde, Jupiter 11, Venus 10 or 8 retrograde, Saturn 15). The
+     separation is the same in every zodiac, so it is read on the tropical
+     longitudes. */
+  ASTA = { Moon: 12, Mars: 17, Mercury: 14, Jupiter: 11, Venus: 10, Saturn: 15 };
+  vedicCombust(r) {
+    const lim0 = this.ASTA[r.name];
+    if (!lim0 || r.lon == null) return false;
+    const sun = { lon: this.lonOf('Sun', this.t2000(this.natalDate())) };
+    if (!isFinite(sun.lon)) return false;
+    const lim = r.retro && r.name === 'Mercury' ? 12 : r.retro && r.name === 'Venus' ? 8 : lim0;
+    return Math.abs(((r.lon - sun.lon + 540) % 360) - 180) < lim;
+  }
+  /* Rahu and Ketu are the Vedic names of the nodes; the key stays the name,
+     so every reading and lookup is unchanged. */
+  studyName(n) {
+    const x = this.chartStudyOf();
+    if (x && x.zodiac === 'lahiri') { if (n === 'North Node') return 'Rahu'; if (n === 'South Node') return 'Ketu'; }
+    return n;
+  }
+  /* The heliocentric study: where each planet stood seen from the Sun at
+     the birth instant, and the Earth opposite the Sun. The Moon, the nodes,
+     the angles and the houses belong to the view from the Earth, so they
+     have no place here. Memoised per birth. */
+  HELIO_BODIES = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  helioOn() { const x = this.chartStudyOf(); return !!x && x.frame === 'helio'; }
+  helioChart() {
+    const T = window.ChartTraditions, A = window.Astronomy;
+    if (!T || !A) return null;
+    const k = this.chartStamp ? this.chartStamp() : String(this.natalDate().getTime());
+    if (this._helioK === k && this._helio) return this._helio;
+    const jd = this.t2000(this.natalDate()) + 2451545, out = {};
+    this.HELIO_BODIES.forEach(b => { const l = T.helio(A, b, jd); if (l != null) out[b] = l; });
+    this._helioK = k; this._helio = out;
+    return out;
+  }
+  helioPos(r) {
+    if (!r || !this.helioOn()) return null;
+    const name = r.name === 'Sun' ? 'Earth' : r.name;
+    if (this.HELIO_BODIES.indexOf(name) === -1) return null;
+    const hc = this.helioChart(), l = hc && hc[name];
+    if (l == null) return null;
+    const i = Math.floor(this.norm360(l) / 30);
+    return { body: name, lon: l, idx: i, sign: this.SIGNS12[i], deg: this.norm360(l) - i * 30 };
+  }
+  signOfT(lon) { const l = this.norm360(lon), i = Math.floor(l / 30); return { sign: this.SIGNS12[i], deg: l - i * 30, idx: i }; }
+  /* The study's sign boundary at or before lon, as a tropical longitude:
+     what a whole sign house, a solar chart and the wheel's sign band start
+     from. */
+  signStart(lon, t) { const o = this.zodiacOff(t); return this.norm360(Math.floor(this.norm360(lon - o) / 30) * 30 + o); }
   /* THE FLAG WAS THE WRONG SOURCE OF TRUTH. "timed" was read off
      p.hasBirthTime, which only profile-manager sets. A partner reached from a
      shared card, or typed into the synastry form, carries a real birth time
@@ -49536,18 +49851,22 @@ class Component extends DCLogic {
   houseCusps(asc) {
     if (!asc) return null;
     const k = this.houseSys();
-    if (asc._hcKey === k && asc._hc) return asc._hc;
+    const zk = k + '|' + this.zodiacOff().toFixed(6);
+    if (asc._hcKey === zk && asc._hc) return asc._hc;
     const H = window.HouseSystems, R = this.RAD;
     let out = null;
     if (H && [asc.ramc, asc.obliquity, asc.latitude].every(Number.isFinite)) {
       const r = H.cusps(k, { ramc: asc.ramc / R, eps: asc.obliquity / R, lat: asc.latitude / R });
       if (r.ok) out = { cusps: r.cusps, drawn: r.system, asked: r.asked, fallback: !!r.fallback };
     }
+    /* A whole sign house is the study's sign, so a sidereal or draconic
+       chart counts its houses from the sign the Ascendant holds there. */
+    if (out && out.drawn === 'W' && this.zodiacOff() !== 0) out = null;
     if (!out) {
-      const s = Math.floor(this.norm360(asc.asc) / 30) * 30;
+      const s = this.signStart(asc.asc);
       out = { cusps: Array.from({ length: 12 }, (_, i) => this.norm360(s + 30 * i)), drawn: 'W', asked: k, fallback: k !== 'W' };
     }
-    asc._hcKey = k; asc._hc = out;
+    asc._hcKey = zk; asc._hc = out;
     return out;
   }
   /* The cusps of the chart on screen, timed or not: the chosen system from a
@@ -49564,7 +49883,7 @@ class Component extends DCLogic {
     if (asc) {
       const cs = this.houseCusps(asc).cusps, H = window.HouseSystems;
       if (H) return H.houseOf(lon, cs);
-      return ((Math.floor(this.norm360(lon) / 30) - Math.floor(cs[0] / 30) + 12) % 12) + 1;
+      return ((this.signOf(lon).idx - this.signOf(cs[0]).idx + 12) % 12) + 1;
     }
     return ((this.signOf(lon).idx - natalSun.idx + 12) % 12) + 1;
   }
@@ -49666,7 +49985,7 @@ class Component extends DCLogic {
   }
   chartAt(date) {
     const t = this.t2000(date);
-    return this.PLNS.map(([n, g]) => { const lon = this.lonOf(n, t), s = this.signOf(lon); return { name: n, glyph: g, lon: lon, sign: s.sign, deg: s.deg, idx: s.idx, mean: this.PL_MEAN[n] }; });
+    return this.PLNS.map(([n, g]) => { const lon = this.lonOf(n, t), s = this.signOf(lon, t); return { name: n, glyph: g, lon: lon, sign: s.sign, deg: s.deg, idx: s.idx, mean: this.PL_MEAN[n] }; });
   }
   // The natal set, cached per birth-data stamp and mode so dragging the wheel
   // never recomputes an ephemeris.
@@ -49869,7 +50188,7 @@ class Component extends DCLogic {
       if (keys.some((o, j) => j !== i && o.length > ks.length && ks.split('|').every(x => o.split('|').indexOf(x) !== -1))) return;
       if (out.some(g => g.k === ks)) return;
       const signs = [];
-      w.forEach(p => { const sg = this.SIGNS12[Math.floor(p.lon / 30)]; if (signs.indexOf(sg) === -1) signs.push(sg); });
+      w.forEach(p => { const sg = this.signOf(p.lon).sign; if (signs.indexOf(sg) === -1) signs.push(sg); });
       if (signs.length < 2) return;
       out.push({ k: ks, signs: signs, names: w.map(p => p.name), span: this.norm360(w[w.length - 1].lon - w[0].lon) });
     });
@@ -49880,7 +50199,7 @@ class Component extends DCLogic {
   outOfSign(x) {
     const want = this.OUT_OF_SIGN_SIGNS[x.asp];
     if (want == null || x.a.lon == null || x.b.lon == null) return null;
-    const ia = Math.floor(this.norm360(x.a.lon) / 30), ib = Math.floor(this.norm360(x.b.lon) / 30);
+    const ia = this.signOf(x.a.lon).idx, ib = this.signOf(x.b.lon).idx;
     let sd = Math.abs(ia - ib); if (sd > 6) sd = 12 - sd;
     return sd === want ? null : { ia: ia, ib: ib, sd: sd, want: want };
   }
@@ -50066,7 +50385,7 @@ class Component extends DCLogic {
         rows: list.map(r => {
           const known = r.lon != null, key = this.pointKey(r);
           const h = known && r.group !== 'angle' ? this.houseOf(r.lon, sun, asc) : null;
-          const d = known ? ((r.lon % 30) + 30) % 30 : 0, deg = Math.floor(d), min = Math.floor((d - deg) * 60);
+          const d = known ? this.signOf(r.lon).deg : 0, deg = Math.floor(d), min = Math.floor((d - deg) * 60);
           return {
             key, name: this.pointLabel(r), glyph: r.glyph || '·', c: this.CAT_COLOR[cat] || 'var(--ac2-hi)',
             pos: known ? deg + '°' + String(min).padStart(2, '0') + '′ ' + SG[Math.floor(((r.lon % 360) + 360) % 360 / 30)] : 'not computed',
@@ -50287,7 +50606,7 @@ class Component extends DCLogic {
   // 360° -> screen. The Ascendant sits at the left edge (9 o'clock) and
   // longitude increases counterclockwise, which is the standard wheel. Without a
   // timed chart the natal Sun's sign boundary takes the Ascendant's place.
-  wheelZero() { const asc = this.ascendant(); return asc ? asc.asc : this.signOf(this.placed(false)[0].lon).idx * 30; }
+  wheelZero() { const asc = this.ascendant(); return asc ? asc.asc : this.signStart(this.placed(false)[0].lon); }
   polar(lon, r) {
     const th = (180 + (lon - this.wheelZero())) * this.RAD;
     return { x: 400 + r * Math.cos(th), y: 400 - r * Math.sin(th) };
@@ -52315,7 +52634,7 @@ class Component extends DCLogic {
     this._rpKey = key; this._rp = out;
     return out;
   }
-  posOn(name, d) { const lon = this.lonOf(name, this.t2000(d)); if (lon == null) return null; const g = this.signOf(lon); return { deg: g.deg, sign: g.sign }; }
+  posOn(name, d) { const lon = this.lonOf(name, this.t2000(d)); if (lon == null) return null; const g = this.signOf(lon, this.t2000(d)); return { deg: g.deg, sign: g.sign }; }
   retroScan() {
     const key = Component.localDay();
     if (this._rtKey === key && this._rt) return this._rt;
@@ -52931,7 +53250,10 @@ class Component extends DCLogic {
       const gIn = stel.sign.filter(g => g.names.indexOf(r.name) !== -1).map(g => this.SIGN_GLYPHS[this.SIGNS12.indexOf(g.key)])
         .concat((stel.cross || []).filter(g => g.names.indexOf(r.name) !== -1).map(g => g.signs.map(sg => this.SIGN_GLYPHS[this.SIGNS12.indexOf(sg)]).join('')))
         .concat(stel.house.filter(g => g.names.indexOf(r.name) !== -1).map(g => 'H' + g.key));
-      const tags = gIn.length ? [{ t: gIn.join(' ') + ' gathering' }] : [];
+      const ved = off ? null : this.vedicOf(r);
+      const hel = off ? null : this.helioPos(r);
+      const tags = (ved ? [{ t: ved.rashi + ' \u00b7 ' + ved.nak + ' ' + ved.pada + (ved.dignity ? ' \u00b7 ' + ved.dignity : '') + (ved.combust ? ' \u00b7 combust' : '') }] : [])
+        .concat(hel ? [{ t: (hel.body === 'Earth' ? 'Earth ' : 'From the Sun ') + Math.floor(hel.deg) + '\u00b0 ' + this.SIGN_GLYPHS[hel.idx] }] : []).concat(gIn.length ? [{ t: gIn.join(' ') + ' gathering' }] : []);
       const cs = off ? [] : this.impactContacts(r.lon), top = cs[0];
       const nx = nextOn[r.name];
       const wxText = top ? this.impactGlyph(top.mover) + ' ' + SYM(top.asp) : '';
@@ -54732,7 +55054,9 @@ class Component extends DCLogic {
     const litSigns = {}, litHouses = {}, shapes = [], ticks = [];
     let litBody = null, horizon = false;
     const poly = (lons, r, c, w, o, dash) => shapes.push({ pts: lons.concat([lons[0]]).map(l => { const q = P(l, r); return f1(q.x) + ',' + f1(q.y); }).join(' '), c: c, w: w, o: o, dash: dash || 'none' });
-    const anchor = skySun ? skySun.lon : 0;
+    /* the wheel is drawn in the study's zodiac: a body stands at its place there */
+    const zo = this.zodiacOff(), zl = l => this.norm360(l - zo);
+    const anchor = skySun ? zl(skySun.lon) : 0;
     if (e.kind === 'sign') litSigns[e.idx] = 'on';
     if (e.kind === 'house') { litHouses[e.idx] = 'on'; litSigns[e.idx] = 'soft'; }
     if (e.kind === 'body') {
@@ -54865,10 +55189,10 @@ class Component extends DCLogic {
           tip: s.name, go: peek('sign:' + s.name, { l: pct(q2.x), t: pct(q2.y) }, s.glyph + '\uFE0E ' + s.name, 'sign:' + s.name) }; }),
       apHouseNums: Array.from({ length: 12 }, (_, i) => { const q2 = P(i * 30 + 15, 132), lit = litHouses[i] === 'on';
         return { n: String(i + 1), l: pct(q2.x), t: pct(q2.y), lit: lit ? '1' : '0', c: lit ? 'var(--tx)' : 'var(--mut)', tip: this.apOrd(i + 1) + ' house', go: peek('house:' + (i + 1), { l: pct(q2.x), t: pct(q2.y) }, 'The ' + this.apOrd(i + 1) + ' house', 'house:' + (i + 1)) }; }),
-      apSkyGlyphs: S.sky.map(r => { const q2 = P(r.lon, 101), lit = r.name === litBody;
+      apSkyGlyphs: S.sky.map(r => { const q2 = P(zl(r.lon), 101), lit = r.name === litBody;
         return { g: r.glyph + '︎', l: pct(q2.x), t: pct(q2.y), lit: lit ? '1' : '0', c: lit ? 'var(--ac2-hi)' : 'var(--tx)', fs: lit ? '17px' : '13px',
           glow: lit ? '0 0 14px rgba(var(--atmc2),.9)' : '0 0 6px rgba(var(--atmc),.8)', tip: r.name + ' now, ' + fmtDeg(r), go: peek('sky:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, r.glyph + '\uFE0E ' + r.name + ' now, ' + fmtDeg(r), 'body:' + r.name) }; }),
-      apNatal: S.natal.filter(r => this.PLNS.slice(0, 10).some(x => x[0] === r.name)).map(r => { const q2 = P(r.lon, 84);
+      apNatal: S.natal.filter(r => this.PLNS.slice(0, 10).some(x => x[0] === r.name)).map(r => { const q2 = P(zl(r.lon), 84);
         return { l: pct(q2.x), t: pct(q2.y), tip: 'Your ' + r.name + ', ' + fmtDeg(r), go: peek('natal:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, 'Your ' + r.name + ', ' + fmtDeg(r), 'body:' + r.name) }; }),
       apStars: stars,
       apHorizonPath: (() => { const a = P(0, 176), b = P(180, 176); return 'M' + f1(a.x) + ' ' + f1(a.y) + 'L' + f1(b.x) + ' ' + f1(b.y); })(),
@@ -59367,8 +59691,25 @@ class Component extends DCLogic {
      only ever paid for somebody who reads them. */
   oracleDeepKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleDeep'; }
   oracleSlot(period, depth) {
-    const p = this.activeProfile();
-    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + this.chartStamp(p);
+    const p = this.activeProfile(), w = this.oracleWorld();
+    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + this.chartStamp(p) + (w === 'deepfield' ? '' : '|w' + w);
+  }
+  /* THE ORACLE SPEAKS IN THE STUDY AND THE WORLD THE READER CHOSE (the owner,
+     5 November 2026: "the Oracle voice should reflect the chart style and the
+     theme as well. This is why it costs extra to run it when the reader
+     changes the theme and chart-style"). The study already reached the
+     dossier through studyDossierLines() and the slot through chartStamp();
+     this adds the world. One line rides in the dossier, so the server's key
+     (a hash of the dossier) moves with either choice and a changed style is a
+     new reading that counts toward the day, and the server reads the same line
+     to choose the voice (STUDY_VOICE and WORLD_VOICE in server/oracle). The
+     defaults, a plain Western study in Deep Field, send no line, so a reading
+     kept before this is still the same reading. */
+  oracleWorld() { const k = this.state.themeKey; return this.THEMES[k] ? k : 'deepfield'; }
+  oracleStyleLine() {
+    const st = this.chartStudyOf(), w = this.oracleWorld(), sk = st ? st.key : 'western';
+    if (sk === 'western' && w === 'deepfield') return null;
+    return 'READING STYLE: study ' + sk + ' (' + (st ? st.name : 'Western, Whole Sign') + '); world ' + w + ' (' + this.THEMES[w].label + ')';
   }
   oracleCached(period, depth) {
     const all = this.readLS(this.oracleStoreKey(), {});
@@ -59504,6 +59845,8 @@ class Component extends DCLogic {
       lines.push('HD ACTIVATIONS: ' + acts.join(', '));
       if (nm) lines.push('NUMEROLOGY EXTRA: Maturity ' + keep(lp + nm.expression) + '; Karmic lessons ' + ([1, 2, 3, 4, 5, 6, 7, 8, 9].filter(n => !present.has(n)).join(', ') || 'none'));
     }
+    const style = this.oracleStyleLine ? this.oracleStyleLine() : null;
+    if (style) lines.push(style);
     return lines.join('\n');
   }
   /* The Codex's words for each way a reading can fail. Silent for now has no
@@ -59542,6 +59885,7 @@ class Component extends DCLogic {
   }
   orOpenDeep(slot) {
     if (String(slot).indexOf('|deep') !== -1) this.writeLS(this.oracleDeepKey(), true);
+    this.orNoteLast(slot);
     this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
   }
   oracleAsk(period, depth, again, quiet) {
@@ -59583,6 +59927,7 @@ class Component extends DCLogic {
         const loud = !this._orQuiet[slot] || !!(this.state.orOpened || {})[slot];
         delete held[slot]; delete this._orTry[slot]; delete waits[slot]; delete this._orQuiet[slot]; delete this._orFirst[slot];
         this.oracleKeep(slot, { reading: r.reading, label: r.label || '', at: Date.now() });
+        if (!quiet || (this.state.orOpened || {})[slot]) this.orNoteLast(slot);
         this.setState({ orBusyMap: { ...held }, orWaitMap: waits, orErr: null, orTick: (this.state.orTick || 0) + 1 });
         if (loud) this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
         return;
@@ -60562,6 +60907,8 @@ class Component extends DCLogic {
     lines.push('PASSAGES (in the order they arrive):');
     ws.forEach((w, i) => lines.push((i + 1) + '. ' + w.mover + ' ' + w.asp + ' natal ' + w.natal + '. In orb ' + w.range + '. ' +
       (w.passes.length ? 'Exact on ' + w.passFull + '.' : 'Comes close without reaching exact.')));
+    const style = this.oracleStyleLine ? this.oracleStyleLine() : null;
+    if (style) lines.push(style);
     return lines.join('\n');
   }
   /* ONE PASSAGE AS A LEDGER (the owner's layout, 18 October 2026): a header
@@ -60998,6 +61345,113 @@ class Component extends DCLogic {
     const CS = typeof window !== 'undefined' && window.ChartScene;
     return !!(CS && CS.supported() && !this.state.csFail);
   }
+  /* The South Indian square: the signs fixed in their cells, Pisces at the
+     top left and running clockwise, the Lagna marked in its sign, and the
+     nine grahas in the signs they hold. The Four Pillars: hour, day, month
+     and year from right to left as BaZi is written, each a stem over a
+     branch, the day stem being the Day Master. Both are read off the same
+     rows the wheel draws; nothing here is computed twice. */
+  studyChartVals(rows, asc, openBody, on) {
+    const off = { sqOn: false, sqCells: [], sqTitle: '', sqSub: '', sqLagna: '', pilOn: false, pillars: [], pilMaster: '', pilEls: [], pilAnimal: '',
+      heOn: false, heOrbits: [], heBodies: [], heLabels: [], heSigns: [], heTicks: [], heRows: [] };
+    const nat = this.chartNative();
+    if (!on || !nat) return off;
+    const T = window.ChartTraditions, A = window.Astronomy, prof = this.activeProfile();
+    if (nat.id === 'square' && T) {
+      const POS = [[1, 2], [1, 3], [1, 4], [2, 4], [3, 4], [4, 4], [4, 3], [4, 2], [4, 1], [3, 1], [2, 1], [1, 1]];
+      const AB = { Sun: 'Su', Moon: 'Mo', Mars: 'Ma', Mercury: 'Me', Jupiter: 'Ju', Venus: 'Ve', Saturn: 'Sa', 'North Node': 'Ra', 'South Node': 'Ke' };
+      const lag = asc ? this.signOf(asc.asc) : null;
+      const gr = rows.filter(r => AB[r.name] && r.lon != null);
+      const cells = POS.map(([row, col], i) => {
+        const here = gr.filter(r => this.signOf(r.lon).idx === i).sort((a, b) => this.signOf(a.lon).deg - this.signOf(b.lon).deg);
+        const isLag = !!lag && lag.idx === i;
+        return { row: String(row), col: String(col), rashi: T.RASHI[i], glyph: this.SIGN_GLYPHS[i], lagna: isLag,
+          bd: isLag ? 'var(--ac2-hi)' : 'var(--bd)', bg: isLag ? 'rgba(var(--atmc2),.14)' : 'rgba(var(--atmc),.06)',
+          grahas: here.map(r => { const sg = this.signOf(r.lon), v = this.vedicOf(r);
+            return { ab: AB[r.name], deg: Math.floor(sg.deg) + '\u00b0', retro: (r.retro ? ' R' : '') + (v && v.combust ? ' c' : ''), key: this.pointKey(r),
+              aria: this.studyName(r.name) + ', ' + Math.floor(sg.deg) + ' degrees ' + T.RASHI[i] + (v ? ', ' + v.nak + ' pada ' + v.pada : '') + (r.retro ? ', retrograde' : '') + (v && v.combust ? ', combust' : '') + '. Open the reading.',
+              go: () => openBody(this.pointKey(r)) }; }),
+          aria: T.RASHI[i] + (isLag ? ', the Lagna' : '') };
+      });
+      const moon = gr.find(r => r.name === 'Moon'), mv = moon ? this.vedicOf(moon) : null;
+      return { ...off, sqOn: true, sqCells: cells, sqTitle: prof ? prof.name : 'Rashi',
+        sqSub: lag ? 'Lagna ' + T.RASHI[lag.idx] + ' ' + Math.floor(lag.deg) + '\u00b0' : 'Lagna unknown',
+        sqLagna: mv ? 'Moon in ' + mv.nak + ' ' + mv.pada : '' };
+    }
+    if (nat.id === 'helio') {
+      const hc = this.helioChart();
+      if (!hc) return off;
+      /* an orrery, not to scale: the orbits evenly spaced so Mercury and
+         Pluto both read, and the angle round the Sun the true heliocentric
+         longitude, 0 Aries at the left as the wheel draws it */
+      const C = 400, R0 = 70, R1 = 330, B = this.HELIO_BODIES, step = (R1 - R0) / (B.length - 1);
+      const xy = (lon, rad) => { const a = (180 - lon) * Math.PI / 180; return [C + rad * Math.cos(a), C + rad * Math.sin(a)]; };
+      const pct = v => (v / 8).toFixed(2) + '%';
+      const GL = { Mercury: '\u263f', Venus: '\u2640', Earth: '\u2641', Mars: '\u2642', Jupiter: '\u2643', Saturn: '\u2644', Uranus: '\u2645', Neptune: '\u2646', Pluto: '\u2647' };
+      const byName = {}; rows.forEach(r => { byName[r.name] = r; });
+      const dm = d => Math.floor(d) + '\u00b0' + String(Math.floor((d % 1) * 60)).padStart(2, '0') + '\u2032';
+      const orbits = B.map((b, i) => ({ r: String(R0 + i * step) }));
+      const bodies = [], labels = [], list = [];
+      B.forEach((b, i) => {
+        const l = hc[b]; if (l == null) return;
+        const rad = R0 + i * step, [x, y] = xy(l, rad), [lx, ly] = xy(l, rad + 22), si = Math.floor(this.norm360(l) / 30), sd = this.norm360(l) - si * 30;
+        const earth = b === 'Earth', src = earth ? byName.Sun : byName[b];
+        bodies.push({ x: x.toFixed(1), y: y.toFixed(1), c: earth ? 'var(--blue)' : 'var(--ac2-hi)', rr: earth ? '7' : '5.5' });
+        labels.push({ l: pct(lx), t: pct(ly), g: (GL[b] || '') + '\ufe0e' });
+        list.push({ name: b, pos: dm(sd) + ' ' + this.SIGNS12[si], glyph: (GL[b] || '') + '\ufe0e', btn: !!src, txt: !src,
+          aria: b + ', ' + dm(sd) + ' ' + this.SIGNS12[si] + ' from the Sun. Open the reading.',
+          go: () => { if (src) openBody(this.pointKey(src)); } });
+      });
+      const signs = this.SIGNS12.map((sg, i) => { const [x, y] = xy(i * 30 + 15, 370); return { l: pct(x), t: pct(y), g: this.SIGN_GLYPHS[i] }; });
+      const ticks = this.SIGNS12.map((sg, i) => { const [x1, y1] = xy(i * 30, 350), [x2, y2] = xy(i * 30, 390); return { x1: x1.toFixed(1), y1: y1.toFixed(1), x2: x2.toFixed(1), y2: y2.toFixed(1) }; });
+      return { ...off, heOn: true, heOrbits: orbits, heBodies: bodies, heLabels: labels, heSigns: signs, heTicks: ticks, heRows: list };
+    }
+    if (nat.id === 'pillars' && T && A) {
+      const fp = this.studyPillars();
+      if (!fp) return off;
+      const CH_S = { Jia: '\u7532', Yi: '\u4e59', Bing: '\u4e19', Ding: '\u4e01', Wu: '\u620a', Ji: '\u5df1', Geng: '\u5e9a', Xin: '\u8f9b', Ren: '\u58ec', Gui: '\u7678' };
+      const CH_B = { Zi: '\u5b50', Chou: '\u4e11', Yin: '\u5bc5', Mao: '\u536f', Chen: '\u8fb0', Si: '\u5df3', Wu: '\u5348', Wei: '\u672a', Shen: '\u7533', You: '\u9149', Xu: '\u620c', Hai: '\u4ea5' };
+      const BR_EL = ['Water', 'Earth', 'Wood', 'Wood', 'Earth', 'Fire', 'Fire', 'Earth', 'Metal', 'Metal', 'Earth', 'Water'];
+      const EL_C = { Wood: 'var(--cat-cen)', Fire: 'var(--warn)', Earth: 'var(--cat-ast)', Metal: 'var(--tx)', Water: 'var(--blue)' };
+      const cols = [['Hour', fp.hour], ['Day', fp.day], ['Month', fp.month], ['Year', fp.year]];
+      const tally = { Wood: 0, Fire: 0, Earth: 0, Metal: 0, Water: 0 };
+      const pillars = cols.map(([label, q]) => {
+        if (!q) return { label, known: false, unknown: true, master: false, stemCh: '', stem: '', stemEl: '', stemC: 'var(--mut)', branchCh: '', branch: '', animal: '', branchEl: '', branchC: 'var(--mut)', bd: 'var(--bd)' };
+        const bel = BR_EL[q.bi]; tally[q.element]++; tally[bel]++;
+        const master = label === 'Day';
+        return { label, known: true, unknown: false, master, stemCh: CH_S[q.stem] || '', stem: q.stem, stemEl: (q.yin ? 'Yin ' : 'Yang ') + q.element, stemC: EL_C[q.element],
+          branchCh: CH_B[q.branch] || '', branch: q.branch, animal: q.animal, branchEl: bel, branchC: EL_C[bel], bd: master ? 'var(--ac2-hi)' : 'var(--bd)' };
+      });
+      const an = T.animalYear(A, this.t2000(this.natalDate()) + 2451545);
+      return { ...off, pilOn: true, pillars,
+        pilMaster: 'Day Master ' + (fp.day.yin ? 'Yin ' : 'Yang ') + fp.day.element + ' (' + fp.day.stem + ')',
+        pilAnimal: (an.yin ? 'Yin ' : 'Yang ') + an.element + ' ' + an.animal + ', by the lunar new year',
+        pilEls: Object.keys(tally).map(k => ({ el: k, n: String(tally[k]), c: EL_C[k], w: Math.round(tally[k] / 8 * 100) + '%' })) };
+    }
+    return off;
+  }
+  studyPillars() {
+    const T = window.ChartTraditions, A = window.Astronomy;
+    if (!T || !A) return null;
+    const p = this.activeProfile(), nd = this.natalDate(), timed = this.timeStateOf(p) === 'known';
+    let off = 0;
+    if (p && p.birthDate) { const [y, mo, d] = p.birthDate.split('-').map(Number), tm = timed ? p.birthTime.split(':').map(Number) : [12, 0]; off = (Date.UTC(y, mo - 1, d, tm[0], tm[1]) - nd.getTime()) / 36e5; }
+    try { return T.fourPillars(A, this.t2000(nd) + 2451545, off, timed); } catch (e) { return null; }
+  }
+  /* The study's own chart, where the tradition draws one that is not a
+     wheel: the South Indian square for Jyotish, the Four Pillars for BaZi.
+     It is the first view under that study and a flat one, so every rule
+     about the stages is unchanged; chartView 'native' is it, and under a
+     study with no chart of its own 'native' is the 2D wheel. */
+  chartNative() {
+    const x = this.chartStudyOf();
+    if (!x) return null;
+    if (x.zodiac === 'lahiri') return { id: 'square', label: 'South Indian', short: 'Rashi' };
+    if (x.calendar === 'chinese') return { id: 'pillars', label: 'Four Pillars', short: 'Pillars' };
+    if (x.frame === 'helio') return { id: 'helio', label: 'From the Sun', short: 'Sun' };
+    return null;
+  }
+  chartNativeOn() { const v = this.state.chartView; return (v === 'native' || v == null) && !!this.chartNative(); }
   chartViewNow() {
     const v = this.state.chartView;
     return (v === '3d' || v === 'orbit') && (this.chartSceneOn() || this.scenePending('ChartScene')) ? v : '2d';
@@ -62602,7 +63056,7 @@ class Component extends DCLogic {
     this._trapEl = el;
     this._trapReturn = document.activeElement;
     this._trapKey = e => {
-      if (e.key === 'Escape') { e.preventDefault(); this.dialogEscape(); return; }
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); this.dialogEscape(); return; }
       if (e.key !== 'Tab') return;
       const f = [].slice.call(el.querySelectorAll(this.FOCUSABLE)).filter(n => n.offsetWidth || n.offsetHeight || n === document.activeElement);
       if (!f.length) return;
@@ -62774,7 +63228,7 @@ class Component extends DCLogic {
      two registry points share the name Cupido. The label is what the reader
      sees, and it tells the two apart. */
   pointKey(r) { return r.id || r.name; }
-  pointLabel(r) { return r.category === 'hypothetical' ? r.name + ' (Hamburg)' : r.name; }
+  pointLabel(r) { return r.category === 'hypothetical' ? r.name + ' (Hamburg)' : this.studyName(r.name); }
   /* The placement page is a packet (the owner, 4 November 2026: "put the
      descriptions in a page-packet that has more beauty in its appeal instead
      of just a sectioned off dissertation"). A cover, then chapters turned one
@@ -62782,6 +63236,33 @@ class Component extends DCLogic {
      Every word is the composer's; this only arranges it. The page turned to is
      kept per placement (plPageKey), so a new placement opens on its cover's
      first chapter. */
+  vedicLines(r, v, name) {
+    const T = window.ChartTraditions, dm = d => Math.floor(d) + '\u00b0' + String(Math.floor((d % 1) * 60)).padStart(2, '0') + '\u2032';
+    const inNak = v.sid - T.NAKSHATRAS.indexOf(v.nak) * (360 / 27);
+    const ord = n => n + ([11, 12, 13].indexOf(n % 100) !== -1 ? 'th' : n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th');
+    const out = ['Your ' + name + ' stands at ' + dm(v.sid % 30) + ' ' + v.rashi + ', the sign called ' + v.sign + ' in the West, in the sidereal zodiac of the Lahiri ayanamsa.',
+      'That is ' + dm(inNak) + ' into ' + v.nak + ', the ' + ord(T.NAKSHATRAS.indexOf(v.nak) + 1) + ' nakshatra, in its ' + ord(v.pada) + ' pada. In the Vimshottari order ' + v.nak + ' is held by ' + (v.lord === 'Ketu' ? 'Ketu' : v.lord === 'Rahu' ? 'Rahu' : v.lord) + '.'];
+    if (v.dignity) out.push(v.dignity === 'exalted' ? name + ' is exalted in ' + v.rashi + ', by Parashara.' : v.dignity === 'debilitated' ? name + ' is debilitated in ' + v.rashi + ', by Parashara.' : v.rashi + ' is one of ' + name + '\u2019s own signs, by Parashara.');
+    if (v.combust) out.push(name + ' stands close enough to the Sun to be combust, asta: lost in its light, the tradition says, so what it gives is given through the Sun.');
+    if (r.name === 'Moon') {
+      const nd = this.natalDate(), jd = this.t2000(nd) + 2451545, now = this.t2000(new Date()) + 2451545;
+      const ds = T.vimshottari(v.sid, jd, 18), cur = ds.find(d => d.start <= now && now < d.end);
+      const ymd = j => new Date((j - 2440587.5) * 864e5).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      out.push('The Moon\u2019s nakshatra is the janma nakshatra, and it sets the Vimshottari dasha: the life begins in the period of ' + ds[0].lord + ', with ' + ds[0].years.toFixed(1) + ' of its ' + (T.DASHA.find(d => d[0] === ds[0].lord) || [0, ''])[1] + ' years left to run.');
+      if (cur) out.push('Now the mahadasha of ' + cur.lord + ' runs, from ' + ymd(cur.start) + ' to ' + ymd(cur.end) + '.');
+    }
+    return out;
+  }
+  helioLines(r, h, name) {
+    const dm = d => Math.floor(d) + '\u00b0' + String(Math.floor((d % 1) * 60)).padStart(2, '0') + '\u2032';
+    if (h.body === 'Earth') return ['Seen from the Sun, the Earth stood at ' + dm(h.deg) + ' ' + h.sign + ' the moment you were born, exactly opposite your Sun in ' + r.sign + '.',
+      'The heliocentric chart puts the Earth where the Sun usually stands: the ground you were born on, read as a planet among the others.'];
+    const geo = this.signOfT(r.lon), same = geo.idx === h.idx, gap = Math.abs(((h.lon - r.lon + 540) % 360) - 180);
+    const out = ['Seen from the Sun, your ' + name + ' stood at ' + dm(h.deg) + ' ' + h.sign + (same ? ', the same sign it holds from the Earth.' : ', where from the Earth it reads as ' + geo.sign + '.')];
+    out.push(gap < 1 ? 'The two views agree to within a degree here.' : 'The two views sit ' + Math.round(gap) + '\u00b0 apart, the distance the Earth\u2019s own orbit throws into the view from here.');
+    if (r.retro) out.push('From the Earth it was retrograde. From the Sun nothing turns back: the backward walk belongs to the Earth overtaking it, or being overtaken.');
+    return out;
+  }
   plPacket(rk, name, r, c, ordH, dig, min, b) {
     const st = this.state, ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
     const leads = [
@@ -62797,15 +63278,25 @@ class Component extends DCLogic {
       lead: 'Dignity is the old question of whether a celestial body is at home or a guest. ' + (dig.strong
         ? 'Yours is at home here, which the tradition counts as ease rather than merit: a well lit room, not a virtue.'
         : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') });
-    const prog = (r.name === 'Sun' || r.name === 'Moon') && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
+    /* Under the Vedic study the packet reads the chart as Jyotish does: the
+       nakshatra and, for the Moon, the dasha. The Western techniques
+       (progressions, the solstice mirror, the profected year) are not part of
+       that tradition and are left out of it. */
+    const ved = this.vedicOf(r), western = !this.helioOn() && (!(this.chartStudyOf() || {}).zodiac || this.chartStudyOf().zodiac !== 'lahiri');
+    if (ved) parts.push({ tab: 'The Nakshatra', sec: { heading: name + ' in ' + ved.nak, lines: this.vedicLines(r, ved, name).map(t => ({ text: t })) },
+      lead: 'Jyotish divides the sidereal zodiac into twenty seven lunar mansions of 13\u00b020\u2032, four padas each, and reads a placement by the mansion as well as the sign.' });
+    const hel = this.helioPos(r);
+    if (hel) parts.push({ tab: 'From the Sun', sec: { heading: hel.body === 'Earth' ? 'The Earth, from the Sun' : name + ', from the Sun', lines: this.helioLines(r, hel, name).map(t => ({ text: t })) },
+      lead: 'Move the eye from the Earth to the Sun and every planet stands where it truly runs its orbit, with no retrograde and no rising sign.' });
+    const prog = western && (r.name === 'Sun' || r.name === 'Moon') && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
     if (prog) parts.push({ tab: 'The Hand-off', sec: { heading: prog.heading, lines: prog.paras.map(t => ({ text: t })) }, lead: prog.lead });
     const ter = prog ? this.progressedHandoff(r.name, 'tertiary') : null;
     if (ter) parts.push({ tab: 'The Month', sec: { heading: ter.heading, lines: ter.paras.map(t => ({ text: t })) }, lead: ter.lead });
     const core = this.PLNS.some(([pn]) => pn === r.name) && r.name !== 'South Node';
-    const mir = core ? this.antisciaFor(r.name) : null;
+    const mir = core && western ? this.antisciaFor(r.name) : null;
     if (mir) parts.push({ tab: 'The Mirror', sec: { heading: 'Your ' + name + ', mirrored', lines: mir.paras.map(t => ({ text: t })) },
       lead: 'Fold the zodiac at the solstices and every degree lands on a partner.' });
-    const yr = this.profection();
+    const yr = western ? this.profection() : null;
     if (yr && (r.name === 'Ascendant' || r.name === yr.lordName)) parts.push({ tab: 'The Year', sec: { heading: r.name === 'Ascendant' ? 'Your year, counted from here' : 'The keeper of your year', lines: yr.paras.map(t => ({ text: t })) },
       lead: r.name === 'Ascendant' ? 'Each birthday the year moves on one sign from where you rose.' : 'This year the count from your rising sign lands on ' + yr.sign + ', and ' + name + ' keeps it.' });
     const n = parts.length, pg = st.plPageKey === rk ? Math.max(0, Math.min(n - 1, st.plPage || 0)) : 0, all = !!st.plAll;
@@ -62830,7 +63321,7 @@ class Component extends DCLogic {
     return {
       plTitle: name, plKind: kind.toUpperCase(), plEpi: b.role || '', plEpiOn: !!b.role,
       plCoords: [
-        { k: 'Sign', v: (this.SIGN_GLYPHS[Math.floor(this.norm360(r.lon) / 30)] || '') + ' ' + r.sign },
+        { k: 'Sign', v: (this.SIGN_GLYPHS[this.signOf(r.lon).idx] || '') + ' ' + (ved ? ved.rashi + ' (' + r.sign + ')' : r.sign) },
         { k: 'Degree', v: Math.floor(r.deg) + '\u00b0' + min + '\u2032' },
         { k: 'House', v: ordH } ],
       plSealOn: !!dig, plSeal: dig ? dig.label : '', plSealC: dig ? (dig.strong ? 'var(--ac2-hi)' : 'var(--blue)') : 'var(--mut)',
@@ -63167,7 +63658,7 @@ class Component extends DCLogic {
         const on = st.tab === id;
         return { t, on: on, c: on ? 'var(--ac)' : 'var(--dim)', dot: on ? 'var(--ac)' : 'transparent',
           /* Tapping a tab returns to the root of that tab, the way a tab bar should. */
-          go: () => this.setState({ tab: id, ...this.sectionRoot(id) }) };
+          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.sectionRoot(id) }) };
       }),
       greet: (h => h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')(new Date().getHours()),
       pyLine: py ? this.artNum(py.value).replace(/^a/, 'A') + ' ' + py.value + ' Personal Year.' : '',
@@ -63316,6 +63807,12 @@ class Component extends DCLogic {
             const bloomGrp = st.chartBloom ? this.bloomShowOf() : null;
             const bx = k => bloomGrp && !bloomGrp[k] ? '1' : '0';
             const svgRows = bloomGrp ? rows.filter(r => r.lon != null && r.group !== 'angle') : placedRows;
+            /* Expert: the points Advanced does not draw glow in one by one, round
+               the wheel from 0 Aries, in the theme's own warm light. */
+            const xNew = expanded && st.chartAdvanced && !bloomGrp && !st.chartExpandOpen ? this.bloomShowOf(true) : null;
+            const xOrd = {};
+            if (xNew) svgRows.filter(r => !xNew[this.pointKey(r)]).sort((a, b) => a.lon - b.lon).forEach((r, i) => { xOrd[this.pointKey(r)] = i; });
+            const xin = k => xOrd[k] != null ? '1' : '0', xd = k => (xOrd[k] != null ? 120 + xOrd[k] * 55 : 0) + 'ms';
             const svgLon = bloomGrp ? new Set(svgRows.filter(r => bloomGrp[this.pointKey(r)]).map(r => r.lon.toFixed(4))) : coreSet ? new Set(placedRows.map(r => r.lon.toFixed(4))) : null;
             const svgGrp = bloomGrp || coreSet;
             const svgAsp = x => !svgLon || ((x.a.group === 'angle' ? !!svgGrp[x.a.name] : (x.a.lon == null || svgLon.has(x.a.lon.toFixed(4)))) && (x.b.group === 'angle' ? !!svgGrp[x.b.name] : (x.b.lon == null || svgLon.has(x.b.lon.toFixed(4)))));
@@ -63323,6 +63820,7 @@ class Component extends DCLogic {
             const zero = this.wheelZero(), P = (lon, r) => this.polar(lon, r);
             const CS = this.chartCusps(), mid = i => CS[i] + this.cuspSpan(CS, i) / 2;
             const SG = ['\u2648\uFE0E', '\u2649\uFE0E', '\u264A\uFE0E', '\u264B\uFE0E', '\u264C\uFE0E', '\u264D\uFE0E', '\u264E\uFE0E', '\u264F\uFE0E', '\u2650\uFE0E', '\u2651\uFE0E', '\u2652\uFE0E', '\u2653\uFE0E'];
+            const zo = this.zodiacOff();
             const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
             const houseOf = r => this.houseOf(r.lon, natalSun, asc);
             const arc = (lonA, lonB, rOut, rIn) => {
@@ -63382,10 +63880,11 @@ class Component extends DCLogic {
                just drawn from, so the three views cannot disagree. Rebuilt only
                when the chart itself changes; selection travels separately. */
             const view = this.chartViewNow(), deep = view !== '2d', deepOn = this.chartSceneOn() || this.scenePending('ChartScene');
+            const native = this.chartNative(), nativeOn = view === '2d' && this.chartNativeOn();
             const csKey = [this.chartStamp(prof), expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
             if (this._csModelKey !== csKey) {
               this._csModelKey = csKey;
-              this._csModel = { key: csKey, zero, cusps: CS.slice(), timed: !!asc, owner: prof ? prof.name : '',
+              this._csModel = { key: csKey, zero, cusps: CS.slice(), timed: !!asc, owner: prof ? prof.name : '', signOff: zo,
                 sub: this.houseModeText(asc),
                 signs: SG.map((glyph, i) => ({ glyph, c: this.SIGN_EL_C[i % 4] })),
                 bodies: placedRows.map(r => {
@@ -63415,18 +63914,24 @@ class Component extends DCLogic {
             };
             const deepZoom = d => () => { if (this._csS) this._csS.zoom(d); };
             return {
-              chartViewsOn: deepOn,
-              chartViews: deepOn ? [['2d', '2D'], ['orbit', 'Orbital'], ['3d', '3D']].map(([id, label]) => ({
-                label, on: view === id,
-                bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
-                bd: view === id ? 'var(--ac2)' : 'transparent',
-                c: view === id ? 'var(--tx)' : 'var(--dim)',
-                go: () => this.setState({ chartView: id })
-              })) : [],
-              cvFlat: !deep, cvDeep: deep, cvOrbit: view === 'orbit', zoomDir: deep ? 'row' : 'column',
+              chartViewsOn: deepOn || !!native,
+              chartViews: (native ? [['native', native.short, native.label]] : []).concat([['2d', '2D', '2D wheel']], deepOn ? [['orbit', 'Orbital', 'Orbital'], ['3d', '3D', '3D']] : []).map(([id, label, aria]) => {
+                const on = id === 'native' ? nativeOn : id === '2d' ? (view === '2d' && !nativeOn) : view === id;
+                return { label, aria, on,
+                bg: on ? 'rgba(var(--atmc),.34)' : 'transparent',
+                bd: on ? 'var(--ac2)' : 'transparent',
+                c: on ? 'var(--tx)' : 'var(--dim)',
+                go: () => this.setState({ chartView: id }) };
+              }),
+              cvFlat: !deep && !nativeOn, cvDeep: deep, cvNative: !deep && nativeOn,
+              ...this.studyChartVals(placedRows, asc, openBody, !deep && nativeOn), cvOrbit: view === 'orbit', zoomDir: deep ? 'row' : 'column',
               /* the stage's units wait for the scene: nothing on or under it is shown until it is a utility */
-              csVeilO: st.csLive ? '0' : '1', csVeilV: st.csLive ? 'hidden' : 'visible', csUiO: (!deep || st.csLive) ? '1' : '0', csUiV: (!deep || st.csLive) ? 'visible' : 'hidden',
-              csFreeOn: deep && this.touchUi(), csFreeOff: !(deep && this.touchUi()), csFree: !!st.csFree,
+              csVeilO: st.csLive ? '0' : '1', csVeilV: st.csLive ? 'hidden' : 'visible', csUiO: (!deep || st.csLive) ? '1' : '0', csUiV: (!deep || st.csLive) ? 'visible' : 'hidden', zmUiO: (deep ? st.csLive : !nativeOn) ? '1' : '0', zmUiV: (deep ? st.csLive : !nativeOn) ? 'visible' : 'hidden',
+              /* The screen lock (owner, 5 November 2026): offered on every device in
+                 the deep views; locked, a drag turns the chart every way and the
+                 page holds still. */
+              csLockOn: deep, csFree: !!st.csFree, railPad: !deep && nativeOn ? '70px' : '0px',
+              csLockPath: st.csFree ? 'M7 9V6.5a3 3 0 0 1 6 0V9' : 'M7 9V6.5a3 3 0 0 1 5.6-1.5',
               csFreeGo: () => this.setState({ csFree: !st.csFree }),
               csFreeBg: st.csFree ? 'rgba(var(--atmc),.4)' : 'var(--bg)', csFreeBd: st.csFree ? 'var(--ac2-hi)' : 'var(--bd)',
               csStageBd: st.csFree ? 'var(--ac2)' : 'transparent',
@@ -63441,15 +63946,16 @@ class Component extends DCLogic {
               csHudMean: csRow ? (this.PL_MEAN[csRow.name] || csRow.mean || '') : '',
               csPrev: csMove(-1), csNext: csMove(1),
               csOpen: () => { if (csB) openBody(csB.key); },
-              chartAdvOn: expanded, chartAdvPressed: st.chartAdvanced ? 'true' : 'false',
-              chartAdvBg: st.chartAdvanced ? 'rgba(var(--atmc),.32)' : 'var(--sf2)', chartAdvBd: st.chartAdvanced ? 'var(--ac2-hi)' : 'var(--bd)',
-              chartAdvGo: () => this.setState({ chartAdvanced: !st.chartAdvanced, openBody: null, aspSel: null }),
-              chartModes: [['basic', 'Basic Chart'], ['expanded', 'Expanded Chart']].map(([id, label]) => ({
-                label, on: st.chartMode === id,
-                bg: st.chartMode === id ? 'var(--ac)' : 'transparent',
-                c: st.chartMode === id ? '#05060a' : 'var(--dim)',
-                go: () => this.setState({ chartMode: id, openBody: null, aspSel: null })
-              })),
+              /* Basic, Advanced and Expert (owner, 5 November 2026): Basic is the
+                 core chart, Advanced the usual 22 (BLOOM_CORE), Expert every point,
+                 the ones Advanced does not draw glowing in one by one. */
+              chartModes: [['basic', 'Basic', 'basic', false], ['advanced', 'Advanced', 'expanded', false], ['expert', 'Expert', 'expanded', true]].map(([id, label, mode, adv]) => {
+                const on = st.chartMode === mode && (mode === 'basic' || !!st.chartAdvanced === adv);
+                return { label, on: on ? 'true' : 'false',
+                  bg: on ? 'var(--ac)' : 'transparent',
+                  c: on ? '#05060a' : 'var(--dim)',
+                  go: () => this.setState({ chartMode: mode, chartAdvanced: adv, openBody: null, aspSel: null }) };
+              }),
               wheelScale: st.zoom, wheelTx: (st.panX / st.zoom).toFixed(1) + 'px', wheelTy: (st.panY / st.zoom).toFixed(1) + 'px',
               wheelCursor: st.zoom > 1 ? 'grab' : 'default',
               wheelSub: this.houseModeText(asc),
@@ -63470,7 +63976,7 @@ class Component extends DCLogic {
                 const noop = () => {};
                 const out = [];
                 SG.forEach((glyph, i) => {
-                  const m = P(i * 30 + 15, 294);
+                  const m = P(i * 30 + 15 + zo, 294);
                   out.push({ hit: '26px', l: pc(m.x), t: pc(m.y), text: glyph, aria: 'Sign ' + (i + 1), cur: 'default', ls: 'normal',
                     c: this.SIGN_EL_C[i % 4],
                     f: '400 22px Georgia,serif', go: noop });
@@ -63490,20 +63996,20 @@ class Component extends DCLogic {
                   const key = this.pointKey(r), label = this.pointLabel(r);
                   const rad = svgRadius[key], pt = P(r.lon, rad), dl = P(r.lon, rad - 30);
                   const minor = r.ring === 2;
-                  out.push({ bx: bx(key), wb: key, hit: '44px', l: pc(pt.x), t: pc(pt.y), text: r.glyph, aria: label, cur: 'pointer', ls: 'normal',
+                  out.push({ bx: bx(key), xin: xin(key), xd: xd(key), wb: key, hit: '44px', l: pc(pt.x), t: pc(pt.y), text: r.glyph, aria: label, cur: 'pointer', ls: 'normal',
                     c: this.CAT_COLOR[r.category] || '#2fff8f', f: (minor ? '400 13px' : '400 19px') + ' Georgia,serif', go: () => openBody(key) });
-                  out.push({ bx: bx(key), wb: key, hit: '44px', l: pc(dl.x), t: pc(dl.y), text: Math.floor(r.deg) + '\u00b0', aria: label + ' degree', cur: 'pointer', ls: 'normal',
+                  out.push({ bx: bx(key), xin: xin(key), xd: xd(key), wb: key, hit: '44px', l: pc(dl.x), t: pc(dl.y), text: Math.floor(r.deg) + '\u00b0', aria: label + ' degree', cur: 'pointer', ls: 'normal',
                     c: '#7c7889', f: (minor ? '400 9px' : '400 11px') + ' var(--fm)', go: () => openBody(key) });
                 });
                 out.push({ hit: '0px', l: '50%', t: '49%', text: prof ? prof.name : '', aria: 'Chart owner', cur: 'default', ls: 'normal',
                   c: '#eef0f8', f: '400 22px var(--fd)', go: noop });
                 out.push({ hit: '0px', l: '50%', t: '52%', text: this.houseModeText(asc),
                   aria: 'House system', cur: 'default', ls: '.1em', c: '#7c7889', f: '400 11px var(--fm)', go: noop });
-                return out.map(w => ({ ...w, wb: w.wb || '-', bx: w.bx || '0' }));
+                return out.map(w => ({ ...w, wb: w.wb || '-', bx: w.bx || '0', xin: w.xin || '0', xd: w.xd || '0ms' }));
               })(),
               wheelSigns: SG.map((glyph, i) => {
-                const mid = P(i * 30 + 15, 294);
-                return { glyph, path: arc(i * 30, i * 30 + 30, 322, 266),
+                const mid = P(i * 30 + 15 + zo, 294);
+                return { glyph, path: arc(i * 30 + zo, i * 30 + 30 + zo, 322, 266),
                   fill: i % 2 ? 'rgba(255,255,255,.022)' : 'transparent',
                   c: this.SIGN_EL_C[i % 4],
                   gx: mid.x.toFixed(1), gy: mid.y.toFixed(1) };
@@ -63557,7 +64063,7 @@ class Component extends DCLogic {
                   const key = this.pointKey(r), rad = svgRadius[key], minor = r.ring === 2, cr = minor ? 13 : 19;
                   const pt = P(r.lon, rad), t1 = P(r.lon, 266), t2 = P(r.lon, rad + cr), dl = P(r.lon, rad - 30);
                   const on = st.placeSel === key || (aspSelRow && (key === (aspSelRow.a.id || aspSelRow.a.name) || key === (aspSelRow.b.id || aspSelRow.b.name)));
-                  return { key: key, bx: bx(key), glyph: r.glyph, x: pt.x.toFixed(1), y: pt.y.toFixed(1), r: cr,
+                  return { key: key, bx: bx(key), xin: xin(key), xd: xd(key), glyph: r.glyph, x: pt.x.toFixed(1), y: pt.y.toFixed(1), r: cr,
                   c: this.CAT_COLOR[r.category] || '#2fff8f',
                   bg: on ? 'rgba(47,255,143,.24)' : '#15141b', sw: on ? 2.2 : 1.2,
                   tx1: t1.x.toFixed(1), ty1: t1.y.toFixed(1), tx2: t2.x.toFixed(1), ty2: t2.y.toFixed(1),
@@ -63978,7 +64484,7 @@ class Component extends DCLogic {
               })) : [],
               hvFlat: !deep, hvDeep: deep,
               hsVeilO: st.hsLive ? '0' : '1', hsVeilV: st.hsLive ? 'hidden' : 'visible', hsUiO: (!deep || st.hsLive) ? '1' : '0', hsUiV: (!deep || st.hsLive) ? 'visible' : 'hidden',
-              hsFreeOn: deep && this.touchUi(), hsFreeOff: !(deep && this.touchUi()), hsFree: !!st.hsFree,
+              hsLockOn: deep, hsFree: !!st.hsFree, hsLockPath: st.hsFree ? 'M7 9V6.5a3 3 0 0 1 6 0V9' : 'M7 9V6.5a3 3 0 0 1 5.6-1.5',
               hsFreeGo: () => this.setState({ hsFree: !st.hsFree }),
               hsFreeBg: st.hsFree ? 'rgba(var(--atmc),.4)' : 'var(--bg)', hsFreeBd: st.hsFree ? 'var(--ac2-hi)' : 'var(--bd)',
               hsStageBd: st.hsFree ? 'var(--ac2)' : 'transparent',
@@ -65215,7 +65721,7 @@ class Component extends DCLogic {
         return { label, glyph, icon: this.uiIcon(id), cur: on ? 'page' : 'false', meta: '',
           c: on ? 'var(--tx)' : 'var(--dim)', gc: on ? 'var(--ac)' : 'rgba(238,240,248,.42)',
           bg: on ? 'rgba(var(--atmc),.28)' : 'transparent', edge: on ? 'var(--ac)' : 'transparent',
-          go: () => this.setState({ tab: id, ...this.sectionRoot(id) }) };
+          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.sectionRoot(id) }) };
       })
     };
   }
@@ -65247,36 +65753,9 @@ class Component extends DCLogic {
      taps, and cannot be hit by a screen reader or the keyboard, both of which
      already have their own way between sections.
 
-     Everywhere else, a hard pull down from the top of a page refreshes, which
-     is what a decade of phones has taught everybody to expect. The document
-     itself never scrolls here, so the browser's own pull to refresh can never
-     fire, and it has to be built. It fires on release rather than mid drag, so
-     a pull that turns into a scroll is not punished with a reload. */
+     There is no pull to refresh any more (owner, 5 November 2026): a drag
+     down at the top of a page scrolls, and nothing reloads. */
   VT_BAND = 34;      /* the thin rectangle, top and bottom */
-  /* PULL TO REFRESH ASKS FOR INTENT, NOT FOR A GESTURE.
-   *
-   * It was firing constantly, because one downward drag from the top of a page
-   * was the whole condition, and reading with a thumb produces those all day.
-   * A refresh throws away scroll position and reloads several megabytes, so it
-   * should cost something to ask for. Four conditions now, and all of them have
-   * to hold.
-   *
-   *   THE PAGE IS AT THE TOP.        As before.
-   *   WHAT YOU TOUCHED IS AT THE TOP. The nearest scrollable thing under the
-   *                                   finger, not just the page behind it, so a
-   *                                   list mid scroll never counts.
-   *   THE PULL IS LONG AND SLOW.      160px rather than 92, and at least 350ms,
-   *                                   so a flick cannot reach it however far it
-   *                                   travels.
-   *   YOU ASK TWICE.                  The first qualifying pull arms and lets
-   *                                   go; a second from the same place within
-   *                                   six seconds refreshes. That is the part
-   *                                   that reflects intent: an accidental drag
-   *                                   is not repeated on purpose.
-   */
-  VT_PULL = 160;     /* travel from the top of a page before it counts */
-  VT_PULL_MS = 350;  /* and the least time that travel may take */
-  VT_ARM_MS = 6000;  /* how long an armed pull stays armed */
   VT_HSWIPE = 56;    /* sideways travel before a swipe moves to the next screen */
 
   /* THE SIDEWAYS SWIPE STAYS INSIDE ITS SECTION.
@@ -65344,20 +65823,6 @@ class Component extends DCLogic {
     }
     return null;
   }
-  vtPullPaint(px) {
-    const el = this._vtScroll;
-    if (!el) return;
-    el.style.transition = px ? 'none' : 'transform .22s ease';
-    el.style.transform = px ? 'translateY(' + px + 'px)' : '';
-    if (!px) setTimeout(() => { if (el) el.style.transition = ''; }, 240);
-  }
-  /* Refresh THIS page, not the app's front door. A reload keeps the hash, but
-     the vertical shell opens on section zero regardless, so the section is
-     handed forward and picked up on the next boot. */
-  vtRefresh() {
-    try { sessionStorage.setItem('incommon.vtsec', String(this.state.vtSec || 0)); } catch (e) {}
-    try { location.reload(); } catch (e) {}
-  }
   vtRestoreSection() {
     let n = null;
     try { n = sessionStorage.getItem('incommon.vtsec'); sessionStorage.removeItem('incommon.vtsec'); } catch (e) {}
@@ -65375,6 +65840,73 @@ class Component extends DCLogic {
       this.setState({ vtSec: i });
       setTimeout(() => { el.style.scrollSnapType = snap || ''; }, 60);
     }, 260);
+  }
+  /* A LIST HANDS THE SCROLL ON (owner, 5 November 2026: "When scrolling a
+     list inside the app, let it continue scrolling the larger page ... Give
+     it a quick pause before continuing the scroll, and let a second attempt
+     at scrolling in the same direction continue scrolling the page."). Every
+     inner list contains its overscroll, so a flick that reaches its end
+     stops there. Reaching the end in one gesture arms the list; once the
+     gesture is over and LIST_PAUSE has passed, the list lets its overscroll
+     chain, so the next gesture the same way scrolls the page it sits on.
+     Scrolling the list back off its end takes the chaining away again.
+     Only vertical: a sideways strip stays dead at its end, as asked. */
+  LIST_PAUSE = 350;
+  listOf(n) {
+    for (; n && n.nodeType === 1; n = n.parentElement) {
+      if (n.matches('[data-vt-scroll],[data-vt-page],[data-vt-pager],[data-dt-scroll],body,html')) return null;
+      if (n.scrollHeight > n.clientHeight + 2) {
+        const cs = getComputedStyle(n);
+        if (/auto|scroll/.test(cs.overflowY) && cs.overscrollBehaviorY !== 'auto') return n;
+        if (/auto|scroll/.test(cs.overflowY) && n._lcArm) return n;
+      }
+    }
+    return null;
+  }
+  listEdge(el) { return { top: el.scrollTop <= 1, bot: el.scrollTop + el.clientHeight >= el.scrollHeight - 1 }; }
+  listArm(el, dir) {
+    clearTimeout(el._lcT);
+    el._lcDir = dir;
+    el._lcT = setTimeout(() => {
+      const e = this.listEdge(el);
+      if ((dir < 0 && e.top) || (dir > 0 && e.bot)) { el._lcArm = dir; el.style.overscrollBehaviorY = 'auto'; }
+    }, this.LIST_PAUSE);
+  }
+  listDisarm(el) { clearTimeout(el._lcT); if (el._lcArm) { el._lcArm = 0; el.style.overscrollBehaviorY = ''; } }
+  listChainBind() {
+    let el = null, y0 = 0, hit = 0;
+    this._lcStart = e => {
+      el = this.listOf(e.target); hit = 0;
+      if (!el || !e.touches || e.touches.length !== 1) { el = null; return; }
+      y0 = e.touches[0].clientY;
+      if (el._lcT) clearTimeout(el._lcT);
+    };
+    this._lcMove = e => {
+      if (!el || !e.touches) return;
+      const dy = y0 - e.touches[0].clientY, ed = this.listEdge(el);
+      if (dy < -6 && ed.top) hit = -1; else if (dy > 6 && ed.bot) hit = 1;
+      if (el._lcArm && el._lcArm !== Math.sign(dy) && Math.abs(dy) > 6) this.listDisarm(el);
+    };
+    this._lcEnd = () => { if (el && hit && !el._lcArm) this.listArm(el, hit); el = null; };
+    this._lcScroll = e => {
+      const t = e.target;
+      if (!t || t.nodeType !== 1 || !t._lcArm) return;
+      const ed = this.listEdge(t);
+      if (!(t._lcArm < 0 ? ed.top : ed.bot)) this.listDisarm(t);
+    };
+    this._lcWheel = e => {
+      if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      const l = this.listOf(e.target);
+      if (!l) return;
+      const ed = this.listEdge(l), dir = Math.sign(e.deltaY);
+      if (l._lcArm && l._lcArm !== dir) { this.listDisarm(l); return; }
+      if (!l._lcArm && ((dir < 0 && ed.top) || (dir > 0 && ed.bot))) this.listArm(l, dir);
+    };
+    document.addEventListener('touchstart', this._lcStart, { passive: true, capture: true });
+    document.addEventListener('touchmove', this._lcMove, { passive: true, capture: true });
+    document.addEventListener('touchend', this._lcEnd, { passive: true, capture: true });
+    document.addEventListener('scroll', this._lcScroll, { passive: true, capture: true });
+    document.addEventListener('wheel', this._lcWheel, { passive: true, capture: true });
   }
   vtBindTouch() {
     let sy = 0, sx = 0, band = 0, page = null, inner = null;
@@ -65410,21 +65942,10 @@ class Component extends DCLogic {
          drag. They do nothing now: a gesture never leaves the section. */
       if (band) return;
 
-      /* Both have to be at the top: the page, and whatever was actually
-         touched. If the finger landed on something with its own scroll that is
-         part way down, this is a scroll and nothing else. */
-      const pageTop = page && page.scrollTop <= 0;
-      const innerTop = !inner || inner.scrollTop <= 0;
-      if (dy > 0 && pageTop && innerTop) {
-        pull = dy;
-        if (e.cancelable) e.preventDefault();
-        /* Heavier damping than before, so the same travel of thumb produces
-           less movement and the threshold is further away than it looks. */
-        this.vtPullPaint(Math.min(72, dy * 0.3));
-      } else if (pull) {
-        pull = 0;
-        this.vtPullPaint(0);
-      }
+      /* NO PULL TO REFRESH (owner, 5 November 2026: "Instead of pulling down
+         to refresh the page, let the user continue to scroll up the page").
+         A drag down at the top of a page is a scroll and nothing else; a
+         list at its top hands the next drag to the page (listChainBind). */
     };
 
     this._vtTE = e => {
@@ -65464,24 +65985,6 @@ class Component extends DCLogic {
       };
       if (Object.keys(back).length) this.setState(back, finish); else finish();
       hz = 0; hzY = 0; hzOK = false; hzFlight = false;
-      const slowEnough = Date.now() - startAt >= this.VT_PULL_MS;
-      if (pull > this.VT_PULL && slowEnough) {
-        const now = Date.now();
-        const sameSpot = this._vtArmSpot === (this.state.vtSec || 0);
-        if (armed !== false && this._vtArmAt && now - this._vtArmAt < this.VT_ARM_MS && sameSpot) {
-          this._vtArmAt = 0; this._vtArmSpot = null;
-          this.vtBuzz(16);
-          this.vtPullPaint(0);
-          this.vtRefresh();
-          return;
-        }
-        /* First ask. Arm it, say so quietly, and let go. */
-        this._vtArmAt = now;
-        this._vtArmSpot = this.state.vtSec || 0;
-        this.vtBuzz(8);
-        this.speak('Pull down again to refresh this page.', 'polite');
-      }
-      if (pull) this.vtPullPaint(0);
       armed = false; band = 0; pull = 0; page = null; inner = null;
     };
 
@@ -65619,6 +66122,45 @@ class Component extends DCLogic {
      open inside the section as well as move to it: a sheet, a selected
      placement, an aspect, an atlas section. dtNav and the desktop tabs row
      already did half of this and are now built from the same list. */
+  /* A SECOND PRESS ON THE TAB YOU ARE IN IS A FRESH START (the owner, 5
+     November 2026): the section opens as it does just after signing in.
+     Today on the astrology horoscope, My Charts at the top of the Human
+     Design chart, the Library on Study, the Oracle on the last reading the
+     reader opened this visit on this chart (else the standard daily one),
+     Settings at the top. Nothing is asked of the Oracle here: the reading
+     waits for its press, by "No reading until it is asked for". */
+  orNoteLast(slot) {
+    const s = String(slot).split('|');
+    if (s[0] === 'cycle' || !s[2]) return;
+    this._orLast = { period: s[0], depth: s[2], stamp: this.chartStamp(this.activeProfile()) + this.oracleWorld() };
+  }
+  sectionOpening(id) {
+    if (id === 'today') return { hPage: 0, alignOpen: false, swOpen: false, cyOpen: false };
+    if (id === 'spirit') return { spiritView: this.isVt() ? null : 'humanDesign', chartExpandOpen: false,
+      ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) };
+    if (id === 'library') return { libSub: 'study', libView: null };
+    if (id === 'oracle') {
+      const L = this._orLast, here = L && L.stamp === this.chartStamp(this.activeProfile()) + this.oracleWorld();
+      return { orPeriod: here ? L.period : 'daily', orDepth: here ? L.depth : 'standard' };
+    }
+    return {};
+  }
+  isVt() { return (this.state.dtW || window.innerWidth || 1440) < this.BP.md; }
+  navAgain(id, i) {
+    this.setState({ tab: id, ...this.sectionRoot(id), ...this.sectionOpening(id) });
+    if (this.isVt() && id === 'spirit') this.vtGoTab(0);
+    const top = () => {
+      const root = this.isVt() ? this.vtSecEls()[i] : document.querySelector('main[data-shell="desktop"]');
+      if (!root) return;
+      const all = [root].concat([].slice.call(root.querySelectorAll('*')));
+      all.forEach(n => {
+        if (n.matches && n.matches('[data-vt-scroll],[data-vt-pager]')) return;
+        if (n.scrollTop > 0) n.scrollTop = 0;
+      });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(top));
+    setTimeout(top, 260);
+  }
   sectionRoot(id) {
     const shared = { placeSel: null, aspSel: null, dpSel: null, numSel: null, memSel: null, lexDeg: null };
     if (id === 'spirit') return { ...shared, spiritView: null, focusToday: false, hdSel: null, ttCard: null, icHex: null, dlOpen: null };
@@ -65733,6 +66275,7 @@ class Component extends DCLogic {
              Spirit tap also returns the pager to its first page, because on this
              shell the pager IS how deep you are. */
           go: () => {
+            if (on) { this.navAgain(id, i); return; }
             this.setState(this.sectionRoot(id));
             this.vtGoSection(i);
             if (id === 'spirit') this.vtGoTab(0);

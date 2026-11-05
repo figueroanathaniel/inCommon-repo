@@ -117,7 +117,7 @@
      uniforms, which is what lets the zodiac slide outward in the morph. */
   var F_DISC = FOG + [
     'uniform vec3 uBg; uniform vec3 uLine; uniform vec3 uAtm; uniform vec3 uAtm2; uniform vec3 uHi; uniform vec3 uAc2; uniform vec3 uSel;',
-    'uniform float uZero; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
+    'uniform float uZero; uniform float uSignOff; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
     'uniform vec2 uPtr; uniform float uPtrOn; uniform float uBreath; uniform float uHouse; uniform float uTimed; uniform vec3 uOrbits[12]; uniform float uNOrb; uniform float uCusp[12];',
     'varying vec2 vUv; varying vec3 vW;',
     'float ring(float r, float at, float w){ float fw = fwidth(r) * 1.2 + 0.002; return 1.0 - smoothstep(w, w + fw, abs(r - at)); }',
@@ -125,7 +125,7 @@
     ' vec2 p = vec2(vW.x, -vW.z); float r = length(p);',
     ' if (r > uOut + 0.9) discard;',
     ' float th = atan(p.y, p.x); float lon = mod(degrees(th) - 180.0 + uZero + 720.0, 360.0);',
-    ' float rel = mod(lon - uZero + 720.0, 360.0);',
+    ' float rel = mod(lon - uZero + 720.0, 360.0); float zl = mod(lon - uSignOff + 720.0, 360.0);',
     ' float fw = fwidth(r) * 1.2 + 0.002; float w1 = 1.0 - uK;',
     ' vec3 c = uBg;',
     /* the inner field: a lens of warm light under the aspects */
@@ -133,12 +133,12 @@
     ' c += uAtm * 0.05 * smoothstep(uOut + 0.4, 0.0, r);',
     /* the sign band */
     ' float inSign = smoothstep(uSignIn - fw, uSignIn + fw, r) * (1.0 - smoothstep(uSignOut - fw, uSignOut + fw, r));',
-    ' float alt = step(0.5, fract(lon / 60.0));',
+    ' float alt = step(0.5, fract(zl / 60.0));',
     ' c += uAc2 * inSign * (0.035 + 0.03 * alt);',
-    ' float sd = abs(fract(lon / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
+    ' float sd = abs(fract(zl / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
     ' c += uLine * inSign * (1.0 - smoothstep(0.012, 0.012 + fw, sd)) * 0.32;',
     /* a tick for every degree on the band\'s inner edge, longer at five and ten */
-    ' float dd = abs(fract(lon + 0.5) - 0.5) * 0.01745 * r; float d5 = abs(fract(lon / 5.0 + 0.5) - 0.5) * 5.0 * 0.01745 * r; float d10 = abs(fract(lon / 10.0 + 0.5) - 0.5) * 10.0 * 0.01745 * r;',
+    ' float dd = abs(fract(zl + 0.5) - 0.5) * 0.01745 * r; float d5 = abs(fract(zl / 5.0 + 0.5) - 0.5) * 5.0 * 0.01745 * r; float d10 = abs(fract(zl / 10.0 + 0.5) - 0.5) * 10.0 * 0.01745 * r;',
     ' float tl = mix(0.1, 0.17, step(d5, 0.03)); tl = mix(tl, 0.26, step(d10, 0.03));',
     ' float inTick = step(uSignIn, r) * (1.0 - step(uSignIn + tl, r));',
     ' c += uLine * inTick * (1.0 - smoothstep(0.006, 0.006 + fw, min(dd, min(d5, d10)))) * 0.42;',
@@ -596,7 +596,7 @@
     this.discMat = new T.ShaderMaterial({ vertexShader: V_UV, fragmentShader: F_DISC, transparent: true, depthWrite: false,
       uniforms: { uCam: this.U.uCam, uFog: this.U.uFog, uBreath: this.U.uBreath, uBg: { value: new T.Vector3() }, uLine: { value: new T.Vector3() }, uAtm: { value: new T.Vector3() },
         uAtm2: { value: new T.Vector3() }, uHi: { value: new T.Vector3() }, uAc2: { value: new T.Vector3() }, uSel: { value: new T.Vector3() },
-        uZero: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
+        uZero: { value: 0 }, uSignOff: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
         uPtr: { value: new T.Vector2() }, uPtrOn: { value: 0 }, uHouse: { value: -1 }, uTimed: { value: 1 }, uOrbits: { value: orbV }, uNOrb: { value: 0 }, uCusp: { value: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] } } });
     var disc = new T.Mesh(new T.CircleGeometry(13.4, 160), this.discMat);
     disc.rotation.x = -Math.PI / 2;
@@ -831,6 +831,8 @@
     this.content = g; this.bodies = []; this.aspects = []; this.signs = []; this.houseLabels = []; this.angleObjs = [];
     this.world.add(g);
     this.discMat.uniforms.uZero.value = m.zero;
+    /* the study's 0 Aries, as a tropical longitude: sidereal and draconic charts turn the band, never the bodies */
+    this.discMat.uniforms.uSignOff.value = m.signOff || 0;
     this.discMat.uniforms.uCusp.value = this.cuspRel();
     this.discMat.uniforms.uTimed.value = m.timed ? 1 : 0;
 
@@ -839,7 +841,7 @@
     (m.signs || []).forEach(function (s, i) {
       var col = self.colorOf(s.c);
       var spr = self.medallion(s.glyph, { size: Math.round(28 * ui), ring: false, color: col.c, scale: 0.78, anchorY: 0.5 });
-      spr.userData.lon = i * 30 + 15;
+      spr.userData.lon = i * 30 + 15 + (m.signOff || 0);
       g.add(spr);
       self.signs.push(spr);
     });
@@ -1061,7 +1063,7 @@
     var tv = Math.tan((this.baseFov || this.cam.fov) * Math.PI / 360);
     var ins = this.mode === 'obs' && this.inset ? this.inset : null;
     var asp = ins && this.H ? Math.max(0.45, (this.W - ins.l - ins.r) / this.H) : this.cam.aspect;
-    var dw = Rc / (tv * asp), dh = (Rc * Math.sin(pitch) + 2.6 * Math.cos(pitch)) / tv;
+    var dw = Rc / (tv * asp), dh = (Rc * Math.abs(Math.sin(pitch)) + 2.6 * Math.abs(Math.cos(pitch))) / tv;
     return Math.max(dw, dh) * 1.04;
   };
   P.turnTo = function (key) {
@@ -1077,7 +1079,7 @@
     var pitch = this.user.pitch != null ? this.user.pitch : this.defaultPitch();
     return {
       yaw: this.user.yaw + drift + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.x * 0.05 : 0),
-      pitch: clamp(pitch - 0.04 * c + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.y * 0.03 : 0), 0.2, 1.42),
+      pitch: pitch - 0.04 * c + (this.ptr.on && this.ptrType === 'mouse' && !this.down ? this.ptr.y * 0.03 : 0),
       dist: this.fit() / this.user.zoom * (1 - 0.04 * c)
     };
   };
@@ -1095,9 +1097,14 @@
     if (!this.rig) this.rig = { yaw: g.yaw, pitch: g.pitch, dist: g.dist };
     var r = this.rig;
     r.yaw = damp(r.yaw, g.yaw, k); r.pitch = damp(r.pitch, g.pitch, k); r.dist = damp(r.dist, g.dist, k);
-    var cp = Math.cos(r.pitch), ty = 0.35;
-    this.cam.position.set(Math.sin(r.yaw) * cp * r.dist, ty + Math.sin(r.pitch) * r.dist, Math.cos(r.yaw) * cp * r.dist);
+    var cp = Math.cos(r.pitch), sp = Math.sin(r.pitch), ty = 0.35;
+    this.cam.position.set(Math.sin(r.yaw) * cp * r.dist, ty + sp * r.dist, Math.cos(r.yaw) * cp * r.dist);
     this.cam.rotation.order = 'XYZ';
+    /* The chart turns all the way round, over the top and under (owner,
+       5 November 2026: "360 in every direction"). Up is the direction the
+       pitch is moving the camera in, which stays defined through both poles,
+       so the view never flips as it passes over them. */
+    this.cam.up.set(-Math.sin(r.yaw) * sp, cp, -Math.cos(r.yaw) * sp);
     this.cam.lookAt(0, ty, 0);
     this.cam.updateMatrixWorld();
     this._settled = Math.abs(r.yaw - g.yaw) < 0.0005 && Math.abs(r.pitch - g.pitch) < 0.0005 && Math.abs(r.dist - g.dist) < 0.005;
@@ -1490,7 +1497,8 @@
     this.readInset();
     var fw = new T.Vector3(); cam.getWorldDirection(fw);
     var th = Math.atan2(-fw.z, fw.x), lon = ((th / RAD - 180 + (this.model ? this.model.zero : 0)) % 360 + 720) % 360;
-    H.tel.hdg.textContent = SIGNS3[Math.floor(lon / 30) % 12] + ' ' + Math.floor(lon % 30) + '°';
+    var zl = ((lon - ((this.model && this.model.signOff) || 0)) % 360 + 360) % 360;
+    H.tel.hdg.textContent = SIGNS3[Math.floor(zl / 30) % 12] + ' ' + Math.floor(zl % 30) + '°';
     H.tel.alt.textContent = this.fmt(Math.abs(cam.position.y)) + (cam.position.y < 0 ? ' S' : '');
     var sp = f && f.active ? f.speedNow : 0;
     H.tel.vel.textContent = this.fmt(sp);
@@ -1568,7 +1576,12 @@
       return;
     }
     if (dir === 0 && this.flying()) this.flyRelease();
-    if (dir === 0) { this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null; }
+    if (dir === 0) {
+      /* Home the short way: a chart turned over several times comes back by
+         the nearest turn rather than unwinding every one. */
+      if (this.rig) { var T = Math.PI * 2; this.rig.yaw -= Math.round(this.rig.yaw / T) * T; this.rig.pitch -= Math.round((this.rig.pitch - this.defaultPitch()) / T) * T; }
+      this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null;
+    }
     else this.user.zoom = clamp(this.user.zoom * (dir < 0 ? 1.25 : 0.8), 0.6, 3.2);
     this.lift(0.15);
     this.kick();
@@ -1692,7 +1705,7 @@
       } else if (dn.axis === 'x' || dn.axis === 'free') {
         var Wd = this.W || 300;
         this.user.yaw = dn.yaw - dx / Wd * Math.PI * 1.1;
-        if (dn.axis === 'free') this.user.pitch = clamp(dn.pitch + dy * 0.005, 0.2, 1.42);
+        if (dn.axis === 'free') this.user.pitch = dn.pitch + dy * 0.005;
         this.lift(0.02);
       }
     }
@@ -1749,8 +1762,8 @@
     if (k === 'ArrowRight' || k === 'ArrowLeft') {
       var nk = this.step(k === 'ArrowRight' ? 1 : -1);
       if (nk) { this.setFocus(nk); if (this.o.onFocus) this.o.onFocus(nk, 'key'); }
-    } else if (k === 'ArrowUp') this.user.pitch = clamp((this.user.pitch != null ? this.user.pitch : this.defaultPitch()) + 0.08, 0.2, 1.42);
-    else if (k === 'ArrowDown') this.user.pitch = clamp((this.user.pitch != null ? this.user.pitch : this.defaultPitch()) - 0.08, 0.2, 1.42);
+    } else if (k === 'ArrowUp') this.user.pitch = (this.user.pitch != null ? this.user.pitch : this.defaultPitch()) + 0.08;
+    else if (k === 'ArrowDown') this.user.pitch = (this.user.pitch != null ? this.user.pitch : this.defaultPitch()) - 0.08;
     else if (k === '+' || k === '=') this.zoom(-1);
     else if (k === '-' || k === '_') this.zoom(1);
     else if (k === '0' || k === 'Home') this.zoom(0);
