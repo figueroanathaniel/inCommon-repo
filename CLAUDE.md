@@ -410,11 +410,15 @@ tiles by time, under three headed bands that read the same on all three charts:
 | Weather | what the sky is doing to it now. Astrology: the two transit lists, and the Ledger's Weather column. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
 | Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design: the dates ahead when the Sun, a planet or Pluto enters the partner of one of the reader's hanging gates and completes that channel (`hdHorizonVals()`, the owner's ask of 5 November 2026; until then it had no Horizon, and with no such date in 180 days it still draws none). |
 
-**The bands are headings and nothing more.** A glyph (strata, a body on its
-orbit, a sun on the horizon line), the name in the display face and a rule. No
-line under them says what a band means, by "Discovery belongs to the reader":
-the contents say it. The glyphs live in `BAND_SVG` on the logic class rather
-than `UI_ICONS`, because nothing asks `uiIcon()` for them.
+**The bands say what they mean on a press, and only then.** A glyph (strata, a
+body on its orbit, a sun on the horizon line), the name in the display face
+with a small circled i beside it, and a rule. Pressing the name (a 44px
+button, `aria-expanded`) shows one line under it, from `BAND_TIP`, through
+`bandTip(k)`; one band is open at a time across the pages (`state.bandTip`).
+The owner chose this on 5 November 2026 over a line always shown, which
+narrows "Discovery belongs to the reader" for these three headings only. The
+glyphs live in `BAND_SVG` on the logic class rather than `UI_ICONS`, because
+nothing asks `uiIcon()` for them.
 
 **On the astrology page the bands became the Ledger's columns**, and the cards
 (Important Today, the retrogrades, the eclipses, the stellium) left them: see
