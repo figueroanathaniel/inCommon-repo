@@ -408,13 +408,22 @@ tiles by time, under three headed bands that read the same on all three charts:
 |---|---|
 | Bedrock | what the birth fixed. Astrology: the placements, Houses, Aspects (the placements are the Ledger's rows, see below). Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
 | Weather | what the sky is doing to it now. Astrology: the two transit lists, and the Ledger's Weather column. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
-| Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
+| Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design: the dates ahead when the Sun, a planet or Pluto enters the partner of one of the reader's hanging gates and completes that channel (`hdHorizonVals()`, the owner's ask of 5 November 2026; until then it had no Horizon, and with no such date in 180 days it still draws none). |
 
-**The bands are headings and nothing more.** A glyph (strata, a body on its
-orbit, a sun on the horizon line), the name in the display face and a rule. No
-line under them says what a band means, by "Discovery belongs to the reader":
-the contents say it. The glyphs live in `BAND_SVG` on the logic class rather
-than `UI_ICONS`, because nothing asks `uiIcon()` for them.
+**The bands are quiet, and the chart leads** (the owner, 5 November 2026: "Make
+the bedrock weather and horizon concepts more subtle. They should be nearly
+exclusive to the library tutorials. The chart should be the main point of
+interaction across the entire charts section"). This replaces the band glyphs,
+the display face headings and the press-for-a-line tips of the same morning
+(`BAND_TIP` and `bandTip()` are gone). On the chart pages each band is a small
+uppercase label in `--mut` over a hairline, in plain words: **Natal**, **Now**
+and **Ahead** (`BAND_NAMES`), and the Ledger's columns read Aspects, Now and
+Ahead. The words Bedrock, Weather and Horizon appear only in the Library: the
+Human Design Atlas's lesson tiers, and one step each in the Astropedia's and
+the Book of Numbers' Finding my way tutorial, which names the three and the
+plain label each wears on My Charts. The phone Ledger rows keep their small
+band glyphs, in `--dim`, as the only key to the three cells. Do not bring a
+band name back to a chart page without the owner.
 
 **On the astrology page the bands became the Ledger's columns**, and the cards
 (Important Today, the retrogrades, the eclipses, the stellium) left them: see
@@ -3053,19 +3062,26 @@ all six that test separation go red with the owner forced to null. Driven in
 the built bundle too: a device holding a guest profile, then account A (takes
 it), account B (the birth page), A again (its own profile), signed out (blank).
 
-## Swiping on the phone is one chain, read left to right
-The order is Today, the three charts (Human Design, Astrology, Numerology), the
-six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
-that line, so the last chart hands on to the first Library tab, the last Library
-tab to the Oracle, and the other way back (landing on the last chart or the last
-tab when going backwards). `vtSwipeStep(dir)` does the move and `vtBindTouch()`
-reads the gesture. Three things are easy to undo.
+## Swiping on the phone stays inside a section
+Decided by the owner on 5 November 2026: "Left and right okay between charts or
+library sections, but scrolling or swiping should never switch between Today,
+Charts, Library, Oracle, and/or Settings." A sideways swipe moves between the
+three charts (Human Design, Astrology, Numerology) or between the six Library
+tabs, and stops at either end; on Today, the Oracle and Settings it does
+nothing. **No gesture changes the section**: the nav bar and an address do. It
+used to be one chain across every section, so a swipe past the last chart
+landed in the Library, and a vertical drag in the top or bottom 34px band
+(`VT_BAND`) jumped a section; both are gone. The column is `touch-action:
+none`, every page contains its own overscroll, and `_vtWheel` refuses a wheel
+or trackpad scroll that would reach the column, so the end of a page is the end.
+`vtSwipeStep(dir)` does the move and `vtBindTouch()` reads the gesture. Three
+things are easy to undo.
 
 **The pager's own horizontal scroll never fired on a phone.** The section column
 is `touch-action: none` and what is inside inherits it, so a swipe on the
 My Charts pager did nothing at all; this was measured, the pager stayed at
 scrollLeft 0 through a real swipe. The swipe is read from the same touch
-listeners the section bands use. If the browser did move the pager under the
+listeners. If the browser did move the pager under the
 finger, `vtBindTouch` leaves it alone so a gesture is never handled twice.
 
 **It must not fire where a sideways gesture already means something.**
@@ -3300,6 +3316,208 @@ the head, and nine rows of the acceptance matrix (A5, A6, A8, A9, A10, B5, B6,
 C5, C6, and D5/D6/S5/S6 at the wider sizes) were the only thing saying so.
 `build-bundle.js` refuses to ship a bundle whose head has no sheet, or whose
 helmet has one again.
+
+## Today is the reading, and each chart carries its own forecast
+Asked for by the owner on 4 November 2026. Today's Forecast and the three
+"Show your working" rows left Today in both shells, and the horoscope pager is
+the page now: on the desktop it spans the column (at most 980px) and Your
+charts and Recent activity sit under it. Each chart page opens with a
+Today's Forecast banner read for that chart, which is the alignment's own row
+for it (`fbAstro`, `fbHd`, `fbNum`, picked out of `alignRows` in the
+`todayVals()` wrapper), so the banner and the alignment cannot disagree. Its
+open state is the same `alignOpen` key, its open half scrolls inside itself at
+`min(56vh, 520px)`, and the astrology banner carries what the forecast block
+held (the sky, the casts, the retrogrades, the next two days). The Cycle Audit's
+line left Today too and sits under the wheel in the astrology panel, opening the
+same sheet.
+
+**The chart's own controls live inside its card** (same day): the view switch,
+the layer or detail switch and the expand button are a bar at the top of the
+wheel and wiring cards, and everything under the bar sits in a
+`position: relative` box, so the stage's absolute controls (Today's sky, Free
+look, the brackets, zoom) anchor to the drawing and not to the bar. The Human
+Design page opens on the wiring; Gates in the sky now is a smaller card under
+it, and Today's Alignment sits under the astrology chart. The titles are Your
+Natal Chart, Your Wiring (the owner's pick over Your Bodygraph, for the mark)
+and Your Numerology.
+
+## The chart study is the reader's choice, and the Oracle reads through it
+Asked for by the owner on 4 November 2026: at least ten studies, Whole Sign,
+Placidus, Vedic and Chinese among them, chosen in Settings, traditionally
+accurate, and the Oracle's readings shift with the choice. Settings has a
+**Chart Study** radiogroup in both shells (`studyRows`, `chartStudySet()`),
+kept per profile beside the house system (`studyState().study`, default
+`western`). The ten, in `ChartTraditions.STUDIES`: Western Whole Sign, Western
+Placidus, Vedic (Jyotish), Chinese (Four Pillars), Western Koch, Western Equal,
+Hellenistic, Western Sidereal (Fagan-Bradley), Draconic and Heliocentric.
+Choosing one sets its house system; `chartStamp()` carries the study, so a
+new study is a new reading.
+
+**`app/chart-traditions.js` is the arithmetic**, mechanics layer. Lahiri and
+Fagan-Bradley by the Swiss Ephemeris method and epochs (Lahiri within 0.01
+arcsecond of the six Swiss Ephemeris and Indian Astronomical Ephemeris values
+from 1950 to 2020); nakshatras, padas, Parashara dignities and Vimshottari
+(a year of 365.25 days); the Four Pillars by the solar terms and the
+sexagenary day; the lunar new year by the 1645 rule, counted at UTC+8 and on
+Beijing mean time before 1929, held to every year from 1900 to 2100
+(`tools/fixtures/chinese-new-year.json`, from pinyin.info's tables). A sidereal
+longitude is the app's apparent longitude less the mean ayanamsa and the
+nutation. `tools/check-chart-traditions.js` (CT1 to CT6) is the gate.
+
+**What changes today is the Oracle and one card, not the wheel.** `studyDossierLines()`
+adds the chart as the study casts it to every dossier: the Vedic rashis,
+bhavas, nakshatras, dignities and current mahadasha; the sidereal or draconic
+positions; the heliocentric bodies; the Four Pillars and the animal year; the
+Hellenistic sect and chart ruler. The astrology page draws the same lines as
+a card above the Cycle Audit (`studyPanelVals()`, both shells), without the
+bracketed method, and draws nothing for the four plain Western studies. The
+wheel, the Ledger and the placement
+pages are still drawn in the tropical zodiac under every study. Relabelling
+them is the next step and needs the ayanamsa at each instant a sign is read,
+so it was not done by shifting `chartAt()`: transits are read through
+`lonOf()` directly in several places, and a shift in one would set the two
+frames 24 degrees apart.
+
+## A house that crosses a sign is a hand-off
+Approved by the owner on 4 November 2026 ("Hand off plan works, proceed"), from
+the plan at claude.ai/artifact/54mMqRoui5kk5eG2GwpDgr, with its four decisions
+taken as recommended: a share under 3 degrees (`HANDOFF_THRESHOLD`) is a
+threshold rather than a second room, a Whole Sign reader sees nothing (a house
+is one sign there, by "No disclaimers"), the Personal Year still turns on 1
+January, and the heading is The Hand-off.
+
+`houseSegs(cs, i)` lists the signs a house passes through with the degrees each
+holds; `houseHandoff(n)` composes from them: door and room, weighted by those
+degrees, each sign's ruler and the house it sits in (Scorpio, Aquarius and
+Pisces add their older ruler in a sentence of its own), an intercepted sign as
+the quiet third voice, a sign on two cusps in a row as one sign holding two
+rooms, and one of the twelve `HANDOFF_PAIR` sentences, each written once. It is
+a headed block on the house's For You tab, after Where this house sits, and the
+open house's wedge on the wheel draws the room's share in a second tint with a
+dashed seam where the sign turns (`sp`, `s1` to `s4`, `t1` to `t4` on
+`wheelHouses`, in all eight wheel markups). **A natal body is never split**:
+only a space is.
+
+`gateHandoff(g)` finds the twelve gates that cross a sign boundary from
+`HDWheel` (3, 8, 10, 14, 15, 25, 29, 30, 46, 50, 56, 60, each on one line; 8,
+14, 29 and 30 on a 0.125 degree sliver, read as a threshold), and the gate pane
+says so on both tabs, naming the side the reader's own activation sits on.
+`hdChart()` activations carry `lon` for that; R1 lifts the collector with no
+`norm360`, so the Earth's longitude is reduced inline there.
+
+The rest of the plan was built on 5 November 2026 (the owner: "Proceed"):
+
+- **Progressed Sun and Moon** (`progressedHandoff(name)`): a day after birth
+  for each year of life, read through `lonOf`, bisected to the sign change. It
+  is a chapter, The Hand-off, on the Sun's and the Moon's packet and glance:
+  the last crossing, the degrees walked since, the next crossing, each with its
+  `HANDOFF_PAIR` sentence. The Moon is withheld without a birth time (noon can
+  move its dates half a year); the Sun keeps its years, to the year only.
+- **Out of sign** (`outOfSign(x)`, `OUT_OF_SIGN_SIGNS`): an aspect whose signs
+  are not the aspect's count. A Ledger chip for one is underlined dotted, the
+  row's name says how many, and an "Across a sign" line under the table opens
+  a reading per contact. The Descendant, IC and South Node are left out of
+  that line because they only mirror the Ascendant, Midheaven and North Node.
+- **Gatherings across a sign** (`crossGatherings()`, in `stelliums().cross`):
+  three or more of the same bodies within 10 degrees in two signs. A tag on
+  their rows, a clause in the Gathering line, and a section in its reading;
+  `any` counts them.
+- **Numerology** (`numHandoff(sel)`), a chapter on the number's packet and
+  glance: the Personal Year still turns on 1 January and the birthday window
+  is the overlap; a Personal Month in its last seven days names the next; a
+  pinnacle or a period cycle names the years it opens and hands on.
+
+## Derived places and the two decan systems
+Asked for by the owner on 5 November 2026 ("Research derivative astrology",
+then "In every sense, where it applies. Also research decans").
+`docs/astro-upgrade/02-derived-and-decans-sources.md` holds every rule and the
+page it was read on. Four are built, all arithmetic on the chart the wheel
+draws: turned houses (`turnedHouse(n)`, "Seen from the other houses" in the
+house pane, counted from the 7th, 4th, 3rd, 5th and 11th, quoting Lilly where
+he names the meaning); both decans (`decanPair()`: the Chaldean faces, which
+match Firmicus Mathesis II.4 for all 36, beside Parashara's drekkana, the sign,
+its 5th and its 9th, BPHS 6.8); the antiscion (`antiscionOf()`, `180 - lon`,
+Firmicus II.29, "The Mirror" chapter for the ten bodies and the North Node);
+and the annual profection (`profection()`, whole signs from the Ascendant,
+"The Year" chapter on the Ascendant and the year's lord, withheld untimed).
+The Vedic dossier carries each graha's drekkana and the Hellenistic dossier
+the profection, so only readers of those studies get a new dossier. The 10th
+is never a turned frame, because the sources disagree on which parent it is.
+The tertiary progression is a chapter too, The Month, on the Sun's and the
+Moon's packet (`progressedHandoff(name, 'tertiary')`, a day for each tropical
+lunar month of 27.32158 days). The navamsa, the two relationship charts, a harmonic wheel and solar arc are
+not built and wait on the owner.
+
+## The sky weather, and the star clusters among the bodies
+Asked for by the owner on 5 November 2026: a forecast of the sky's own events
+(cazimis, moon phases, stations, meteor showers, alignments, the clusters),
+at least a day ahead, behind a weather icon at the top right of the
+horoscope on Today. On the screen it is called **Forecast** (the owner, 5
+November 2026); the code still says sky weather. `docs/astro-upgrade/03-sky-weather-sources.md` holds every
+rule and the page it was read on.
+
+**`app/sky-weather.js` is mechanics** (global `SkyWeather`): it reads
+astronomy-engine and returns dated events with numbers and names, and reads no
+clock. `swWindow()` hands it tomorrow, local, for thirty days (`SW_DAYS`), so
+nothing is forecast for less than a day ahead; `swFind()` memoises per local
+day and `swSoon()` runs it a tick after the sheet opens, behind Loading.
+`skyWeatherVals()` writes the sentences. The sheet is a bottom sheet on the
+phone and a centred dialog on the desktop (`swOpen`, closed by
+`dialogEscape()` and `vtSheetClose`). It is a forecast of the sky for
+everyone, so it carries no chart and no reading, and the "No reading until
+requested" rule is not touched by it.
+
+**`tools/check-sky-weather.js` is the gate**: every event held to the Swiss
+Ephemeris over 2026 and 2027, the moon phases to USNO, the shower maxima to
+IMO's 2026 dates, the clusters' precession, and no clock read.
+
+**A cazimi is 17' in longitude**, Lilly's figure; the sheet adds a sentence
+when the body is inside Bonatti's 16' in latitude too. The sources disagree and
+the doc says so.
+
+**The five clusters are points of the Expanded Chart** (category `cluster`,
+"Star Clusters", ring 2, `--blue`): the Pleiades, the Hyades, Praesepe, the
+Coma Star Cluster and the Double Cluster, at the ecliptic longitude of the
+birth instant. They are read as the Astropedia reads a fixed star, by
+conjunction alone and within one degree (`natalAspects`), never by any other
+angle. The globes draw them as lattices of light, not worlds. Each has a
+placement entry in `placement-content.js` whose definition says only what
+Ptolemy (Tetrabiblos I.9) and the cluster's own page say; the Astropedia has a
+Star Clusters concept. Do not add a cluster's myth from memory.
+
+**A planet parade is seen from somewhere** (5 November 2026). `parades()`
+counts Mercury to Saturn at least 3 degrees up when the Sun is 3 degrees down,
+evening and morning, and four or more is a parade, one event per run of
+nights. Uranus and Neptune never count, because they need a telescope. The
+two 3s are chosen, not read: the phrase is not a term of astronomy, and those
+are the figures that reproduce Kielder Observatory's dated list when run from
+Kielder (SW6). Do not tune them without rerunning SW6. The place is where
+the reader is (the owner, 5 November 2026, reversing the profile place he
+chose that morning): opening the sheet asks the device for a coarse position
+(`swLocate()`), kept as `incommon.here`, rounded to two decimals, never sent,
+and named by the nearest town in the gazetteer (`swNearest()`), renamed from
+the world list once it lands. Refused or unavailable, `swPlace()` falls back
+to the profile's birth place; the sample has none, so then there is no
+parade. The memo key carries the place. `Permissions-Policy` in the bundle's
+`_headers` allows `geolocation=(self)` for this, and the Privacy Policy's
+section 3 says so. The store apps ask through the web view: iOS has
+`NSLocationWhenInUseUsageDescription` in `Info.plist` and Android declares
+`ACCESS_COARSE_LOCATION`, with no plugin, because the browser's own
+`navigator.geolocation` is what the page calls. Not yet run on a device.
+
+## The hole is the middle of the screen, and the ring hugs it
+Asked for by the owner on 4 November 2026 ("The event horizon should fit
+perfectly center"). The cover's camera looked at a point wandering half a unit
+round the hole, which put the shadow up to 39px off centre on a desktop while
+the ring and the pill sat dead centre. `updateCamera()` now aims at the hole
+(`tgt` is the origin), so `uHoleS` is zero and the shadow is the centre of the
+screen; the orbit, tilt and distance still drift. `fitRing()` sets `--ring-d`
+to the shadow's own diameter plus the border, so the ring sits on the photon
+ring, wherever that is at least 200px and the split mark fits the width. A
+portrait phone draws the disk wide and its shadow is about 80px, too small to
+hold the pill, so there the ring keeps its own size and is concentric. The
+handoff carries the ring's diameter (`d`) so the app's overlay draws the same
+size. The pill's float is even about the centre. No shader changed.
 
 ## The ring, Continue and the registration card (26 October 2026)
 The owner asked for the cover to be simplified and for a new way in. This
@@ -4521,6 +4739,20 @@ reading is written for one person and kept with them; a sample chart is refused
 on the page before anything is sent, because the Oracle writes for one person
 and a sample is nobody.
 
+## No reading until it is asked for
+Decided by the owner on 4 November 2026: "No readings until requested. That's
+universal law. No reading should populate before request, not even standard
+readings." This overrides every section below that has the page ask on open or
+prepare ahead. `oracleWillAsk()` answers false for every slot, so neither
+`oracleAutoAsk()` nor `cycleSheetAutoAsk()` asks, and `oraclePrepareAuto()`
+returns at `ORACLE_ON_REQUEST_ONLY`. Every Oracle slot, standard, in depth and
+the Cycle Audit, shows Consult the Oracle until it is pressed for that slot in
+this visit (`orOpened`, written by `orOpenDeep()`, which now opens any slot and
+remembers the in-depth wish only for an in-depth one), and a kept reading
+waits behind the same press: it shows at once and costs nothing. Driven with
+the cloud faked, both shells: nothing is asked on open or on switching to In
+Depth, and one press asks once and shows the reading.
+
 ## The in-depth reading is prepared ahead, and still opened with a press
 The owner asked on 10 October 2026 for the Luminary reading to load in seconds.
 It cannot be written in seconds: an in-depth reading is about six thousand
@@ -4892,8 +5124,8 @@ apart by the origin Capacitor gives its web view** (`capacitor://localhost`,
 browser can, and that is accepted on purpose, because what it would get is what
 installing the app gives anybody.
 
-**Support inCommon is the owner's donate button, in the apps only**
-(`GIFT_IN_APP`, `giftOn()`): beside Contact Support, in the Settings footer
+**Support inCommon is the owner's donate button, in the apps and, since 4
+November 2026, on the website too** (`GIFT_IN_APP`, `GIFT_ON_WEB`, `giftOn()`): beside Contact Support, in the Settings footer
 after Accessibility, and in the profile menu. It is called a gift on every
 surface because inCommon is not a charity and "donate" says tax deductible to
 most people. It needs no account (the `support` action is answered before
@@ -6058,6 +6290,111 @@ labels, Orbital live and its pixels read back, a drag running the probe, the
 morph to 3D and back, the sheet in Orbital with a tap on an exact date opening
 that passage's card, and Rings in the sheet.
 
+## The Expanded Chart is the wheel, calm
+Asked for by the owner on 4 November 2026: "an expand icon on the chart itself
+to blow it up. Wrap the text and activities around it uniformly. It should feel
+like luxury, not overburdening." A 44px button at the top left of both wheel
+cards ("Open the expanded chart", `chartBloomGo`) opens a full screen dialog
+(`chartBloom`, `chartBloomVals()`, `data-immersive`): the 2D wheel in the
+middle and, from 1100px, two rails of folded groups either side (Luminaries
+& Planets, Nodes, Angles, Derived points; Asteroids, Centaurs, TNOs, Comets,
+Hypotheticals), one column under the wheel below that.
+
+**Every point is on the wheel and the reader switches them** (owner, 4
+November 2026: nothing is left off as mundane, comets included, and the 22
+most used placements start on). `BLOOM_CORE` is those 22 (the ten bodies, both
+nodes, the four angles, Chiron, Ceres, Pallas, Juno, Vesta and Lilith),
+`bloomShowOf()` the current set keyed by `pointKey()`, and each group carries a
+switch (`role="checkbox"`, `mixed` when part of it is on) beside its fold, with
+Show every point and The usual 22 above the rails. Every point is placed and
+staggered once, so nothing moves when a switch is pressed; the ones switched off
+carry `data-bloom-x="1"` and are hidden by the head sheet. On opening,
+`data-bloom-intro` runs `bloomFlash` (opacity and visibility, labels also a
+text glow, no `filter`) so all of them glow in and the hidden ones fade out
+over 3.2s. Aspects are drawn only between points that are on. `radiusFor` and
+`placedRows` stay as they were, because the 3D scene model reads them. Toggles
+go through `this._bloomGrp` and `this._bloomShow`, not state alone, or two
+presses in one tick overwrite each other. Opening it sets
+`chartMode: 'expanded'` and closing (the cross, Escape via `dialogEscape()`)
+puts the previous mode back. A row opens the placement. **The Observatory is
+entered from here only** (the owner's choice, same day): Enter the Observatory
+(`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
+buttons are gone. N40 goes through both.
+
+**Expanded and Advanced** (owner, 5 November 2026). The 22 in `BLOOM_CORE`
+are the Expanded set and every point is Advanced: the dialog's two buttons say
+so. On the chart card the Expanded Chart draws the Expanded set alone
+(`coreSet` in the wheel vals, so the 3D and Orbital stage follow it), and an
+Advanced placements switch (`chartAdvanced`, per visit) draws every point. The
+dialog and the Observatory still place every point.
+
+**The forecast banner is one line until opened** (owner, 5 November 2026):
+the label and the forecast's first line, 46px, with the rest behind the press.
+The "Back to Today's Alignment" buttons and the alignment teaser on the chart
+pages are gone, and the last stop of a followed thread closes it rather than
+going to Today.
+
+## The chart speaks gently, and stays intense
+Decided by the owner on 4 November 2026, after a voice sample he approved: the
+placement, sign, house and aspect writing reads as an invitation rather than a
+definition ("Some things you love before you can say why. Venus keeps that
+pull..." rather than "Venus is attraction, value, and pleasure"). Rewritten in
+that voice: the 21 core definitions and roles and all 75 expanded roles in
+`placement-content.js`, the twelve signs' definitions and demands, the twelve
+houses with their presence and in-life lines, the composer's joining sentences
+and dignity lines, the placement page's section leads, and `ASP_MEAN`,
+`ASP_SHORT`, `ASP_NATURE`, `ASP_POSS` and `ASP_PLAY`. `ASP_CLOSE` and the gift,
+shadow, growth and block lists were left as they were. **Comets say it
+discreetly**: their pages say astrologers read them for whole eras rather than
+single lives, and no reader facing string says mundane. A sign's `demand` is now
+a sentence of its own (the composer no longer strips its full stop), and the
+dignity lines keep the body as subject, because `energy` is a compound phrase.
+New writing here keeps the voice: personal, gentle, no "you are" verdicts, no
+"X is Y, and Y is Z" catalogues.
+
+## A placement page is a packet
+Asked for by the owner on 4 November 2026 ("put the descriptions in a page-packet
+that has more beauty in its appeal instead of just a sectioned off dissertation").
+`plPacket()` arranges the composer's words and writes none of its own: a cover
+(the glyph in a lit medallion, the kind of point, the name, the body's role as
+an epigraph, sign, degree and house, and the dignity as a seal), then the
+chapters (The Room, The Accent, The Nature, At Home, The Way It Moves, and The
+Welcome when there is a dignity) turned one at a time with "Read every page"
+beside them, then Held together, the four practice cards, Conversations, The sky
+now and The degree. The page turned to is kept per placement (`plPageKey`), so a
+new placement opens on chapter I. The markup is written once and placed in both
+shells; the desktop is a single centred column. Nothing on it wears `--ac` but
+Back and the breadcrumb, and the phone sheet is painted over an opaque `--bg`
+because `--sf` carries alpha. Measured over every page at 1440, 390 and 375,
+four identities hardened and not: no pair under 4.5:1, no control under 44px.
+
+## A passing tap opens the glance, a focused read opens the packet
+Asked for by the owner on 4 November 2026: "It's nice for a focused read. For
+passing, make it a pop up without the fantastic visuals, keep the info, and make
+it radiant." A tap on a body anywhere it is passed (the wheel, the Ledger, the
+lists, the flash cards, a stage's Open the reading) sets `plGlance` and opens a
+dialog, `placementGlanceVals()`, in both shells, rather than the packet. It
+reads `placementVals(key)`, so it carries every word the packet does: the
+epigraph, the seal, every chapter in order, Held together, the four practice
+lists, Conversations (each opens that body's glance), The sky now and the degree.
+No cover, no turning, no drawing: a warm glow over `--sf2` on an opaque `--bg`.
+"Open the focused read" goes to the packet. `plGlance` is cleared in both clean
+bags, `dialogEscape()` and `vtSheetClose`.
+
+## A number is a packet too, and is glanced the same way
+Asked for by the owner on 4 November 2026: "do the same application to
+numerology. Explanation beats summation." `numerology-content.js` 1.1.0 gives
+every number a `why` (what the number is and why the tradition reads it so),
+a `persona` and an `ask`, and every seat (`POSITIONS`) an `about` that says what
+the seat is drawn from in plain words without the arithmetic. The writing is
+the chart's voice: personal, gentle, no "you are". `numberDetailVals()` arranges
+it as the placement packet is arranged (cover, chapters The Number, The Seat,
+The Double Digit, The Debt and Your Season, Held together, the four practice
+cards and the question), and `numberGlanceVals()` maps the same words into the
+glance, so a passing tap on a number opens the glance and Open the focused read
+opens the packet. `numGlance` is cleared wherever `plGlance` is. On the
+Numbers stage the first press still brings a number forward.
+
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
 Observatory. People should feel like they're going in a certified space
@@ -6066,7 +6403,7 @@ diagonal, ascend, descend, strafe left, strafe right, dash up, and dash back,
 dash left, and dash right. Omni directional motion: on every chart, but
 especially in the full screen observatory in the astrology tab. Generate
 appropriate images for each astral body as they are encroached upon." The
-maximize button (the expand chart button) opens it; `chartExpandOpen` is still
+Expanded Chart's Enter the Observatory button opens it (since 4 November 2026; see "The Expanded Chart is the wheel, calm"); `chartExpandOpen` is still
 its state, so everything that already opened, closed, persisted or escaped the
 old overlay does the same to the Observatory.
 
@@ -6777,7 +7114,7 @@ Until 15 October 2026 they shipped unrewritten, and from a site root that
 address is answered by the catch all with the app, so a home screen icon was
 an HTML page.
 
-`tools/` holds thirty four scripts. Twenty one are gates and are worth running
+`tools/` holds thirty five scripts. Twenty two are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -6785,7 +7122,7 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
-`check-astral-bodies.js`, `check-timing-lexicon.js`.
+`check-astral-bodies.js`, `check-timing-lexicon.js`, `check-sky-weather.js`.
 Ten generate:
 `build-bundle.js`, `build-number-matrix.js` (`app/number-matrix.js`, from the owner's Book of Numbers CSV), `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
@@ -7187,3 +7524,19 @@ serving the site, and that address cannot be removed. Deploy previews and
 branch deploys are other hosts and are not redirected. If the address moves, change
 the three together, then submit the sitemap again in Search Console.
 Description copy follows the voice rules: no method, no fate, no dash.
+
+## About is in the profile menu
+Asked for by the owner on 5 November 2026: an About page that does not get in
+the way of the tabs, in the profile icon's menu, "dedicated and decorated
+according to the concept of gaining insight". The menu row sits after Settings
+(`pmAboutGo`) and opens a dialog in both shells (`aboutOpen`, cleared by
+`dialogEscape()`): the mark drawn as a lens (two whole circles, the warm light
+where they meet, faint rays, a twinkling field, `data-pl` so it breathes by
+opacity only and is still under reduced motion), then what inCommon is, insight
+rather than instruction, the name, and the four places it holds. It says what
+inCommon is and never how anything is worked out, by "No disclaimers", and it
+carries no legal link, so K55's counts are unchanged. **It has no subheaders and nothing on it is gray** (the owner, 5 November 2026: "No grayed subheaders", then "None of those gray-now-purple headers ... Regular paragraph format is fine"): the three sections are plain paragraphs with no label and no rule beside them, the company name stands alone without a "Kept by" label, and the tile lines and the credit line wear `--tx`. Only the "About" kicker over the title stays. **The company line is
+`ABOUT_COMPANY`**, empty until the owner confirms the legal name: while it is
+empty the "Kept by" line is not drawn and only the credit line shows. Measured
+with the harness's own `contrastFails()` and `tapTargets()` over the dialog,
+four identities hardened and not, at 1440, 390 and 375: clean.

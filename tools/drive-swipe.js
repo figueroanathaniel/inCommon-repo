@@ -15,13 +15,15 @@
  *     pager or the section column stayed between two screens.
  *
  *   W1  Three swipes forward from the first chart, the third made while the
- *       second is still travelling: every swipe counts, so the reader is on
- *       the Library's first tab, with the column on a section.
- *   W2  Three quick swipes back from there: every swipe counts and the
- *       interrupted section move is finished, so the reader is on the first
- *       chart, the pager on a page and the column on a section.
+ *       second is still travelling: the swipes count and stop at the last
+ *       chart, never crossing into the Library (owner, 5 November 2026: no
+ *       gesture changes the section), the column on a section.
+ *   W2  Three quick swipes back from there: every swipe counts, so the reader
+ *       is on the first chart, the pager on a page and the column on a section.
  *   W3  A tap while a swipe is still travelling: the move is finished where it
  *       was going, on the second chart, and the pager is on a page.
+ *   W4  A vertical drag in the bottom band and one in the top band, and a
+ *       sideways swipe on Today: the section never changes.
  *
  * Each row runs twice: as Chromium behaves, and as an iPhone does, where a
  * touch stops a smooth scroll in place. The second is simulated by a capture
@@ -141,6 +143,24 @@ function t(id, name, expected, actual) {
     await swipe(-200); await p.waitForTimeout(140); await tap();
     await p.waitForTimeout(2800);
     out.w3 = await where();
+    const drag = async (y0, dy) => {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 200, y: y0 }] });
+      for (let i = 1; i <= 6; i++) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 200, y: y0 + dy * i / 6 }] });
+        await new Promise(r => setTimeout(r, 15));
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    };
+    const h = await p.evaluate(() => innerHeight);
+    await drag(h - 12, -160); await p.waitForTimeout(1200);
+    const w4u = await where();
+    await drag(12, 160); await p.waitForTimeout(1200);
+    const w4a = await where();
+    await p.evaluate(() => { const a = window.__incommonApp; a.setState(a.sectionRoot('today')); a.vtGoSection(0); });
+    await p.waitForTimeout(1500);
+    await swipe(-200); await p.waitForTimeout(1500);
+    const w4b = await where();
+    out.w4 = { afterBottomBand: w4u.tab, afterTopBand: w4a.tab, afterTodaySwipe: w4b.tab, columnOnSection: w4b.columnOnSection };
     await ctx.close();
     return out;
   }
@@ -149,18 +169,21 @@ function t(id, name, expected, actual) {
     const chromiumRun = await run(false);
     const iphoneRun = await run(true);
     const pick = (r, keys) => keys.reduce((o, k) => { o[k] = r[k]; return o; }, {});
-    const W1 = { tab: 'library', libTab: 'study', columnOnSection: true };
+    const W1 = { tab: 'spirit', chart: 2, pagerOnPage: true, columnOnSection: true };
     const W2 = { tab: 'spirit', chart: 0, pagerOnPage: true, columnOnSection: true };
     const W3 = { tab: 'spirit', chart: 1, pagerOnPage: true, columnOnSection: true };
-    t('W1', 'Three swipes forward, the third mid-move, all count: Library, first tab, on a section',
+    t('W1', 'Three swipes forward, the third mid-move: last chart, never the Library',
       { chromium: W1, iphone: W1 },
       { chromium: pick(chromiumRun.w1, Object.keys(W1)), iphone: pick(iphoneRun.w1, Object.keys(W1)) });
-    t('W2', 'Three quick swipes back all count and the interrupted section move is finished: first chart, nothing between screens',
+    t('W2', 'Three quick swipes back all count: first chart, nothing between screens',
       { chromium: W2, iphone: W2 },
       { chromium: pick(chromiumRun.w2, Object.keys(W2)), iphone: pick(iphoneRun.w2, Object.keys(W2)) });
     t('W3', 'A tap mid-move finishes the move where it was going: second chart, on a page',
       { chromium: W3, iphone: W3 },
       { chromium: pick(chromiumRun.w3, Object.keys(W3)), iphone: pick(iphoneRun.w3, Object.keys(W3)) });
+    const W4 = { afterBottomBand: 'spirit', afterTopBand: 'spirit', afterTodaySwipe: 'today', columnOnSection: true };
+    t('W4', 'A drag in either band and a swipe on Today never change the section',
+      { chromium: W4, iphone: W4 }, { chromium: chromiumRun.w4, iphone: iphoneRun.w4 });
   } catch (e) {
     t('W-ERR', 'drive failure: ' + (e && e.message), 'no error', String(e && e.message));
   } finally {

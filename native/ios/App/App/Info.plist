@@ -66,5 +66,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>inCommon uses your approximate location to show which planets you can see from where you are. It stays on your device.</string>
 </dict>
 </plist>

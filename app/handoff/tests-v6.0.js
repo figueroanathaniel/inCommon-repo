@@ -2563,22 +2563,27 @@
       /* ---- N40 to N40b: the maximize overlay's own smoke, and its tooltips ----
          The overlay's controls, dismissal paths and layout were driven by hand
          across three viewports when they were built; nothing in this suite had
-         driven the ⛶ control itself, or checked that a sampled point's tooltip
+         driven the expanded chart's way into it, or checked that a sampled point's tooltip
          actually carries the registry's own symbolism rather than a blank
          string a missing wire would still let the row render with. */
       onStep('new surfaces: the maximize chart overlay');
       app.setState({ tab: 'spirit', spiritView: 'astrology', chartExpandOpen: false, chartExpandAspSel: null });
       await sleep(400);
-      var expandBtn = dd.querySelector('[aria-label="Expand chart"]');
-      if (expandBtn) expandBtn.click();
-      await sleep(500);
+      /* Since 4 November 2026 the Observatory is entered from the expanded
+         chart: the icon on the wheel opens it, and its header button flies. */
+      var expandBtn = { click: function () {
+        var b = dd.querySelector('[aria-label="Open the expanded chart"]'); if (b) b.click();
+        setTimeout(function () { var o = dd.querySelector('[aria-label="Enter the Observatory"]'); if (o) o.click(); }, 350);
+      } };
+      expandBtn.click();
+      await sleep(900);
       var dlg = dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
       var dlgOpen = !!dlg;
       var closeBtn = dlg ? dlg.querySelector('[aria-label="Close the Observatory"]') : null;
       if (closeBtn) closeBtn.click();
       await sleep(350);
       var dlgClosedNow = !dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
-      t('N40', 'The maximize control opens the Observatory and its close control dismisses it',
+      t('N40', 'The expanded chart opens the Observatory and its close control dismisses it',
         { opened: true, closed: true },
         { opened: dlgOpen, closed: dlgClosedNow });
 
@@ -2586,8 +2591,8 @@
          sample crosses asteroids, centaurs, TNOs, nodes, hypotheticals,
          comets and derived points rather than staying inside one category.
          Reopened for this row since N40 just closed it. */
-      if (expandBtn) expandBtn.click();
-      await sleep(500);
+      expandBtn.click();
+      await sleep(900);
       dlg = dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
       var sample = app.EXPANDED_REGISTRY.filter(function (_, i) { return i % 8 === 0; }).slice(0, 10);
       var rowsNow = app.fullChart(true);
