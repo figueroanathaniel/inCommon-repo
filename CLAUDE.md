@@ -3411,6 +3411,25 @@ The rest of the plan was built on 5 November 2026 (the owner: "Proceed"):
   is the overlap; a Personal Month in its last seven days names the next; a
   pinnacle or a period cycle names the years it opens and hands on.
 
+## Derived places and the two decan systems
+Asked for by the owner on 5 November 2026 ("Research derivative astrology",
+then "In every sense, where it applies. Also research decans").
+`docs/astro-upgrade/02-derived-and-decans-sources.md` holds every rule and the
+page it was read on. Four are built, all arithmetic on the chart the wheel
+draws: turned houses (`turnedHouse(n)`, "Seen from the other houses" in the
+house pane, counted from the 7th, 4th, 3rd, 5th and 11th, quoting Lilly where
+he names the meaning); both decans (`decanPair()`: the Chaldean faces, which
+match Firmicus Mathesis II.4 for all 36, beside Parashara's drekkana, the sign,
+its 5th and its 9th, BPHS 6.8); the antiscion (`antiscionOf()`, `180 - lon`,
+Firmicus II.29, "The Mirror" chapter for the ten bodies and the North Node);
+and the annual profection (`profection()`, whole signs from the Ascendant,
+"The Year" chapter on the Ascendant and the year's lord, withheld untimed).
+The Vedic dossier carries each graha's drekkana and the Hellenistic dossier
+the profection, so only readers of those studies get a new dossier. The 10th
+is never a turned frame, because the sources disagree on which parent it is.
+The navamsa, the two relationship charts, a harmonic wheel and solar arc are
+not built and wait on the owner.
+
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
 perfectly center"). The cover's camera looked at a point wandering half a unit

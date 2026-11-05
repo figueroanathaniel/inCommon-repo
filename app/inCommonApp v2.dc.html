@@ -16755,6 +16755,87 @@ class Component extends DCLogic {
     }
     return out;
   }
+  /* Derived places (the owner, 5 November 2026: "In every sense, where it
+     applies"). docs/astro-upgrade/02-derived-and-decans-sources.md holds every
+     rule and where it was read. Four of them live here:
+     - turned houses: any house counted as the 1st of another (Lilly's 9th is
+       the kindred of the wife, the 3rd from the 7th);
+     - the two decan systems side by side: the Chaldean faces of Firmicus
+       (Mathesis II.4, Mars first in Aries) and Parashara's drekkana, the sign
+       itself, its 5th and its 9th (BPHS 6.8);
+     - the antiscion, a degree mirrored across the solstices (Firmicus II.29);
+     - the annual profection, the Ascendant's sign moved on one sign a year.
+     Everything is arithmetic on the chart the wheel draws. */
+  TRAD_RULER = ['Mars', 'Venus', 'Mercury', 'the Moon', 'the Sun', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Saturn', 'Jupiter'];
+  TURN_FRAMES = [[7, 'a partner'], [4, 'your family'], [3, 'a brother or sister'], [5, 'a child'], [11, 'a friend']];
+  TURN_ROOM = ['own self and body', 'money and what they keep', 'siblings and daily talk', 'home and family', 'children and play',
+    'daily work and health', 'closest partner', 'shared money and what ends', 'beliefs and far travel', 'work in the world and standing',
+    'friends and hopes', 'solitude and what stays hidden'];
+  /* Where Lilly names the turned meaning himself (Christian Astrology, 1647,
+     "Of the twelve houses"), keyed by house then frame. */
+  TURN_LILLY = { 9: { 7: 'Lilly gives the 9th to the kindred of one’s wife for exactly this reason.' },
+    5: { 4: 'Lilly gives the 5th the wealth of the father for exactly this reason.' },
+    6: { 4: 'Lilly gives the 6th the father’s brothers and sisters for exactly this reason.' },
+    8: { 7: 'Lilly gives the 8th the dowry of the wife for exactly this reason.' } };
+  turnedHouse(n) {
+    const ord = k => k + (k % 10 === 1 && k !== 11 ? 'st' : k % 10 === 2 && k !== 12 ? 'nd' : k % 10 === 3 && k !== 13 ? 'rd' : 'th');
+    const poss = who => who === 'your family' ? 'your family’s' : who + '’s';
+    const out = [];
+    this.TURN_FRAMES.forEach(([f, who]) => {
+      if (f === n) return;
+      const m = ((n - f + 12) % 12) + 1, lil = (this.TURN_LILLY[n] || {})[f];
+      out.push('Counted from your ' + ord(f) + ', the house of ' + who + ', this is its ' + ord(m) + ': ' + poss(who) + ' ' + this.TURN_ROOM[m - 1] + '.' + (lil ? ' ' + lil : ''));
+    });
+    out.push('Any house can be read this way, by taking another as the 1st and counting on. Which of these rooms belongs to someone you love?');
+    return out;
+  }
+  decanPair(sign, deg) {
+    const PC = window.PlacementContent, si = this.SIGNS12.indexOf(sign);
+    if (!PC || si < 0 || deg == null) return null;
+    const ch = PC.decan(sign, deg), n = ch.n, ds = (si + 4 * (n - 1)) % 12;
+    const lord = this.TRAD_RULER[ds], same = lord.replace(/^the /, '') === ch.ruler;
+    return { chaldean: ch, n: n, dSign: this.SIGNS12[ds], dLord: lord, same: same,
+      text: 'Parashara counts the same ten degrees through the signs of the element instead: this is the ' + this.SIGNS12[ds] + ' decan of ' + sign +
+        ', kept by ' + lord + '.' + (same ? ' Both systems hand this third to the same ruler.' : ' The two traditions disagree here, and each is a true reading of its own school.') };
+  }
+  antiscionOf(lon) { return this.norm360(180 - lon); }
+  /* Bodies of the natal chart standing on another's antiscion, within a
+     degree. Firmicus calls the mirrored degree the one a planet "sends" its
+     antiscion to; a body there is linked to it without an aspect. */
+  antisciaFor(name) {
+    const rows = this.chartAt(this.natalDate()).filter(r => r.lon != null && r.name !== 'South Node');
+    const me = rows.find(r => r.name === name);
+    if (!me) return null;
+    const a = this.antiscionOf(me.lon), s = this.signOf(a);
+    const hits = rows.filter(r => r.name !== name && Math.abs(((r.lon - a + 540) % 360) - 180) <= 1)
+      .map(r => ({ name: r.name, orb: Math.abs(((r.lon - a + 540) % 360) - 180) }));
+    const paras = ['Mirrored across the solstices, your ' + name + ' at ' + Math.floor(me.lon % 30) + '° ' + me.sign + ' falls at ' + Math.floor(s.deg) + '° ' + s.sign +
+      '. The old astrologers called that point its antiscion: two degrees the same distance from the turning of the year, which share the length of their days.'];
+    if (hits.length) hits.forEach(h => paras.push('Your ' + h.name + ' stands on that mirror, within ' + h.orb.toFixed(1) + '°. There is no aspect between them, and still the tradition counts the two as linked.'));
+    else paras.push('Nothing of yours stands on that mirror. It is a quiet point, worth knowing when the sky crosses it.');
+    paras.push('What in you answers to your ' + name + ' without being in plain view of it?');
+    return { lon: a, sign: s.sign, deg: s.deg, hits: hits, paras: paras };
+  }
+  /* The annual profection: the Ascendant's sign moved on one sign for each
+     year of life, so the year from one birthday to the next falls on a house
+     and its ruler keeps the year. Whole signs, as the technique has always
+     been counted; withheld without a birth time, because then there is no
+     Ascendant to begin from. */
+  profection() {
+    const asc = this.ascendant(), p = this.activeProfile();
+    if (!asc || !p || !p.birthDate || this.usingSampleBirth()) return null;
+    const [by, bm, bd] = p.birthDate.split('-').map(Number), now = new Date();
+    const age = now.getFullYear() - by - ((now.getMonth() + 1 < bm || (now.getMonth() + 1 === bm && now.getDate() < bd)) ? 1 : 0);
+    if (!(age >= 0)) return null;
+    const ai = Math.floor(this.norm360(asc.asc) / 30), house = (age % 12) + 1, si = (ai + age) % 12, lord = this.TRAD_RULER[si];
+    const ord = k => k + (k % 10 === 1 && k !== 11 ? 'st' : k % 10 === 2 && k !== 12 ? 'nd' : k % 10 === 3 && k !== 13 ? 'rd' : 'th');
+    const room = (window.PlacementContent && window.PlacementContent.houses[house - 1]) || null;
+    return { age: age, house: house, sign: this.SIGNS12[si], lord: lord, lordName: lord.replace(/^the /, '').replace(/^./, c => c.toUpperCase()),
+      paras: ['From your birthday at ' + age + ' to the one at ' + (age + 1) + ', the year falls on the ' + ord(house) + ' sign from your rising sign, ' + this.SIGNS12[si] +
+        ', and ' + lord + ' keeps the year. The count moves on one sign every birthday and comes back to the rising sign every twelve years.',
+        room ? 'The year asks after ' + room.arena + '. ' + room.asks : '',
+        'Watch what ' + lord + ' does this year, by transit and by where it sits in you: the tradition reads the keeper of the year first.'].filter(Boolean) };
+  }
   /* The progressed Sun and Moon: a day after birth for each year of life. A
      sign change of either is a hand-off in time, the way a cusp is one in
      space. Returns { lead, paras } for the Sun or the Moon, or null. The Moon
@@ -16908,6 +16989,9 @@ class Component extends DCLogic {
            : 'Your chart carries no birth time, so this is a whole-sign solar chart counted from your Sun. It is an honest approximation rather than a timed reading; a birth time and a city in Settings redraw it from a genuine Ascendant.')));
     const hof = this.houseHandoff(n);
     if (hof) lines.push(H('The Hand-off', hof.paras.join(' ')));
+    const turned = this.turnedHouse(n);
+    gen.push(H('Seen from the other houses', turned.join(' ')));
+    lines.push(H('Seen from the other houses', turned.join(' ')));
     if (h) {
       lines.push(H('What this house is for', h.definition + ' ' + h.inLife));
       lines.push(H('Its temperament', 'It is ' + (cls[0] === 'Angular' ? 'an' : 'a') + ' ' + cls[0].toLowerCase() + ' house. ' + cls[1] + ' That classification is older than most of what people argue about in astrology, and it is the part that has held up best.'));
@@ -17880,6 +17964,7 @@ class Component extends DCLogic {
         const nn = gr.find(r => r.name === 'North Node');
         if (nn) { const k = this.norm360(sid(nn.lon) + 180), n = T.nakshatra(k); rows.push('Ketu ' + dm(k) + ' ' + T.RASHI[Math.floor(k / 30)] + (lagnaSign == null ? '' : ' (bhava ' + (((Math.floor(k / 30) - lagnaSign + 12) % 12) + 1) + ')') + ', ' + n.name + ' pada ' + n.pada); }
         out.push('VEDIC SIDEREAL CHART (Lahiri ayanamsa ' + ay.toFixed(4) + '\u00b0, whole sign bhavas, mean Rahu): ' + (lagna == null ? 'Lagna unknown (no birth time); ' : 'Lagna ' + dm(lagna) + ' ' + T.RASHI[lagnaSign] + ', ' + T.nakshatra(lagna).name + '; ') + rows.join('; '));
+        out.push('DREKKANA (D3, Parashara: the sign, its 5th, its 9th): ' + gr.map(r => { const s = sid(r.lon), si = Math.floor(s / 30), d = Math.floor((s % 30) / 10); return nm(r) + ' in ' + T.RASHI[(si + 4 * d) % 12]; }).join('; '));
         const moon = gr.find(r => r.name === 'Moon');
         if (moon) {
           const ms = sid(moon.lon), dashas = T.vimshottari(ms, jd, 18), now = jdAt;
@@ -17920,6 +18005,8 @@ class Component extends DCLogic {
       const RULER = ['Mars', 'Venus', 'Mercury', 'Moon', 'Sun', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Saturn', 'Jupiter'];
       out.push('HELLENISTIC: ' + (day ? 'Day' : 'Night') + ' chart; sect light ' + (day ? 'Sun' : 'Moon') + '; benefic of sect ' + (day ? 'Jupiter' : 'Venus') + ', malefic of sect ' + (day ? 'Saturn' : 'Mars') +
         '; chart ruler ' + RULER[Math.floor(this.norm360(asc.asc) / 30)] + ' (traditional rulers); whole sign houses.');
+      const yr = this.profection();
+      if (yr) out.push('ANNUAL PROFECTION: age ' + yr.age + ', the ' + yr.house + ' house from the Ascendant (' + yr.sign + '); lord of the year ' + yr.lordName + '.');
     }
     return out;
   }
@@ -24237,7 +24324,7 @@ class Component extends DCLogic {
         (sg && hz) ? H('The lesson in the pairing', 'The sign brings the manner and the house brings the room. In you, ' + b.energy + ' moves ' + sg.manner + ', somewhere inside ' + hz.arena + '. ' +
           'It is tempting to let the sign tell the whole story, but ' + hz.arena.split(',')[0] + ' is where you get to find out how that manner actually lands.') : null,
         dig ? H('Dignity, which is not a grade', dig.traditional + ' ' + dig.possibility) : null,
-        dec ? H('Your degree, more closely', 'At ' + Math.floor(r.deg) + '\u00b0 you are in the ' + dec.word + ' decan of ' + r.sign + ', ruled by ' + dec.rulerName + '. That ruler ' + dec.filter.primary + ', which adds ' + dec.filter.gain + ' and asks: ' + dec.filter.asks + ' ' + dec.character) : null,
+        dec ? H('Your degree, more closely', 'At ' + Math.floor(r.deg) + '\u00b0 you are in the ' + dec.word + ' decan of ' + r.sign + ', ruled by ' + dec.rulerName + '. That ruler ' + dec.filter.primary + ', which adds ' + dec.filter.gain + ' and asks: ' + dec.filter.asks + ' ' + dec.character + (() => { const dp = this.decanPair(r.sign, r.deg); return dp ? ' ' + dp.text : ''; })()) : null,
         syn ? H('Put together', syn.synthesis) : null
       ];
       if (hit) {
@@ -30879,7 +30966,7 @@ class Component extends DCLogic {
      kept per placement (plPageKey), so a new placement opens on its cover's
      first chapter. */
   plPacket(rk, name, r, c, ordH, dig, min, b) {
-    const st = this.state, ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+    const st = this.state, ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
     const leads = [
       'Begin with the room. A house is a part of living where a certain kind of thing keeps finding you, and your ' + name + ' does its work here, in the ' + ordH + '.',
       r.sign + ' sits over this house and gives the room its accent. Nobody chooses an accent, and most of us can barely hear our own.',
@@ -30895,6 +30982,13 @@ class Component extends DCLogic {
         : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') });
     const prog = (r.name === 'Sun' || r.name === 'Moon') && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
     if (prog) parts.push({ tab: 'The Hand-off', sec: { heading: prog.heading, lines: prog.paras.map(t => ({ text: t })) }, lead: prog.lead });
+    const core = this.PLNS.some(([pn]) => pn === r.name) && r.name !== 'South Node';
+    const mir = core ? this.antisciaFor(r.name) : null;
+    if (mir) parts.push({ tab: 'The Mirror', sec: { heading: 'Your ' + name + ', mirrored', lines: mir.paras.map(t => ({ text: t })) },
+      lead: 'Fold the zodiac at the solstices and every degree lands on a partner.' });
+    const yr = this.profection();
+    if (yr && (r.name === 'Ascendant' || r.name === yr.lordName)) parts.push({ tab: 'The Year', sec: { heading: r.name === 'Ascendant' ? 'Your year, counted from here' : 'The keeper of your year', lines: yr.paras.map(t => ({ text: t })) },
+      lead: r.name === 'Ascendant' ? 'Each birthday the year moves on one sign from where you rose.' : 'This year the count from your rising sign lands on ' + yr.sign + ', and ' + name + ' keeps it.' });
     const n = parts.length, pg = st.plPageKey === rk ? Math.max(0, Math.min(n - 1, st.plPage || 0)) : 0, all = !!st.plAll;
     const turn = i => () => this.setState({ plPage: i, plPageKey: rk, plAll: false, plFlip: (st.plFlip || 0) + 1 });
     const chapters = parts.map((p, i) => {
@@ -31058,7 +31152,8 @@ class Component extends DCLogic {
       plWorking: [['Strengths', c.working.strengths], ['Challenges', c.working.challenges],
         ['Opportunities', c.working.opportunities], ['Obstacles', c.working.obstacles]]
         .map(([label, items]) => ({ label: label, items: items.map(t => ({ t: t })) })),
-      plDegree: sec(c.degree, 'The last layer, and the one to hold most lightly. A single degree is a fine thread to pull on; sit with it as a prompt rather than a finding.'),
+      plDegree: (() => { const d = sec(c.degree, 'The last layer, and the one to hold most lightly. A single degree is a fine thread to pull on; sit with it as a prompt rather than a finding.');
+        const dp = r.category === 'angle' ? null : this.decanPair(r.sign, r.deg); if (dp) d.lines.push({ text: dp.text }); return d; })(),
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),
       plNoSabianWhy: this.bodyAccuracyNote(rk, name),
