@@ -49,9 +49,24 @@
     if (root.hasAttribute('data-world-hc')) return 'hc';
     return root.getAttribute('data-world') || 'deepfield';
   };
-  function rgbVar(name, fallback) {
-    const v = root ? getComputedStyle(root).getPropertyValue(name).trim() : '';
-    return v || fallback;
+  /* Every value read off the page is read once, when the identity changes or a
+     span arrives, never per frame: a getComputedStyle or a box measurement in
+     the loop forces a style and layout pass over the whole app thirty times a
+     second, which is what made the N phase overrun its budget. */
+  let toks = {};
+  function rgbVar(name, fallback) { return toks[name] || fallback; }
+  function readToks() {
+    toks = {};
+    if (!root) return;
+    const cs = getComputedStyle(root);
+    for (const n of ['--atmc', '--atmc2']) toks[n] = cs.getPropertyValue(n).trim();
+  }
+  let sizeObs = null, seeObs = null;
+  function observers() {
+    if (!sizeObs && typeof ResizeObserver === 'function')
+      sizeObs = new ResizeObserver(es => { for (const e of es) for (const g of glyphs) if (g.span === e.target) { g.size = e.contentRect.width || g.size; if (held) still(); } });
+    if (!seeObs && typeof IntersectionObserver === 'function')
+      seeObs = new IntersectionObserver(es => { for (const e of es) for (const g of glyphs) if (g.span === e.target) g.seen = e.isIntersecting; });
   }
   function hash(n) { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
 
@@ -222,10 +237,12 @@
   }
 
   function inkOf(g) {
-    /* The template's own token, resolved through the canvas's colour. */
+    /* The template's own token, resolved through the canvas's colour. The
+       inline value is read every frame (it costs nothing); the resolved
+       colour only when that value changes or the identity does. */
     const tok = g.span.style.backgroundColor || 'currentColor';
-    if (g.tok !== tok) { g.cv.style.color = tok; g.tok = tok; }
-    return getComputedStyle(g.cv).color;
+    if (g.tok !== tok || !g.ink) { g.cv.style.color = tok; g.tok = tok; g.ink = getComputedStyle(g.cv).color; }
+    return g.ink;
   }
 
   function attach(span) {
@@ -240,9 +257,12 @@
     }
     const ctx = cv.getContext('2d');
     if (!ctx) { cv.remove(); return; }
-    const g = { span, cv, ctx, size: span.getBoundingClientRect().width || 21, ink: '', tok: '' };
+    const g = { span, cv, ctx, size: span.getBoundingClientRect().width || 21, ink: '', tok: '', seen: true };
     g.ink = inkOf(g);
     glyphs.add(g);
+    observers();
+    if (sizeObs) sizeObs.observe(span);
+    if (seeObs) seeObs.observe(span);
     span.setAttribute('data-glyph-live', '');
   }
 
@@ -251,6 +271,8 @@
     for (const g of [...glyphs]) {
       if (!g.span.isConnected || !g.cv.isConnected) {
         glyphs.delete(g);
+        if (sizeObs) sizeObs.unobserve(g.span);
+        if (seeObs) seeObs.unobserve(g.span);
         if (g.span.isConnected) g.span.removeAttribute('data-glyph-live');
       }
     }
@@ -273,7 +295,8 @@
       const world = worldOf();
       if (world !== lastWorld) { lastWorld = world; drops = []; scan(); }
       for (const g of glyphs) {
-        if (now - (g.inked || 0) > 400) { g.ink = inkOf(g); g.size = g.span.getBoundingClientRect().width || g.size; g.inked = now; }
+        if (!g.seen || !g.size) continue;
+        inkOf(g);
         draw(g, T);
       }
     }
@@ -285,10 +308,12 @@
   function still() {
     held = true;
     const T = 3.0;
-    for (const g of glyphs) { g.ink = inkOf(g); g.size = g.span.getBoundingClientRect().width || g.size; draw(g, T); }
+    for (const g of glyphs) { inkOf(g); if (g.size) draw(g, T); }
   }
 
   function kick() {
+    readToks();
+    for (const g of glyphs) g.ink = '';
     scan();
     if (reduced()) { still(); return; }
     held = false;
@@ -322,6 +347,9 @@
       document.removeEventListener('visibilitychange', onVis);
       for (const g of glyphs) { g.span.removeAttribute('data-glyph-live'); g.cv.remove(); }
       glyphs.clear();
+      if (sizeObs) sizeObs.disconnect();
+      if (seeObs) seeObs.disconnect();
+      sizeObs = seeObs = null;
       root = null;
     },
   };
