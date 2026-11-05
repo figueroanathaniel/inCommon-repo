@@ -28553,6 +28553,7 @@ class Component extends DCLogic {
   }
   orOpenDeep(slot) {
     if (String(slot).indexOf('|deep') !== -1) this.writeLS(this.oracleDeepKey(), true);
+    this.orNoteLast(slot);
     this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
   }
   oracleAsk(period, depth, again, quiet) {
@@ -28594,6 +28595,7 @@ class Component extends DCLogic {
         const loud = !this._orQuiet[slot] || !!(this.state.orOpened || {})[slot];
         delete held[slot]; delete this._orTry[slot]; delete waits[slot]; delete this._orQuiet[slot]; delete this._orFirst[slot];
         this.oracleKeep(slot, { reading: r.reading, label: r.label || '', at: Date.now() });
+        if (!quiet || (this.state.orOpened || {})[slot]) this.orNoteLast(slot);
         this.setState({ orBusyMap: { ...held }, orWaitMap: waits, orErr: null, orTick: (this.state.orTick || 0) + 1 });
         if (loud) this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
         return;
@@ -32322,7 +32324,7 @@ class Component extends DCLogic {
         const on = st.tab === id;
         return { t, on: on, c: on ? 'var(--ac)' : 'var(--dim)', dot: on ? 'var(--ac)' : 'transparent',
           /* Tapping a tab returns to the root of that tab, the way a tab bar should. */
-          go: () => this.setState({ tab: id, ...this.sectionRoot(id) }) };
+          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.sectionRoot(id) }) };
       }),
       greet: (h => h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')(new Date().getHours()),
       pyLine: py ? this.artNum(py.value).replace(/^a/, 'A') + ' ' + py.value + ' Personal Year.' : '',
@@ -34385,7 +34387,7 @@ class Component extends DCLogic {
         return { label, glyph, icon: this.uiIcon(id), cur: on ? 'page' : 'false', meta: '',
           c: on ? 'var(--tx)' : 'var(--dim)', gc: on ? 'var(--ac)' : 'rgba(238,240,248,.42)',
           bg: on ? 'rgba(var(--atmc),.28)' : 'transparent', edge: on ? 'var(--ac)' : 'transparent',
-          go: () => this.setState({ tab: id, ...this.sectionRoot(id) }) };
+          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.sectionRoot(id) }) };
       })
     };
   }
@@ -34786,6 +34788,45 @@ class Component extends DCLogic {
      open inside the section as well as move to it: a sheet, a selected
      placement, an aspect, an atlas section. dtNav and the desktop tabs row
      already did half of this and are now built from the same list. */
+  /* A SECOND PRESS ON THE TAB YOU ARE IN IS A FRESH START (the owner, 5
+     November 2026): the section opens as it does just after signing in.
+     Today on the astrology horoscope, My Charts at the top of the Human
+     Design chart, the Library on Study, the Oracle on the last reading the
+     reader opened this visit on this chart (else the standard daily one),
+     Settings at the top. Nothing is asked of the Oracle here: the reading
+     waits for its press, by "No reading until it is asked for". */
+  orNoteLast(slot) {
+    const s = String(slot).split('|');
+    if (s[0] === 'cycle' || !s[2]) return;
+    this._orLast = { period: s[0], depth: s[2], stamp: this.chartStamp(this.activeProfile()) };
+  }
+  sectionOpening(id) {
+    if (id === 'today') return { hPage: 0, alignOpen: false, swOpen: false, cyOpen: false };
+    if (id === 'spirit') return { spiritView: this.isVt() ? null : 'humanDesign', chartExpandOpen: false,
+      ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) };
+    if (id === 'library') return { libSub: 'study', libView: null };
+    if (id === 'oracle') {
+      const L = this._orLast, here = L && L.stamp === this.chartStamp(this.activeProfile());
+      return { orPeriod: here ? L.period : 'daily', orDepth: here ? L.depth : 'standard' };
+    }
+    return {};
+  }
+  isVt() { return (this.state.dtW || window.innerWidth || 1440) < this.BP.md; }
+  navAgain(id, i) {
+    this.setState({ tab: id, ...this.sectionRoot(id), ...this.sectionOpening(id) });
+    if (this.isVt() && id === 'spirit') this.vtGoTab(0);
+    const top = () => {
+      const root = this.isVt() ? this.vtSecEls()[i] : document.querySelector('main[data-shell="desktop"]');
+      if (!root) return;
+      const all = [root].concat([].slice.call(root.querySelectorAll('*')));
+      all.forEach(n => {
+        if (n.matches && n.matches('[data-vt-scroll],[data-vt-pager]')) return;
+        if (n.scrollTop > 0) n.scrollTop = 0;
+      });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(top));
+    setTimeout(top, 260);
+  }
   sectionRoot(id) {
     const shared = { placeSel: null, aspSel: null, dpSel: null, numSel: null, memSel: null, lexDeg: null };
     if (id === 'spirit') return { ...shared, spiritView: null, focusToday: false, hdSel: null, ttCard: null, icHex: null, dlOpen: null };
@@ -34900,6 +34941,7 @@ class Component extends DCLogic {
              Spirit tap also returns the pager to its first page, because on this
              shell the pager IS how deep you are. */
           go: () => {
+            if (on) { this.navAgain(id, i); return; }
             this.setState(this.sectionRoot(id));
             this.vtGoSection(i);
             if (id === 'spirit') this.vtGoTab(0);

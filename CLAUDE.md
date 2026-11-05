@@ -3157,6 +3157,20 @@ events through the DevTools protocol: down to the list's end, an immediate
 flick holds, a flick after the pause moves the page 285px; the same upward;
 the section column never moves.
 
+## A second press on a tab is a fresh start
+Asked for by the owner on 5 November 2026. Pressing the section the reader is
+already in (the phone's tab bar, the desktop sidebar and rail) runs
+`navAgain()`: the section's root (`sectionRoot()`), then its opening
+(`sectionOpening()`), then every scroller inside the section back to the top
+(never `[data-vt-scroll]` or a pager). Today opens on the astrology horoscope
+(`hPage` 0); My Charts on the Human Design chart (page 0 on the phone,
+`spiritView: 'humanDesign'` on the desktop); the Library on Study; Settings at
+its top. The Oracle opens on the last reading the reader opened or had written
+this visit (`orNoteLast()`, kept in `_orLast` with the chart's stamp), and on
+the standard daily reading when there is none or the chart has changed since.
+**It never asks for a reading**: it only chooses which press is on screen.
+A first press on another tab is unchanged.
+
 ## A row of pills becomes a dropdown when it is a choice of one
 The Human Design readings (My Type, Chart, Mood, Work, Sleep, Diet & Exercise,
 Health, Synastry, Just Me, At Me) and the Throughline filter were rows of pills,
@@ -6386,12 +6400,28 @@ entered from here only** (the owner's choice, same day): Enter the Observatory
 (`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
 buttons are gone. N40 goes through both.
 
-**Expanded and Advanced** (owner, 5 November 2026). The 22 in `BLOOM_CORE`
-are the Expanded set and every point is Advanced: the dialog's two buttons say
-so. On the chart card the Expanded Chart draws the Expanded set alone
-(`coreSet` in the wheel vals, so the 3D and Orbital stage follow it), and an
-Advanced placements switch (`chartAdvanced`, per visit) draws every point. The
+**Basic, Advanced and Expert** (owner, 5 November 2026, renamed the same
+evening). The chart card's only control above the wheel is Basic / Advanced /
+Expert (`chartModes`): Basic is `chartMode: 'basic'`; Advanced is the 22 in
+`BLOOM_CORE` (`coreSet` in the wheel vals, so the 3D and Orbital stage follow
+it); Expert is every point (`chartAdvanced` true, per visit). In Expert the
+points beyond the 22 carry `data-xin="1"` and arrive one after another in
+order of longitude (`animation-delay` 120ms plus 55ms each), fading in with a
+glow in `--atmc2`, so the glow is the identity's own; under reduced motion
+they simply appear. The dialog's two buttons read Advanced and Expert, and the
 dialog and the Observatory still place every point.
+
+**The view switch and the lock live in a rail inside the chart**
+(`data-chart-rail`, top right of the drawing, both charts, both shells): the
+views as a small vertical radiogroup (2D, Orbital, 3D, and the study's own
+first view, named Rashi, Pillars or Sun), and under it a lock that holds the
+page still so a finger turns the chart freely (`csFree`/`hsFree`, the same
+`setExplore()` Free look used; offered in the deep views on every device).
+The Human Design card keeps only Design / Personality / Both above its
+drawing. A native view pads its right edge (`railPad`) so the rail sits
+beside the square, not on it. **3D turns a full circle in every direction**:
+pitch is not clamped, the camera's up vector turns with it, and the reset
+homes the short way round.
 
 **The forecast banner is one line until opened** (owner, 5 November 2026):
 the label and the forecast's first line, 46px, with the rest behind the press.
