@@ -1645,6 +1645,13 @@
          themeSet owns the profile key: the harness must never write themeProf
          itself. */
       var bgMid = app.cardToken('--bg', ''), pxMid = cv ? cornerPixel(cv) : null;
+      /* The identity this row found is put back after it. Left on midnight,
+         the rest of the phase ran under Cyberspace, whose three.js world
+         drew in this frame and in the phone frame (which reads the same
+         profile key), and under a software renderer that took the phase
+         from two minutes past its five minute cap. It also left the
+         reader's stored theme changed, which a phase must never do. */
+      var themeWas = app.state.themeKey || 'deepfield';
       app.themeSet('dawn');
       await sleep(600);
       var bgDawn = app.cardToken('--bg', ''), cv2 = card ? app.synCardCanvas(card) : null;
@@ -1657,6 +1664,7 @@
         { tokensDiffer: !!bgMid && !!bgDawn && bgMid !== bgDawn,
           pixelFollowed: !!pxMid && !!pxDawn && (pxMid.r !== pxDawn.r || pxMid.g !== pxDawn.g || pxMid.b !== pxDawn.b),
           matchesDawnGround: !!wantDawn && !!pxDawn && Math.abs(wantDawn.r - pxDawn.r) < 3 && Math.abs(wantDawn.g - pxDawn.g) < 3 && Math.abs(wantDawn.b - pxDawn.b) < 3 });
+      app.themeSet(themeWas);
       app.setState({ synManual: null, synWith: null });
       await sleep(300);
 
