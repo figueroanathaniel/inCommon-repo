@@ -150,7 +150,7 @@ data that leaves the device:
 | Chart summary sent to Moonshot AI | Yes, when the Oracle is used | Yes | App functionality | Shared with a third party (Google's form: "shared") |
 | Support messages and their email | Yes, when sent | Yes | Customer support | |
 | Usage data | No | | | The usage count stays on the device |
-| Location | No | | | A birth place is typed, not read from the device |
+| Location | No | | | The Forecast reads a coarse position from the device (5 November 2026) and it never leaves the device, so it is not collected. Apple still asks for the purpose string, which is in `Info.plist`; Android declares `ACCESS_COARSE_LOCATION` |
 | Advertising or tracking | No | | | |
 
 Encrypted in transit: yes. Deletion can be requested: yes, in the app and at

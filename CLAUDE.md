@@ -3491,8 +3491,10 @@ the world list once it lands. Refused or unavailable, `swPlace()` falls back
 to the profile's birth place; the sample has none, so then there is no
 parade. The memo key carries the place. `Permissions-Policy` in the bundle's
 `_headers` allows `geolocation=(self)` for this, and the Privacy Policy's
-section 3 says so. The store apps' native location permission is not set up,
-so there it falls back.
+section 3 says so. The store apps ask through the web view: iOS has
+`NSLocationWhenInUseUsageDescription` in `Info.plist` and Android declares
+`ACCESS_COARSE_LOCATION`, with no plugin, because the browser's own
+`navigator.geolocation` is what the page calls. Not yet run on a device.
 
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
