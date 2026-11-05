@@ -370,13 +370,52 @@ const IMAGERY = [
   "thresholds and architecture: doors, stairs, rooms and windows",
   "roads and journeys: maps, crossings and the miles between",
 ];
-async function voiceFor(userId: string, period: string, key: string) {
+// THE STUDY AND THE WORLD SET THE VOICE (the owner, 5 November 2026). The
+// page adds one line to the dossier, "READING STYLE: study <key> (...); world
+// <key> (...)", only when the reader has left the defaults (a plain Western
+// study in Deep Field). Because the line is in the dossier, the stored
+// reading's key moves with it, so a changed study or world is a new reading
+// and counts toward the day. A world sets the imagery and the register in place
+// of the hashed pair; a study sets the vocabulary the reading is spoken in.
+// Keys are the app's own: midnight is Cyberspace, dawn is Nature's Roots, gold
+// is the Subterranean Biome.
+const WORLD_VOICE: Record<string, { voice: string; imagery: string }> = {
+  midnight: {
+    voice: "playful and a little nostalgic, crisp short lines like messages arriving in a late night chat window, warm under the chrome",
+    imagery: "late 1990s home computing: the dial up handshake, gray dialog boxes and their buttons, chat rooms and away messages, starfield screensavers, wireframe 3D and the glow of a monitor in a dark room",
+  },
+  dawn: {
+    voice: "grounded and unhurried, like an elder speaking beside a fire, plain words that carry weight",
+    imagery: "the primordial earth: river clay and the hands that shape it, roots, carved stone and petroglyphs, ancestral ornament, the warm Caribbean shore, the hearth and the slow work of an excavation bringing old things to light",
+  },
+  gold: {
+    voice: "slow and luminous, sentences that drift, breathe and glow",
+    imagery: "the deep sea: bioluminescent light in dark water, kelp and coral growing, currents and tides below the surface, slow breathing creatures and the neon of living things in the deep",
+  },
+};
+const STUDY_VOICE: Record<string, string> = {
+  vedic: "Read as a Jyotish reading does: speak of rashis, the bhavas, the Moon's nakshatra and the running dasha exactly as the dossier names them, giving each Sanskrit term its plain meaning once.",
+  chinese: "Read through the Four Pillars: the Day Master, the balance of the five elements and the animal year as the dossier gives them, in the register of the almanac.",
+  hellenistic: "Read as the Hellenistic manuals do: sect, the chart ruler and the year's profection as the dossier gives them, plainly and with their old dignity.",
+  sidereal: "Read in the sidereal zodiac the dossier gives, naming its signs as they stand against the stars.",
+  draconic: "Read the draconic chart the dossier gives as the chart of purpose beneath the personality, measured from the North Node.",
+  heliocentric: "Read the heliocentric positions the dossier gives as the view from the Sun: the bodies as one family turning around a single centre.",
+  placidus: "The houses are Placidus houses; name the system once and read the houses as the dossier places them.",
+  koch: "The houses are Koch houses; name the system once and read the houses as the dossier places them.",
+  equal: "The houses are Equal houses; name the system once and read the houses as the dossier places them.",
+};
+const STYLE_LINE = /READING STYLE: study (\w+)[^;\n]*; world (\w+)/;
+async function voiceFor(userId: string, period: string, key: string, dossier = "") {
   const h = await shortHash(`${userId}|${period}|${key}`);
+  const style = STYLE_LINE.exec(dossier);
+  const world = style ? WORLD_VOICE[style[2]] : undefined;
+  const study = style ? STUDY_VOICE[style[1]] : undefined;
   const emphasis = EMPHASES[parseInt(h.slice(0, 4), 16) % EMPHASES.length];
-  const voice = VOICES[parseInt(h.slice(4, 8), 16) % VOICES.length];
-  const imagery = IMAGERY[parseInt(h.slice(8, 12), 16) % IMAGERY.length];
+  const voice = world ? world.voice : VOICES[parseInt(h.slice(4, 8), 16) % VOICES.length];
+  const imagery = world ? world.imagery : IMAGERY[parseInt(h.slice(8, 12), 16) % IMAGERY.length];
   return `Lead with ${emphasis}, and let that set the order of the reading. Within the style above, write in a voice that is ${voice}, and draw your images mostly from ${imagery}. ` +
-    "This shapes emphasis and voice only: every placement, sign, house, aspect, gate, channel, number and date must be exactly as the dossier states, and nothing may be added that the dossier does not contain.";
+    (study ? study + " " : "") +
+    "This shapes emphasis and voice only: every placement, sign, house, aspect, gate, channel, number and date must be exactly as the dossier states, and nothing may be added that the dossier does not contain. The READING STYLE line is an instruction about voice, not a fact to report.";
 }
 
 // No dash of either kind reaches the page, whatever the model writes. Built
@@ -583,7 +622,7 @@ Deno.serve(async (req) => {
   const instructions = cycle ? CYCLE_INSTRUCTIONS : !deep ? INSTRUCTIONS : part === "b" ? DEEP_B_INSTRUCTIONS : DEEP_A_INSTRUCTIONS;
   const ask = cycle ? "Compose the CYCLE AUDIT."
     : `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.`;
-  const voice = await voiceFor(user.id, period, key);
+  const voice = await voiceFor(user.id, period, key, dossier);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), Math.max(10e3, TIME_LIMIT_MS - (Date.now() - started)));
   let status = 0, raw = "";
