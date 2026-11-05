@@ -22001,7 +22001,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      uniforms, which is what lets the zodiac slide outward in the morph. */
   var F_DISC = FOG + [
     'uniform vec3 uBg; uniform vec3 uLine; uniform vec3 uAtm; uniform vec3 uAtm2; uniform vec3 uHi; uniform vec3 uAc2; uniform vec3 uSel;',
-    'uniform float uZero; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
+    'uniform float uZero; uniform float uSignOff; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
     'uniform vec2 uPtr; uniform float uPtrOn; uniform float uBreath; uniform float uHouse; uniform float uTimed; uniform vec3 uOrbits[12]; uniform float uNOrb; uniform float uCusp[12];',
     'varying vec2 vUv; varying vec3 vW;',
     'float ring(float r, float at, float w){ float fw = fwidth(r) * 1.2 + 0.002; return 1.0 - smoothstep(w, w + fw, abs(r - at)); }',
@@ -22009,7 +22009,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     ' vec2 p = vec2(vW.x, -vW.z); float r = length(p);',
     ' if (r > uOut + 0.9) discard;',
     ' float th = atan(p.y, p.x); float lon = mod(degrees(th) - 180.0 + uZero + 720.0, 360.0);',
-    ' float rel = mod(lon - uZero + 720.0, 360.0);',
+    ' float rel = mod(lon - uZero + 720.0, 360.0); float zl = mod(lon - uSignOff + 720.0, 360.0);',
     ' float fw = fwidth(r) * 1.2 + 0.002; float w1 = 1.0 - uK;',
     ' vec3 c = uBg;',
     /* the inner field: a lens of warm light under the aspects */
@@ -22017,12 +22017,12 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     ' c += uAtm * 0.05 * smoothstep(uOut + 0.4, 0.0, r);',
     /* the sign band */
     ' float inSign = smoothstep(uSignIn - fw, uSignIn + fw, r) * (1.0 - smoothstep(uSignOut - fw, uSignOut + fw, r));',
-    ' float alt = step(0.5, fract(lon / 60.0));',
+    ' float alt = step(0.5, fract(zl / 60.0));',
     ' c += uAc2 * inSign * (0.035 + 0.03 * alt);',
-    ' float sd = abs(fract(lon / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
+    ' float sd = abs(fract(zl / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
     ' c += uLine * inSign * (1.0 - smoothstep(0.012, 0.012 + fw, sd)) * 0.32;',
     /* a tick for every degree on the band\'s inner edge, longer at five and ten */
-    ' float dd = abs(fract(lon + 0.5) - 0.5) * 0.01745 * r; float d5 = abs(fract(lon / 5.0 + 0.5) - 0.5) * 5.0 * 0.01745 * r; float d10 = abs(fract(lon / 10.0 + 0.5) - 0.5) * 10.0 * 0.01745 * r;',
+    ' float dd = abs(fract(zl + 0.5) - 0.5) * 0.01745 * r; float d5 = abs(fract(zl / 5.0 + 0.5) - 0.5) * 5.0 * 0.01745 * r; float d10 = abs(fract(zl / 10.0 + 0.5) - 0.5) * 10.0 * 0.01745 * r;',
     ' float tl = mix(0.1, 0.17, step(d5, 0.03)); tl = mix(tl, 0.26, step(d10, 0.03));',
     ' float inTick = step(uSignIn, r) * (1.0 - step(uSignIn + tl, r));',
     ' c += uLine * inTick * (1.0 - smoothstep(0.006, 0.006 + fw, min(dd, min(d5, d10)))) * 0.42;',
@@ -22480,7 +22480,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.discMat = new T.ShaderMaterial({ vertexShader: V_UV, fragmentShader: F_DISC, transparent: true, depthWrite: false,
       uniforms: { uCam: this.U.uCam, uFog: this.U.uFog, uBreath: this.U.uBreath, uBg: { value: new T.Vector3() }, uLine: { value: new T.Vector3() }, uAtm: { value: new T.Vector3() },
         uAtm2: { value: new T.Vector3() }, uHi: { value: new T.Vector3() }, uAc2: { value: new T.Vector3() }, uSel: { value: new T.Vector3() },
-        uZero: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
+        uZero: { value: 0 }, uSignOff: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
         uPtr: { value: new T.Vector2() }, uPtrOn: { value: 0 }, uHouse: { value: -1 }, uTimed: { value: 1 }, uOrbits: { value: orbV }, uNOrb: { value: 0 }, uCusp: { value: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] } } });
     var disc = new T.Mesh(new T.CircleGeometry(13.4, 160), this.discMat);
     disc.rotation.x = -Math.PI / 2;
@@ -22715,6 +22715,8 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.content = g; this.bodies = []; this.aspects = []; this.signs = []; this.houseLabels = []; this.angleObjs = [];
     this.world.add(g);
     this.discMat.uniforms.uZero.value = m.zero;
+    /* the study's 0 Aries, as a tropical longitude: sidereal and draconic charts turn the band, never the bodies */
+    this.discMat.uniforms.uSignOff.value = m.signOff || 0;
     this.discMat.uniforms.uCusp.value = this.cuspRel();
     this.discMat.uniforms.uTimed.value = m.timed ? 1 : 0;
 
@@ -22723,7 +22725,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     (m.signs || []).forEach(function (s, i) {
       var col = self.colorOf(s.c);
       var spr = self.medallion(s.glyph, { size: Math.round(28 * ui), ring: false, color: col.c, scale: 0.78, anchorY: 0.5 });
-      spr.userData.lon = i * 30 + 15;
+      spr.userData.lon = i * 30 + 15 + (m.signOff || 0);
       g.add(spr);
       self.signs.push(spr);
     });
@@ -23374,7 +23376,8 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.readInset();
     var fw = new T.Vector3(); cam.getWorldDirection(fw);
     var th = Math.atan2(-fw.z, fw.x), lon = ((th / RAD - 180 + (this.model ? this.model.zero : 0)) % 360 + 720) % 360;
-    H.tel.hdg.textContent = SIGNS3[Math.floor(lon / 30) % 12] + ' ' + Math.floor(lon % 30) + '°';
+    var zl = ((lon - ((this.model && this.model.signOff) || 0)) % 360 + 360) % 360;
+    H.tel.hdg.textContent = SIGNS3[Math.floor(zl / 30) % 12] + ' ' + Math.floor(zl % 30) + '°';
     H.tel.alt.textContent = this.fmt(Math.abs(cam.position.y)) + (cam.position.y < 0 ? ' S' : '');
     var sp = f && f.active ? f.speedNow : 0;
     H.tel.vel.textContent = this.fmt(sp);
@@ -47780,7 +47783,7 @@ class Component extends DCLogic {
     const a = this.antiscionOf(me.lon), s = this.signOf(a);
     const hits = rows.filter(r => r.name !== name && Math.abs(((r.lon - a + 540) % 360) - 180) <= 1)
       .map(r => ({ name: r.name, orb: Math.abs(((r.lon - a + 540) % 360) - 180) }));
-    const paras = ['Mirrored across the solstices, your ' + name + ' at ' + Math.floor(me.lon % 30) + '° ' + me.sign + ' falls at ' + Math.floor(s.deg) + '° ' + s.sign +
+    const paras = ['Mirrored across the solstices, your ' + name + ' at ' + Math.floor(this.signOf(me.lon).deg) + '° ' + me.sign + ' falls at ' + Math.floor(s.deg) + '° ' + s.sign +
       '. The old astrologers called that point its antiscion: two degrees the same distance from the turning of the year, which share the length of their days.'];
     if (hits.length) hits.forEach(h => paras.push('Your ' + h.name + ' stands on that mirror, within ' + h.orb.toFixed(1) + '°. There is no aspect between them, and still the tradition counts the two as linked.'));
     else paras.push('Nothing of yours stands on that mirror. It is a quiet point, worth knowing when the sky crosses it.');
@@ -47798,7 +47801,7 @@ class Component extends DCLogic {
     const [by, bm, bd] = p.birthDate.split('-').map(Number), now = new Date();
     const age = now.getFullYear() - by - ((now.getMonth() + 1 < bm || (now.getMonth() + 1 === bm && now.getDate() < bd)) ? 1 : 0);
     if (!(age >= 0)) return null;
-    const ai = Math.floor(this.norm360(asc.asc) / 30), house = (age % 12) + 1, si = (ai + age) % 12, lord = this.TRAD_RULER[si];
+    const ai = this.signOf(asc.asc).idx, house = (age % 12) + 1, si = (ai + age) % 12, lord = this.TRAD_RULER[si];
     const ord = k => k + (k % 10 === 1 && k !== 11 ? 'st' : k % 10 === 2 && k !== 12 ? 'nd' : k % 10 === 3 && k !== 13 ? 'rd' : 'th');
     const room = (window.PlacementContent && window.PlacementContent.houses[house - 1]) || null;
     return { age: age, house: house, sign: this.SIGNS12[si], lord: lord, lordName: lord.replace(/^the /, '').replace(/^./, c => c.toUpperCase()),
@@ -47829,17 +47832,17 @@ class Component extends DCLogic {
     const YEAR = 365.2422 * 86400000, YR = ter ? 27.32158 * 86400000 : YEAR, tN = this.t2000(nd);
     const age = (Date.now() - nd.getTime()) / YR;
     if (!(age > 0)) return (memo[mk] = null);
-    const sgn = y => Math.floor(this.norm360(this.lonOf(name, tN + y)) / 30);
+    const sgn = y => this.signOf(this.lonOf(name, tN + y), tN + y).idx;
     const step = ter ? (name === 'Sun' ? 1 : 0.1) : (name === 'Sun' ? 1 : 0.2);
     const edge = (a, b) => { const s = sgn(a); for (let k = 0; k < 30; k++) { const m = (a + b) / 2; if (sgn(m) === s) a = m; else b = m; } return b; };
     const find = (from, dir, lim) => { const s0 = sgn(from); for (let y = from; dir > 0 ? y < from + lim : y > Math.max(0, from - lim); y += dir * step) {
       const y2 = dir > 0 ? y + step : Math.max(0, y - step); if (sgn(y2) !== s0) return dir > 0 ? edge(y, y2) : edge(y2, y); if (y2 === 0) break; } return null; };
-    const lonNow = this.norm360(this.lonOf(name, tN + age)), si = Math.floor(lonNow / 30), sign = this.SIGNS12[si];
+    const lonNow = this.norm360(this.lonOf(name, tN + age)), sNow = this.signOf(lonNow, tN + age), si = sNow.idx, sign = this.SIGNS12[si];
     const natalSi = sgn(0), last = find(age, -1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 95 : 3.5)), next = find(age, 1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 40 : 3.5));
     const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const when = y => { const d = new Date(nd.getTime() + y * YR); return timed ? 'in ' + MON[d.getMonth()] + ' ' + d.getFullYear() : 'around ' + d.getFullYear(); };
     const old = y => { const n = Math.floor(y * YR / YEAR); return n < 1 ? 'in your first year' : 'the year you turned ' + n; };
-    const gone = Math.floor(lonNow % 30), ahead = 30 - (lonNow % 30);
+    const gone = Math.floor(sNow.deg), ahead = 30 - sNow.deg;
     const nm = (ter ? 'tertiary ' : 'progressed ') + name, paras = [];
     if (last != null) {
       const from = this.SIGNS12[(si + 11) % 12];
@@ -47899,7 +47902,7 @@ class Component extends DCLogic {
     }
     if (segs.length === 1) {
       const s = segs[0], next = this.signOf(cs[n % 12]), prev = this.signOf(cs[(i + 11) % 12]);
-      const nextSame = next.sign === s.sign && this.norm360(cs[n % 12]) % 30 > 1e-6, prevSame = prev.sign === s.sign && i !== 0;
+      const nextSame = next.sign === s.sign && this.signOf(cs[n % 12]).deg > 1e-6, prevSame = prev.sign === s.sign && i !== 0;
       if (!nextSame && !prevSame) return null;
       if (nextSame) paras.push(s.sign + ' also opens your ' + ord(n % 12 + 1) + ' house, so the same sign hands itself on: what ' + s.sign + ' keeps in this room, it carries next door. ' + both(R(s.sign), 'runs both.'));
       if (prevSame) paras.push(s.sign + ' reaches this house from your ' + ord((i + 11) % 12 + 1) + ', where it began. One sign holds two rooms in a row here. ' + both(R(s.sign), 'runs both.'));
@@ -47916,7 +47919,7 @@ class Component extends DCLogic {
     const start = W.norm360(W.gateStart(g)), GD = 360 / 64, LD = GD / 6;
     const end = start + GD, cut = Math.ceil(start / 30) * 30;
     if (!(cut > start + 1e-9 && cut < end - 1e-9)) return null;
-    const a = this.signOf(start), b = this.signOf(cut % 360);
+    const a = this.signOfT(start), b = this.signOfT(cut % 360);
     return { gate: g, a: a.sign, b: b.sign, aDeg: cut - start, bDeg: end - cut, line: Math.floor((cut - start) / LD) + 1, cut: cut % 360 };
   }
   gateHandoffText(g, act) {
@@ -47928,7 +47931,7 @@ class Component extends DCLogic {
       (thin ? 'The share in ' + h.b + ' is a sliver, a few hours of the Sun\u2019s travel, so ' + h.b + ' is a threshold at the gate\u2019s far edge rather than a second home.'
             : 'So this gate has two sign colourings: ' + h.a + ' at its opening, ' + h.b + ' toward its close.');
     if (act && act.lon != null) {
-      const side = this.signOf(act.lon).sign;
+      const side = this.signOfT(act.lon).sign;
       t += ' Your ' + act.body + ' here sits on the ' + side + ' side' + (act.line === h.line ? ', on the very line where the sign turns' : '') + '.';
     }
     return t;
@@ -48521,7 +48524,50 @@ class Component extends DCLogic {
     const p = helio(el), earth = helio(this.EARTH_EL);
     return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
   }
-  signOf(lon) { const l = this.norm360(lon), i = Math.floor(l / 30); return { sign: this.SIGNS12[i], deg: l - i * 30, idx: i }; }
+  /* THE ZODIAC FOLLOWS THE CHART STUDY (the owner, 5 November 2026: "When
+     changing which chart to read, it should change all of the information to
+     that chart's specific features. Placements and chart visuals alike.")
+     Every longitude in the app stays tropical, because the ephemeris, the
+     aspects, the transits and the Human Design gates are all measured there,
+     and a frame shifted in one place and not another sets two readings 24
+     degrees apart. What moves is where a sign begins: zodiacOff(t) is the
+     tropical longitude of the study's 0 Aries at instant t (days from J2000),
+     and signOf() reads a sign and a degree from there. Sidereal studies put
+     it at the ayanamsa plus the nutation, at the instant of the position, as
+     the Swiss Ephemeris does; the Draconic study at the natal North Node, for
+     the natal chart and the sky alike. signOfT() is the tropical reading, for
+     the Human Design wheel, which is tropical whatever is studied. */
+  zodiacOff(t) {
+    const x = this.chartStudyOf();
+    if (!x || x.zodiac === 'tropical') return 0;
+    if (t == null) {
+      const p = this.activeProfile(), k = (p ? p.birthStamp : '') + '|' + x.key;
+      if (!this._zNat || this._zNat.k !== k) this._zNat = { k, t: this.t2000(this.natalDate()) };
+      t = this._zNat.t;
+    }
+    if (x.zodiac === 'draconic') {
+      const p = this.activeProfile(), k = (p ? p.birthStamp : '') + '|dr';
+      if (!this._zDr || this._zDr.k !== k) { const nn = this.lonOf('North Node', this.t2000(this.natalDate())); this._zDr = { k, v: nn == null ? 0 : this.norm360(nn) }; }
+      return this._zDr.v;
+    }
+    const T = window.ChartTraditions;
+    if (!T) return 0;
+    const day = Math.round(t * 4) / 4, k = x.zodiac + '|' + day, m = this._zSid || (this._zSid = new Map());
+    if (m.has(k)) return m.get(k);
+    const jd = day + 2451545, A = window.Astronomy;
+    let nut = null;
+    try { if (A && A.e_tilt) nut = A.e_tilt(A.MakeTime(new Date((jd - 2440587.5) * 864e5))).dpsi / 3600; } catch (e) { nut = null; }
+    const v = this.norm360(T.ayanamsa(x.zodiac, jd) + (nut != null ? nut : T.dpsi(jd)));
+    if (m.size > 4000) m.clear();
+    m.set(k, v);
+    return v;
+  }
+  signOf(lon, t) { const l = this.norm360(lon - this.zodiacOff(t)), i = Math.floor(l / 30); return { sign: this.SIGNS12[i], deg: l - i * 30, idx: i }; }
+  signOfT(lon) { const l = this.norm360(lon), i = Math.floor(l / 30); return { sign: this.SIGNS12[i], deg: l - i * 30, idx: i }; }
+  /* The study's sign boundary at or before lon, as a tropical longitude:
+     what a whole sign house, a solar chart and the wheel's sign band start
+     from. */
+  signStart(lon, t) { const o = this.zodiacOff(t); return this.norm360(Math.floor(this.norm360(lon - o) / 30) * 30 + o); }
   /* THE FLAG WAS THE WRONG SOURCE OF TRUTH. "timed" was read off
      p.hasBirthTime, which only profile-manager sets. A partner reached from a
      shared card, or typed into the synastry form, carries a real birth time
@@ -49026,18 +49072,22 @@ class Component extends DCLogic {
   houseCusps(asc) {
     if (!asc) return null;
     const k = this.houseSys();
-    if (asc._hcKey === k && asc._hc) return asc._hc;
+    const zk = k + '|' + this.zodiacOff().toFixed(6);
+    if (asc._hcKey === zk && asc._hc) return asc._hc;
     const H = window.HouseSystems, R = this.RAD;
     let out = null;
     if (H && [asc.ramc, asc.obliquity, asc.latitude].every(Number.isFinite)) {
       const r = H.cusps(k, { ramc: asc.ramc / R, eps: asc.obliquity / R, lat: asc.latitude / R });
       if (r.ok) out = { cusps: r.cusps, drawn: r.system, asked: r.asked, fallback: !!r.fallback };
     }
+    /* A whole sign house is the study's sign, so a sidereal or draconic
+       chart counts its houses from the sign the Ascendant holds there. */
+    if (out && out.drawn === 'W' && this.zodiacOff() !== 0) out = null;
     if (!out) {
-      const s = Math.floor(this.norm360(asc.asc) / 30) * 30;
+      const s = this.signStart(asc.asc);
       out = { cusps: Array.from({ length: 12 }, (_, i) => this.norm360(s + 30 * i)), drawn: 'W', asked: k, fallback: k !== 'W' };
     }
-    asc._hcKey = k; asc._hc = out;
+    asc._hcKey = zk; asc._hc = out;
     return out;
   }
   /* The cusps of the chart on screen, timed or not: the chosen system from a
@@ -49054,7 +49104,7 @@ class Component extends DCLogic {
     if (asc) {
       const cs = this.houseCusps(asc).cusps, H = window.HouseSystems;
       if (H) return H.houseOf(lon, cs);
-      return ((Math.floor(this.norm360(lon) / 30) - Math.floor(cs[0] / 30) + 12) % 12) + 1;
+      return ((this.signOf(lon).idx - this.signOf(cs[0]).idx + 12) % 12) + 1;
     }
     return ((this.signOf(lon).idx - natalSun.idx + 12) % 12) + 1;
   }
@@ -49156,7 +49206,7 @@ class Component extends DCLogic {
   }
   chartAt(date) {
     const t = this.t2000(date);
-    return this.PLNS.map(([n, g]) => { const lon = this.lonOf(n, t), s = this.signOf(lon); return { name: n, glyph: g, lon: lon, sign: s.sign, deg: s.deg, idx: s.idx, mean: this.PL_MEAN[n] }; });
+    return this.PLNS.map(([n, g]) => { const lon = this.lonOf(n, t), s = this.signOf(lon, t); return { name: n, glyph: g, lon: lon, sign: s.sign, deg: s.deg, idx: s.idx, mean: this.PL_MEAN[n] }; });
   }
   // The natal set, cached per birth-data stamp and mode so dragging the wheel
   // never recomputes an ephemeris.
@@ -49359,7 +49409,7 @@ class Component extends DCLogic {
       if (keys.some((o, j) => j !== i && o.length > ks.length && ks.split('|').every(x => o.split('|').indexOf(x) !== -1))) return;
       if (out.some(g => g.k === ks)) return;
       const signs = [];
-      w.forEach(p => { const sg = this.SIGNS12[Math.floor(p.lon / 30)]; if (signs.indexOf(sg) === -1) signs.push(sg); });
+      w.forEach(p => { const sg = this.signOf(p.lon).sign; if (signs.indexOf(sg) === -1) signs.push(sg); });
       if (signs.length < 2) return;
       out.push({ k: ks, signs: signs, names: w.map(p => p.name), span: this.norm360(w[w.length - 1].lon - w[0].lon) });
     });
@@ -49370,7 +49420,7 @@ class Component extends DCLogic {
   outOfSign(x) {
     const want = this.OUT_OF_SIGN_SIGNS[x.asp];
     if (want == null || x.a.lon == null || x.b.lon == null) return null;
-    const ia = Math.floor(this.norm360(x.a.lon) / 30), ib = Math.floor(this.norm360(x.b.lon) / 30);
+    const ia = this.signOf(x.a.lon).idx, ib = this.signOf(x.b.lon).idx;
     let sd = Math.abs(ia - ib); if (sd > 6) sd = 12 - sd;
     return sd === want ? null : { ia: ia, ib: ib, sd: sd, want: want };
   }
@@ -49556,7 +49606,7 @@ class Component extends DCLogic {
         rows: list.map(r => {
           const known = r.lon != null, key = this.pointKey(r);
           const h = known && r.group !== 'angle' ? this.houseOf(r.lon, sun, asc) : null;
-          const d = known ? ((r.lon % 30) + 30) % 30 : 0, deg = Math.floor(d), min = Math.floor((d - deg) * 60);
+          const d = known ? this.signOf(r.lon).deg : 0, deg = Math.floor(d), min = Math.floor((d - deg) * 60);
           return {
             key, name: this.pointLabel(r), glyph: r.glyph || '·', c: this.CAT_COLOR[cat] || 'var(--ac2-hi)',
             pos: known ? deg + '°' + String(min).padStart(2, '0') + '′ ' + SG[Math.floor(((r.lon % 360) + 360) % 360 / 30)] : 'not computed',
@@ -49777,7 +49827,7 @@ class Component extends DCLogic {
   // 360° -> screen. The Ascendant sits at the left edge (9 o'clock) and
   // longitude increases counterclockwise, which is the standard wheel. Without a
   // timed chart the natal Sun's sign boundary takes the Ascendant's place.
-  wheelZero() { const asc = this.ascendant(); return asc ? asc.asc : this.signOf(this.placed(false)[0].lon).idx * 30; }
+  wheelZero() { const asc = this.ascendant(); return asc ? asc.asc : this.signStart(this.placed(false)[0].lon); }
   polar(lon, r) {
     const th = (180 + (lon - this.wheelZero())) * this.RAD;
     return { x: 400 + r * Math.cos(th), y: 400 - r * Math.sin(th) };
@@ -51805,7 +51855,7 @@ class Component extends DCLogic {
     this._rpKey = key; this._rp = out;
     return out;
   }
-  posOn(name, d) { const lon = this.lonOf(name, this.t2000(d)); if (lon == null) return null; const g = this.signOf(lon); return { deg: g.deg, sign: g.sign }; }
+  posOn(name, d) { const lon = this.lonOf(name, this.t2000(d)); if (lon == null) return null; const g = this.signOf(lon, this.t2000(d)); return { deg: g.deg, sign: g.sign }; }
   retroScan() {
     const key = Component.localDay();
     if (this._rtKey === key && this._rt) return this._rt;
@@ -54150,7 +54200,9 @@ class Component extends DCLogic {
     const litSigns = {}, litHouses = {}, shapes = [], ticks = [];
     let litBody = null, horizon = false;
     const poly = (lons, r, c, w, o, dash) => shapes.push({ pts: lons.concat([lons[0]]).map(l => { const q = P(l, r); return f1(q.x) + ',' + f1(q.y); }).join(' '), c: c, w: w, o: o, dash: dash || 'none' });
-    const anchor = skySun ? skySun.lon : 0;
+    /* the wheel is drawn in the study's zodiac: a body stands at its place there */
+    const zo = this.zodiacOff(), zl = l => this.norm360(l - zo);
+    const anchor = skySun ? zl(skySun.lon) : 0;
     if (e.kind === 'sign') litSigns[e.idx] = 'on';
     if (e.kind === 'house') { litHouses[e.idx] = 'on'; litSigns[e.idx] = 'soft'; }
     if (e.kind === 'body') {
@@ -54283,10 +54335,10 @@ class Component extends DCLogic {
           tip: s.name, go: peek('sign:' + s.name, { l: pct(q2.x), t: pct(q2.y) }, s.glyph + '\uFE0E ' + s.name, 'sign:' + s.name) }; }),
       apHouseNums: Array.from({ length: 12 }, (_, i) => { const q2 = P(i * 30 + 15, 132), lit = litHouses[i] === 'on';
         return { n: String(i + 1), l: pct(q2.x), t: pct(q2.y), lit: lit ? '1' : '0', c: lit ? 'var(--tx)' : 'var(--mut)', tip: this.apOrd(i + 1) + ' house', go: peek('house:' + (i + 1), { l: pct(q2.x), t: pct(q2.y) }, 'The ' + this.apOrd(i + 1) + ' house', 'house:' + (i + 1)) }; }),
-      apSkyGlyphs: S.sky.map(r => { const q2 = P(r.lon, 101), lit = r.name === litBody;
+      apSkyGlyphs: S.sky.map(r => { const q2 = P(zl(r.lon), 101), lit = r.name === litBody;
         return { g: r.glyph + '︎', l: pct(q2.x), t: pct(q2.y), lit: lit ? '1' : '0', c: lit ? 'var(--ac2-hi)' : 'var(--tx)', fs: lit ? '17px' : '13px',
           glow: lit ? '0 0 14px rgba(var(--atmc2),.9)' : '0 0 6px rgba(var(--atmc),.8)', tip: r.name + ' now, ' + fmtDeg(r), go: peek('sky:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, r.glyph + '\uFE0E ' + r.name + ' now, ' + fmtDeg(r), 'body:' + r.name) }; }),
-      apNatal: S.natal.filter(r => this.PLNS.slice(0, 10).some(x => x[0] === r.name)).map(r => { const q2 = P(r.lon, 84);
+      apNatal: S.natal.filter(r => this.PLNS.slice(0, 10).some(x => x[0] === r.name)).map(r => { const q2 = P(zl(r.lon), 84);
         return { l: pct(q2.x), t: pct(q2.y), tip: 'Your ' + r.name + ', ' + fmtDeg(r), go: peek('natal:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, 'Your ' + r.name + ', ' + fmtDeg(r), 'body:' + r.name) }; }),
       apStars: stars,
       apHorizonPath: (() => { const a = P(0, 176), b = P(180, 176); return 'M' + f1(a.x) + ' ' + f1(a.y) + 'L' + f1(b.x) + ' ' + f1(b.y); })(),
@@ -62248,7 +62300,7 @@ class Component extends DCLogic {
     return {
       plTitle: name, plKind: kind.toUpperCase(), plEpi: b.role || '', plEpiOn: !!b.role,
       plCoords: [
-        { k: 'Sign', v: (this.SIGN_GLYPHS[Math.floor(this.norm360(r.lon) / 30)] || '') + ' ' + r.sign },
+        { k: 'Sign', v: (this.SIGN_GLYPHS[this.signOf(r.lon).idx] || '') + ' ' + r.sign },
         { k: 'Degree', v: Math.floor(r.deg) + '\u00b0' + min + '\u2032' },
         { k: 'House', v: ordH } ],
       plSealOn: !!dig, plSeal: dig ? dig.label : '', plSealC: dig ? (dig.strong ? 'var(--ac2-hi)' : 'var(--blue)') : 'var(--mut)',
@@ -62741,6 +62793,7 @@ class Component extends DCLogic {
             const zero = this.wheelZero(), P = (lon, r) => this.polar(lon, r);
             const CS = this.chartCusps(), mid = i => CS[i] + this.cuspSpan(CS, i) / 2;
             const SG = ['\u2648\uFE0E', '\u2649\uFE0E', '\u264A\uFE0E', '\u264B\uFE0E', '\u264C\uFE0E', '\u264D\uFE0E', '\u264E\uFE0E', '\u264F\uFE0E', '\u2650\uFE0E', '\u2651\uFE0E', '\u2652\uFE0E', '\u2653\uFE0E'];
+            const zo = this.zodiacOff();
             const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
             const houseOf = r => this.houseOf(r.lon, natalSun, asc);
             const arc = (lonA, lonB, rOut, rIn) => {
@@ -62803,7 +62856,7 @@ class Component extends DCLogic {
             const csKey = [this.chartStamp(prof), expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
             if (this._csModelKey !== csKey) {
               this._csModelKey = csKey;
-              this._csModel = { key: csKey, zero, cusps: CS.slice(), timed: !!asc, owner: prof ? prof.name : '',
+              this._csModel = { key: csKey, zero, cusps: CS.slice(), timed: !!asc, owner: prof ? prof.name : '', signOff: zo,
                 sub: this.houseModeText(asc),
                 signs: SG.map((glyph, i) => ({ glyph, c: this.SIGN_EL_C[i % 4] })),
                 bodies: placedRows.map(r => {
@@ -62888,7 +62941,7 @@ class Component extends DCLogic {
                 const noop = () => {};
                 const out = [];
                 SG.forEach((glyph, i) => {
-                  const m = P(i * 30 + 15, 294);
+                  const m = P(i * 30 + 15 + zo, 294);
                   out.push({ hit: '26px', l: pc(m.x), t: pc(m.y), text: glyph, aria: 'Sign ' + (i + 1), cur: 'default', ls: 'normal',
                     c: this.SIGN_EL_C[i % 4],
                     f: '400 22px Georgia,serif', go: noop });
@@ -62920,8 +62973,8 @@ class Component extends DCLogic {
                 return out.map(w => ({ ...w, wb: w.wb || '-', bx: w.bx || '0' }));
               })(),
               wheelSigns: SG.map((glyph, i) => {
-                const mid = P(i * 30 + 15, 294);
-                return { glyph, path: arc(i * 30, i * 30 + 30, 322, 266),
+                const mid = P(i * 30 + 15 + zo, 294);
+                return { glyph, path: arc(i * 30 + zo, i * 30 + 30 + zo, 322, 266),
                   fill: i % 2 ? 'rgba(255,255,255,.022)' : 'transparent',
                   c: this.SIGN_EL_C[i % 4],
                   gx: mid.x.toFixed(1), gy: mid.y.toFixed(1) };
