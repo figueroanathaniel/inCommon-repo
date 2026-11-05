@@ -54,8 +54,8 @@ and kept failing.
 
 ## The theme boundary
 Four identities plus a modifier: `deepfield` (**the default**, today's tokens
-exactly), `midnight` (the previous default, kept whole as a delta), `dawn`
-(warm, Petrona display), `gold` (the older gold and violet), and a contrast
+exactly), `midnight` (Cyberspace), `dawn` (Nature's Roots), `gold`
+(Subterranean Biome), and a contrast
 modifier that hardens whichever identity is active rather than being a fifth
 palette. `THEMES` and `HC_SHARED` live on the logic class; `themeVarsFor(scope)`
 builds the override string for one root.
@@ -64,9 +64,9 @@ builds the override string for one root.
 Deep Field now. Six places name the default key and they must agree: the
 initial `themeKey` in state, `get theme()`, `themeKeyOf()`, the seed in
 `themeLoad()`, the free path in `themeVarsFor()`, and the current key in
-`themeVals()`. Midnight lost the seat and lost nothing else: its delta carries
-the exact values the three roots held before, so selecting it returns the app
-to the palette it shipped with, token for token.
+`themeVals()`. Midnight once carried the palette the app shipped with, token
+for token; since 5 November 2026 the three keys hold three worlds instead (see
+"The four appearances are worlds"), and that palette is in git history.
 
 **A theme is token deltas, never style holes.** The literal Deep Field tokens
 stay in the markup and each of the three roots ends with ONE hole that appends
@@ -82,10 +82,10 @@ button on purpose.
 The atmosphere hue is `--atmc`, a bare RGB triplet that substitutes inside
 `rgba(var(--atmc),.32)`, because that layer had the cosmic blue written out in
 33 places and kept it in every theme. The glow's second lobe is `--atmc2`
-(Deep Field `242,214,158`, midnight `139,92,246`), separate from `--ac2` because
-it is atmosphere rather than accent and moves with the identity: Deep Field
-takes it warm so the lower lobe reads as a horizon, dawn takes it warm, gold
-takes it violet.
+(Deep Field `242,214,158`, Cyberspace aqua, Nature's Roots lantern ochre,
+the Biome magenta), separate from `--ac2` because it is atmosphere rather than
+accent and moves with the identity: Deep Field takes it warm so the lower lobe
+reads as a horizon.
 
 The same fault survived in the third lobe until V1.9: it had the action green
 written into it as `rgba(47,255,143,.07)`, so every identity carried a green
@@ -150,6 +150,84 @@ Theme is per profile (`incommon.theme.<id>`), inheriting the device value once
 `getComputedStyle` and the effective background. What it lacked was coverage,
 so the T rows run the same gate at the same 4.5:1 floor over each identity and
 each identity hardened. 128 assertions, none relaxed, none removed.
+
+## The four appearances are worlds
+Decided by the owner on 5 November 2026: the app centres on its four
+appearances and each is vastly different, very 3D and textured. Deep Field
+stays. Midnight became **Cyberspace** (1999: AOL, gray windows, chrome, the 3D
+pipes), Dawn became **Nature's Roots** (an excavation under a Caribbean night:
+clay strata, Taíno carvings, a cemí, a painted jar, a clay tablet and a
+ziggurat, cucubanos; dark, by the owner's earlier word) and Gold became the
+**Subterranean Biome** (breathing underwater: glowing algae, kelp, coral,
+jellyfish, a fish school, bubbles). The concept is the artifact in
+`/mnt/project-files/four-themes/`. **The keys did not move**, because a theme
+is stored per profile by key; only the labels did.
+
+**Three layers, and each owns one thing.** The token delta in `THEMES` carries
+palette, faces, `--rad` and the four lift tokens, which is what makes a card a
+bevel, a fired clay tile or a lit membrane. The head sheet, keyed on
+`data-world` on the app root, carries the shapes a token cannot (every radius in
+the template is inline): square corners and a title bar stripe for Cyberspace,
+hand shaped corners for Roots, cell like curves for the Biome, and the ground
+each world draws under the natal wheel. `worldSync()` writes that attribute as
+a DOM write, never a template hole, and removes it for Deep Field and under the
+contrast modifier (`data-world-hc`). The world itself is `app/theme-worlds.js`
+(shell layer, global `ThemeWorlds`), three.js scenes ported from the concept,
+drawn into `[data-atmos-world]` over the sky.
+
+**All four are dark with light type, and that is forced.** `--ac` is fixed and
+written as text in over two hundred places, so a light identity fails the
+contrast gate wherever the action green is a word. The concept's light gray
+Cyberspace windows became dark steel gray with the same bevels.
+
+**The world is veiled where the reading sits.** Text is set straight onto the
+world in many places, and `contrastFails()` measures against `--bg`, which
+cannot see a canvas, so a green T row would say nothing about a bright pixel
+behind a sentence. `theme-worlds.js` lays a scrim in the identity's ground
+colour over its canvas, .7 at the centre and .55 at the edges, and every
+surface carries alpha of .88 or more. Do not thin the scrim to show more world
+without measuring type over the brightest point of each scene.
+
+**Only the active world exists**, and it is disposed whole before another is
+built. It holds one frame under reduced motion, is not drawn under the contrast
+modifier, pauses while the page is hidden, runs at about 30 frames a second at
+a pixel ratio of at most 1.25, and falls back to the plain atmosphere without
+WebGL or three.js.
+
+**Two measured fixes the worlds needed.** `--ok` is lightened in Cyberspace
+(`#8fe0ad`) and Nature's Roots (`#86d8a3`): the muted success green read at
+3.5:1 and 4.1:1 on their lighter surfaces, as the DEFINED tags on the wiring.
+It is still a pastel, never the action green. And the life ribbon's current
+segment is washed at `.34` of `--atmc`, not `.48`, because the Biome's cyan
+at that strength put white type under 4.5:1. Both were found by the T rows.
+
+**The faces.** Each identity sets six faces, by the owner's word of 5
+November 2026, and four tokens joined the three to carry them: `--fg` the
+greeting (the one line per screen that wears a fill, `[data-greet]`, styled
+in the head sheet and plain under the contrast modifier), `--fk` kickers and
+tabs (every `--fu` style that is uppercase), `--fm` data (times, degrees,
+gates: the tabular and monospace styles and the clock), and `--fc` controls
+(every other button that was `--fu`). All four are declared in the three
+roots, and the contrast modifier sets `--fg` and `--fk` to Karla with `--fd`.
+Cyberspace: Pixelify Sans headlines with Tiny5 digits (Pixelify draws its 5
+as an S, so Tiny5 is loaded as a digits only subset, the third entry of the
+face, and set first in `--fd` and `--fu`), Audiowide in chrome, Silkscreen,
+VT323, Verdana, Tahoma bold; ligatures are off, because Pixelify's fi joins
+into a glyph that reads as F. Nature's Roots: Grenze, Macondo with an ember
+glow, Cinzel, Courier Prime, Spectral, Alegreya Sans. The Biome: Comfortaa,
+Sniglet lit cyan into magenta, Quicksand, Share Tech Mono, Nunito, Varela
+Round. Deep Field, the owner's pick of three on 5 November 2026: Cormorant
+Unicase headlines, Pinyon Script greeting in gold, Josefin Sans kickers and
+controls, Space Mono data, Newsreader reading. Roots and the Biome also set
+`--fu` (Alegreya Sans, Nunito), because the owner asked for the Biome's look
+on every screen and a label left in `--fu` was the last thing still in Karla.
+A paragraph is `--fb`, never `--fd`: headline faces are not reading faces, and
+the paragraphs that wore `--fd` were moved. The wheel's numbers, degrees and
+angles are `var(--fm)` and its centre name `var(--fd)`, written into the `f`
+shorthand the wheel labels carry; the sign and body glyphs keep Georgia, for
+the symbols. A theme's other faces ride in one request from its `more` list.
+None of them is in `app/fonts/`, so a `--fonts self` build falls back along
+each token's stack.
 
 ## A category is not a semantic colour
 `--ac` means a primary action, `--ok` means a confirmed value, `--crisis` means

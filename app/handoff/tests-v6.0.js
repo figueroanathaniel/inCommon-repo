@@ -792,9 +792,11 @@
          triplets --atmc and --atmc2 must resolve to per identity. Neither is
          in HC_SHARED, so the hardened case expects the same pair. */
       var themeCases = [['deepfield', false, '47,79,214', '242,214,158'], ['deepfield', true, '47,79,214', '242,214,158'],
-        ['midnight', false, '47,79,214', '139,92,246'], ['midnight', true, '47,79,214', '139,92,246'],
-        ['dawn', false, '200,160,120', '190,118,96'], ['dawn', true, '200,160,120', '190,118,96'],
-        ['gold', false, '211,173,110', '154,122,200'], ['gold', true, '211,173,110', '154,122,200']];
+        /* 5 November 2026: midnight, dawn and gold became Cyberspace, Nature's
+           Roots and the Subterranean Biome, each with its own atmosphere. */
+        ['midnight', false, '16,132,208', '62,232,255'], ['midnight', true, '16,132,208', '62,232,255'],
+        ['dawn', false, '80,200,196', '217,164,65'], ['dawn', true, '80,200,196', '217,164,65'],
+        ['gold', false, '143,244,255', '255,82,220'], ['gold', true, '143,244,255', '255,82,220']];
       for (var wi = 0; wi < THEME_WIDTHS.length; wi++) {
       var W = THEME_WIDTHS[wi], wLabel = W[2];
       onStep('themes: loading at ' + wLabel);
@@ -2169,6 +2171,11 @@
 
       await goD('#/library/readings', 800);
       var tarotG = dd.querySelector('[role="group"][aria-label="Tarot"]'), bookG = dd.querySelector('[role="group"][aria-label="The Book of Changes"]');
+      // The two halves enter on a staggered animation, so measure where they
+      // land rather than where they are mid flight: a world drawing behind
+      // the app can hold the first frame of it past the 800ms wait.
+      var settle = [tarotG, bookG].filter(Boolean).reduce(function (a, e) { return a.concat(e.getAnimations ? e.getAnimations().map(function (x) { return x.finished.catch(function () {}); }) : []); }, []);
+      await Promise.race([Promise.all(settle), sleep(4000)]);
       var tr = tarotG && tarotG.getBoundingClientRect(), br = bookG && bookG.getBoundingClientRect();
       var divEl = tarotG && tarotG.nextElementSibling, dr = divEl && divEl.getBoundingClientRect();
       var openedTarot = null, openedBook = null;
