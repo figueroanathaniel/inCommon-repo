@@ -3482,10 +3482,17 @@ evening and morning, and four or more is a parade, one event per run of
 nights. Uranus and Neptune never count, because they need a telescope. The
 two 3s are chosen, not read: the phrase is not a term of astronomy, and those
 are the figures that reproduce Kielder Observatory's dated list when run from
-Kielder (SW6). Do not tune them without rerunning SW6. The place is the
-profile's (`swPlace()`, the owner's choice over the device's location or a
-typed place), the memo key carries it, and the sample has none, so
-it shows no parade.
+Kielder (SW6). Do not tune them without rerunning SW6. The place is where
+the reader is (the owner, 5 November 2026, reversing the profile place he
+chose that morning): opening the sheet asks the device for a coarse position
+(`swLocate()`), kept as `incommon.here`, rounded to two decimals, never sent,
+and named by the nearest town in the gazetteer (`swNearest()`), renamed from
+the world list once it lands. Refused or unavailable, `swPlace()` falls back
+to the profile's birth place; the sample has none, so then there is no
+parade. The memo key carries the place. `Permissions-Policy` in the bundle's
+`_headers` allows `geolocation=(self)` for this, and the Privacy Policy's
+section 3 says so. The store apps' native location permission is not set up,
+so there it falls back.
 
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit

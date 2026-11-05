@@ -51309,10 +51309,57 @@ class Component extends DCLogic {
     const to = new Date(d); to.setDate(to.getDate() + this.SW_DAYS);
     return { from: d, to, key: d.toDateString() };
   }
-  /* Where a planet parade is seen from: the place on the profile, the one
-     place the app holds for the reader (the owner's choice, 5 November
-     2026, over the device's location or a typed place). None, no parade. */
+  /* Where a planet parade is seen from: where the reader is now (the owner,
+     5 November 2026, reversing the profile place chosen earlier that day).
+     Opening the sheet asks the device once for its position, coarse, and it
+     is kept on this device only, rounded to about a kilometre, and never
+     sent. Refused, unavailable or not yet answered, the profile's place
+     stands in, so a parade is still drawn somewhere true and named. */
+  HERE_KEY = 'incommon.here';
+  swHere() {
+    const h = this.readLS(this.HERE_KEY, null);
+    if (!h || !Number.isFinite(+h.lat) || !Number.isFinite(+h.lon)) return null;
+    if (!h.world && this.gazReady()) { h.name = this.swNearest(+h.lat, +h.lon) || h.name; h.world = true; this.writeLS(this.HERE_KEY, h); }
+    return h;
+  }
+  swNearest(lat, lon) {
+    const G = window.Gazetteer, rows = G && G.ROWS;
+    if (!rows || !rows.length) return '';
+    const cl = Math.cos(lat * Math.PI / 180);
+    let best = null, bd = Infinity, big = null, bigS = -Infinity;
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i], dy = r.lat - lat, dx = (r.lon - lon) * cl, d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = r; }
+      /* Within about 15 km, a town people know beats the nearest hamlet. */
+      if (d < 0.0185) { const s = Math.log10(Math.max(r.pop || 0, 1)) - d * 60; if (s > bigS) { bigS = s; big = r; } }
+    }
+    const r = big || (bd < 0.25 ? best : null);
+    return r ? String(r.name || '').trim() : '';
+  }
+  swLocate() {
+    const g = typeof navigator !== 'undefined' && navigator.geolocation;
+    if (!g || this._swLocating) return;
+    const h = this.swHere();
+    if (h && Date.now() - (+h.at || 0) < 6 * 36e5) return;
+    this._swLocating = true;
+    try {
+      g.getCurrentPosition(pos => {
+        this._swLocating = false;
+        const lat = Math.round(pos.coords.latitude * 100) / 100, lon = Math.round(pos.coords.longitude * 100) / 100;
+        let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { tz = ''; }
+        this.writeLS(this.HERE_KEY, { lat, lon, tz, name: this.swNearest(lat, lon), world: this.gazReady(), at: Date.now() });
+        /* The nearest town is named from the world list once it is here,
+           without a callback: gazWant keeps one, and a birth form may be
+           waiting on it. swHere() names it again when the list lands. */
+        this.gazWant();
+        if (this.state.swOpen) this.swSoon();
+        this.setState({ swTick: Date.now() });
+      }, () => { this._swLocating = false; }, { enableHighAccuracy: false, maximumAge: 6 * 36e5, timeout: 15000 });
+    } catch (e) { this._swLocating = false; }
+  }
   swPlace() {
+    const h = this.swHere();
+    if (h) return { lat: +h.lat, lon: +h.lon, name: h.name || '', tz: h.tz || '' };
     const p = this.activeProfile();
     if (!p || !Number.isFinite(+p.birthLat) || !Number.isFinite(+p.birthLon) || p.birthLat === null || p.birthLon === null) return null;
     const name = String(p.birthLocation || '').split(',')[0].trim();
@@ -51371,7 +51418,7 @@ class Component extends DCLogic {
           + (e.moonLit < 0.35 ? ', so the faint ones will show.' : e.moonLit > 0.75 ? ', and its light will hide the faint ones.' : '.'),
         when: t };
       case 'parade': {
-        const pl = this._swPl || {}, eve = e.side === 'evening', tzo = { month: 'long', day: 'numeric' };
+        const pl = this.swPlace() || this._swPl || {}, eve = e.side === 'evening', tzo = { month: 'long', day: 'numeric' };
         let tz = null; try { if (pl.tz) { new Intl.DateTimeFormat(undefined, { timeZone: pl.tz }); tz = pl.tz; } } catch (x) { tz = null; }
         const dt = d => { try { return d.toLocaleDateString(undefined, tz ? { ...tzo, timeZone: tz } : tzo); } catch (x) { return d.toDateString(); } };
         const a = dt(e.from), b = dt(e.to), each = eve ? 'Every evening' : 'Every morning';
@@ -51395,7 +51442,7 @@ class Component extends DCLogic {
   }
   skyWeatherVals() {
     const open = !!this.state.swOpen;
-    const go = () => { this.setState({ swOpen: true }); this.swSoon(); };
+    const go = () => { this.setState({ swOpen: true }); this.swSoon(); this.swLocate(); };
     const close = () => this.setState({ swOpen: false });
     const base = { swGo: go, swClose: close, swOpen: open, swStop: e => { if (e && e.stopPropagation) e.stopPropagation(); } };
     if (!open) return { ...base, swBusy: false, swNone: false, swDays: [], swSpan: '' };
