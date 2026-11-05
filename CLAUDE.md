@@ -7524,3 +7524,19 @@ serving the site, and that address cannot be removed. Deploy previews and
 branch deploys are other hosts and are not redirected. If the address moves, change
 the three together, then submit the sitemap again in Search Console.
 Description copy follows the voice rules: no method, no fate, no dash.
+
+## About is in the profile menu
+Asked for by the owner on 5 November 2026: an About page that does not get in
+the way of the tabs, in the profile icon's menu, "dedicated and decorated
+according to the concept of gaining insight". The menu row sits after Settings
+(`pmAboutGo`) and opens a dialog in both shells (`aboutOpen`, cleared by
+`dialogEscape()`): the mark drawn as a lens (two whole circles, the warm light
+where they meet, faint rays, a twinkling field, `data-pl` so it breathes by
+opacity only and is still under reduced motion), then what inCommon is, insight
+rather than instruction, the name, and the four places it holds. It says what
+inCommon is and never how anything is worked out, by "No disclaimers", and it
+carries no legal link, so K55's counts are unchanged. **The company line is
+`ABOUT_COMPANY`**, empty until the owner confirms the legal name: while it is
+empty the "Kept by" line is not drawn and only the credit line shows. Measured
+with the harness's own `contrastFails()` and `tapTargets()` over the dialog,
+four identities hardened and not, at 1440, 390 and 375: clean.

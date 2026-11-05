@@ -6688,6 +6688,10 @@ input[type="date"]{color-scheme:dark}
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
       </button>
+      <button onClick="{{ pmAboutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.6" style="flex:none;display:block;color:var(--mut)"><circle cx="9.5" cy="12" r="6"></circle><circle cx="14.5" cy="12" r="6"></circle></svg>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">About</span>
+      </button>
       <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
           <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
@@ -7115,6 +7119,84 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;gap:10px">
         <button data-lift onClick="{{ callClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Not now</button>
         <button data-lift onClick="{{ callMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">More lines</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ABOUT, FROM THE MENU (the owner, 5 November 2026: an About page that does
+     not get in the way of the tabs, in the profile menu, dedicated to gaining
+     insight on inCommon and the company that keeps it). It says what inCommon
+     is and never how anything is worked out, by "No disclaimers". The drawing
+     is the mark as a lens: two whole circles, and the light where they meet. -->
+<sc-if value="{{ aboutOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ aboutClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:82">
+    <div role="dialog" aria-label="About inCommon" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:90%;border-radius:22px 22px 0 0;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--bg);border:1px solid var(--bd);padding:0 0 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
+      <div data-portal="1" style="position:relative;flex:none;overflow:hidden;border-bottom:1px solid var(--bd);background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 70% at 50% 110%,rgba(var(--atmc2),.22),transparent 66%),var(--bg)">
+        <svg aria-hidden="true" viewBox="0 0 320 168" style="display:block;width:100%;height:auto;max-height:220px">
+          <defs><clipPath id="abLensClip"><circle cx="138" cy="84" r="46"></circle></clipPath></defs>
+          <g fill="var(--tx)">
+            <circle data-pl="tw" cx="24" cy="22" r="1.1" style="animation-delay:-1s"></circle>
+            <circle data-pl="tw" cx="58" cy="118" r=".8" style="animation-delay:-2.4s"></circle>
+            <circle data-pl="tw" cx="86" cy="40" r="1.3" style="animation-delay:-.4s"></circle>
+            <circle data-pl="tw" cx="40" cy="70" r=".7" style="animation-delay:-3s"></circle>
+            <circle data-pl="tw" cx="248" cy="30" r="1.2" style="animation-delay:-1.7s"></circle>
+            <circle data-pl="tw" cx="292" cy="96" r=".9" style="animation-delay:-.9s"></circle>
+            <circle data-pl="tw" cx="270" cy="140" r="1.1" style="animation-delay:-2.9s"></circle>
+            <circle data-pl="tw" cx="230" cy="122" r=".7" style="animation-delay:-3.4s"></circle>
+            <circle data-pl="tw" cx="300" cy="44" r=".7" style="animation-delay:-2s"></circle>
+            <circle data-pl="tw" cx="16" cy="148" r="1" style="animation-delay:-1.3s"></circle>
+            <circle data-pl="tw" cx="160" cy="14" r=".8" style="animation-delay:-2.2s"></circle>
+            <circle data-pl="tw" cx="112" cy="156" r=".8" style="animation-delay:-.6s"></circle>
+          </g>
+          <g data-pl="breath" stroke="rgba(var(--atmc2),.55)" stroke-width="1" stroke-linecap="round" stroke-dasharray="2 6">
+            <line x1="160" y1="44" x2="160" y2="8"></line><line x1="160" y1="124" x2="160" y2="162"></line>
+            <line x1="172" y1="54" x2="200" y2="26"></line><line x1="148" y1="54" x2="120" y2="26"></line>
+            <line x1="172" y1="114" x2="200" y2="142"></line><line x1="148" y1="114" x2="120" y2="142"></line>
+          </g>
+          <g clip-path="url(#abLensClip)"><circle data-pl="breath" cx="182" cy="84" r="46" fill="rgba(var(--atmc2),.42)"></circle></g>
+          <g fill="none">
+            <circle cx="138" cy="84" r="46" stroke="var(--ac2)" stroke-width="6" stroke-opacity=".32"></circle>
+            <circle cx="182" cy="84" r="46" stroke="var(--ac2)" stroke-width="6" stroke-opacity=".32"></circle>
+            <circle cx="138" cy="84" r="46" stroke="var(--ac2-hi)" stroke-width="1.5"></circle>
+            <circle cx="182" cy="84" r="46" stroke="var(--ac2-hi)" stroke-width="1.5"></circle>
+          </g>
+          <circle data-pl="breath" cx="160" cy="84" r="3.2" fill="var(--tx)"></circle>
+        </svg>
+        <button data-lift onClick="{{ aboutClose }}" aria-label="Close About" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font:400 20px/1 var(--fu)"><span aria-hidden="true">&#215;</span></button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding:0 22px">
+        <div style="font:600 9.5px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">About</div>
+        <h2 style="margin:0;font:400 34px/1.1 var(--fd);color:var(--tx)">inCommon</h2>
+        <div style="font:italic 400 17px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">A place to look closer, and to find what is shared.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;padding:0 22px">
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--ac2);padding-left:13px">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">What it is</div>
+          <div style="max-width:60ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is a space for self-reflection. Astrology, Human Design and numerology sit beside a private journal, so your own patterns can be looked at over time, and what you hold in common with the people around you can come into view.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--ac2);padding-left:13px">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Insight, not instruction</div>
+          <div style="max-width:60ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">Nothing here decides who to be. A chart is a set of questions held up to the light, and your own experience is the final authority. Whatever you find is yours to keep, to question, or to set down.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--ac2);padding-left:13px">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">The name</div>
+          <div style="max-width:60ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">Two whole circles, and the light where they meet. The same sky turns over everyone, and the name is a promise to keep looking for the threads between people rather than the walls. Here, everyone has something in common.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:8px;padding:0 22px">
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">My Charts</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">One birth, read three ways.</span></div>
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">The Library</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">Rooms to study, to write and to read.</span></div>
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">The Oracle</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">A reading, only when it is asked for.</span></div>
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">The Throughline</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">Your own record, held over time.</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 22px 0;text-align:center">
+        <div aria-hidden="true" style="width:42px;height:1px;background:var(--bd);margin-bottom:6px"></div>
+        <sc-if value="{{ aboutCoOn }}" hint-placeholder-val="{{ false }}">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Kept by</div>
+          <div style="font:400 17px var(--fd);color:var(--tx)">{{ aboutCo }}</div>
+        </sc-if>
+        <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
       </div>
     </div>
   </div>
@@ -13514,6 +13596,10 @@ input[type="date"]{color-scheme:dark}
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
       </button>
+      <button onClick="{{ pmAboutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.6" style="flex:none;display:block;color:var(--mut)"><circle cx="9.5" cy="12" r="6"></circle><circle cx="14.5" cy="12" r="6"></circle></svg>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">About</span>
+      </button>
       <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
           <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
@@ -13941,6 +14027,84 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;gap:10px">
         <button data-lift onClick="{{ callClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Not now</button>
         <button data-lift onClick="{{ callMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">More lines</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ABOUT, FROM THE MENU (the owner, 5 November 2026: an About page that does
+     not get in the way of the tabs, in the profile menu, dedicated to gaining
+     insight on inCommon and the company that keeps it). It says what inCommon
+     is and never how anything is worked out, by "No disclaimers". The drawing
+     is the mark as a lens: two whole circles, and the light where they meet. -->
+<sc-if value="{{ aboutOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ aboutClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:center;justify-content:center;z-index:12;padding:24px;box-sizing:border-box">
+    <div role="dialog" aria-label="About inCommon" onClick="{{ swallow }}" style="width:100%;max-width:600px;max-height:100%;border-radius:22px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--bg);border:1px solid var(--bd);padding:0 0 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
+      <div data-portal="1" style="position:relative;flex:none;overflow:hidden;border-bottom:1px solid var(--bd);background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 70% at 50% 110%,rgba(var(--atmc2),.22),transparent 66%),var(--bg)">
+        <svg aria-hidden="true" viewBox="0 0 320 168" style="display:block;width:100%;height:auto;max-height:220px">
+          <defs><clipPath id="abLensClip"><circle cx="138" cy="84" r="46"></circle></clipPath></defs>
+          <g fill="var(--tx)">
+            <circle data-pl="tw" cx="24" cy="22" r="1.1" style="animation-delay:-1s"></circle>
+            <circle data-pl="tw" cx="58" cy="118" r=".8" style="animation-delay:-2.4s"></circle>
+            <circle data-pl="tw" cx="86" cy="40" r="1.3" style="animation-delay:-.4s"></circle>
+            <circle data-pl="tw" cx="40" cy="70" r=".7" style="animation-delay:-3s"></circle>
+            <circle data-pl="tw" cx="248" cy="30" r="1.2" style="animation-delay:-1.7s"></circle>
+            <circle data-pl="tw" cx="292" cy="96" r=".9" style="animation-delay:-.9s"></circle>
+            <circle data-pl="tw" cx="270" cy="140" r="1.1" style="animation-delay:-2.9s"></circle>
+            <circle data-pl="tw" cx="230" cy="122" r=".7" style="animation-delay:-3.4s"></circle>
+            <circle data-pl="tw" cx="300" cy="44" r=".7" style="animation-delay:-2s"></circle>
+            <circle data-pl="tw" cx="16" cy="148" r="1" style="animation-delay:-1.3s"></circle>
+            <circle data-pl="tw" cx="160" cy="14" r=".8" style="animation-delay:-2.2s"></circle>
+            <circle data-pl="tw" cx="112" cy="156" r=".8" style="animation-delay:-.6s"></circle>
+          </g>
+          <g data-pl="breath" stroke="rgba(var(--atmc2),.55)" stroke-width="1" stroke-linecap="round" stroke-dasharray="2 6">
+            <line x1="160" y1="44" x2="160" y2="8"></line><line x1="160" y1="124" x2="160" y2="162"></line>
+            <line x1="172" y1="54" x2="200" y2="26"></line><line x1="148" y1="54" x2="120" y2="26"></line>
+            <line x1="172" y1="114" x2="200" y2="142"></line><line x1="148" y1="114" x2="120" y2="142"></line>
+          </g>
+          <g clip-path="url(#abLensClip)"><circle data-pl="breath" cx="182" cy="84" r="46" fill="rgba(var(--atmc2),.42)"></circle></g>
+          <g fill="none">
+            <circle cx="138" cy="84" r="46" stroke="var(--ac2)" stroke-width="6" stroke-opacity=".32"></circle>
+            <circle cx="182" cy="84" r="46" stroke="var(--ac2)" stroke-width="6" stroke-opacity=".32"></circle>
+            <circle cx="138" cy="84" r="46" stroke="var(--ac2-hi)" stroke-width="1.5"></circle>
+            <circle cx="182" cy="84" r="46" stroke="var(--ac2-hi)" stroke-width="1.5"></circle>
+          </g>
+          <circle data-pl="breath" cx="160" cy="84" r="3.2" fill="var(--tx)"></circle>
+        </svg>
+        <button data-lift onClick="{{ aboutClose }}" aria-label="Close About" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font:400 20px/1 var(--fu)"><span aria-hidden="true">&#215;</span></button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding:0 22px">
+        <div style="font:600 9.5px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">About</div>
+        <h2 style="margin:0;font:400 34px/1.1 var(--fd);color:var(--tx)">inCommon</h2>
+        <div style="font:italic 400 17px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">A place to look closer, and to find what is shared.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;padding:0 22px">
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--ac2);padding-left:13px">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">What it is</div>
+          <div style="max-width:60ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is a space for self-reflection. Astrology, Human Design and numerology sit beside a private journal, so your own patterns can be looked at over time, and what you hold in common with the people around you can come into view.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--ac2);padding-left:13px">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Insight, not instruction</div>
+          <div style="max-width:60ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">Nothing here decides who to be. A chart is a set of questions held up to the light, and your own experience is the final authority. Whatever you find is yours to keep, to question, or to set down.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--ac2);padding-left:13px">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">The name</div>
+          <div style="max-width:60ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">Two whole circles, and the light where they meet. The same sky turns over everyone, and the name is a promise to keep looking for the threads between people rather than the walls. Here, everyone has something in common.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:8px;padding:0 22px">
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">My Charts</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">One birth, read three ways.</span></div>
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">The Library</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">Rooms to study, to write and to read.</span></div>
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">The Oracle</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">A reading, only when it is asked for.</span></div>
+        <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:12px 13px;border-radius:14px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.14),var(--sf2) 70%)"><span style="font:600 13px var(--fu);color:var(--tx)">The Throughline</span><span style="font:400 12px/1.5 var(--fb);color:var(--mut)">Your own record, held over time.</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 22px 0;text-align:center">
+        <div aria-hidden="true" style="width:42px;height:1px;background:var(--bd);margin-bottom:6px"></div>
+        <sc-if value="{{ aboutCoOn }}" hint-placeholder-val="{{ false }}">
+          <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Kept by</div>
+          <div style="font:400 17px var(--fd);color:var(--tx)">{{ aboutCo }}</div>
+        </sc-if>
+        <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
       </div>
     </div>
   </div>
@@ -14901,7 +15065,7 @@ class Component extends DCLogic {
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
-    pmenuOpen: false, callOpen: false, cyOpen: false, cyView: '2d', cwSceneFail: false, cwSceneLive: false, gazTick: 0,
+    pmenuOpen: false, callOpen: false, aboutOpen: false, cyOpen: false, cyView: '2d', cwSceneFail: false, cwSceneLive: false, gazTick: 0,
     chartView: '2d', csFail: false, csFocus: null, csToday: false,
     hdView: '2d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
     csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
@@ -26684,6 +26848,7 @@ class Component extends DCLogic {
      there (syncSectionToTab); Get Help opens the call prompt below; Log Out is
      the one that used to sit in the profile sheet, moved rather than copied,
      so there is one way out of the account. */
+  ABOUT_COMPANY = '';
   profileMenuVals() {
     const st = this.state, cs = st.cloudStatus || {};
     const shown = p => String(p || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3');
@@ -26696,6 +26861,13 @@ class Component extends DCLogic {
       pmProfileGo: () => this.setState({ ...close, quickOpen: true }),
       pmSettingsGo: () => this.setState({ ...close, tab: 'settings', spiritView: null }),
       pmHelpGo: () => { this.crisisAudit(); this.setState({ ...close, callOpen: true }); },
+      /* About opens its own dialog (the owner, 5 November 2026). ABOUT_COMPANY
+         is the name the page prints under Kept by, and while it is empty that
+         line is not drawn: the legal name is the owner's to confirm. */
+      pmAboutGo: () => this.setState({ ...close, aboutOpen: true }),
+      aboutOpen: !!st.aboutOpen,
+      aboutClose: () => this.setState({ aboutOpen: false }),
+      aboutCo: this.ABOUT_COMPANY, aboutCoOn: !!this.ABOUT_COMPANY,
       pmLogOutGo: () => { this.setState(close); this.accountLogOut(); },
       pmLogOutNote: (cs.mode === 'cloud' && (cs.email || shown(cs.phone))) || '',
       /* Support inCommon, on the website and in the apps (giftOn): here, beside Contact
@@ -31200,7 +31372,7 @@ class Component extends DCLogic {
      that closes them all. */
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
-      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, cyOpen: false,
+      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, aboutOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
       avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
