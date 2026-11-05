@@ -3389,9 +3389,27 @@ says so on both tabs, naming the side the reader's own activation sits on.
 `hdChart()` activations carry `lon` for that; R1 lifts the collector with no
 `norm360`, so the Earth's longitude is reduced inline there.
 
-Not built yet, in the plan's order: progressed Sun and Moon arrivals (no
-progression pass exists), out of sign aspects and gatherings on the Ledger, and
-the numerology hand-offs.
+The rest of the plan was built on 5 November 2026 (the owner: "Proceed"):
+
+- **Progressed Sun and Moon** (`progressedHandoff(name)`): a day after birth
+  for each year of life, read through `lonOf`, bisected to the sign change. It
+  is a chapter, The Hand-off, on the Sun's and the Moon's packet and glance:
+  the last crossing, the degrees walked since, the next crossing, each with its
+  `HANDOFF_PAIR` sentence. The Moon is withheld without a birth time (noon can
+  move its dates half a year); the Sun keeps its years, to the year only.
+- **Out of sign** (`outOfSign(x)`, `OUT_OF_SIGN_SIGNS`): an aspect whose signs
+  are not the aspect's count. A Ledger chip for one is underlined dotted, the
+  row's name says how many, and an "Across a sign" line under the table opens
+  a reading per contact. The Descendant, IC and South Node are left out of
+  that line because they only mirror the Ascendant, Midheaven and North Node.
+- **Gatherings across a sign** (`crossGatherings()`, in `stelliums().cross`):
+  three or more of the same bodies within 10 degrees in two signs. A tag on
+  their rows, a clause in the Gathering line, and a section in its reading;
+  `any` counts them.
+- **Numerology** (`numHandoff(sel)`), a chapter on the number's packet and
+  glance: the Personal Year still turns on 1 January and the birthday window
+  is the overlap; a Personal Month in its last seven days names the next; a
+  pinnacle or a period cycle names the years it opens and hands on.
 
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit

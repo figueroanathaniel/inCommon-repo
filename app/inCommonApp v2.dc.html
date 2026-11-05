@@ -1730,7 +1730,7 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
             
             <div data-ch-ledger="1" role="list" aria-label="Placements" style="display:flex;flex-direction:column">
-              <sc-for list="{{ chLedger }}" as="l" hint-placeholder-count="10"><div role="listitem"><button data-ledger-row="1" onClick="{{ l.go }}" onMouseEnter="{{ l.enter }}" onMouseLeave="{{ l.leave }}" onFocus="{{ l.enter }}" onBlur="{{ l.leave }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:54px;display:flex;flex-direction:column;gap:7px;padding:10px 12px;border-bottom:1px solid var(--bd)"><span style="display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.7);background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.22),rgba(var(--atmc),.2) 60%,transparent);font:400 16px/1 var(--fb);color:var(--tx)">{{ l.glyph }}</span><span style="flex:1;min-width:0"><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 15px/1.2 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span><sc-if value="{{ l.tagsOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-wrap:wrap;gap:4px;min-width:0"><sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="1"><span style="box-sizing:border-box;max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 8.5px var(--fu);letter-spacing:.06em;padding:1px 6px;border:1px solid var(--bd);border-radius:999px;color:var(--mut);white-space:nowrap">{{ t.t }}</span></sc-for></span></sc-if></span></span><span style="flex:none;text-align:right"><span style="font:600 12px var(--fu);font-variant-numeric:tabular-nums;color:var(--tx);white-space:nowrap">{{ l.pos }}<sc-if value="{{ l.houseOn }}" hint-placeholder-val="{{ true }}"><span style="color:var(--dim)"> · {{ l.house }}</span></sc-if></span></span></span><span style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);column-gap:10px;align-items:start"><span style="min-width:0;display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="flex:none;width:11px;height:11px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.b }} center/contain no-repeat;mask:{{ chLedgerIcons.b }} center/contain no-repeat"></span><sc-if value="{{ l.aspOn }}" hint-placeholder-val="{{ true }}"><span style="font:400 12.5px/1.3 var(--fb);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><sc-for list="{{ l.asp }}" as="a" hint-placeholder-count="2"><span style="margin-right:8px">{{ a.t }}</span></sc-for><sc-if value="{{ l.aspMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.aspMore }}</span></sc-if></span></sc-if><sc-if value="{{ l.aspOff }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span><span style="min-width:0;display:flex;align-items:flex-start;gap:6px"><span aria-hidden="true" style="flex:none;margin-top:3px;width:11px;height:11px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.w }} center/contain no-repeat;mask:{{ chLedgerIcons.w }} center/contain no-repeat"></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.wxOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span aria-hidden="true" style="flex:none;width:6px;height:6px;border-radius:50%;background:{{ l.wxDot }};box-shadow:0 0 8px rgba(var(--atmc),.9)"></span><span style="font:400 14px/1.2 var(--fb);color:var(--tx)">{{ l.wx }}</span><sc-if value="{{ l.wxMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.wxMore }}</span></sc-if></span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ l.wxPhase }}</span></sc-if><sc-if value="{{ l.wxOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></span><span style="min-width:0;display:flex;align-items:flex-start;gap:6px"><span aria-hidden="true" style="flex:none;margin-top:3px;width:11px;height:11px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.h }} center/contain no-repeat;mask:{{ chLedgerIcons.h }} center/contain no-repeat"></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.hzOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px/1.2 var(--fb);color:var(--tx);white-space:nowrap">{{ l.hz }}</span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap">{{ l.hzWhen }}</span></sc-if><sc-if value="{{ l.hzOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></span></span></button></div></sc-for>
+              <sc-for list="{{ chLedger }}" as="l" hint-placeholder-count="10"><div role="listitem"><button data-ledger-row="1" onClick="{{ l.go }}" onMouseEnter="{{ l.enter }}" onMouseLeave="{{ l.leave }}" onFocus="{{ l.enter }}" onBlur="{{ l.leave }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:54px;display:flex;flex-direction:column;gap:7px;padding:10px 12px;border-bottom:1px solid var(--bd)"><span style="display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.7);background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.22),rgba(var(--atmc),.2) 60%,transparent);font:400 16px/1 var(--fb);color:var(--tx)">{{ l.glyph }}</span><span style="flex:1;min-width:0"><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 15px/1.2 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span><sc-if value="{{ l.tagsOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-wrap:wrap;gap:4px;min-width:0"><sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="1"><span style="box-sizing:border-box;max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 8.5px var(--fu);letter-spacing:.06em;padding:1px 6px;border:1px solid var(--bd);border-radius:999px;color:var(--mut);white-space:nowrap">{{ t.t }}</span></sc-for></span></sc-if></span></span><span style="flex:none;text-align:right"><span style="font:600 12px var(--fu);font-variant-numeric:tabular-nums;color:var(--tx);white-space:nowrap">{{ l.pos }}<sc-if value="{{ l.houseOn }}" hint-placeholder-val="{{ true }}"><span style="color:var(--dim)"> · {{ l.house }}</span></sc-if></span></span></span><span style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);column-gap:10px;align-items:start"><span style="min-width:0;display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="flex:none;width:11px;height:11px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.b }} center/contain no-repeat;mask:{{ chLedgerIcons.b }} center/contain no-repeat"></span><sc-if value="{{ l.aspOn }}" hint-placeholder-val="{{ true }}"><span style="font:400 12.5px/1.3 var(--fb);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><sc-for list="{{ l.asp }}" as="a" hint-placeholder-count="2"><span style="margin-right:8px;text-decoration:{{ a.deco }};text-underline-offset:3px">{{ a.t }}</span></sc-for><sc-if value="{{ l.aspMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.aspMore }}</span></sc-if></span></sc-if><sc-if value="{{ l.aspOff }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span><span style="min-width:0;display:flex;align-items:flex-start;gap:6px"><span aria-hidden="true" style="flex:none;margin-top:3px;width:11px;height:11px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.w }} center/contain no-repeat;mask:{{ chLedgerIcons.w }} center/contain no-repeat"></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.wxOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span aria-hidden="true" style="flex:none;width:6px;height:6px;border-radius:50%;background:{{ l.wxDot }};box-shadow:0 0 8px rgba(var(--atmc),.9)"></span><span style="font:400 14px/1.2 var(--fb);color:var(--tx)">{{ l.wx }}</span><sc-if value="{{ l.wxMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.wxMore }}</span></sc-if></span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ l.wxPhase }}</span></sc-if><sc-if value="{{ l.wxOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></span><span style="min-width:0;display:flex;align-items:flex-start;gap:6px"><span aria-hidden="true" style="flex:none;margin-top:3px;width:11px;height:11px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.h }} center/contain no-repeat;mask:{{ chLedgerIcons.h }} center/contain no-repeat"></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.hzOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px/1.2 var(--fb);color:var(--tx);white-space:nowrap">{{ l.hz }}</span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap">{{ l.hzWhen }}</span></sc-if><sc-if value="{{ l.hzOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></span></span></button></div></sc-for>
             </div>
           </sc-if>
         </div>
@@ -1744,6 +1744,25 @@ input[type="date"]{color-scheme:dark}
             <sc-if value="{{ chGatherOpen }}" hint-placeholder-val="{{ false }}">
               <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:13px;padding:2px 4px 6px 24px;animation:fadeUp .22s ease-out">
                 <sc-for list="{{ chGatherBody }}" as="b" hint-placeholder-count="2">
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ b.head }}</div>
+                    <div style="font:400 12.5px/1.75 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ b.text }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+<sc-if value="{{ chOosOn }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button onClick="{{ chOosToggle }}" aria-expanded="{{ chOosOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:4px 4px">
+              <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ chOosRot }});transition:transform .3s ease">&#9654;</span>
+              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Across a sign</span>
+              <span style="flex:1;min-width:0;font:400 12.5px/1.45 var(--fb);color:var(--mut)">{{ chOos }}</span>
+            </button>
+            <sc-if value="{{ chOosOpen }}" hint-placeholder-val="{{ false }}">
+              <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:13px;padding:2px 4px 6px 24px;animation:fadeUp .22s ease-out">
+                <sc-for list="{{ chOosBody }}" as="b" hint-placeholder-count="2">
                   <div style="display:flex;flex-direction:column;gap:4px">
                     <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ b.head }}</div>
                     <div style="font:400 12.5px/1.75 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ b.text }}</div>
@@ -8373,7 +8392,7 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
             <div aria-hidden="true" style="display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.8fr);column-gap:10px;padding:8px 12px;border-bottom:1px solid var(--bd);font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)"><span>Placement</span><span style="display:flex;align-items:center;gap:6px;min-width:0"><span style="flex:none;width:13px;height:13px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.b }} center/contain no-repeat;mask:{{ chLedgerIcons.b }} center/contain no-repeat"></span>Bedrock</span><span style="display:flex;align-items:center;gap:6px;min-width:0"><span style="flex:none;width:13px;height:13px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.w }} center/contain no-repeat;mask:{{ chLedgerIcons.w }} center/contain no-repeat"></span>Weather</span><span style="display:flex;align-items:center;gap:6px;min-width:0"><span style="flex:none;width:13px;height:13px;background-color:var(--ac2-hi);-webkit-mask:{{ chLedgerIcons.h }} center/contain no-repeat;mask:{{ chLedgerIcons.h }} center/contain no-repeat"></span>Horizon</span></div>
             <div data-ch-ledger="1" role="list" aria-label="Placements" style="display:flex;flex-direction:column">
-              <sc-for list="{{ chLedger }}" as="l" hint-placeholder-count="10"><div role="listitem"><button data-ledger-row="1" onClick="{{ l.go }}" onMouseEnter="{{ l.enter }}" onMouseLeave="{{ l.leave }}" onFocus="{{ l.enter }}" onBlur="{{ l.leave }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:56px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.8fr);column-gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bd)"><span style="min-width:0;display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.7);background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.22),rgba(var(--atmc),.2) 60%,transparent);font:400 16px/1 var(--fb);color:var(--tx)">{{ l.glyph }}</span><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 15px/1.2 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span><sc-if value="{{ l.tagsOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-wrap:wrap;gap:4px;min-width:0"><sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="1"><span style="box-sizing:border-box;max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 8.5px var(--fu);letter-spacing:.06em;padding:1px 6px;border:1px solid var(--bd);border-radius:999px;color:var(--mut);white-space:nowrap">{{ t.t }}</span></sc-for></span></sc-if></span></span><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:600 12px var(--fu);font-variant-numeric:tabular-nums;color:var(--tx);white-space:nowrap">{{ l.pos }}<sc-if value="{{ l.houseOn }}" hint-placeholder-val="{{ true }}"><span style="color:var(--dim)"> · {{ l.house }}</span></sc-if></span><sc-if value="{{ l.aspOn }}" hint-placeholder-val="{{ true }}"><span style="font:400 12.5px/1.3 var(--fb);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><sc-for list="{{ l.asp }}" as="a" hint-placeholder-count="2"><span style="margin-right:8px">{{ a.t }}</span></sc-for><sc-if value="{{ l.aspMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.aspMore }}</span></sc-if></span></sc-if></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.wxOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span aria-hidden="true" style="flex:none;width:6px;height:6px;border-radius:50%;background:{{ l.wxDot }};box-shadow:0 0 8px rgba(var(--atmc),.9)"></span><span style="font:400 14px/1.2 var(--fb);color:var(--tx)">{{ l.wx }}</span><sc-if value="{{ l.wxMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.wxMore }}</span></sc-if></span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ l.wxPhase }}</span></sc-if><sc-if value="{{ l.wxOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.hzOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px/1.2 var(--fb);color:var(--tx);white-space:nowrap">{{ l.hz }}</span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap">{{ l.hzWhen }}</span></sc-if><sc-if value="{{ l.hzOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></button></div></sc-for>
+              <sc-for list="{{ chLedger }}" as="l" hint-placeholder-count="10"><div role="listitem"><button data-ledger-row="1" onClick="{{ l.go }}" onMouseEnter="{{ l.enter }}" onMouseLeave="{{ l.leave }}" onFocus="{{ l.enter }}" onBlur="{{ l.leave }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:56px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.8fr);column-gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bd)"><span style="min-width:0;display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.7);background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.22),rgba(var(--atmc),.2) 60%,transparent);font:400 16px/1 var(--fb);color:var(--tx)">{{ l.glyph }}</span><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 15px/1.2 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span><sc-if value="{{ l.tagsOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-wrap:wrap;gap:4px;min-width:0"><sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="1"><span style="box-sizing:border-box;max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 8.5px var(--fu);letter-spacing:.06em;padding:1px 6px;border:1px solid var(--bd);border-radius:999px;color:var(--mut);white-space:nowrap">{{ t.t }}</span></sc-for></span></sc-if></span></span><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:600 12px var(--fu);font-variant-numeric:tabular-nums;color:var(--tx);white-space:nowrap">{{ l.pos }}<sc-if value="{{ l.houseOn }}" hint-placeholder-val="{{ true }}"><span style="color:var(--dim)"> · {{ l.house }}</span></sc-if></span><sc-if value="{{ l.aspOn }}" hint-placeholder-val="{{ true }}"><span style="font:400 12.5px/1.3 var(--fb);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><sc-for list="{{ l.asp }}" as="a" hint-placeholder-count="2"><span style="margin-right:8px;text-decoration:{{ a.deco }};text-underline-offset:3px">{{ a.t }}</span></sc-for><sc-if value="{{ l.aspMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.aspMore }}</span></sc-if></span></sc-if></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.wxOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span aria-hidden="true" style="flex:none;width:6px;height:6px;border-radius:50%;background:{{ l.wxDot }};box-shadow:0 0 8px rgba(var(--atmc),.9)"></span><span style="font:400 14px/1.2 var(--fb);color:var(--tx)">{{ l.wx }}</span><sc-if value="{{ l.wxMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.wxMore }}</span></sc-if></span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ l.wxPhase }}</span></sc-if><sc-if value="{{ l.wxOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.hzOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px/1.2 var(--fb);color:var(--tx);white-space:nowrap">{{ l.hz }}</span><span style="font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap">{{ l.hzWhen }}</span></sc-if><sc-if value="{{ l.hzOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></button></div></sc-for>
             </div>
           </sc-if>
         </div>
@@ -8387,6 +8406,25 @@ input[type="date"]{color-scheme:dark}
             <sc-if value="{{ chGatherOpen }}" hint-placeholder-val="{{ false }}">
               <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:13px;padding:2px 4px 6px 24px;animation:fadeUp .22s ease-out">
                 <sc-for list="{{ chGatherBody }}" as="b" hint-placeholder-count="2">
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ b.head }}</div>
+                    <div style="font:400 12.5px/1.75 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ b.text }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+<sc-if value="{{ chOosOn }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button onClick="{{ chOosToggle }}" aria-expanded="{{ chOosOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:4px 4px">
+              <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ chOosRot }});transition:transform .3s ease">&#9654;</span>
+              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Across a sign</span>
+              <span style="flex:1;min-width:0;font:400 12.5px/1.45 var(--fb);color:var(--mut)">{{ chOos }}</span>
+            </button>
+            <sc-if value="{{ chOosOpen }}" hint-placeholder-val="{{ false }}">
+              <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:13px;padding:2px 4px 6px 24px;animation:fadeUp .22s ease-out">
+                <sc-for list="{{ chOosBody }}" as="b" hint-placeholder-count="2">
                   <div style="display:flex;flex-direction:column;gap:4px">
                     <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ b.head }}</div>
                     <div style="font:400 12.5px/1.75 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ b.text }}</div>
@@ -16717,6 +16755,52 @@ class Component extends DCLogic {
     }
     return out;
   }
+  /* The progressed Sun and Moon: a day after birth for each year of life. A
+     sign change of either is a hand-off in time, the way a cusp is one in
+     space. Returns { lead, paras } for the Sun or the Moon, or null. The Moon
+     is withheld without a birth time, because noon can put its arrivals half
+     a year out; the Sun keeps its years, to the year only. Memoised per day. */
+  progressedHandoff(name) {
+    if (name !== 'Sun' && name !== 'Moon') return null;
+    const nd = this.natalDate();
+    if (!nd || isNaN(nd.getTime())) return null;
+    const timed = !!this.ascendant();
+    if (name === 'Moon' && !timed) return null;
+    const memo = this._progMemo || (this._progMemo = {});
+    const mk = name + '|' + this.chartStamp() + '|' + new Date().toDateString();
+    if (memo[mk] !== undefined) return memo[mk];
+    const YR = 365.2422 * 86400000, tN = this.t2000(nd);
+    const age = (Date.now() - nd.getTime()) / YR;
+    if (!(age > 0)) return (memo[mk] = null);
+    const sgn = y => Math.floor(this.norm360(this.lonOf(name, tN + y)) / 30);
+    const step = name === 'Sun' ? 1 : 0.2;
+    const edge = (a, b) => { const s = sgn(a); for (let k = 0; k < 30; k++) { const m = (a + b) / 2; if (sgn(m) === s) a = m; else b = m; } return b; };
+    const find = (from, dir, lim) => { const s0 = sgn(from); for (let y = from; dir > 0 ? y < from + lim : y > Math.max(0, from - lim); y += dir * step) {
+      const y2 = dir > 0 ? y + step : Math.max(0, y - step); if (sgn(y2) !== s0) return dir > 0 ? edge(y, y2) : edge(y2, y); if (y2 === 0) break; } return null; };
+    const lonNow = this.norm360(this.lonOf(name, tN + age)), si = Math.floor(lonNow / 30), sign = this.SIGNS12[si];
+    const natalSi = sgn(0), last = find(age, -1, name === 'Sun' ? 95 : 3.5), next = find(age, 1, name === 'Sun' ? 40 : 3.5);
+    const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const when = y => { const d = new Date(nd.getTime() + y * YR); return timed ? 'in ' + MON[d.getMonth()] + ' ' + d.getFullYear() : 'around ' + d.getFullYear(); };
+    const old = y => { const n = Math.floor(y); return n < 1 ? 'in your first year' : 'the year you turned ' + n; };
+    const gone = Math.floor(lonNow % 30), ahead = 30 - (lonNow % 30);
+    const nm = 'progressed ' + name, paras = [];
+    if (last != null) {
+      const from = this.SIGNS12[(si + 11) % 12];
+      paras.push('Your ' + nm + ' crossed from ' + from + ' into ' + sign + ' ' + when(last) + ', ' + old(last) + ', and has walked ' + (gone < 1 ? 'less than a degree' : gone === 1 ? 'one degree' : gone + ' degrees') + ' of it since.');
+      paras.push(this.HANDOFF_PAIR[(si + 11) % 12]);
+    } else {
+      paras.push('Your ' + nm + ' has not left the sign it was born in. It still walks ' + sign + ', ' + (gone < 1 ? 'less than a degree' : gone === 1 ? 'one degree' : gone + ' degrees') + ' in.');
+    }
+    if (next != null) {
+      const to = this.SIGNS12[(si + 1) % 12];
+      paras.push((ahead < 3 && name === 'Sun' ? 'It stands on the threshold now, and reaches ' : 'It reaches ') + to + ' ' + when(next) + ', ' + old(next).replace('the year you turned', 'the year you turn') + '. ' + this.HANDOFF_PAIR[si]);
+    }
+    const lead = name === 'Sun'
+      ? 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
+      : 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Moon keeps walking, about a sign every two and a half years, and each crossing is a change of weather inside.';
+    void natalSi;
+    return (memo[mk] = { heading: 'Your ' + name + ', progressed', lead: lead, paras: paras });
+  }
   handoffDeg(d) { return d < this.HANDOFF_THRESHOLD ? (Math.round(d * 10) / 10) + '°' : Math.round(d) + '°'; }
   /* Who rules a sign, and where that ruler sits in this chart: { name, older }.
      name reads "the Moon, in your 2nd," and older is a sentence of its own for
@@ -18170,6 +18254,42 @@ class Component extends DCLogic {
     }));
     return out.sort((x, y) => x.orb - y.orb);
   }
+  /* A gathering that crosses a sign line: three or more of the same bodies
+     stelliums() counts, inside 10 degrees, that are not all in one sign. The
+     same-sign rule cannot see it, because the cusp splits it, and the tradition
+     reads it as one cluster handing over. Returns [{ signs, names, span }]. */
+  OUT_OF_SIGN_SIGNS = { conjunct: 0, sextile: 2, square: 3, trine: 4, opposite: 6, semisextile: 1, quincunx: 5 };
+  crossGatherings(rows) {
+    const pts = rows.filter(r => r.lon != null && !r.uncomputed).map(r => ({ name: r.name, lon: this.norm360(r.lon) })).sort((x, y) => x.lon - y.lon);
+    const n = pts.length, wins = [];
+    for (let i = 0; i < n; i++) {
+      const w = [pts[i]];
+      for (let k = 1; k < n; k++) { const p = pts[(i + k) % n]; if (this.norm360(p.lon - pts[i].lon) <= 10) w.push(p); else break; }
+      if (w.length >= 3) wins.push(w);
+    }
+    const key = w => w.map(p => p.name).sort().join('|');
+    const keys = wins.map(key);
+    const out = [];
+    wins.forEach((w, i) => {
+      const ks = keys[i];
+      if (keys.some((o, j) => j !== i && o.length > ks.length && ks.split('|').every(x => o.split('|').indexOf(x) !== -1))) return;
+      if (out.some(g => g.k === ks)) return;
+      const signs = [];
+      w.forEach(p => { const sg = this.SIGNS12[Math.floor(p.lon / 30)]; if (signs.indexOf(sg) === -1) signs.push(sg); });
+      if (signs.length < 2) return;
+      out.push({ k: ks, signs: signs, names: w.map(p => p.name), span: this.norm360(w[w.length - 1].lon - w[0].lon) });
+    });
+    return out.map(g => ({ kind: 'cross', signs: g.signs, names: g.names, span: g.span }));
+  }
+  /* An aspect whose signs are not the aspect's signs (a trine five signs apart,
+     a conjunction across a cusp). Null for an aspect with no sign count. */
+  outOfSign(x) {
+    const want = this.OUT_OF_SIGN_SIGNS[x.asp];
+    if (want == null || x.a.lon == null || x.b.lon == null) return null;
+    const ia = Math.floor(this.norm360(x.a.lon) / 30), ib = Math.floor(this.norm360(x.b.lon) / 30);
+    let sd = Math.abs(ia - ib); if (sd > 6) sd = 12 - sd;
+    return sd === want ? null : { ia: ia, ib: ib, sd: sd, want: want };
+  }
   stelliums(expanded) {
     // A gathering is counted in the celestial bodies, nodes and the inner ring. With
     // eighty minor points placed, every sign holds three of something, and a
@@ -18183,7 +18303,8 @@ class Component extends DCLogic {
     });
     const sign = Object.keys(bySign).filter(k => bySign[k].length >= 3).map(k => ({ kind: 'sign', key: k, names: bySign[k] }));
     const house = Object.keys(byHouse).filter(k => byHouse[k].length >= 3).map(k => ({ kind: 'house', key: +k, names: byHouse[k] }));
-    return { sign, house, any: sign.length + house.length > 0 };
+    const cross = this.crossGatherings(rows);
+    return { sign, house, cross, any: sign.length + house.length + cross.length > 0 };
   }
   /* The Observatory's data (reached from the Expanded Chart's Enter the
      Observatory button; it was once the expand overlay): a full-screen view of the wheel with a house
@@ -20982,8 +21103,11 @@ class Component extends DCLogic {
       const dm = off ? '' : Math.floor(r.deg) + '\u00b0' + String(Math.floor((r.deg % 1) * 60)).padStart(2, '0') + '\u2032';
       const h = off || r.category === 'angle' ? null : o.houseOf(r);
       const mine = o.asps.filter(x => (x.a.id || x.a.name) === key || (x.b.id || x.b.name) === key).sort((x, y) => x.orb - y.orb);
-      const chips = mine.slice(0, 3).map(x => { const other = (x.a.id || x.a.name) === key ? x.b : x.a; return { t: SYM(x.asp) + ' ' + (other.glyph || other.name) }; });
+      const chips = mine.slice(0, 3).map(x => { const other = (x.a.id || x.a.name) === key ? x.b : x.a, oos = !!this.outOfSign(x);
+        return { t: SYM(x.asp) + ' ' + (other.glyph || other.name), deco: oos ? 'underline dotted' : 'none' }; });
+      const oosN = mine.filter(x => this.outOfSign(x)).length;
       const gIn = stel.sign.filter(g => g.names.indexOf(r.name) !== -1).map(g => this.SIGN_GLYPHS[this.SIGNS12.indexOf(g.key)])
+        .concat((stel.cross || []).filter(g => g.names.indexOf(r.name) !== -1).map(g => g.signs.map(sg => this.SIGN_GLYPHS[this.SIGNS12.indexOf(sg)]).join('')))
         .concat(stel.house.filter(g => g.names.indexOf(r.name) !== -1).map(g => 'H' + g.key));
       const tags = gIn.length ? [{ t: gIn.join(' ') + ' gathering' }] : [];
       const cs = off ? [] : this.impactContacts(r.lon), top = cs[0];
@@ -21001,7 +21125,7 @@ class Component extends DCLogic {
         go: () => o.openBody(key), enter: () => this.ledgerHot(key), leave: () => this.ledgerHot(null),
         aria: [name, off ? 'not drawn' : Math.floor(r.deg) + ' degrees ' + r.sign, h ? 'house ' + h : '',
           tags.length ? tags.map(t => t.t).join(', ') : '',
-          mine.length ? mine.length + (mine.length === 1 ? ' aspect' : ' aspects') : 'no aspects',
+          mine.length ? mine.length + (mine.length === 1 ? ' aspect' : ' aspects') + (oosN ? ', ' + oosN + ' across a sign' : '') : 'no aspects',
           top ? 'now ' + top.mover + ' ' + this.aspName(top.asp) + ', ' + (PHASE[top.phase] || '') : 'nothing touching it now',
           nx ? 'next ' + nx.mover + ' ' + this.aspName(nx.asp) + ' from ' + this.fmtDay(nx.from) : ''].filter(Boolean).join(', ') };
     });
@@ -21045,7 +21169,28 @@ class Component extends DCLogic {
     const sky = feats.filter(f => f.key !== 'stellium');
     const gather = feats.filter(f => f.key === 'stellium')[0];
     const gatherText = [].concat(stel.sign.map(g => this.SIGN_GLYPHS[this.SIGNS12.indexOf(g.key)] + ' ' + g.key + ': ' + g.names.join(', ')),
+      (stel.cross || []).map(g => g.signs.map(sg => this.SIGN_GLYPHS[this.SIGNS12.indexOf(sg)]).join('') + ' ' + g.signs.join(' into ') + ': ' + g.names.join(', ')),
       stel.house.map(g => o.ordinal(g.key) + ' house: ' + g.names.join(', '))).join(' \u00b7 ');
+    /* Out of sign: the contact is there by degree and the signs say otherwise.
+       One quiet line under the table, like the gathering, opening a short
+       reading per contact. Core points only, the ones the Ledger rows hold. */
+    const coreKeys = corePts.map(r => this.pointKey(r));
+    // The Descendant, the IC and the South Node only ever mirror the Ascendant,
+    // the Midheaven and the North Node, so their contacts are the same fact twice.
+    const MIRROR = ['Descendant', 'IC', 'South Node'];
+    const oosList = o.asps.filter(x => coreKeys.indexOf(x.a.id || x.a.name) !== -1 && coreKeys.indexOf(x.b.id || x.b.name) !== -1
+      && MIRROR.indexOf(x.a.name) === -1 && MIRROR.indexOf(x.b.name) === -1)
+      .map(x => ({ x: x, o: this.outOfSign(x) })).filter(y => y.o);
+    const OOS_RIDE = { conjunct: 'a sign to share', sextile: 'elements that get along', square: 'a shared mode', trine: 'a shared element',
+      opposite: 'a shared mode across the wheel', semisextile: 'neighbouring signs', quincunx: 'signs that have nothing in common' };
+    const oosOpen = !!st.oosOpen;
+    const oosBody = oosList.map(({ x, o: oo }) => {
+      const A = this.SIGNS12[oo.ia], B = this.SIGNS12[oo.ib], fd = r => Math.floor(r.deg) + '\u00b0 ' + r.sign;
+      const an = this.aspName(x.asp);
+      return { head: x.a.name + ' ' + an + ' ' + x.b.name + ', across the signs',
+        text: 'Your ' + x.a.name + ' at ' + fd(x.a) + ' and your ' + x.b.name + ' at ' + fd(x.b) + ' are close enough for ' + (/^[aeiou]/.test(an) ? 'an ' : 'a ') + an + ', ' + x.orb.toFixed(1) + '\u00b0 from exact, ' + (oo.want === 0 ? 'but they sit in two signs, ' + A + ' and ' + B + '.' : 'but ' + A + ' and ' + B + ' sit ' + oo.sd + (oo.sd === 1 ? ' sign' : ' signs') + ' apart, where ' + (/^[aeiou]/.test(an) ? 'an ' : 'a ') + an + ' usually spans ' + oo.want + '.') + ' The tradition calls this out of sign. The angle holds while the usual common ground, ' + (OOS_RIDE[x.asp] || 'the signs it rides on') + ', is missing, so the two meet by degree rather than by a shared manner. Where do these two find each other without the usual words for it?' };
+    });
+    const oosText = oosList.map(({ x }) => (x.a.glyph || x.a.name) + ' ' + SYM(x.asp) + ' ' + (x.b.glyph || x.b.name)).join(' \u00b7 ');
     const bands = [
       this.chartBand('bedrock', [], headed((ledgerDeck ? [ledgerDeck] : []).concat(restPts, [houses, aspects]), restPts.length ? { [first]: 'More points' } : {})),
       this.chartBand('weather', [], headed([trP, trS], { 'tr-personal': 'Transits' })),
@@ -21066,7 +21211,9 @@ class Component extends DCLogic {
       chGatherOn: !!(gather && stel.any), chGather: gatherText,
       chGatherOpen: !!(gather && gather.open && stel.any), chGatherToggle: gather ? gather.toggle : () => {},
       chGatherRot: gather && gather.open ? '90deg' : '0deg',
-      chGatherBody: gather ? gather.body : []
+      chGatherBody: gather ? gather.body : [],
+      chOosOn: oosList.length > 0, chOos: oosText, chOosOpen: oosOpen && oosList.length > 0,
+      chOosToggle: () => this.setState({ oosOpen: !oosOpen }), chOosRot: oosOpen ? '90deg' : '0deg', chOosBody: oosBody
     };
   }
   lunationsAhead(from, days) {
@@ -24546,13 +24693,65 @@ class Component extends DCLogic {
      then the number held against the Life Path, the four practice cards and a
      question to keep. `glance` is a numSel handed in by the pop up, which reads
      the same words without the cover. */
+  /* Numerology's hand-offs: where one number gives way to the next. The
+     Personal Year turns on 1 January (the owner's choice, 4 November 2026),
+     and the birthday window is the hand-off, because an older count runs the
+     year from birthday to birthday. A Personal Month hands over in its last
+     week. A pinnacle or a period cycle turns in the year of its first age.
+     Returns { heading, lead, lines } or null. */
+  numHandoff(sel) {
+    const core = window.InCommonCore, dob = this.dob();
+    if (!core || !sel || !dob || !/^\d{4}-\d{2}-\d{2}$/.test(dob)) return null;
+    const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const now = new Date(), y = now.getFullYear(), by = +dob.slice(0, 4), bm = +dob.slice(5, 7), bd = +dob.slice(8, 10);
+    const day0 = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const today = day0(now), DAY = 86400000;
+    const py = yy => { const p = core.personalYear(dob, yy); return p ? p.value : null; };
+    if (sel.pos === 'personalYear') {
+      const cur = py(y), prev = py(y - 1), nxt = py(y + 1);
+      if (cur == null) return null;
+      const bday = new Date(y, bm - 1, bd).getTime(), inWin = today < bday, left = Math.round((bday - today) / DAY);
+      const bdStr = MON[bm - 1] + ' ' + bd;
+      const lines = ['Your Personal Year turned to ' + cur + ' on 1 January' + (nxt != null ? ' and turns to ' + nxt + ' on the next 1 January' : '') + '. An older count runs the year from birthday to birthday instead, and by that count your ' + prev + ' reaches on until ' + bdStr + '.',
+        'So between 1 January and your birthday the two years overlap: the ' + prev + ' that is closing and the ' + cur + ' that is opening are both in the room, and much of what that stretch holds belongs a little to each.',
+        inWin ? 'Today sits inside that overlap, ' + (left === 1 ? 'one day' : left + ' days') + ' from your birthday.' : 'The overlap is behind you this year. It opens again on 1 January, when ' + (nxt != null ? nxt + ' arrives and ' : '') + cur + ' stays on until ' + bdStr + '.'];
+      return { heading: 'From ' + prev + ' to ' + cur, lead: 'A year in numbers has two doors: the calendar’s, and your own birthday. The stretch between them is where one year hands the next its keys.', lines: lines };
+    }
+    if (sel.pos === 'personalMonth') {
+      const last = new Date(y, now.getMonth() + 1, 0).getDate(), left = last - now.getDate() + 1;
+      if (left > 7) return null;
+      const nm = now.getMonth() === 11 ? 1 : now.getMonth() + 2, ny = now.getMonth() === 11 ? y + 1 : y, pyN = py(ny);
+      if (pyN == null) return null;
+      const nxt = core.personalMonth(pyN, nm).value;
+      return { heading: 'Into ' + MON[nm - 1], lead: 'A month in numbers rarely ends on the last day. Its final week is already leaning toward the next.',
+        lines: ['Your Personal Month hands over in ' + (left === 1 ? 'a day' : left + ' days') + '. On 1 ' + MON[nm - 1] + ' it becomes ' + nxt + (now.getMonth() === 11 ? ', inside a new Personal Year of ' + pyN : '') + '.',
+          'What this month opened is still worth finishing; what the next one asks may already be at the door.'] };
+    }
+    if ((sel.pos === 'pinnacle' || sel.pos === 'cycle') && sel.range) {
+      const m = String(sel.range).match(/^(\d+|birth)\s+to\s+(\d+)|^(\d+)\s+onward/);
+      if (!m) return null;
+      const from = m[3] != null ? +m[3] : (m[1] === 'birth' ? 0 : +m[1]), to = m[2] != null ? +m[2] : null;
+      const word = sel.pos === 'pinnacle' ? 'pinnacle' : 'cycle';
+      const age = (today - new Date(by, bm - 1, bd).getTime()) / (365.2422 * DAY);
+      const lines = [];
+      if (from > 0) lines.push('This ' + word + ' opens in ' + (by + from) + ', the year you ' + (age >= from ? 'turned ' : 'turn ') + from + ', and takes over from the one before it around your birthday.');
+      if (to != null) lines.push('It hands on to the next in ' + (by + to + 1) + ', the year you ' + (age >= to + 1 ? 'turned ' : 'turn ') + (to + 1) + '.');
+      else lines.push('It is the last of its kind and runs on from there.');
+      lines.push(sel.pos === 'pinnacle' ? 'A pinnacle rarely changes on the day. The next one is often felt arriving a year or so ahead, and the old one lingers a while after.'
+        : 'A cycle is the longest weather in the numbers, and its turn is slow: the seasons either side of it tend to blur.');
+      const near = (from > 0 && Math.abs(age - from) <= 1.5) || (to != null && Math.abs(age - (to + 1)) <= 1.5);
+      if (near) lines.push('You stand near one of those turns now.');
+      return { heading: from === 0 ? 'Where it hands on' : 'Where it turns', lead: 'Every long number in the chart has a door at each end. This is where the doors of this one fall.', lines: lines };
+    }
+    return null;
+  }
   numberDetailVals(glance) {
     const NC = window.NumerologyContent, st = this.state, sel = glance || st.numSel;
     const vertical = (st.dtW || window.innerWidth || 1440) < this.BP.md;
     const on = glance ? true : (vertical || this.curTab() === 'spirit') && st.spiritView === 'numberDetail';
     if (!on || !NC || !sel) return { spiritNumDetail: false };
     const num = this.numerology(), c = NC.build(sel.pos, sel.v, num.age), ent = NC.content(sel.v) || {};
-    const cm = this.numCmp(sel.c, sel.v, sel.k), ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+    const cm = this.numCmp(sel.c, sel.v, sel.k), ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
     const cap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
     const v = sel.v, lp = num.lp, a = this.artNum(v);
     const parts = [
@@ -24566,6 +24765,8 @@ class Component extends DCLogic {
       lead: 'On its way down this number passes ' + d.n + ', which the tradition reads as something carried in and still asking to be settled.', lines: [d.desc] }));
     parts.push({ tab: 'Your Season', heading: c.stageKicker,
       lead: 'The same number sits differently across a life. This is how it tends to sit where you stand now.', lines: [c.atStage.text] });
+    const ho = this.numHandoff(sel);
+    if (ho) parts.push({ tab: 'The Hand-off', heading: ho.heading, lead: ho.lead, lines: ho.lines });
     const key = sel.pos + '|' + v + '|' + (sel.range || ''), n = parts.length;
     const pg = st.nmPageKey === key ? Math.max(0, Math.min(n - 1, st.nmPage || 0)) : 0, all = !!st.nmAll;
     const turn = i => () => this.setState({ nmPage: i, nmPageKey: key, nmAll: false, nmFlip: (st.nmFlip || 0) + 1 });
@@ -30678,7 +30879,7 @@ class Component extends DCLogic {
      kept per placement (plPageKey), so a new placement opens on its cover's
      first chapter. */
   plPacket(rk, name, r, c, ordH, dig, min, b) {
-    const st = this.state, ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+    const st = this.state, ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
     const leads = [
       'Begin with the room. A house is a part of living where a certain kind of thing keeps finding you, and your ' + name + ' does its work here, in the ' + ordH + '.',
       r.sign + ' sits over this house and gives the room its accent. Nobody chooses an accent, and most of us can barely hear our own.',
@@ -30692,6 +30893,8 @@ class Component extends DCLogic {
       lead: 'Dignity is the old question of whether a celestial body is at home or a guest. ' + (dig.strong
         ? 'Yours is at home here, which the tradition counts as ease rather than merit: a well lit room, not a virtue.'
         : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') });
+    const prog = (r.name === 'Sun' || r.name === 'Moon') && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
+    if (prog) parts.push({ tab: 'The Hand-off', sec: { heading: prog.heading, lines: prog.paras.map(t => ({ text: t })) }, lead: prog.lead });
     const n = parts.length, pg = st.plPageKey === rk ? Math.max(0, Math.min(n - 1, st.plPage || 0)) : 0, all = !!st.plAll;
     const turn = i => () => this.setState({ plPage: i, plPageKey: rk, plAll: false, plFlip: (st.plFlip || 0) + 1 });
     const chapters = parts.map((p, i) => {
@@ -31453,6 +31656,7 @@ class Component extends DCLogic {
                   if (!stel.any) return [plain('No gathering shows up in your wheel. Three or more bodies never crowd into a single sign or a single house, so your emphasis is spread rather than pooled.')];
                   const parts = [];
                   stel.sign.forEach(s => parts.push('a ' + s.key + ' stellium: ' + s.names.join(', ')));
+                  (stel.cross || []).forEach(g => parts.push(g.names.join(', ') + ' gathered across ' + g.signs.join(' and ')));
                   stel.house.forEach(h => parts.push(h.names.join(', ') + ' gathered in your ' + ordinal(h.key) + ' house'));
                   return [plain('You carry ' + (parts.length === 1 ? parts[0] : parts.slice(0, -1).join('; ') + '; and ' + parts[parts.length - 1]) + '. A cluster like this is easily mistaken for a verdict, so it is worth setting out plainly what it is and is not.')];
                 })();
@@ -31466,6 +31670,8 @@ class Component extends DCLogic {
                   out.push(S('What a stellium actually is', 'Three or more bodies sharing one sign or one house. That is the whole definition: no mystery in it. What the tradition adds is the reading: several separate functions of you, all speaking the same dialect, all crowded into the same room. They amplify one another. They also lose the ability to check one another, which is the part people leave out.'));
                   stel.sign.forEach(s => out.push(S('The ' + s.key + ' gathering',
                     s.names.join(', ') + ' all wear ' + s.key + ': ' + first(this.SIGN_LONG[s.key]) + '. When that many functions share a manner, the manner stops feeling like a choice and starts feeling like the truth of things. Most people with a concentration like this cannot see it, precisely because it is everywhere they look. That is not a failing. It is what standing inside something feels like.')));
+                  (stel.cross || []).forEach(g => out.push(S('The gathering across ' + g.signs.join(' and '),
+                    g.names.join(', ') + ' sit within ' + Math.max(1, Math.round(g.span)) + ' degrees of one another, and a sign line runs through them. Counted by sign it is no stellium; seen on the wheel it is one cluster, and the tradition reads the cusp inside it as a hand-off: ' + this.HANDOFF_PAIR[this.SIGNS12.indexOf(g.signs[0])].charAt(0).toLowerCase() + this.HANDOFF_PAIR[this.SIGNS12.indexOf(g.signs[0])].slice(1) + ' The ones still in ' + g.signs[0] + ' carry the opening, and the ones already in ' + g.signs[g.signs.length - 1] + ' carry it on.')));
                   stel.house.forEach(h => out.push(S('The ' + ordinal(h.key) + '-house gathering',
                     h.names.join(', ') + ' occupy one arena of your life: ' + first(this.HOUSE_LONG[h.key - 1]) + '. Expect that room to be where your energy, your attention, and a fair share of your trouble collect. Where a chart concentrates, life tends to concentrate too, not because the sky insists, but because that is where you keep going back.')));
                   if (stel.sign.length && stel.house.length) out.push(S('Read twice',
