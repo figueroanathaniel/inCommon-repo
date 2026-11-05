@@ -210,6 +210,10 @@ input[type="date"]{color-scheme:dark}
    corners alike, like a tile pressed out by hand. Subterranean Biome: cell
    like curves on the cards; the pills stay pills. */
 [data-world="midnight"],[data-world="midnight"] *{font-variant-ligatures:none!important}
+/* The Oracle's symbol, alive (oracle-glyph.js). The template paints the
+   static mask; once the module has a canvas inside the span it marks it live,
+   and only then is the mask dropped, so the plain icon is the fallback. */
+[data-icon="oracle"][data-glyph-live]{-webkit-mask:none!important;mask:none!important;background:transparent!important;position:relative;overflow:visible}
 /* The greeting is the one line per screen that wears a fill: horizon gold in
    Deep Field, brushed chrome in Cyberspace, an ember glow in Nature's Roots and
    bioluminescence in the Biome. The colour underneath stays --dim, which is
@@ -462,6 +466,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./flight.js"></script>
 <script src="./body-globes.js"></script>
 <script src="./theme-worlds.js"></script>
+<script src="./oracle-glyph.js"></script>
 <script src="./cycle-scene.js"></script>
 <script src="./chart-scene.js"></script>
 <script src="./hd-scene.js"></script>
@@ -5452,7 +5457,7 @@ input[type="date"]{color-scheme:dark}
   <sc-for list="{{ vtNav }}" as="n" hint-placeholder-count="6">
     <button onClick="{{ n.go }}" aria-current="{{ n.cur }}" aria-label="{{ n.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding-top:6px">
       <span style="width:4px;height:4px;border-radius:50%;background:{{ n.dot }};box-shadow:{{ n.glow }}"></span>
-      <span aria-hidden="true" style="flex:none;display:block;width:21px;height:21px;background-color:{{ n.c }};-webkit-mask:{{ n.icon }} center/contain no-repeat;mask:{{ n.icon }} center/contain no-repeat"></span>
+      <span aria-hidden="true" data-icon="{{ n.id }}" style="flex:none;display:block;width:21px;height:21px;background-color:{{ n.c }};-webkit-mask:{{ n.icon }} center/contain no-repeat;mask:{{ n.icon }} center/contain no-repeat"></span>
       <span style="font:600 10px var(--fu);letter-spacing:.03em;color:{{ n.lc }};height:12px">{{ n.labelShown }}</span>
     </button>
   </sc-for>
@@ -7960,7 +7965,7 @@ input[type="date"]{color-scheme:dark}
     <nav data-app-nav="desktop" role="navigation" aria-label="Sections" style="display:flex;flex-direction:column;gap:3px">
       <sc-for list="{{ dtNav }}" as="n" hint-placeholder-count="6">
         <button onClick="{{ n.go }}" aria-current="{{ n.cur }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;min-height:44px;padding:0 12px;border-radius:11px;background:{{ n.bg }};box-shadow:inset 2px 0 0 0 {{ n.edge }}">
-          <span aria-hidden="true" style="flex:none;display:block;width:19px;height:19px;background-color:{{ n.gc }};-webkit-mask:{{ n.icon }} center/contain no-repeat;mask:{{ n.icon }} center/contain no-repeat"></span>
+          <span aria-hidden="true" data-icon="{{ n.id }}" style="flex:none;display:block;width:19px;height:19px;background-color:{{ n.gc }};-webkit-mask:{{ n.icon }} center/contain no-repeat;mask:{{ n.icon }} center/contain no-repeat"></span>
           <span style="flex:1;min-width:0;font:600 12.5px var(--fu);letter-spacing:.02em;color:{{ n.c }}">{{ n.label }}</span>
           <span style="flex:none;font:600 9.5px var(--fu);color:var(--dim)">{{ n.meta }}</span>
         </button>
@@ -7976,7 +7981,7 @@ input[type="date"]{color-scheme:dark}
     <nav data-app-nav="desktop" role="navigation" aria-label="Sections" style="flex:0 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px;width:100%;align-items:center">
       <sc-for list="{{ dtNav }}" as="n" hint-placeholder-count="6">
         <button data-lift onClick="{{ n.go }}" aria-current="{{ n.cur }}" aria-label="{{ n.label }}" title="{{ n.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:48px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:13px;background:{{ n.bg }}">
-          <span aria-hidden="true" style="flex:none;display:block;width:19px;height:19px;background-color:{{ n.gc }};-webkit-mask:{{ n.icon }} center/contain no-repeat;mask:{{ n.icon }} center/contain no-repeat"></span>
+          <span aria-hidden="true" data-icon="{{ n.id }}" style="flex:none;display:block;width:19px;height:19px;background-color:{{ n.gc }};-webkit-mask:{{ n.icon }} center/contain no-repeat;mask:{{ n.icon }} center/contain no-repeat"></span>
           <span style="width:4px;height:4px;border-radius:50%;background:{{ n.edge }}"></span>
         </button>
       </sc-for>
@@ -15549,6 +15554,9 @@ class Component extends DCLogic {
       if (key === 'deepfield') root.removeAttribute('data-world'); else root.setAttribute('data-world', key);
       if (hc) root.setAttribute('data-world-hc', '1'); else root.removeAttribute('data-world-hc');
     }
+    /* the Oracle's nav symbol shapeshifts in every identity, with each world's
+       own weather on top; it reads the attributes just written */
+    if (root && window.OracleGlyph) window.OracleGlyph.sync(root, still);
     const W = window.ThemeWorlds, host = document.querySelector('[data-atmos-world]');
     if (!W || !host) { if (key !== 'deepfield' && !this._worldWait && (this._worldTries = (this._worldTries || 0) + 1) < 20) { this._worldWait = setTimeout(() => { this._worldWait = null; this._worldSig = null; this.worldSync(); }, 600); } return; }
     if (key === 'deepfield' || hc || W.keys.indexOf(key) < 0 || !W.supported()) { W.stop(); return; }
@@ -15751,6 +15759,7 @@ class Component extends DCLogic {
     }
   }
   componentWillUnmount() {
+    if (window.OracleGlyph) window.OracleGlyph.stop();
     if (this._cyS) { this._cyS.destroy(); this._cyS = null; }
     if (this._csS) { this._csS.destroy(); this._csS = null; }
     if (this._hsS) { this._hsS.destroy(); this._hsS = null; }
@@ -34054,7 +34063,7 @@ class Component extends DCLogic {
       dtRecentEmpty: tl.length === 0,
       dtNav: this.DT_NAV.map(([id, label, glyph]) => {
         const on = tab === id;
-        return { label, glyph, icon: this.uiIcon(id), cur: on ? 'page' : 'false', meta: '',
+        return { id, label, glyph, icon: this.uiIcon(id), cur: on ? 'page' : 'false', meta: '',
           c: on ? 'var(--tx)' : 'var(--dim)', gc: on ? 'var(--ac)' : 'rgba(238,240,248,.42)',
           bg: on ? 'rgba(var(--atmc),.28)' : 'transparent', edge: on ? 'var(--ac)' : 'transparent',
           go: () => this.setState({ tab: id, ...this.sectionRoot(id) }) };
@@ -34568,7 +34577,7 @@ class Component extends DCLogic {
       vtDateBig: now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' }),
       vtNav: this.VT_SECTIONS.map(([id, label, glyph], i) => {
         const on = i === secIdx;
-        return { label, glyph, icon: this.uiIcon(id), labelShown: on ? label : '', cur: on ? 'true' : 'false',
+        return { id, label, glyph, icon: this.uiIcon(id), labelShown: on ? label : '', cur: on ? 'true' : 'false',
           c: on ? 'var(--ac)' : 'var(--mut)', lc: 'var(--ac)',
           dot: on ? 'var(--ac)' : 'transparent', glow: on ? '0 0 8px rgba(47,255,143,.9)' : 'none',
           /* The root first, then the move: vtGoSection commits the tab, and a
