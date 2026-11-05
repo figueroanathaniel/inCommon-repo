@@ -107,6 +107,7 @@ lit fraction at the maximum is computed.
   50" a year.
 - SW5: cazimi windows are well formed, and the module computes with the clock
   broken.
+- SW6: planet parades seen from Kielder match the observatory's list (above).
 
 Sabotaged once: moving the Perseids to 141 degrees and biasing the station
 speed turned SW1 and SW3 red.
@@ -114,8 +115,53 @@ speed turned SW1 and SW3 red.
 Retrograde stations have no outside reference but the Swiss Ephemeris:
 timeanddate.com and in-the-sky.org refused the fetch.
 
-## Not built
+## Planet parades
 
-A planetary "parade" (several planets visible in one part of the evening sky)
-is not a forecast kind yet: it needs a horizon, so a place and a time of night,
-and the sheet is drawn for everyone.
+Asked for by the owner on 5 November 2026 ("build the planet parade").
+
+**It is not a term of astronomy, so there is no rule to read, and the numbers
+are ours.** What the sources say, read 5 November 2026:
+
+| Claim | Source |
+|---|---|
+| "A planetary parade refers to a rare event when several planets appear in the same region of the sky." "it's not a scientific term in astronomy." Uranus and Neptune visible "only to those with a telescope". A dated list of parades (below). | Kielder Observatory, "AAA: What's a Planetary Parade?", https://kielderobservatory.org/news/latest-news/434-aaa-what-s-a-planetary-parade |
+| NASA, quoted: "these two distant planets will not be visible to the unaided eye." Multiple planets "visible at the same time from our vantage point on earth." | WTTW, 25 February 2025, https://news.wttw.com/2025/02/25/upcoming-rare-7-planet-parade-mostly-hype-here-s-what-s-actually-happening-sky |
+| "As per NASA, when you can see four, five, or more planets in the night sky, it is often referred to as a planetary parade" | SlashGear, 15 June 2025, https://www.slashgear.com/1886555/planet-parade-explained-how-often/ (the NASA page it links was not read; two NASA skywatching pages refused the fetch) |
+| 28 February 2026: "Mercury, Venus, Jupiter, Saturn, Uranus, and Neptune will trace an arc along the ecliptic" after sunset; Mercury, Venus and Saturn "too low on the horizon and too close to the Sun's glare to be practical observing targets". | Celestron, https://www.celestron.com/blogs/news/planetary-parade |
+
+**The rule built** (`SkyWeather.parades()`): at the moment the Sun is 3 degrees
+below the horizon (`PARADE_SUN`), after sunset and before sunrise, count the
+five planets seen without a telescope (Mercury to Saturn, `NAKED`) whose
+apparent altitude, refraction included, is 3 degrees or more (`PARADE_ALT`).
+Four or more (`PARADE_MIN`, the NASA figure as SlashGear quotes it) is a
+parade, and consecutive twilights make one run, one event on the sheet. The
+Moon is not counted, as none of the sources count it.
+
+**The two degree figures were chosen by measurement, not read.** Run from
+Kielder Observatory (Wikipedia infobox: 55.23194 N, 2.616250 W, 370 m), they
+reproduce the observatory's own list; the end of civil twilight (Sun at 6
+degrees down) with planets at 5 degrees or more does not, because it loses
+Mercury and Saturn low in the glow and finds only one of the four five planet
+stretches the list names (October 2028). Held by SW6:
+
+| Kielder's list | The scan from Kielder |
+|---|---|
+| Late April to Late August 2022, four before sunrise | 20 April to 13 August |
+| Mid-June to Early July 2022, five before sunrise | five from 20 June to 7 July |
+| January to mid-February 2025, four after sunset | 12 January to 21 March (Mercury takes Saturn's place in March) |
+| all five, 22nd to 25th February 2025 | five from 19 February to 2 March |
+| Late August 2025, four before sunrise | 9 August to 7 September |
+| Late October 2028, five before sunrise | five from 9 to 28 October |
+| five "won't happen again until 2028" | no five between March 2025 and October 2028 |
+
+The two places they part: the 2022 morning parade ends on 13 August in the
+scan, not in late August, and the 2025 evening one runs past mid-February.
+Celestron's four planets for 28 February 2026 are the scan's four, though
+Celestron calls three of them impractical; the sheet names any planet under
+10 degrees as low in the twilight.
+
+**It needs a place.** It is read from the place on the profile, the one place
+the app holds, and a profile with none (the sample) has no parade. Whether that
+should be the device's location or a place typed into the sheet is the
+owner's decision, asked on 5 November 2026.
+

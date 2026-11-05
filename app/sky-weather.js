@@ -26,6 +26,10 @@
      ecliptic: the conjunction in longitude of date, kept when the latitude
      difference is inside CLUSTER_NEAR.
 
+   - Planet parades, given a place: four or more of the five naked eye
+     planets above the horizon together at evening or morning twilight, one
+     event per run of nights.
+
    CLUSTERS also serves the chart: clusterLon() gives any cluster's ecliptic
    longitude of date at any instant, which is how a cluster becomes a point.
 
@@ -39,6 +43,17 @@
   const MOON_PLANETS = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
   const CAZIMI = 17 / 60, CAZIMI_LAT = 16 / 60;
   const MOON_MEET = 4, GATHER = 10, CLUSTER_NEAR = 6;
+  /* A planet parade. Not a term of astronomy (Kielder Observatory: "not a
+     scientific term in astronomy"), so these numbers are ours, chosen so the
+     scan reproduces the dated list Kielder Observatory publishes when it is
+     run from Kielder: several of the five planets seen without a telescope
+     (Uranus and Neptune "only to those with a telescope"), above the horizon
+     at the same moment, after sunset or before sunrise. The moment is the Sun
+     PARADE_SUN degrees below the horizon; a planet counts when its apparent
+     altitude is PARADE_ALT degrees or more; PARADE_MIN planets make one
+     (NASA, as SlashGear quotes it: "four, five, or more"). */
+  const NAKED = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+  const PARADE_SUN = -3, PARADE_ALT = 3, PARADE_MIN = 4;
 
   /* J2000 right ascension and declination, from each cluster's Wikipedia
      infobox, read 5 November 2026. The temperaments are Ptolemy's,
@@ -222,18 +237,73 @@
       });
       return out;
     }
-    /* Everything in [a, b), sorted by time. */
-    function events(from, to) {
+    /* Every twilight of one side ('evening' or 'morning') from a to b, seen
+       from obs ({ lat, lon, height }): the instant the Sun crosses PARADE_SUN
+       and the naked eye planets standing PARADE_ALT or more above the horizon
+       then. A place where the Sun does not reach PARADE_SUN that day has no
+       twilight to read and is skipped. */
+    function twilights(a, b, obs, side) {
+      const O = new A.Observer(obs.lat, obs.lon, obs.height || 0), dir = side === 'evening' ? -1 : +1, out = [];
+      let from = a;
+      for (let guard = (b - a) / DAY + 8; guard > 0 && from < b; guard--) {
+        const t = A.SearchAltitude(A.Body.Sun, O, dir, T(D(from)), (b - from) / DAY + 1, PARADE_SUN);
+        if (!t) break;
+        const ms = t.date.getTime(); if (ms >= b) break;
+        const up = [];
+        NAKED.forEach(n => {
+          const e = A.Equator(n, t, O, true, true), h = A.Horizon(t, O, e.ra, e.dec, 'normal');
+          if (h.altitude >= PARADE_ALT) up.push({ n, alt: h.altitude, az: h.azimuth });
+        });
+        out.push({ ms, up });
+        from = ms + DAY / 2;
+      }
+      return out;
+    }
+    /* Runs of consecutive twilights with PARADE_MIN or more planets up, one
+       event per run, dated at its first twilight inside [a, b). `before` and
+       `after` say the run reaches past either end of the window; `names` and
+       `alts` are taken at the twilight with the most planets up. */
+    function parades(a, b, obs) {
+      if (!obs || !Number.isFinite(obs.lat) || !Number.isFinite(obs.lon)) return [];
+      const out = [];
+      ['evening', 'morning'].forEach(side => {
+        const tw = twilights(a - DAY * 1.5, b + DAY * 1.5, obs, side);
+        let run = null;
+        const close = () => {
+          if (!run) return;
+          const inside = run.tw.filter(x => x.ms >= a && x.ms < b);
+          if (inside.length) {
+            const best = inside.reduce((p, q) => q.up.length > p.up.length ? q : p);
+            out.push({ kind: 'parade', side, t: D(inside[0].ms), from: D(inside[0].ms), to: D(inside[inside.length - 1].ms),
+              before: run.tw[0].ms < a, after: run.tw[run.tw.length - 1].ms >= b, best: D(best.ms),
+              names: best.up.map(u => u.n), alts: best.up.map(u => u.alt), count: best.up.length });
+          }
+          run = null;
+        };
+        tw.forEach(x => {
+          if (x.up.length >= PARADE_MIN) {
+            if (run && x.ms - run.tw[run.tw.length - 1].ms > DAY * 1.6) close();
+            if (!run) run = { tw: [] };
+            run.tw.push(x);
+          } else close();
+        });
+        close();
+      });
+      return out;
+    }
+    /* Everything in [a, b), sorted by time. A parade needs a place, so it is
+       found only when obs is given. */
+    function events(from, to, obs) {
       const a = +from, b = +to;
       return [].concat(phases(a, b), eclipses(a, b), stations(a, b), sunMeetings(a, b), meetings(a, b),
-        clusterPasses(a, b), gatherings(a, b), showers(a, b))
+        clusterPasses(a, b), gatherings(a, b), showers(a, b), parades(a, b, obs))
         .filter(e => +e.t >= a && +e.t < b).sort((x, y) => x.t - y.t);
     }
-    return { events, lon, phases, eclipses, stations, sunMeetings, meetings, clusterPasses, gatherings, showers, sunJ2000,
+    return { events, lon, phases, eclipses, stations, sunMeetings, meetings, clusterPasses, gatherings, showers, twilights, parades, sunJ2000,
       clusterLon: (id, d) => { const c = CLUSTERS.find(x => x.id === id); return c ? clusterPos(c, d).lon : null; } };
   }
 
-  const api = { CLUSTERS, SHOWERS, PLANETS, CAZIMI, CAZIMI_LAT, MOON_MEET, GATHER, CLUSTER_NEAR, make };
+  const api = { CLUSTERS, SHOWERS, PLANETS, NAKED, CAZIMI, CAZIMI_LAT, MOON_MEET, GATHER, CLUSTER_NEAR, PARADE_SUN, PARADE_ALT, PARADE_MIN, make };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SkyWeather = api;
 })(typeof window !== 'undefined' ? window : globalThis);

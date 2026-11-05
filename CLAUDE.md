@@ -3468,6 +3468,16 @@ placement entry in `placement-content.js` whose definition says only what
 Ptolemy (Tetrabiblos I.9) and the cluster's own page say; the Astropedia has a
 Star Clusters concept. Do not add a cluster's myth from memory.
 
+**A planet parade is seen from somewhere** (5 November 2026). `parades()`
+counts Mercury to Saturn at least 3 degrees up when the Sun is 3 degrees down,
+evening and morning, and four or more is a parade, one event per run of
+nights. Uranus and Neptune never count, because they need a telescope. The
+two 3s are chosen, not read: the phrase is not a term of astronomy, and those
+are the figures that reproduce Kielder Observatory's dated list when run from
+Kielder (SW6). Do not tune them without rerunning SW6. The place is the
+profile's (`swPlace()`), the memo key carries it, and the sample has none, so
+it shows no parade.
+
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
 perfectly center"). The cover's camera looked at a point wandering half a unit

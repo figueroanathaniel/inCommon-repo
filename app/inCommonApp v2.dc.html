@@ -20583,14 +20583,26 @@ class Component extends DCLogic {
     const to = new Date(d); to.setDate(to.getDate() + this.SW_DAYS);
     return { from: d, to, key: d.toDateString() };
   }
+  /* Where a planet parade is seen from: the place on the profile, the one
+     place the app holds for the reader (the owner's choice is pending; see
+     docs/astro-upgrade/03-sky-weather-sources.md). None, no parade. */
+  swPlace() {
+    const p = this.activeProfile();
+    if (!p || !Number.isFinite(+p.birthLat) || !Number.isFinite(+p.birthLon) || p.birthLat === null || p.birthLon === null) return null;
+    const name = String(p.birthLocation || '').split(',')[0].trim();
+    return { lat: +p.birthLat, lon: +p.birthLon, name, tz: p.timezone || '' };
+  }
+  swKeyOf(w, pl) { return w.key + '|' + (pl ? pl.lat.toFixed(3) + ',' + pl.lon.toFixed(3) : ''); }
   swFind() {
-    const S = window.SkyWeather, A = window.Astronomy, w = this.swWindow();
+    const S = window.SkyWeather, A = window.Astronomy, w = this.swWindow(), pl = this.swPlace();
     if (!S || !A) return null;
-    if (this._swKey === w.key) return this._sw;
+    const key = this.swKeyOf(w, pl);
+    if (this._swKey === key) return this._sw;
     if (!this._swMake) this._swMake = S.make(A);
     let ev = [];
-    try { ev = this._swMake.events(w.from, w.to); } catch (e) { ev = []; }
-    this._swKey = w.key; this._sw = ev;
+    try { ev = this._swMake.events(w.from, w.to, pl); } catch (e) { ev = []; }
+    this._swPl = pl;
+    this._swKey = key; this._sw = ev;
     return ev;
   }
   swSoon() {
@@ -20632,6 +20644,22 @@ class Component extends DCLogic {
         line: 'As many as ' + e.zhr + ' meteors an hour under a perfectly dark sky. The Moon is ' + Math.round(e.moonLit * 100) + '% lit'
           + (e.moonLit < 0.35 ? ', so the faint ones will show.' : e.moonLit > 0.75 ? ', and its light will hide the faint ones.' : '.'),
         when: t };
+      case 'parade': {
+        const pl = this._swPl || {}, eve = e.side === 'evening', tzo = { month: 'long', day: 'numeric' };
+        let tz = null; try { if (pl.tz) { new Intl.DateTimeFormat(undefined, { timeZone: pl.tz }); tz = pl.tz; } } catch (x) { tz = null; }
+        const dt = d => { try { return d.toLocaleDateString(undefined, tz ? { ...tzo, timeZone: tz } : tzo); } catch (x) { return d.toDateString(); } };
+        const a = dt(e.from), b = dt(e.to), each = eve ? 'Every evening' : 'Every morning';
+        const span = e.before && e.after ? each + ', through all thirty days and beyond'
+          : e.before ? each + ', already under way, through ' + b
+          : e.after ? each + ' from ' + a + ', and on past the thirty days'
+          : a === b ? 'This ' + (eve ? 'evening' : 'morning') + ' only' : each + ', ' + a + ' to ' + b;
+        const low = e.names.filter((n, i) => e.alts[i] < 10);
+        return { glyph: e.names.map(n => this.swGlyph(n)).join(''), kind: 'Planet parade',
+          title: this.SW_COUNT[e.count] + ' planets ' + (eve ? 'after sunset' : 'before sunrise') + (pl.name ? ', seen from ' + pl.name : ''),
+          line: this.swList(e.names) + ' stand above the horizon together as the sky ' + (eve ? 'darkens' : 'pales')
+            + ', no telescope needed.' + (low.length ? ' ' + this.swList(low) + (low.length > 1 ? ' stay' : ' stays') + ' low in the twilight, close to where the Sun ' + (eve ? 'went down' : 'will rise') + '.' : ''),
+          when: span };
+      }
       case 'cluster': return { glyph: this.swGlyph(e.body) + ' ✦︎', kind: 'Star cluster',
         title: (e.body === 'Moon' ? 'The Moon' : e.body) + ' passes the ' + e.name,
         line: deg(e.sep) + ' apart in latitude. Ptolemy gave this cluster the nature of ' + (cl ? this.swList(cl.like.map(n => n === 'Moon' ? 'the Moon' : n)) : 'its stars') + '.',
@@ -20645,7 +20673,7 @@ class Component extends DCLogic {
     const close = () => this.setState({ swOpen: false });
     const base = { swGo: go, swClose: close, swOpen: open, swStop: e => { if (e && e.stopPropagation) e.stopPropagation(); } };
     if (!open) return { ...base, swBusy: false, swNone: false, swDays: [], swSpan: '' };
-    const w = this.swWindow(), ready = this._swKey === w.key, ev = ready ? (this._sw || []) : [];
+    const w = this.swWindow(), ready = this._swKey === this.swKeyOf(w, this.swPlace()), ev = ready ? (this._sw || []) : [];
     if (!ready) this.swSoon();
     const last = new Date(w.to); last.setDate(last.getDate() - 1);
     const fmt = (d, o) => { try { return d.toLocaleDateString(undefined, o); } catch (e) { return d.toDateString(); } };
