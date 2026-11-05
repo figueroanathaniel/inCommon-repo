@@ -198,6 +198,33 @@ input[type="date"]{color-scheme:dark}
 :is(button,a,summary)[data-lift]:active{box-shadow:var(--lift-in)!important}
 :is(button,a,summary)[data-lift]:is(:disabled,[aria-disabled="true"]){box-shadow:none!important}
 .obs-btn{box-shadow:var(--lift)}@media (hover:hover){.obs-btn:hover{box-shadow:var(--lift-hi)}}.obs-btn:active{box-shadow:var(--lift-in)}
+/* THE SHAPES OF THE WORLDS (owner, 5 November 2026). A token can carry a
+   colour and a shadow; it cannot square a pill or hand shape a corner, because
+   every radius in the template is written inline. So the shape of each world
+   is here, keyed on data-world, which worldSync() writes on the app root and
+   removes for Deep Field. Shape only: nothing here sets a colour, a background
+   or a size, so no contrast pair and no touch target moves. Not under the
+   contrast modifier (data-world-hc), which keeps the plain shapes.
+   Cyberspace: every lifted surface is square, and a card wears a title bar
+   stripe in the identity's own blue. Nature's Roots: hand shaped, no two
+   corners alike, like a tile pressed out by hand. Subterranean Biome: cell
+   like curves on the cards; the pills stay pills. */
+[data-world="midnight"]:not([data-world-hc]) [data-lift]{border-radius:0!important}
+[data-world="midnight"]:not([data-world-hc]) [data-lift="card"]{box-shadow:inset 0 5px 0 rgb(var(--atmc)),var(--lift)!important}
+[data-world="dawn"]:not([data-world-hc]) :is([data-lift="card"],[data-lift="box"]){border-radius:30px 12px 26px 14px / 14px 28px 12px 24px!important}
+[data-world="dawn"]:not([data-world-hc]) :is(button,a,summary)[data-lift]:not([data-lift="card"]){border-radius:22px 9px 19px 11px / 11px 20px 9px 18px!important}
+[data-world="gold"]:not([data-world-hc]) :is([data-lift="card"],[data-lift="box"]){border-radius:30px 44px 26px 40px / 40px 26px 44px 30px!important}
+/* Each world draws the natal wheel on its own ground: a chrome rim round a dark
+   monitor with scanlines (Cyberspace, whose lines are also drawn pixel crisp),
+   a fired clay disc ringed with turquoise and shell beads (Nature's Roots), and
+   a jellyfish seen from below, its bell glowing from the centre (Subterranean
+   Biome). The ground sits under the wheel's SVG and under everything drawn on
+   it, so no glyph or line moves. */
+[data-world]:not([data-world-hc]) [data-chart="wheel"]::before{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none}
+[data-world="midnight"]:not([data-world-hc]) [data-chart="wheel"] svg{shape-rendering:crispEdges}
+[data-world="midnight"]:not([data-world-hc]) [data-chart="wheel"]::before{background:repeating-linear-gradient(rgba(0,0,0,.22) 0 2px,transparent 2px 4px),radial-gradient(circle,rgba(14,42,106,.85) 0,rgba(0,2,15,.92) 95%,transparent 96.4%),conic-gradient(from 30deg,rgb(255,255,255),rgb(122,122,140),rgb(244,244,255),rgb(74,74,90),rgb(228,228,242),rgb(138,138,156),rgb(255,255,255));box-shadow:0 6px 0 rgba(0,0,20,.55)}
+[data-world="dawn"]:not([data-world-hc]) [data-chart="wheel"]::before{background:radial-gradient(circle at 42% 36%,rgba(150,82,46,.62),rgba(78,41,24,.7) 70%,rgba(52,28,16,.75) 96%,transparent 96.6%);border:4px dotted rgba(80,200,196,.55);box-shadow:inset 0 3px 0 rgba(255,222,176,.14),inset 0 -6px 14px rgba(0,0,0,.45),0 10px 26px rgba(0,0,0,.5)}
+[data-world="gold"]:not([data-world-hc]) [data-chart="wheel"]::before{background:radial-gradient(circle,rgba(220,255,255,.22) 0,rgba(143,244,255,.08) 22%,rgba(20,40,90,.42) 60%,rgba(2,8,22,.5) 95%,transparent 96.6%);border:2px dashed rgba(255,82,220,.45);box-shadow:0 0 34px rgba(143,244,255,.18),inset 0 0 40px rgba(158,107,255,.16)}
 [data-hd-deck]::-webkit-scrollbar{display:none}
 [data-hd-deck]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:2px;border-radius:var(--rad)}
 [data-hs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
@@ -424,6 +451,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-circle.js"></script>
 <script src="./flight.js"></script>
 <script src="./body-globes.js"></script>
+<script src="./theme-worlds.js"></script>
 <script src="./cycle-scene.js"></script>
 <script src="./chart-scene.js"></script>
 <script src="./hd-scene.js"></script>
@@ -455,6 +483,12 @@ input[type="date"]{color-scheme:dark}
      change and no colour is written into the layer. Decorative, so it is
      aria-hidden and inert, and it does not paint at all under high contrast. -->
 <canvas data-atmos-sky="1" aria-hidden="true" style="position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;opacity:var(--atmo)"></canvas>
+<!-- THE WORLD (owner, 5 November 2026). Cyberspace, Nature's Roots and the
+     Subterranean Biome each draw a world here in real depth, over the sky and
+     under the grain: theme-worlds.js, built by worldSync() and only for the
+     identity that is active. Deep Field leaves it empty and keeps its sky.
+     Decorative, aria-hidden, takes no pointer. -->
+<div data-atmos-world="1" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden"></div>
 <!-- Grain, over the sky and under the content. It exists to kill the banding
      a wide gradient shows on an OLED panel, which is why it sits on the
      atmosphere rather than over the type. -->
@@ -15324,6 +15358,29 @@ class Component extends DCLogic {
     if (this._skyRAF) { cancelAnimationFrame(this._skyRAF); this._skyRAF = null; }
     this.skyFrame();
   }
+  /* THE WORLD BEHIND THE IDENTITY. Called from componentDidMount and the one
+     componentDidUpdate, and it only acts when the identity, the contrast
+     modifier or the reader's motion setting actually changed, because a token
+     delta tells a canvas nothing. It also writes data-world on the app root,
+     a DOM write rather than a template hole, which the head sheet reads for
+     the shapes a token cannot carry (square bevels, hand shaped clay, cell
+     like membranes). Deep Field writes nothing and builds nothing. Under the
+     contrast modifier the world is not drawn: hardening is for reading. */
+  worldSync() {
+    const key = this.state.themeKey || 'deepfield', hc = !!this.state.themeHC, still = this.motionOff();
+    const sig = key + (hc ? '/hc' : '') + (still ? '/still' : '');
+    if (sig === this._worldSig) return;
+    this._worldSig = sig;
+    const root = document.querySelector('[data-app-root]');
+    if (root) {
+      if (key === 'deepfield') root.removeAttribute('data-world'); else root.setAttribute('data-world', key);
+      if (hc) root.setAttribute('data-world-hc', '1'); else root.removeAttribute('data-world-hc');
+    }
+    const W = window.ThemeWorlds, host = document.querySelector('[data-atmos-world]');
+    if (!W || !host) { if (key !== 'deepfield' && !this._worldWait && (this._worldTries = (this._worldTries || 0) + 1) < 20) { this._worldWait = setTimeout(() => { this._worldWait = null; this._worldSig = null; this.worldSync(); }, 600); } return; }
+    if (key === 'deepfield' || hc || W.keys.indexOf(key) < 0 || !W.supported()) { W.stop(); return; }
+    W.show(host, key, { still: still, onFail: () => { try { W.stop(); } catch (e) {} } });
+  }
   skyStop() {
     if (this._skyRAF) { cancelAnimationFrame(this._skyRAF); this._skyRAF = null; }
     if (this._skyResize) { window.removeEventListener('resize', this._skyResize); this._skyResize = null; }
@@ -15445,6 +15502,7 @@ class Component extends DCLogic {
     this._onPop = () => { const h = this.hashPath(); this._hash = h; if (h) this.openPath(h); };
     window.addEventListener('popstate', this._onPop);
     this.skyStart();
+    this.worldSync();
   }
   /* A TAB CHANGE IS A JOURNEY ON THE PHONE, AND MOST CALLERS DID NOT KNOW IT.
 
@@ -15483,6 +15541,7 @@ class Component extends DCLogic {
     this.syncTrap();
     this.announceChanges();
     this.skySync();
+    this.worldSync();
     this.syncSectionToTab();
     this.syncAtlasItem();
     this.syncLibTabIntoView();
@@ -15534,6 +15593,7 @@ class Component extends DCLogic {
       this.ephIntegration = null;
     }
     this.skyStop();
+    if (window.ThemeWorlds) window.ThemeWorlds.stop();
     if (this._trapObs) { this._trapObs.disconnect(); this._trapObs = null; }
     this._trapQueued = false;
     this.trapRelease();
@@ -22311,40 +22371,79 @@ class Component extends DCLogic {
     deepfield: { label: 'Deep Field',
       face: null, shared: {}, scoped: {},
       hc: { '--bd': 'rgba(120,150,255,.5)', '--ac2-hi': '#cbb8ff', '--blue': '#a8c0ff', '--mood': '#a8c0ff' } },
-    /* Midnight is not gone, it is a delta now. Every value below is exactly what
-       the three roots carried before Deep Field took the seat, so choosing it
-       returns the app to the palette it shipped with, token for token. */
-    midnight: { label: 'Midnight',
-      face: null,
-      shared: { '--atmc2': '139,92,246', '--atmc3': '47,255,143', '--atmo': '.6',
-        '--sf-g': '#181b24', '--chl': '#24222c', '--chl2': '#1c1a23',
-        '--rail1': '#0b0d13', '--rail2': '#080a0f' },
-      scoped: { app: { '--sf': '#14161d', '--sf2': '#1c1f29', '--bd': 'rgba(var(--atmc),.34)' },
-        vt: { '--sf': '#05060a', '--sf2': '#14161d', '--bd': 'rgba(var(--atmc),.3)' },
-        dt: { '--sf': '#14161d', '--sf2': '#1c1f29', '--bd': 'rgba(var(--atmc),.34)' } },
-      hc: { '--bd': 'rgba(120,150,255,.5)', '--ac2-hi': '#cbb8ff', '--blue': '#a8c0ff', '--mood': '#a8c0ff' } },
-    dawn: { label: 'Dawn',
-      face: ['Petrona', 'Petrona:ital,wght@0,400;0,500;1,400'],
-      shared: { '--tx': '#f0ebe5', '--atmc': '200,160,120', '--atmc2': '190,118,96', '--atmc3': '200,160,120', '--atmo': '.6',
-        '--sf-g': '#2a221d', '--chl': '#3a2f26', '--chl2': '#2d2520', '--rail1': '#12100e', '--rail2': '#0d0b0a',
-        /* .55 as specified measures about 4.2:1 on this card and fails the body
-           gate. .72 is the first value that clears it. */
-        '--dim': 'rgba(240,235,229,.72)', '--mut': 'rgba(240,235,229,.72)',
-        '--ac2': '#b89fd0', '--ac2-hi': '#c9b3e0', '--blue': '#9ab8cf', '--mood': '#9ab8cf',
-        '--ok': '#6bb88a', '--warn': '#d4907a', '--fd': "'Petrona',Georgia,serif" },
-      scoped: { app: { '--bg': '#1a1512', '--sf': '#221c18', '--sf2': '#2d2520', '--bd': 'rgba(200,160,120,.22)' },
-        vt: { '--bg': '#12100e', '--sf': '#1a1512', '--sf2': '#221c18', '--bd': 'rgba(200,160,120,.2)' },
-        dt: { '--bg': '#1a1512', '--sf': '#221c18', '--sf2': '#2d2520', '--bd': 'rgba(200,160,120,.22)' } },
-      hc: { '--bd': 'rgba(200,160,120,.42)', '--ac2-hi': '#dcc9f0' } },
-    gold: { label: 'Gold',
-      face: null,
-      shared: { '--tx': '#e8e6ee', '--atmc': '211,173,110', '--atmc2': '154,122,200', '--atmc3': '211,173,110', '--atmo': '.6',
-        '--sf-g': '#1c1a25', '--chl': '#2a2733', '--chl2': '#201d2a', '--rail1': '#0a0910', '--rail2': '#06050a', '--dim': 'rgba(232,230,238,.62)', '--mut': 'rgba(232,230,238,.62)',
-        '--ac2': '#a98fd6', '--ac2-hi': '#c2aee6', '--blue': '#d3ad6e', '--mood': '#d3ad6e' },
-      scoped: { app: { '--bg': '#0d0c11', '--sf': '#17151e', '--sf2': '#201d2a', '--bd': 'rgba(211,173,110,.22)' },
-        vt: { '--bg': '#08070b', '--sf': '#0d0c11', '--sf2': '#17151e', '--bd': 'rgba(211,173,110,.2)' },
-        dt: { '--bg': '#0d0c11', '--sf': '#17151e', '--sf2': '#201d2a', '--bd': 'rgba(211,173,110,.22)' } },
-      hc: { '--bd': 'rgba(211,173,110,.35)', '--ac2-hi': '#e8c880', '--blue': '#e8c880', '--mood': '#e8c880' } }
+    /* THE OTHER THREE ARE WORLDS (owner, 5 November 2026). Midnight became
+       Cyberspace, Dawn became Nature's Roots and Gold became the Subterranean
+       Biome, and the brief was that they be vastly different from each other,
+       very 3D and textured. The keys did not move, because a theme is stored
+       per profile by key and a renamed key would drop every reader's choice.
+
+       What a delta can carry it carries here: palette, faces, radius and the
+       four lift tokens, which are what make a card a bevel, a fired clay tile
+       or a lit membrane. What a token cannot carry (square corners on a pill,
+       a hand shaped corner, a texture) is in the head sheet under
+       [data-world], which worldSync() writes on the app root. The world
+       itself is theme-worlds.js.
+
+       Every one of them is dark with light type, and that is forced rather than
+       chosen: --ac is fixed and is written as text in over two hundred places,
+       so a light identity would fail the contrast gate wherever the action
+       green is a word. The concept's light gray Cyberspace windows became dark
+       steel gray with the same bevels for that reason.
+
+       Surfaces carry alpha, as Deep Field's do, so the world reads through
+       them; the alpha is high enough that the brightest point of each world
+       leaves every pair the colour table guarantees above 4.5:1. */
+    midnight: { label: 'Cyberspace',
+      /* A pixel face that is still a reading face: the display face carries the
+         readings' paragraphs as well as the headings, and VT323, the concept's
+         label face, reads at about two thirds of its size there. */
+      face: ['Pixelify Sans', 'Pixelify+Sans:wght@400;500;600'],
+      shared: { '--tx': '#f4f6ff', '--ok': '#8fe0ad', '--dim': 'rgba(244,246,255,.76)', '--mut': 'rgba(244,246,255,.76)',
+        '--atmc': '16,132,208', '--atmc2': '62,232,255', '--atmc3': '0,0,128', '--atmo': '.9',
+        '--ac2': '#a98cff', '--ac2-hi': '#d4c4ff', '--blue': '#7fe9ff', '--mood': '#7fe9ff',
+        '--sf-g': 'rgba(52,56,72,.93)', '--chl': '#4a4f62', '--chl2': '#373b4b',
+        '--rail1': 'rgba(26,29,40,.94)', '--rail2': 'rgba(14,16,24,.94)',
+        '--fd': "'Pixelify Sans',Tahoma,Verdana,sans-serif", '--fb': "Verdana,Tahoma,'DejaVu Sans',sans-serif", '--fu': "Tahoma,Verdana,'DejaVu Sans',sans-serif",
+        '--lift': 'inset 1px 1px 0 rgba(255,255,255,.45),inset -1px -1px 0 rgba(0,0,0,.7),inset 2px 2px 0 rgba(255,255,255,.12),inset -2px -2px 0 rgba(0,0,0,.35),3px 3px 0 rgba(0,0,20,.55)',
+        '--lift-hi': 'inset 1px 1px 0 rgba(255,255,255,.6),inset -1px -1px 0 rgba(0,0,0,.7),inset 2px 2px 0 rgba(127,233,255,.25),inset -2px -2px 0 rgba(0,0,0,.35),4px 4px 0 rgba(0,0,20,.6)',
+        '--lift-in': 'inset 1px 1px 0 rgba(0,0,0,.7),inset -1px -1px 0 rgba(255,255,255,.4),inset 2px 2px 0 rgba(0,0,0,.35),inset -2px -2px 0 rgba(255,255,255,.1)',
+        '--lift-lo': 'inset 1px 1px 0 rgba(255,255,255,.3),inset -1px -1px 0 rgba(0,0,0,.55),2px 2px 0 rgba(0,0,20,.4)' },
+      scoped: { app: { '--bg': '#000a3a', '--sf': 'rgba(56,60,76,.93)', '--sf2': 'rgba(40,43,56,.94)', '--bd': 'rgba(150,156,178,.75)', '--rad': '0px' },
+        vt: { '--bg': '#000a3a', '--sf': 'rgba(56,60,76,.93)', '--sf2': 'rgba(40,43,56,.94)', '--bd': 'rgba(150,156,178,.75)', '--rad': '0px' },
+        dt: { '--bg': '#000a3a', '--sf': 'rgba(56,60,76,.93)', '--sf2': 'rgba(40,43,56,.94)', '--bd': 'rgba(150,156,178,.75)', '--rad': '0px' } },
+      hc: { '--bd': 'rgba(200,206,228,.9)', '--ac2-hi': '#e4d9ff', '--blue': '#b0f3ff', '--mood': '#b0f3ff' } },
+    dawn: { label: "Nature's Roots",
+      face: ['Spectral', 'Spectral:ital,wght@0,400;0,500;0,600;1,400'],
+      shared: { '--tx': '#f7ecd9', '--ok': '#86d8a3', '--dim': 'rgba(247,236,217,.76)', '--mut': 'rgba(247,236,217,.76)',
+        '--atmc': '80,200,196', '--atmc2': '217,164,65', '--atmc3': '122,65,40', '--atmo': '.7',
+        '--ac2': '#3fb8b4', '--ac2-hi': '#93e6de', '--blue': '#a8dcd2', '--mood': '#a8dcd2', '--warn': '#eba57d',
+        '--sf-g': 'rgba(92,50,30,.92)', '--chl': '#5c3624', '--chl2': '#45291b',
+        '--rail1': 'rgba(30,18,11,.95)', '--rail2': 'rgba(20,12,7,.95)',
+        '--fd': "'Spectral',Georgia,serif", '--fb': "'Spectral',Georgia,serif",
+        '--lift': 'inset 0 2px 0 rgba(255,222,176,.16),inset 0 -3px 7px rgba(0,0,0,.42),0 0 0 2px rgba(22,13,8,.5),0 8px 18px rgba(0,0,0,.55)',
+        '--lift-hi': 'inset 0 2px 0 rgba(255,222,176,.22),inset 0 -3px 7px rgba(0,0,0,.42),0 0 0 2px rgba(80,200,196,.35),0 12px 24px rgba(0,0,0,.6)',
+        '--lift-in': 'inset 0 3px 7px rgba(0,0,0,.55),inset 0 -1px 0 rgba(255,222,176,.12)',
+        '--lift-lo': 'inset 0 1px 0 rgba(255,222,176,.1),0 0 0 1px rgba(22,13,8,.4),0 4px 10px rgba(0,0,0,.4)' },
+      scoped: { app: { '--bg': '#120b07', '--sf': 'rgba(78,41,24,.92)', '--sf2': 'rgba(58,32,19,.93)', '--bd': 'rgba(80,200,196,.5)', '--rad': '24px' },
+        vt: { '--bg': '#0d0805', '--sf': 'rgba(78,41,24,.92)', '--sf2': 'rgba(58,32,19,.93)', '--bd': 'rgba(80,200,196,.48)', '--rad': '24px' },
+        dt: { '--bg': '#120b07', '--sf': 'rgba(78,41,24,.92)', '--sf2': 'rgba(58,32,19,.93)', '--bd': 'rgba(80,200,196,.5)', '--rad': '24px' } },
+      hc: { '--bd': 'rgba(120,224,220,.8)', '--ac2-hi': '#b8f2ec', '--blue': '#c6ece4', '--mood': '#c6ece4' } },
+    gold: { label: 'Subterranean Biome',
+      face: ['Comfortaa', 'Comfortaa:wght@400;600;700'],
+      shared: { '--tx': '#ecfdff', '--dim': 'rgba(236,253,255,.74)', '--mut': 'rgba(236,253,255,.74)',
+        '--atmc': '143,244,255', '--atmc2': '255,82,220', '--atmc3': '158,107,255', '--atmo': '.7',
+        '--ac2': '#9e6bff', '--ac2-hi': '#cdb6ff', '--blue': '#8ff4ff', '--mood': '#8ff4ff',
+        '--sf-g': 'rgba(12,42,72,.88)', '--chl': '#14385a', '--chl2': '#0c2640',
+        '--rail1': 'rgba(3,16,36,.92)', '--rail2': 'rgba(2,10,24,.92)',
+        '--fd': "'Comfortaa',system-ui,sans-serif",
+        '--lift': '0 0 0 1px rgba(143,244,255,.2),0 0 18px rgba(143,244,255,.16),inset 0 0 16px rgba(143,244,255,.08),0 10px 24px rgba(0,0,0,.45)',
+        '--lift-hi': '0 0 0 1px rgba(143,244,255,.4),0 0 26px rgba(143,244,255,.3),0 0 40px rgba(255,82,220,.14),inset 0 0 20px rgba(143,244,255,.12),0 12px 28px rgba(0,0,0,.5)',
+        '--lift-in': 'inset 0 0 0 1px rgba(143,244,255,.25),inset 0 2px 10px rgba(0,0,0,.55)',
+        '--lift-lo': '0 0 0 1px rgba(143,244,255,.14),0 0 12px rgba(143,244,255,.1),0 6px 14px rgba(0,0,0,.35)' },
+      scoped: { app: { '--bg': '#010611', '--sf': 'rgba(8,32,58,.88)', '--sf2': 'rgba(4,18,38,.9)', '--bd': 'rgba(143,244,255,.4)', '--rad': '30px' },
+        vt: { '--bg': '#010611', '--sf': 'rgba(8,32,58,.88)', '--sf2': 'rgba(4,18,38,.9)', '--bd': 'rgba(143,244,255,.38)', '--rad': '30px' },
+        dt: { '--bg': '#010611', '--sf': 'rgba(8,32,58,.88)', '--sf2': 'rgba(4,18,38,.9)', '--bd': 'rgba(143,244,255,.4)', '--rad': '30px' } },
+      hc: { '--bd': 'rgba(170,248,255,.75)', '--ac2-hi': '#e0d2ff', '--blue': '#c4faff', '--mood': '#c4faff' } }
   };
   /* Contrast is a modifier over any identity, not a fourth palette, so nobody
      is dropped out of dawn in order to read something. Type hardens with the
@@ -24869,7 +24968,7 @@ class Component extends DCLogic {
     const pct = a => (Math.min(a, END) / END * 100).toFixed(2) + '%';
     const seg = (x, cur, past, go, name) => { const a = x.r[0], b = x.r[1] == null ? END : x.r[1];
       return { l: pct(a), w: ((b - a) / END * 100).toFixed(2) + '%', v: x.v, years: x.years, go: go,
-        bg: cur ? 'rgba(var(--atmc),.48)' : past ? 'var(--sf2)' : 'rgba(var(--atmc),.18)',
+        bg: cur ? 'rgba(var(--atmc),.34)' : past ? 'var(--sf2)' : 'rgba(var(--atmc),.18)',
         bd: cur ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.5)', c: cur ? 'var(--tx)' : 'var(--mut)', vc: cur ? 'var(--tx)' : 'var(--ac2-hi)',
         aria: name + ' ' + x.v + ', ages ' + x.years + (cur ? ', where you are' : '') }; };
     const pinGo = x => open('pinnacle', x.v, { range: x.years, c: x.cc }), cycGo = x => open('cycle', x.v, { range: x.years, c: x.cc });

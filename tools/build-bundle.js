@@ -192,6 +192,9 @@ const MODULES = [
      scene that calls them, so they need nothing above them. */
   'flight.js',
   'body-globes.js',
+  /* The world behind Cyberspace, Nature's Roots and the Subterranean Biome.
+     Reads nothing above it and imports three.module.js on first use. */
+  'theme-worlds.js',
   /* The Cycle Audit drawn in depth. Reads nothing above it and imports
      three.module.js, which sits beside the bundle for the cover, on first use. */
   'cycle-scene.js',
