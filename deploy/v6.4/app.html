@@ -47162,7 +47162,7 @@ class Component extends DCLogic {
       ? 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
       : 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Moon keeps walking, about a sign every two and a half years, and each crossing is a change of weather inside.';
     void natalSi;
-    return (memo[mk] = { heading: 'Your ' + name + ', progressed', lead: lead, paras: paras });
+    return (memo[mk] = { heading: 'Your ' + name + ', progressed', lead: lead, paras: paras, last: last, next: next, age: age, lonNow: lonNow });
   }
   handoffDeg(d) { return d < this.HANDOFF_THRESHOLD ? (Math.round(d * 10) / 10) + '°' : Math.round(d) + '°'; }
   /* Who rules a sign, and where that ruler sits in this chart: { name, older }.
