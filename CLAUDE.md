@@ -3370,13 +3370,47 @@ bhavas, nakshatras, dignities and current mahadasha; the sidereal or draconic
 positions; the heliocentric bodies; the Four Pillars and the animal year; the
 Hellenistic sect and chart ruler. The astrology page draws the same lines as
 a card above the Cycle Audit (`studyPanelVals()`, both shells), without the
-bracketed method, and draws nothing for the four plain Western studies. The
-wheel, the Ledger and the placement
-pages are still drawn in the tropical zodiac under every study. Relabelling
-them is the next step and needs the ayanamsa at each instant a sign is read,
-so it was not done by shifting `chartAt()`: transits are read through
-`lonOf()` directly in several places, and a shift in one would set the two
-frames 24 degrees apart.
+bracketed method, and draws nothing for the four plain Western studies. Since
+5 November 2026 the chart itself follows the study too: see "The chart is
+drawn in the study's own zodiac".
+
+## The chart is drawn in the study's own zodiac
+Asked for by the owner on 5 November 2026: "When changing which chart to read,
+it should change all of the information to that chart's specific features.
+Placements and chart visuals alike."
+
+**Every longitude stays tropical; only the reading of it moves.** Aspects,
+transits, the Human Design gates and every scan are computed on tropical
+longitudes, so nothing is shifted in `chartAt()` or `lonOf()`. `zodiacOff(t)`
+is where the study's 0 Aries stands in the tropical frame: the Lahiri or
+Fagan-Bradley ayanamsa plus nutation for a sidereal study (memoised per
+quarter day), the natal mean North Node for Draconic, 0 otherwise.
+`signOf(lon, t)` reads a sign through it, `signStart()` gives the study's sign
+boundary (whole sign houses, the solar chart and the wheel's zero start
+there), and `signOfT()` stays tropical for the gate hand-off, because the
+wiring is tropical by definition. The 2D wheel's sign band turns by the
+offset and the 3D and Orbital stage take it as `uSignOff`.
+
+**Each tradition has its own first view** (`chartNative()`, chart view
+`native`, ahead of 2D, Orbital and 3D, and the zoom cluster is hidden on it):
+the South Indian square for Vedic (Lagna marked, grahas by rashi, the Moon's
+nakshatra in the middle), the Four Pillars for Chinese (stems and branches,
+the Day Master, the five elements counted), and From the Sun for Heliocentric
+(an orrery not to scale, the true heliocentric longitude round the Sun, the
+Earth in `--blue`). Every other study has none and opens on 2D.
+
+**Vedic reads as Jyotish.** `vedicOf()` gives the rashi, nakshatra, pada, lord
+and Parashara dignity; the Ledger tags each row with them, the nodes are Rahu
+and Ketu (`studyName()`), and the packet has The Nakshatra chapter, with the
+Vimshottari dasha on the Moon. Progressions, the Mirror and the Year are
+Western techniques and are left out under Vedic and Heliocentric.
+
+**Heliocentric** (`helioChart()`, `helioPos()`; the older `helioOf(el, t)` is
+the Kepler helper and is unrelated) tags the Ledger with each planet from the
+Sun and the Sun's row with the Earth, and adds a From the Sun chapter. The
+Moon, the nodes, the angles and the houses have no heliocentric place and get
+no tag. Measured over the three native views, four identities hardened and
+not, at 1440 and 375: 48 cases, clean.
 
 ## A house that crosses a sign is a hand-off
 Approved by the owner on 4 November 2026 ("Hand off plan works, proceed"), from
