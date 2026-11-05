@@ -93,7 +93,7 @@ button{font-family:inherit;transition:background-color .2s ease,border-color .3s
 .obs[data-panels="1"]{--obs-l:348px;--obs-r:372px}
 .obs-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:600}
 .obs-glass{background:var(--sf2);-webkit-backdrop-filter:blur(16px) saturate(1.15);backdrop-filter:blur(16px) saturate(1.15)}
-.obs-top{position:absolute;left:0;right:0;top:0;z-index:6;min-height:60px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:8px max(14px,env(safe-area-inset-right)) 8px max(14px,env(safe-area-inset-left));background:linear-gradient(180deg,var(--bg) 40%,transparent)}
+.obs-top{position:absolute;left:0;right:0;top:0;z-index:6;min-height:60px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:max(8px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 8px max(14px,env(safe-area-inset-left));background:linear-gradient(180deg,var(--bg) 40%,transparent)}
 .obs-btn{all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 13px;display:flex;align-items:center;gap:7px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx);transition:border-color .2s ease,opacity .6s ease .6s}
 .obs-btn:hover,.obs-btn[aria-expanded="true"],.obs-btn[aria-pressed="true"]{border-color:var(--ac2-hi)}
 .obs-sq{padding:0;justify-content:center;width:44px}
@@ -148,7 +148,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 @keyframes expertGlow{0%,30%{text-shadow:0 0 14px rgba(var(--atmc2),1),0 0 4px rgba(var(--atmc2),.9)}100%{text-shadow:none}}
 @media (prefers-reduced-motion:reduce){[data-xin="1"]{animation:none!important}}
 [data-bloom-intro="1"] [data-bloom-x="1"]{animation:bloomFlash 3.2s ease both}
-[data-bloom-intro="1"] span[data-bloom-x="1"]{animation:bloomFlash 3.2s ease both,bloomFlashGlow 3.2s ease both}
+[data-bloom-intro="1"] :is(span,button)[data-bloom-x="1"]{animation:bloomFlash 3.2s ease both,bloomFlashGlow 3.2s ease both}
 @keyframes bloomFlash{0%{opacity:0;visibility:visible}28%{opacity:1;visibility:visible}62%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden}}
 @keyframes bloomFlashGlow{0%,100%{text-shadow:none}35%,55%{text-shadow:0 0 10px rgba(var(--atmc2),.9),0 0 3px rgba(var(--atmc2),.7)}}
 .bloom-rail{scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.5) transparent}
@@ -5908,7 +5908,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
   </div>
 </sc-if>
 <sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
+  <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:{{ pgZ }};background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
     <div onClick="{{ pgStop }}" role="dialog" aria-modal="true" aria-label="{{ pgTitle }}" data-vt-sheet="1" style="box-sizing:border-box;width:100%;max-height:88svh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc2),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border-top:1px solid rgba(var(--atmc2),.5);border-radius:26px 26px 0 0;box-shadow:0 -10px 60px rgba(var(--atmc2),.3);animation:vtSheet .26s cubic-bezier(.22,1,.36,1);padding:20px 20px calc(26px + env(safe-area-inset-bottom))">
       <div style="display:flex;align-items:flex-start;gap:14px">
         <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.55);background:rgba(var(--atmc2),.12);box-shadow:0 0 22px rgba(var(--atmc2),.35);font:400 24px var(--fb);color:var(--tx)">{{ pgGlyph }}</span>
@@ -6067,7 +6067,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
        Observatory is one press away, from the header. -->
   <div data-immersive="1" style="position:fixed;inset:0;z-index:390;display:flex;background:radial-gradient(60% 55% at 50% 42%,rgba(var(--atmc),.30),transparent 72%),radial-gradient(80% 45% at 50% 112%,rgba(var(--atmc2),.13),transparent 70%),var(--bg)">
     <div onClick="{{ chartBloomSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded chart" data-immersive="1" data-bloom-intro="{{ bloomIntro }}" style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:{{ bloomScroll }};overflow-x:hidden;animation:bloomIn .45s ease both">
-      <div style="flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:14px clamp(14px,2.6vw,40px) 4px">
+      <div style="flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:max(14px,calc(env(safe-area-inset-top) + 8px)) max(clamp(14px,2.6vw,40px),env(safe-area-inset-right)) 4px max(clamp(14px,2.6vw,40px),env(safe-area-inset-left))">
         <div style="justify-self:start"><button data-lift onClick="{{ bloomObsGo }}" aria-label="Enter the Observatory" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 14px 0 12px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span style="display:flex;color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></span><span style="display:{{ bloomLblD }}">Observatory</span></button></div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center">
           <span style="font:600 10px var(--fk);letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi);white-space:nowrap">{{ bloomName }} &#183; {{ bloomCount }}</span>
@@ -6078,7 +6078,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -6130,7 +6130,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                           <line data-bloom-x="{{ g.bx }}" x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
                         </sc-for>
                         <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
-                          <g data-bloom-x="{{ p.bx }}">
+                          <g data-bloom-x="{{ p.bx }}" onClick="{{ p.go }}" style="cursor:pointer">
                             <title>{{ p.tip }}</title>
                             <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
                             <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
@@ -6138,7 +6138,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         </sc-for>
                       </svg>
                       <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-                        <span data-bloom-x="{{ w.bx }}" aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                        <button data-bloom-x="{{ w.bx }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="-webkit-appearance:none;appearance:none;background:none;border:0;padding:0;margin:0;outline-offset:2px;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
+                      </sc-for>
+                      <sc-for list="{{ wheelSky }}" as="k" hint-placeholder-count="0">
+                        <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
           </div>
@@ -6198,7 +6201,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                           <line data-bloom-x="{{ g.bx }}" x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
                         </sc-for>
                         <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
-                          <g data-bloom-x="{{ p.bx }}">
+                          <g data-bloom-x="{{ p.bx }}" onClick="{{ p.go }}" style="cursor:pointer">
                             <title>{{ p.tip }}</title>
                             <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
                             <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
@@ -6206,13 +6209,16 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         </sc-for>
                       </svg>
                       <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-                        <span data-bloom-x="{{ w.bx }}" aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                        <button data-bloom-x="{{ w.bx }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="-webkit-appearance:none;appearance:none;background:none;border:0;padding:0;margin:0;outline-offset:2px;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
+                      </sc-for>
+                      <sc-for list="{{ wheelSky }}" as="k" hint-placeholder-count="0">
+                        <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -6631,6 +6637,29 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <button onClick="{{ obsHomeGo }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#8962;</span>Station</button>
               <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
             </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ obsAspOn }}" hint-placeholder-val="{{ false }}">
+        <div role="dialog" aria-modal="false" aria-label="{{ obsAspTitle }}" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
+          <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--bd)">
+            <span aria-hidden="true" style="flex:none;display:flex;align-items:center;gap:6px;font:400 20px/1 Georgia,serif;color:var(--ac2-hi)">{{ obsAspGA }}<span style="width:18px;height:0;border-top:2px solid {{ obsAspC }}"></span>{{ obsAspGB }}</span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <span style="font:400 19px/1.2 var(--fd);color:var(--tx)">{{ obsAspTitle }}</span>
+              <span class="obs-mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ obsAspOrb }}</span>
+            </div>
+            <button onClick="{{ obsAspShut }}" aria-label="Close this contact" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#215;</span></button>
+          </div>
+          <div class="obs-scroll" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px">
+            <p style="margin:0;font:600 14px/1.5 var(--fb);color:var(--tx)">{{ obsAspShort }}</p>
+            <p style="margin:0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsAspNature }}</p>
+            <p style="margin:0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsAspDepth }}</p>
+            <p style="margin:0;padding-left:12px;border-left:2px solid var(--ac2);font:italic 400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsAspAsk }}</p>
+          </div>
+          <div style="flex:none;display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--bd)">
+            <button data-lift onClick="{{ obsAspGoA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;padding:0 10px;text-align:center;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fk);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">{{ obsAspSeeA }}</button>
+            <button data-lift onClick="{{ obsAspGoB }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;padding:0 10px;text-align:center;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fk);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">{{ obsAspSeeB }}</button>
           </div>
         </div>
       </sc-if>
@@ -13064,7 +13093,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
        Observatory is one press away, from the header. -->
   <div data-immersive="1" style="position:fixed;inset:0;z-index:390;display:flex;background:radial-gradient(60% 55% at 50% 42%,rgba(var(--atmc),.30),transparent 72%),radial-gradient(80% 45% at 50% 112%,rgba(var(--atmc2),.13),transparent 70%),var(--bg)">
     <div onClick="{{ chartBloomSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded chart" data-immersive="1" data-bloom-intro="{{ bloomIntro }}" style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:{{ bloomScroll }};overflow-x:hidden;animation:bloomIn .45s ease both">
-      <div style="flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:14px clamp(14px,2.6vw,40px) 4px">
+      <div style="flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:max(14px,calc(env(safe-area-inset-top) + 8px)) max(clamp(14px,2.6vw,40px),env(safe-area-inset-right)) 4px max(clamp(14px,2.6vw,40px),env(safe-area-inset-left))">
         <div style="justify-self:start"><button data-lift onClick="{{ bloomObsGo }}" aria-label="Enter the Observatory" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 14px 0 12px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span style="display:flex;color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></span><span style="display:{{ bloomLblD }}">Observatory</span></button></div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center">
           <span style="font:600 10px var(--fk);letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi);white-space:nowrap">{{ bloomName }} &#183; {{ bloomCount }}</span>
@@ -13075,7 +13104,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -13127,7 +13156,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                           <line data-bloom-x="{{ g.bx }}" x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
                         </sc-for>
                         <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
-                          <g data-bloom-x="{{ p.bx }}">
+                          <g data-bloom-x="{{ p.bx }}" onClick="{{ p.go }}" style="cursor:pointer">
                             <title>{{ p.tip }}</title>
                             <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
                             <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
@@ -13135,7 +13164,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         </sc-for>
                       </svg>
                       <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-                        <span data-bloom-x="{{ w.bx }}" aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                        <button data-bloom-x="{{ w.bx }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="-webkit-appearance:none;appearance:none;background:none;border:0;padding:0;margin:0;outline-offset:2px;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
+                      </sc-for>
+                      <sc-for list="{{ wheelSky }}" as="k" hint-placeholder-count="0">
+                        <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
           </div>
@@ -13195,7 +13227,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                           <line data-bloom-x="{{ g.bx }}" x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
                         </sc-for>
                         <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
-                          <g data-bloom-x="{{ p.bx }}">
+                          <g data-bloom-x="{{ p.bx }}" onClick="{{ p.go }}" style="cursor:pointer">
                             <title>{{ p.tip }}</title>
                             <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
                             <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
@@ -13203,13 +13235,16 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         </sc-for>
                       </svg>
                       <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-                        <span data-bloom-x="{{ w.bx }}" aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                        <button data-bloom-x="{{ w.bx }}" onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="-webkit-appearance:none;appearance:none;background:none;border:0;padding:0;margin:0;outline-offset:2px;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
+                      </sc-for>
+                      <sc-for list="{{ wheelSky }}" as="k" hint-placeholder-count="0">
+                        <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
-          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button></div>
+          <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
             <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
               <div style="display:flex;align-items:center;gap:2px">
@@ -13628,6 +13663,29 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <button onClick="{{ obsHomeGo }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#8962;</span>Station</button>
               <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
             </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ obsAspOn }}" hint-placeholder-val="{{ false }}">
+        <div role="dialog" aria-modal="false" aria-label="{{ obsAspTitle }}" class="obs-keys obs-glass" style="display:flex;flex-direction:column">
+          <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--bd)">
+            <span aria-hidden="true" style="flex:none;display:flex;align-items:center;gap:6px;font:400 20px/1 Georgia,serif;color:var(--ac2-hi)">{{ obsAspGA }}<span style="width:18px;height:0;border-top:2px solid {{ obsAspC }}"></span>{{ obsAspGB }}</span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <span style="font:400 19px/1.2 var(--fd);color:var(--tx)">{{ obsAspTitle }}</span>
+              <span class="obs-mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ obsAspOrb }}</span>
+            </div>
+            <button onClick="{{ obsAspShut }}" aria-label="Close this contact" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#215;</span></button>
+          </div>
+          <div class="obs-scroll" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px">
+            <p style="margin:0;font:600 14px/1.5 var(--fb);color:var(--tx)">{{ obsAspShort }}</p>
+            <p style="margin:0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsAspNature }}</p>
+            <p style="margin:0;font:400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsAspDepth }}</p>
+            <p style="margin:0;padding-left:12px;border-left:2px solid var(--ac2);font:italic 400 13.5px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsAspAsk }}</p>
+          </div>
+          <div style="flex:none;display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--bd)">
+            <button data-lift onClick="{{ obsAspGoA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;padding:0 10px;text-align:center;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fk);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">{{ obsAspSeeA }}</button>
+            <button data-lift onClick="{{ obsAspGoB }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;padding:0 10px;text-align:center;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fk);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">{{ obsAspSeeB }}</button>
           </div>
         </div>
       </sc-if>
@@ -14610,7 +14668,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 </sc-if>
 <!-- The glance: the reading in passing, a plain radiant pop up. The packet is one press further in. -->
 <sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(8,7,11,.7);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .18s ease">
+  <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:{{ pgZ }};background:rgba(8,7,11,.7);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .18s ease">
     <div onClick="{{ pgStop }}" role="dialog" aria-modal="true" aria-label="{{ pgTitle }}" style="box-sizing:border-box;width:100%;max-width:640px;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc2),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border:1px solid rgba(var(--atmc2),.45);border-radius:22px;box-shadow:0 0 0 1px rgba(var(--atmc2),.12),0 0 70px rgba(var(--atmc2),.28),0 30px 80px rgba(0,0,0,.55);padding:22px 24px 26px">
       <div style="display:flex;align-items:flex-start;gap:14px">
         <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.55);background:rgba(var(--atmc2),.12);box-shadow:0 0 22px rgba(var(--atmc2),.35);font:400 24px var(--fb);color:var(--tx)">{{ pgGlyph }}</span>
@@ -17829,6 +17887,29 @@ class Component extends DCLogic {
   /* ASP_NATURE teaches the angle and is too long for a row subtitle or the
      middle of a sentence. ASP_SHORT is the one line version of the same
      reading, for the aspect list and the Today contact paragraph. */
+  /* The four minor contacts the expanded chart draws, written in the same
+     voice as the five above and kept in a table of their own so ASP_CLOSE
+     stays as it is. Each carries its one line, its teaching, what it does in
+     a chart, and a question naming both ends (owner, 5 November 2026: the
+     Observatory's aspects needed words of their own). */
+  ASP_MINOR = {
+    semisextile: { short: 'A neighbourly nudge between two rooms that rarely talk.',
+      nature: 'Thirty degrees, between signs that sit side by side and share neither element nor modality. The two bodies live next door to each other without speaking the same language, so the contact is quiet and easy to miss. The tradition reads it as a small opening: what one learns can reach the other, if you carry it across on purpose.',
+      play: 'Each picks up something the other is just finishing with. The exchange is small and steady, and it rewards attention more than effort: noticing when one has something to offer the other is most of the work.',
+      ask: (A, B) => 'What has ' + A + ' just learned that ' + B + ' could use, if you carried it over?' },
+    semisquare: { short: 'A small itch that keeps asking for a move.',
+      nature: 'Forty five degrees, half a square. The tradition counts it in the square\'s own family, so it carries the same push toward action at a lower volume. It rarely arrives as a crisis. It shows up as restlessness, a small irritation that returns until something is adjusted.',
+      play: 'These two catch on each other in small ways, often enough to notice. Answered early, the friction turns into steady fine tuning; left alone, it builds into the kind of pressure a square would bring all at once.',
+      ask: (A, B) => 'Where does a small friction between ' + A + ' and ' + B + ' keep coming back, and what would one adjustment change?' },
+    sesquisquare: { short: 'A restless angle that builds momentum through adjustment.',
+      nature: 'A hundred and thirty five degrees, a square and a half. It belongs to the square\'s family too, and the tradition reads it as agitation that wants an outlet. The two bodies are far enough apart to feel separate and close enough in rhythm to keep provoking each other into motion.',
+      play: 'This pair keeps each other moving. The push tends to arrive sideways, through a detail or a delay, and it builds skill when it is given somewhere useful to go rather than being smoothed over.',
+      ask: (A, B) => 'When ' + A + ' and ' + B + ' stir each other up, where would that energy do the most good?' },
+    quincunx: { short: 'Two ends that keep asking you to adjust.',
+      nature: 'A hundred and fifty degrees, also called the inconjunct, between signs that share no element and no modality. The two bodies cannot simply agree or simply oppose each other, so the contact asks for constant small adjustments. The tradition reads it as the aspect of recalibration: neither side wins, and the skill is learning to make room for both.',
+      play: 'These two never quite fit, and the not fitting is the teacher. Each adjustment you make to let one work alongside the other becomes a piece of practical wisdom that steadier contacts never have to learn.',
+      ask: (A, B) => 'What small adjustment lets ' + A + ' and ' + B + ' work side by side today?' }
+  };
   ASP_SHORT = {
     conjunct: 'Two drives fused into one bright, concentrated strength.',
     sextile: 'A quiet opening that answers every small, deliberate step.',
@@ -18951,10 +19032,11 @@ class Component extends DCLogic {
        different pace than an air one while the mechanics, the houses and the
        orb are identical for everybody. Nothing here changes what is asserted. */
     const voice = this.toneVoice(false);
+    const mn = this.ASP_MINOR[x.asp] || {};
     return {
       depth: place(x.a) + ' and ' + place(x.b) + '. ' + where + ' ' +
-        voice.turn + ' this: ' + this.lowerFirst(this.ASP_PLAY[x.asp] || '') + ' ' + loud + ' ' + voice.hold,
-      close: (this.ASP_CLOSE[x.asp] || this.ASP_CLOSE.conjunct)(A, B, pa, pb)
+        voice.turn + ' this: ' + this.lowerFirst(this.ASP_PLAY[x.asp] || mn.play || '') + ' ' + loud + ' ' + voice.hold,
+      close: this.ASP_CLOSE[x.asp] ? this.ASP_CLOSE[x.asp](A, B, pa, pb) : mn.ask ? mn.ask(A, B) : this.ASP_CLOSE.conjunct(A, B, pa, pb)
     };
   }
   natalAspects(expanded, opts) {
@@ -19117,7 +19199,7 @@ class Component extends DCLogic {
     const contacts = asps.filter(a => a.keyA === key || a.keyB === key).slice(0, 12).map(a => ({
       id: a.id, label: (a.keyA === key ? a.nameB : a.nameA), glyph: (a.keyA === key ? a.glyphB : a.glyphA), asp: a.aspLabel, orb: a.orb, color: a.color,
       on: st.chartExpandAspSel === a.id ? 'true' : 'false', bd: st.chartExpandAspSel === a.id ? 'var(--ac2-hi)' : 'var(--bd)',
-      go: () => { this.setState({ chartExpandAspSel: a.id }); if (S) S.flyToPair(a.keyA, a.keyB); }
+      go: () => { this.setState({ chartExpandAspSel: a.id, obsAspWin: true }); if (S) S.flyToPair(a.keyA, a.keyB); }
     }));
     const flying = !!st.csFlying;
     return {
@@ -19238,10 +19320,12 @@ class Component extends DCLogic {
       bloomLeft: left, bloomRight: right, bloomAll: left.concat(right),
       bloomShowAll: () => setShow(rows.reduce((o, r) => (o[this.pointKey(r)] = true, o), {})),
       bloomShowCore: () => setShow(this.bloomShowOf(true)),
+      bloomSkyOn: st.bloomSky ? 'true' : 'false', bloomSkyDot: st.bloomSky ? 'var(--ac2-hi)' : 'transparent',
+      bloomSkyGo: () => this.setState({ bloomSky: !this.state.bloomSky }),
       bloomObsGo: () => {
         let seen = true;
         try { seen = !!localStorage.getItem('incommon.obs.keys'); localStorage.setItem('incommon.obs.keys', '1'); } catch (e) {}
-        this.setState({ chartBloom: false, chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsDrawer: false, obsHouse: null, obsKeys: !seen });
+        this.setState({ chartBloom: false, chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsAspWin: false, obsDrawer: false, obsHouse: null, obsKeys: !seen });
       }
     };
   }
@@ -19269,9 +19353,9 @@ class Component extends DCLogic {
         /* The first visit opens on the flight controls, once per device. */
         let seen = true;
         try { seen = !!localStorage.getItem('incommon.obs.keys'); localStorage.setItem('incommon.obs.keys', '1'); } catch (e) {}
-        this.setState({ chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsDrawer: false, obsHouse: null, obsKeys: !seen });
+        this.setState({ chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsAspWin: false, obsDrawer: false, obsHouse: null, obsKeys: !seen });
       },
-      chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null }),
+      chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false }),
       chartExpandSwallow: e => { if (e && e.stopPropagation) e.stopPropagation(); }
     };
     if (!st.chartExpandOpen) return base;
@@ -19369,8 +19453,10 @@ class Component extends DCLogic {
         // Highlights the pair on the wheel; a second click on the same row
         // clears it rather than toggling something else, per the brief.
         go: () => {
-          const off = st.chartExpandAspSel === i;
-          this.setState({ chartExpandAspSel: off ? null : i });
+          /* A press opens the contact's window and frames the pair. A second
+             press on a row whose window is already open clears both. */
+          const off = st.chartExpandAspSel === i && !!st.obsAspWin;
+          this.setState({ chartExpandAspSel: off ? null : i, obsAspWin: !off });
           if (!off && this._csS) this._csS.flyToPair(kA, kB);
         }
       };
@@ -19405,8 +19491,36 @@ class Component extends DCLogic {
 
     const narrow = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) < 900;
 
+    /* The contact's window (owner, 5 November 2026: the aspects were dead
+       buttons). The same words the chart's own aspect sheet reads: the
+       angle's nature, where the two meet, and the question it leaves. */
+    const obsAsp = (() => {
+      const x = st.obsAspWin && st.chartExpandAspSel != null ? asps[st.chartExpandAspSel] : null;
+      if (!x) return { obsAspOn: false };
+      const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+      const hOf = r => (r.lon == null ? 1 : this.houseOf(r.lon, natalSun, asc));
+      const L = this.aspectLines(x, hOf, ordinal);
+      const kA = this.pointKey(x.a), kB = this.pointKey(x.b);
+      const name = r => (this.pointLabel ? this.pointLabel(r) : r.name);
+      return {
+        obsAspOn: true,
+        obsAspC: (this.ASP_COLOR[x.asp] || ['var(--dim)'])[0],
+        obsAspGA: x.a.glyph, obsAspGB: x.b.glyph,
+        obsAspTitle: name(x.a) + ' ' + this.aspName(x.asp) + ' ' + name(x.b),
+        obsAspOrb: 'Within ' + x.orb.toFixed(1) + '\u00b0 orb' + (x.orb <= EXACT_ORB ? ', exact' : ''),
+        obsAspShort: this.ASP_SHORT[x.asp] || (this.ASP_MINOR[x.asp] || {}).short || '',
+        obsAspNature: this.ASP_NATURE[x.asp] || (this.ASP_MINOR[x.asp] || {}).nature || '',
+        obsAspDepth: L.depth, obsAspAsk: L.close,
+        obsAspSeeA: 'See ' + name(x.a), obsAspSeeB: 'See ' + name(x.b),
+        obsAspGoA: () => this.setState({ plGlance: kA }),
+        obsAspGoB: () => this.setState({ plGlance: kB }),
+        obsAspShut: () => this.setState({ obsAspWin: false }, () => this.obsRefocus())
+      };
+    })();
+
     return {
       ...base,
+      ...obsAsp,
       ...this.obsVals(rows, allRows, houses, aspectRowsAll, narrow),
       chartExpandRows: sorted,
       chartExpandGrouped: grouped,
@@ -25877,7 +25991,7 @@ class Component extends DCLogic {
   numberGlanceVals() {
     const sel = this.state.numGlance, v = this.numberDetailVals(sel);
     if (!v.spiritNumDetail) return { pgOpen: false };
-    return { pgOpen: true, pgComputed: true, pgWhy: [],
+    return { pgOpen: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgComputed: true, pgWhy: [],
       pgClose: () => this.setState({ numGlance: null }), pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
       pgTitle: v.nmTitle, pgGlyph: v.nmValue, pgKind: v.nmKind,
       pgWhere: v.nmCoords.map(k => k.k === 'Number' ? null : k.v).filter(Boolean).join(' · '),
@@ -30377,7 +30491,7 @@ class Component extends DCLogic {
         if (b && how === 'key') this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
       },
       onOpen: key => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }),
-      onAspect: i => this.setState(this.state.chartExpandOpen ? { chartExpandAspSel: i, obsTab: 'aspects' } : { aspSel: i }),
+      onAspect: i => this.setState(this.state.chartExpandOpen ? { chartExpandAspSel: i, obsTab: 'aspects', obsAspWin: true } : { aspSel: i }),
       onHouse: n => this.setState(this.state.chartExpandOpen ? { obsHouse: n } : { dpSel: { kind: 'house', h: n } }),
       lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t))),
       /* the Observatory's own moves, all of them discrete */
@@ -31947,10 +32061,15 @@ class Component extends DCLogic {
      time, and Escape that closed the wrong one would be worse than Escape
      that closes them all. */
   dialogEscape() {
+    /* Inside the Observatory, Escape closes what sits over the flight (a
+       glance, then a contact's window) before it closes the Observatory. */
+    const o = this.state;
+    if (o.chartExpandOpen && (o.plGlance || o.numGlance)) { this.setState({ plGlance: null, numGlance: null }, () => this.obsRefocus()); return; }
+    if (o.chartExpandOpen && o.obsAspWin) { this.setState({ obsAspWin: false }, () => this.obsRefocus()); return; }
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, aboutOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
+      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
@@ -32180,9 +32299,11 @@ class Component extends DCLogic {
     const v = this.placementVals(k);
     if (!v || !v.spiritPlacement) return { pgOpen: false };
     const close = () => this.setState({ plGlance: null, numGlance: null });
-    const base = { pgOpen: true, pgClose: close, pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
+    const base = { pgOpen: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgClose: close, pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
       pgTitle: v.plTitle || (v.plName ? v.plName.charAt(0) + v.plName.slice(1).toLowerCase() : ''), pgGlyph: v.plGlyph || '',
-      pgKind: v.plKind || '', pgFocus: () => this.setState({ plGlance: null, numGlance: null, tab: 'spirit', spiritView: 'placement', placeSel: k, aspSel: null }) };
+      pgKind: v.plKind || '', pgFocus: () => this.setState({ plGlance: null, numGlance: null, tab: 'spirit', spiritView: 'placement', placeSel: k, aspSel: null,
+        ...(this.state.chartExpandOpen ? { chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false } : {}),
+        ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) }) };
     if (!v.plComputed) return { ...base, pgComputed: false, pgWhy: v.plWhyLines || [], pgEpiOn: false, pgEpi: '', pgWhere: v.plSummary || '',
       pgSealOn: false, pgSeal: '', pgSealC: 'var(--mut)', pgChapters: [], pgSynth: { heading: '', lines: [] }, pgCards: [], pgAspOn: false, pgAsp: [],
       pgTrOn: false, pgTr: [], pgDegOn: false, pgDegKick: '', pgDegree: { heading: '', lines: [] }, pgSabOn: false, pgSab: '', pgSabMeta: '' };
@@ -32812,10 +32933,13 @@ class Component extends DCLogic {
                     f: '400 22px Georgia,serif', go: noop });
                 });
                 for (let i = 0; i < 12; i++) {
-                  const n = P(mid(i), 354), hn = i + 1;
-                  out.push({ hit: '26px', l: pc(n.x), t: pc(n.y), text: String(hn), aria: 'House ' + hn + ', open its details', cur: 'pointer', ls: 'normal',
+                  /* On the Expanded Chart the house pane is behind the dialog, so a
+                     number there is a label, and it steps outward when Today's sky
+                     takes the band. */
+                  const n = P(mid(i), st.chartBloom && st.bloomSky ? 375 : 354), hn = i + 1;
+                  out.push({ hit: '26px', l: pc(n.x), t: pc(n.y), text: String(hn), aria: 'House ' + hn + (st.chartBloom ? '' : ', open its details'), cur: st.chartBloom ? 'default' : 'pointer', ls: 'normal',
                     c: '#5f5b6b', f: '400 13px var(--fm)',
-                    go: () => this.setState({ dpSel: { kind: 'house', h: hn } }) });
+                    go: st.chartBloom ? noop : () => this.setState({ dpSel: { kind: 'house', h: hn } }) });
                 }
                 if (asc) [['ASC', 'Ascendant', asc.asc], ['DC', 'Descendant', asc.asc + 180], ['MC', 'Midheaven', asc.mc], ['IC', 'IC', asc.mc + 180]].forEach(([label, nm, lon]) => {
                   const l = P(lon, 368);
@@ -32826,9 +32950,9 @@ class Component extends DCLogic {
                   const key = this.pointKey(r), label = this.pointLabel(r);
                   const rad = svgRadius[key], pt = P(r.lon, rad), dl = P(r.lon, rad - 30);
                   const minor = r.ring === 2;
-                  out.push({ bx: bx(key), xin: xin(key), xd: xd(key), wb: key, hit: '44px', l: pc(pt.x), t: pc(pt.y), text: r.glyph, aria: label, cur: 'pointer', ls: 'normal',
+                  out.push({ bx: bx(key), xin: xin(key), xd: xd(key), wb: key, hit: st.chartBloom ? '32px' : '44px', l: pc(pt.x), t: pc(pt.y), text: r.glyph, aria: label, cur: 'pointer', ls: 'normal',
                     c: this.CAT_COLOR[r.category] || '#2fff8f', f: (minor ? '400 13px' : '400 19px') + ' Georgia,serif', go: () => openBody(key) });
-                  out.push({ bx: bx(key), xin: xin(key), xd: xd(key), wb: key, hit: '44px', l: pc(dl.x), t: pc(dl.y), text: Math.floor(r.deg) + '\u00b0', aria: label + ' degree', cur: 'pointer', ls: 'normal',
+                  out.push({ bx: bx(key), xin: xin(key), xd: xd(key), wb: key, hit: st.chartBloom ? '0px' : '44px', l: pc(dl.x), t: pc(dl.y), text: Math.floor(r.deg) + '\u00b0', aria: label + ' degree', cur: 'pointer', ls: 'normal',
                     c: '#7c7889', f: (minor ? '400 9px' : '400 11px') + ' var(--fm)', go: () => openBody(key) });
                 });
                 out.push({ hit: '0px', l: '50%', t: '49%', text: prof ? prof.name : '', aria: 'Chart owner', cur: 'default', ls: 'normal',
@@ -32872,6 +32996,34 @@ class Component extends DCLogic {
                 const a = P(lon, 206), b = P(lon, 322), l = P(lon, 368);
                 return { label, bx: bx(nm), x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1), lx: l.x.toFixed(1), ly: l.y.toFixed(1) };
               }) : [],
+              /* Today's sky on the Expanded Chart (owner, 5 November 2026: the
+                 reader has to be able to press the transits). The bodies where
+                 they stand this minute, in the outer band beside the house
+                 numbers, each a button: a press opens the glance of the natal
+                 point it touches most closely, whose The sky now names the
+                 contact, or the body's own glance when it touches nothing. */
+              wheelSky: (() => {
+                if (!st.chartBloom || !st.bloomSky) return [];
+                const minute = Math.floor(Date.now() / 60000);
+                if (!this._bloomSkyMemo || this._bloomSkyMemo.m !== minute || this._bloomSkyMemo.s !== this.chartStamp(this.activeProfile())) {
+                  const now = new Date(minute * 60000), today = this.chartAt(now);
+                  const natal = this.chartAt(this.natalDate()).concat(this.anglePoints());
+                  this._bloomSkyMemo = { m: minute, s: this.chartStamp(this.activeProfile()), today: today, hits: this.aspectPairs(today, natal, false) };
+                }
+                const M = this._bloomSkyMemo, pc = v => (v / 800 * 100).toFixed(2) + '%';
+                const spots = stagger(M.today.map(r => ({ ...r, id: 'sky:' + r.name })), 341, 0, 1);
+                return M.today.map(r => {
+                  const hit = M.hits.filter(h => h.a.name === r.name).sort((x, y) => x.orb - y.orb)[0];
+                  const pt = P(r.lon, spots['sky:' + r.name] || 341), s = this.signOf(r.lon);
+                  const target = hit ? hit.b.name : r.name;
+                  const wide = (st.dtW || window.innerWidth || 1440) >= 1100;
+                  return { key: 'sky:' + r.name, glyph: r.glyph, l: pc(pt.x), t: pc(pt.y), sz: wide ? '30px' : '22px', fs: wide ? '15px' : '11px',
+                    aria: 'Today, ' + r.name + ' at ' + Math.floor(s.deg) + ' degrees ' + s.sign + (hit ? ', ' + this.aspName(String(hit.asp).toLowerCase()) + ' your natal ' + hit.b.name : '') + '. Open the reading.',
+                    tip: 'Today: ' + r.name + ' ' + Math.floor(s.deg) + '\u00b0 ' + s.sign + (hit ? ', ' + this.aspName(String(hit.asp).toLowerCase()) + ' natal ' + hit.b.name : ''),
+                    ring: hit ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.7)',
+                    go: () => openBody(target) };
+                });
+              })(),
               wheelAspects: asps.map((x, i) => ({ x, i })).filter(o => svgAsp(o.x)).slice(0, 40).map(({ x, i }) => {
                 const col = this.ASP_COLOR[x.asp], a = P(x.a.lon, 196), b = P(x.b.lon, 196);
                 return { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1),
@@ -33145,7 +33297,7 @@ class Component extends DCLogic {
                 return { c: this.ASP_COLOR[x.asp][0], ga: x.a.glyph, gb: x.b.glyph,
                   title: x.a.name + ' ' + cap(x.asp) + ' ' + x.b.name,
                   orb: 'Within ' + x.orb.toFixed(1) + '\u00b0 orb',
-                  nature: this.ASP_NATURE[x.asp],
+                  nature: this.ASP_NATURE[x.asp] || (this.ASP_MINOR[x.asp] || {}).nature || '',
                   depth: this.aspectLines(x, houseOf, ordinal).depth,
                   possibility: this.aspectLines(x, houseOf, ordinal).close,
                   labelA: 'See ' + x.a.name, labelB: 'See ' + x.b.name,
