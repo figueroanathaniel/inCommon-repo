@@ -5628,12 +5628,32 @@ in the text, the sources or the study notes. "You" is allowed in a subordinate
 clause and an imperative; the keynote fragments of gates and lines have no
 subject and were left as they were.
 
-**Every label says what it holds.** The kicker reads "Share of people", "Theme",
-"Function", "In the X centre", "Keynote" or "Strategy for the X"; the epigraph
-has its own label (Signature, Hexagram N, In short, Standing); facets are
-Weight, Fidelity and Origins on a study claim, Low and High expression on a
-gate, and the like. A bare word over a value ("Success", "How reliable") is the
-fault this removed.
+**Zero eyebrows** (the owner, 6 November 2026: "Remove the subheaders
+altogether, put the text under the title ... Zero eyebrows. Zero." and "If
+there's a title on the page, leave titling it at that"). In the Atlas and the
+Astropedia folios nothing sits over or above a title or a text: no chapter
+eyebrow, no "Your strategy" line, no label over the epigraph, no name over a
+facet card, no "Words here", "In your chart" or "Field study" heading. The line
+under a title is the value itself in the reading face, italic and in --tx
+(About 35 percent of people; Bedrock · 2 of 7), and a mark pill's label is
+reading type too. The field study's two questions are questions in the
+reading face. The epigraph is not a row between hairlines either ("No
+eyebrows, meaning no ---- How to meet the moment ----"): it sits in the title
+column under the kicker, italic 13px in the reading face, in gold with a soft glow
+(`[data-epi]` in the head sheet, plain under the contrast modifier). Do not put an
+uppercase label or a ruled line back on these pages.
+
+**The wiring is drawn one way in the Atlas and on My Charts** (same day):
+`hdWireGeom()` places each gate on the side of its centre that faces where its
+channel runs, keeps channels between one pair of centres parallel, and bows a
+channel round a centre it would cross (20-34 round the G). It is all one blue,
+as the owner's sample (the Atlas Reflector page) draws it: an open centre is a
+faint `--atmc` fill in a `--chl` outline, a defined centre the same blue a
+little fuller and a brighter `--atmc` outline, never a category colour and
+never warm; a defined channel is `--atmc` and thin, every other channel
+`--chl`; the reader's gates are white points and the sky's are ringed in
+`--blue`. The 3D and Wheel views keep their
+personality and design inks.
 
 **Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
 holds each Type's and each authority's theme words; `atlasRich()` bolds the
@@ -6593,6 +6613,15 @@ a sentence of its own (the composer no longer strips its full stop), and the
 dignity lines keep the body as subject, because `energy` is a compound phrase.
 New writing here keeps the voice: personal, gentle, no "you are" verdicts, no
 "X is Y, and Y is Z" catalogues.
+
+**A chapter lead moves in the energy and explains nothing** (the owner, 6
+November 2026: "we need to trust that the user will go with the message").
+`plLeads()` is the one source for the packet, the glance and the section list:
+the house as "A part of living where ... happens consistently, and your X lives
+here" (`living` on each house), the sign walking into the room as itself
+(`enters`), the body speaking as itself (`voice`), then the house's `cue` and
+the sign's `manner`. A point with no `voice` gets no lead, never a generic one.
+No lead says "begin", "now", or what the reader is about to read.
 
 ## A placement page is a packet
 Asked for by the owner on 4 November 2026 ("put the descriptions in a page-packet
