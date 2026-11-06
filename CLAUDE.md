@@ -5637,15 +5637,21 @@ facet card, no "Words here", "In your chart" or "Field study" heading. The line
 under a title is the value itself in the reading face, italic and in --tx
 (About 35 percent of people; Bedrock · 2 of 7), and a mark pill's label is
 reading type too. The field study's two questions are questions in the
-reading face. Do not put an uppercase label back on these pages.
+reading face. The epigraph is not a row between hairlines either ("No
+eyebrows, meaning no ---- How to meet the moment ----"): it sits in the title
+column under the kicker, italic 13px in the reading face. Do not put an
+uppercase label or a ruled line back on these pages.
 
 **The wiring is drawn one way in the Atlas and on My Charts** (same day):
 `hdWireGeom()` places each gate on the side of its centre that faces where its
 channel runs, keeps channels between one pair of centres parallel, and bows a
-channel round a centre it would cross (20-34 round the G). A defined centre is
-lit warm (`--atmc2`), never filled with a category colour; a defined channel is
-warm and thin, every other channel `--chl`; the reader's gates are white
-points and the sky's are ringed in `--blue`. The 3D and Wheel views keep their
+channel round a centre it would cross (20-34 round the G). It is all one blue,
+as the owner's sample (the Atlas Reflector page) draws it: an open centre is a
+faint `--atmc` fill in a `--chl` outline, a defined centre the same blue a
+little fuller and a brighter `--atmc` outline, never a category colour and
+never warm; a defined channel is `--atmc` and thin, every other channel
+`--chl`; the reader's gates are white points and the sky's are ringed in
+`--blue`. The 3D and Wheel views keep their
 personality and design inks.
 
 **Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
