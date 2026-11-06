@@ -866,6 +866,15 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
     <button data-lift onClick="{{ sampleGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--ac2-hi);border-radius:999px;font:600 10.5px var(--fc);color:var(--ac2-hi)">Use mine</button>
   </div>
 </sc-if>
+<!-- THE PLACE PILL (placeSync, pingVals): the way back to where the reader
+     came from, after a crossing between the Library and My Charts. Above the
+     dock, never over the help square, and gone in any other section. -->
+<sc-if value="{{ pingOn }}" hint-placeholder-val="{{ false }}">
+  <button data-lift data-ping-back="1" onClick="{{ pingGo }}" style="all:unset;cursor:pointer;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--nav) + var(--dock) + 10px);z-index:61;box-sizing:border-box;max-width:calc(100% - 32px);min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border:1px solid var(--ac2-hi);border-radius:999px;background:rgba(13,12,24,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 8px 26px rgba(0,0,0,.45);animation:fadeUp .25s ease">
+    <span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">&#8592;</span>
+    <span style="font:600 12.5px var(--fu);color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ pingLabel }}</span>
+  </button>
+</sc-if>
 <div data-vt-scroll="1" role="main" data-main-region="1" aria-label="Your readings" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow:hidden;scroll-behavior:smooth">
 <section data-vt-sec="Today" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Today" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
@@ -7356,6 +7365,43 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
   </div>
 </sc-if>
 
+<!-- THE ATLAS'S WINDOW ON ONE PART OF YOUR WIRING (the owner, 6 November
+     2026). Opened by a line under In your chart that names a gate or a centre
+     (atlasRec, atlasRecVals). The folio under it is not touched, so closing it
+     leaves the reader exactly where they were. -->
+<sc-if value="{{ arwOn }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ arwClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:82">
+    <div role="dialog" aria-modal="true" aria-label="{{ arwTitle }}" data-atlas-rec="1" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:88%;border-bottom:0;border-radius:22px 22px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:linear-gradient(170deg,rgba(var(--atmc),.16),var(--sf) 46%);border:1px solid var(--ac2);box-shadow:0 18px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <sc-if value="{{ arwEpiOn }}" hint-placeholder-val="{{ true }}">
+          <div style="font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ arwEpi }}</div>
+        </sc-if>
+        <div style="font:400 24px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ arwTitle }}</div>
+      </div>
+      <sc-if value="{{ arwFromOn }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:5px;padding:11px 14px;border-left:2px solid var(--ac2-hi);background:rgba(var(--atmc),.1);border-radius:0 12px 12px 0">
+          <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ arwFrom }}</div>
+          <sc-if value="{{ arwSaidOn }}" hint-placeholder-val="{{ true }}">
+            <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ arwSaid }}</div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-for list="{{ arwBlocks }}" as="rb" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--bd);padding-top:12px">
+          <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ rb.h }}</div>
+          <sc-for list="{{ rb.rows }}" as="rr" hint-placeholder-count="1">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ rr.t }}</p>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
+        <button data-lift onClick="{{ arwClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fc)"><span aria-hidden="true">&#8592;</span> Back to where you were</button>
+        <button data-lift onClick="{{ arwSee }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac2);border-radius:999px;font:600 13px var(--fc);color:var(--tx)">{{ arwSeeLabel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <!-- ABOUT, FROM THE MENU (the owner, 5 November 2026: an About page that does
      not get in the way of the tabs, in the profile menu, dedicated to gaining
      insight on inCommon and the company that keeps it). It says what inCommon
@@ -8174,6 +8220,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
     <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
       <div style="display:flex;align-items:center;gap:10px">
         <h1 style="margin:0;font:400 clamp(19px,1.5vw,23px) var(--fd);color:var(--tx)">{{ headTitle }}</h1>
+        <!-- The place pill (pingVals): back to where the reader came from. -->
+        <sc-if value="{{ pingOn }}" hint-placeholder-val="{{ false }}">
+          <button data-lift data-ping-back="1" onClick="{{ pingGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;max-width:42ch;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 16px;margin-left:6px;border:1px solid var(--ac2-hi);border-radius:999px;background:rgba(var(--atmc),.16);animation:fadeUp .25s ease">
+            <span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">&#8592;</span>
+            <span style="font:600 12.5px var(--fu);color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ pingLabel }}</span>
+          </button>
+        </sc-if>
         <sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}">
           <span role="status" aria-label="Connection state" style="font:700 8px var(--fu);letter-spacing:.12em;padding:3px 7px;border-radius:5px;color:var(--mood);background:rgba(125,155,255,.16)">OFFLINE · FULLY FUNCTIONAL</span>
         </sc-if>
@@ -14435,6 +14488,43 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
   </div>
 </sc-if>
 
+<!-- THE ATLAS'S WINDOW ON ONE PART OF YOUR WIRING (the owner, 6 November
+     2026). Opened by a line under In your chart that names a gate or a centre
+     (atlasRec, atlasRecVals). The folio under it is not touched, so closing it
+     leaves the reader exactly where they were. -->
+<sc-if value="{{ arwOn }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ arwClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:center;padding:24px;justify-content:center;z-index:82">
+    <div role="dialog" aria-modal="true" aria-label="{{ arwTitle }}" data-atlas-rec="1" onClick="{{ swallow }}" style="width:100%;max-width:600px;max-height:86vh;border-radius:22px;padding:26px 28px 24px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:linear-gradient(170deg,rgba(var(--atmc),.16),var(--sf) 46%);border:1px solid var(--ac2);box-shadow:0 18px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <sc-if value="{{ arwEpiOn }}" hint-placeholder-val="{{ true }}">
+          <div style="font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ arwEpi }}</div>
+        </sc-if>
+        <div style="font:400 28px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ arwTitle }}</div>
+      </div>
+      <sc-if value="{{ arwFromOn }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:5px;padding:11px 14px;border-left:2px solid var(--ac2-hi);background:rgba(var(--atmc),.1);border-radius:0 12px 12px 0">
+          <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ arwFrom }}</div>
+          <sc-if value="{{ arwSaidOn }}" hint-placeholder-val="{{ true }}">
+            <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ arwSaid }}</div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-for list="{{ arwBlocks }}" as="rb" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--bd);padding-top:12px">
+          <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ rb.h }}</div>
+          <sc-for list="{{ rb.rows }}" as="rr" hint-placeholder-count="1">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ rr.t }}</p>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="display:flex;gap:10px;padding-top:4px">
+        <button data-lift onClick="{{ arwClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fc)"><span aria-hidden="true">&#8592;</span> Back to where you were</button>
+        <button data-lift onClick="{{ arwSee }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac2);border-radius:999px;font:600 13px var(--fc);color:var(--tx)">{{ arwSeeLabel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <!-- ABOUT, FROM THE MENU (the owner, 5 November 2026: an About page that does
      not get in the way of the tabs, in the profile menu, dedicated to gaining
      insight on inCommon and the company that keeps it). It says what inCommon
@@ -15441,7 +15531,7 @@ class Component extends DCLogic {
     dreamView: 'write', dreamTitle: '', dreamText: '', dreamDate: '', dreamSleep: 0, dreamLucid: 0,
     dreamMoodB: '', dreamMoodA: '', dreamRecurring: false, dreamInterp: '',
     dreamRej: {}, dreamAssoc: {}, dreamSaved: false,
-    numSel: null, nmPage: 0, nmPageKey: null, nmAll: false, nmFlip: 0, numListsOpen: false, numFocus: 'lifePath', numSpin: null, nameDraft: '', nameTick: 0, clockTick: 0, dpSel: null, installGone: false,
+    numSel: null, nmPage: 0, nmPageKey: null, nmAll: false, nmFlip: 0, numListsOpen: false, numFocus: 'lifePath', numSpin: null, nameDraft: '', nameTick: 0, clockTick: 0, dpSel: null, atlasRec: null, pingBack: null, installGone: false,
     profileTick: 0, quickOpen: false, switchTo: null, pin: ['', '', '', ''], pinErr: '',
     formMode: null, form: null, formPin: '', delOpen: false, delName: '', sharePin: {},
     alignOpen: false, sabQuery: '', sabSign: null, ack: true, geoManual: false, geoLat: '', geoLon: '',
@@ -16081,6 +16171,7 @@ class Component extends DCLogic {
     this.worldSync();
     this.syncSectionToTab();
     this.syncAtlasItem();
+    this.placeSync();
     this.syncLibTabIntoView();
     this.syncChartExpandPersist();
     this.lumAuto();
@@ -23272,8 +23363,11 @@ class Component extends DCLogic {
     const it = item != null && item !== '' ? this.atlasSlug(item) : null;
     return () => {
       this._atlasScrolled = it;
+      /* This lands on an entry of its own, so the place kept for the room does
+         not pull the scroll back to where the reader last was (placeSync). */
+      this._placeSkip = true;
       this.setState(
-        { tab: 'library', libSub: 'study', libView: 'hdatlas', atlasSec: sec || 'intro', atlasItem: it, selId: null, spiritView: null, hdSel: null },
+        { tab: 'library', libSub: 'study', libView: 'hdatlas', atlasSec: sec || 'intro', atlasItem: it, selId: null, hdSel: null },
         () => {
           if ((this.state.dtW || window.innerWidth || 1440) < this.BP.md) this.vtGoSection(2);
           /* The accordion renders in a later tick than this callback, so the
@@ -25410,6 +25504,197 @@ class Component extends DCLogic {
     let at = 0; marks.forEach(m => { seg(s.slice(at, m.a), ''); seg(s.slice(m.a, m.b), m.kind); at = m.b; }); seg(s.slice(at), '');
     return out;
   }
+  /* KEEPING THE READER'S PLACE (the owner, 6 November 2026: "let the user ping
+     pong back and forth between a section of the library and their chart
+     without losing their place"). Two halves.
+
+     The scroll. Every scroller the reader moves is remembered against the place
+     it belongs to (placeKey: the section, the room and the entry open in it),
+     by its template id, which the runtime gives every element and which is the
+     same each time that markup is drawn. A room that is not open is not drawn,
+     so its scroller is gone while the reader is away, and before this the room
+     came back at its top. When the reader crosses back into a section, every
+     scroller the place remembers is put back. The column the phone snaps
+     between sections ([data-vt-scroll]) is never touched, nor is any scroll
+     sideways. A scroll is recorded only inside the section on screen, because
+     on the phone the section left behind shrinks as its room closes. A press, a
+     wheel or a key after the arrival cancels the restore, so the reader's own
+     move always wins over a late one.
+
+     The pill. Crossing between the Library and My Charts, by any route, leaves
+     a pill in the section arrived at (pingBack) that names where the reader
+     came from and takes them back to it; going back leaves the pill pointing
+     the other way, so the two ping pong. Any other crossing drops it, and a
+     second press on a tab (navAgain) clears it with the rest. */
+  PLACE_KEYS = ['libSub', 'libView', 'atlasSec', 'atlasItem', 'apSec', 'apOpen', 'bnSel', 'bnRoot', 'icSec', 'icHex', 'selId', 'spiritView', 'placeSel', 'hdSel'];
+  placeBag() {
+    const st = this.state, b = { tab: this.curTab() };
+    this.PLACE_KEYS.forEach(k => { b[k] = st[k] === undefined ? null : st[k]; });
+    b.vtTab = st.vtTab == null ? null : st.vtTab;
+    return b;
+  }
+  placeKey(b) {
+    const v = x => x == null ? '' : typeof x === 'object' ? JSON.stringify(x) : String(x);
+    if (b.tab === 'library') return ['library', b.libSub, b.libView, b.atlasSec, b.atlasItem, b.apSec, b.apOpen, b.bnSel, b.bnRoot, b.icSec, b.icHex, b.selId].map(v).join('/');
+    if (b.tab === 'spirit') return ['spirit', b.spiritView, b.placeSel].map(v).join('/');
+    return b.tab;
+  }
+  placeName(b) {
+    if (b.tab === 'spirit') {
+      if (b.spiritView === 'placement' && b.placeSel) return 'your ' + b.placeSel;
+      const view = b.spiritView || ((this.state.dtW || window.innerWidth || 1440) < this.BP.md ? (this.VT_TABS[b.vtTab || 0] || [])[0] : null);
+      return ({ humanDesign: 'your wiring', astrology: 'your natal chart', numerology: 'your numerology' })[view] || 'your charts';
+    }
+    if (b.tab === 'library') {
+      if (b.libView === 'hdatlas') {
+        const e = b.atlasItem && this.atlasEntries().find(x => x.ch === b.atlasSec && x.slug === b.atlasItem);
+        return e ? e.name : 'the Human Design Atlas';
+      }
+      return ({ astropedia: 'the Astropedia', numbers: 'the Book of Numbers', iching: 'the Book of Changes', lexicon: 'the Sabian Lexicon',
+        tarot: 'My Tarot', dreams: 'Dream Symbols', angel: 'Synchronicities', dreamj: 'the Dream Journal', reading: 'the reading' })[b.libView] || 'the Library';
+    }
+    return '';
+  }
+  placeRecord(ev) {
+    const el = ev && ev.target;
+    if (!el || el.nodeType !== 1 || !this._placeKey) return;
+    if (el.hasAttribute('data-vt-scroll')) return;
+    /* On the phone every section stays drawn, and a room that closes as the
+       reader leaves shrinks its page and clamps that page's scroll. That is the
+       old section moving, not the reader, so only the section on screen counts. */
+    if (this.isVt()) {
+      const i = this.VT_SECTIONS.findIndex(x => x[0] === this.curTab()), sec = this.vtSecEls()[i];
+      if (sec && !sec.contains(el)) return;
+    }
+    const tpl = el.getAttribute('data-dc-tpl');
+    if (!tpl || el.scrollHeight <= el.clientHeight + 1) return;
+    const map = this._places || (this._places = {});
+    (map[this._placeKey] || (map[this._placeKey] = {}))[tpl] = el.scrollTop;
+  }
+  placeRestore(key, tries) {
+    const saved = this._places && this._places[key];
+    if (!saved || this._placeKey !== key || this._placeTouched) return;
+    Object.keys(saved).forEach(tpl => {
+      let list = [];
+      try { list = [].slice.call(document.querySelectorAll('[data-dc-tpl="' + tpl + '"]')); } catch (e) {}
+      list.forEach(el => { if (!el.hasAttribute('data-vt-scroll') && el.scrollHeight > el.clientHeight + 1 && Math.abs(el.scrollTop - saved[tpl]) > 2) el.scrollTop = saved[tpl]; });
+    });
+    if (tries > 0) setTimeout(() => this.placeRestore(key, tries - 1), tries > 2 ? 160 : 420);
+  }
+  placeSync() {
+    if (!this.state.ready) return;
+    if (!this._placeListen) {
+      this._placeListen = true;
+      document.addEventListener('scroll', e => this.placeRecord(e), { capture: true, passive: true });
+      const touch = () => { this._placeTouched = true; };
+      ['pointerdown', 'wheel', 'keydown', 'touchstart'].forEach(t => document.addEventListener(t, touch, { capture: true, passive: true }));
+    }
+    const bag = this.placeBag(), key = this.placeKey(bag), prev = this._placeBag;
+    this._placeBag = bag;
+    if (key === this._placeKey) return;
+    this._placeKey = key;
+    if (!prev || prev.tab === bag.tab) return;
+    /* A crossing between sections. */
+    this._placeTouched = false;
+    const skip = this._placeSkip; this._placeSkip = false;
+    if (!skip && this._places && this._places[key]) setTimeout(() => this.placeRestore(key, 4), 40);
+    const pair = (prev.tab === 'library' && bag.tab === 'spirit') || (prev.tab === 'spirit' && bag.tab === 'library');
+    const pb = pair ? { bag: prev, label: this.placeName(prev) } : null;
+    if (pb || this.state.pingBack) this.setState({ pingBack: pb });
+  }
+  /* To a chart without leaving the Library behind. A search row clears every
+     room, which is right for a search and wrong here: the Atlas line that sent
+     the reader to their wiring has to be standing where they left it when they
+     come back, by the pill or by the tab. */
+  chartGoKeep(view, page, extra) {
+    return () => {
+      const vertical = (this.state.dtW || window.innerWidth || 1440) < this.BP.md;
+      this.setState(vertical ? { tab: 'spirit', dpSel: null, ...(extra || {}) } : { tab: 'spirit', spiritView: view, placeSel: null, dpSel: null, ...(extra || {}) });
+      if (vertical) setTimeout(() => { this.vtGoSection(1); if (page != null) this.vtGoTab(page); }, 0);
+    };
+  }
+  pingVals() {
+    const st = this.state, pb = st.pingBack, tab = this.curTab();
+    const on = !!pb && pb.bag.tab !== tab && (tab === 'library' || tab === 'spirit') && !st.atlasRec;
+    return {
+      pingOn: on,
+      pingLabel: on ? 'Back to ' + pb.label : '',
+      pingGo: () => {
+        const b = this.state.pingBack && this.state.pingBack.bag;
+        if (!b) return;
+        /* Only the section's own keys: the chart's bag must not close the room
+           the reader is standing in, nor the Library's bag the chart. */
+        const own = b.tab === 'spirit' ? ['spiritView', 'placeSel', 'hdSel'] : this.PLACE_KEYS.filter(k => ['spiritView', 'placeSel', 'hdSel'].indexOf(k) === -1);
+        const next = { tab: b.tab };
+        own.forEach(k => { next[k] = b[k]; });
+        this._atlasScrolled = b.atlasItem;
+        this.setState(next, () => {
+          if (b.tab === 'spirit' && b.vtTab != null && (this.state.dtW || window.innerWidth || 1440) < this.BP.md) setTimeout(() => this.vtGoTab(b.vtTab), 60);
+        });
+      }
+    };
+  }
+  /* The window a line about the reader's own wiring opens (the owner, 6
+     November 2026: a lesson that names gate 30, when gate 30 is among the
+     reader's gates, "should pull up a window with gate 30 ... explain how it
+     applies to them, what they might experience, and at the end return to where
+     they left off"). Every word is the Atlas's own (hd-atlas.js) or the
+     reader's chart: nothing here makes a Human Design claim the Atlas does not.
+     Closing it changes nothing under it, so the folio is where it was, and
+     focus returns to the line that opened it (trapRelease). */
+  atlasRecVals() {
+    const st = this.state, r = st.atlasRec, A = this.A();
+    const off = { arwOn: false, arwTitle: '', arwEpi: '', arwEpiOn: false, arwFrom: '', arwFromOn: false, arwSaid: '', arwSaidOn: false, arwBlocks: [],
+      arwClose: () => this.setState({ atlasRec: null }), arwSee: () => {}, arwSeeLabel: '' };
+    if (!r || !A || this.curTab() !== 'library') return off;
+    const hd = this.hdChart(), mine = !this.usingSampleBirth();
+    const sky = this.hdSkyNow();
+    const blocks = [], add = (h, t) => { if (t) blocks.push({ h: h, t: t }); };
+    const ofList = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+    let title = '', epi = '';
+    if (r.kind === 'gate') {
+      const n = r.n, G = A.GATES[n] || ['', '', '', '', ''], ck = this.hdCenterOf(n), C = A.CENTERS[ck];
+      const IC = this.IC(), hx = IC && IC.hexagram ? IC.hexagram(n) : null;
+      const chans = A.channelsFor(n) || [], myGates = new Set(mine ? hd.gates.map(g => g.gate) : []);
+      title = 'Gate ' + n + ', ' + G[0];
+      epi = 'Hexagram ' + n + (hx && hx.name ? ', ' + hx.name : '');
+      add('What it is', 'In the ' + ck + ' centre. ' + G[2] + (chans.length ? ' It is one end of ' + ofList(chans.map(c => 'channel ' + c.key + ', ' + c.name)) + '.' : ''));
+      const how = [];
+      if (mine) hd.acts.filter(a => a.gate === n).forEach(a => {
+        const L = A.LINES[a.line];
+        how.push('Your ' + String(a.kind).charAt(0).toUpperCase() + String(a.kind).slice(1) + ' ' + a.body + ' holds it, on line ' + a.line + (L ? ', ' + L.name + ': ' + L.theme : '.'));
+      });
+      if (mine && C) how.push('Your ' + ck + ' centre is ' + (hd.defined.has(ck) ? 'defined: ' + C.defined : 'open: ' + C.open));
+      if (mine) chans.forEach(c => {
+        if (myGates.has(c.partner)) how.push('Gate ' + c.partner + ' is yours as well, so channel ' + c.key + ', ' + c.name + ', is defined in your chart. ' + c.meaning);
+        else {
+          const hg = (A.TERMS || []).find(t => t.name === 'Hanging Gate');
+          how.push('Gate ' + c.partner + ', the other end of channel ' + c.key + ', is not in your chart, so this is a hanging gate for you. ' + (hg ? hg.text : ''));
+        }
+      });
+      add('How it sits in your chart', how.join(' \n'));
+      add('What you might meet', (G[3] ? 'In a pinch: ' + G[3] : '') + (G[4] ? (G[3] ? ' \n' : '') + 'At ease: ' + G[4] : ''));
+      const now = sky.filter(a => a.gate === n);
+      if (now.length) add('In the sky now', ofList(now.map(a => a.body + ', line ' + a.line)) + '.');
+    } else if (r.kind === 'centre') {
+      const ck = r.c, C = A.CENTERS[ck];
+      if (!C) return off;
+      const held = mine ? hd.gates.filter(g => this.hdCenterOf(g.gate) === ck).map(g => g.gate) : [];
+      const def = mine && hd.defined.has(ck);
+      title = C.label;
+      epi = 'The ' + ck + ' centre';
+      add('What it is', C.fn);
+      add('How it sits in your chart', mine ? (def ? 'Defined in your chart' : 'Open in your chart') + (held.length ? ', with ' + (held.length > 1 ? 'gates ' : 'gate ') + ofList(held.map(String)) + ' held here.' : ', with no gate held here.') : '');
+      add('What you might meet', def ? C.defined : C.open + ' \n' + C.wisdom);
+    }
+    if (!blocks.length) return off;
+    return { ...off, arwOn: true, arwTitle: title, arwEpi: epi, arwEpiOn: !!epi,
+      arwFrom: r.from ? 'From ' + r.from : '', arwFromOn: !!r.from, arwSaid: r.said || '', arwSaidOn: !!r.said,
+      arwBlocks: blocks.map(b => ({ h: b.h, rows: String(b.t).split(' \n').map(t => ({ t: t })) })),
+      arwSeeLabel: r.kind === 'gate' ? 'See gate ' + r.n + ' in your wiring' : 'See it in your wiring',
+      /* The wiring opens on the same gate or centre, in its own panel. */
+      arwSee: () => this.setState({ atlasRec: null }, () => this.chartGoKeep('humanDesign', 0, { hdSel: this.hdSelOf(r.kind === 'gate' ? 'g:' + r.n : 'c:' + r.c) })()) };
+  }
   atlasVals() {
     const st = this.state;
     if (!(this.curTab() === 'library' && st.libView === 'hdatlas')) return { libAtlas: false };
@@ -25479,8 +25764,14 @@ class Component extends DCLogic {
     const hexName = n => { const IC = this.IC(), h = IC && IC.hexagram ? IC.hexagram(n) : null; return h ? h.name : ''; };
     const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
     const term = (label, key) => { const x = find(key); if (x && x.key !== e.key && !terms.some(t => t.key === key)) terms.push({ label: label, key: key, g: '?', go: () => this.atlasBubGo(key) }); };
-    const wiringGo = this.searchGo(this.searchSpirit('humanDesign', 0));
-    const yourLine = (label, text) => yours.push({ label: label, text: text, go: wiringGo });
+    const wiringGo = this.chartGoKeep('humanDesign', 0);
+    /* A line about the reader's own wiring opens a window on that one thing
+       (atlasRec) when it names a gate or a centre, and closing it leaves the
+       reader on this folio exactly where they were. The rest still go to the
+       wiring, and the place pill brings them back (placeSync). */
+    const arwSaid = d.study ? ((A.STUDY.find(z => z.key === d.study) || {}).claim || '') : '';
+    const yourLine = (label, text, rec) => yours.push({ label: label, text: text,
+      go: rec ? () => this.setState({ atlasRec: { ...rec, from: e.name, said: arwSaid } }) : wiringGo });
     if (d.type) { const t = A.TYPES[d.type];
       kicker = t.pct.charAt(0).toUpperCase() + t.pct.slice(1) + ' of people'; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim();
       bold = (A.EMPHASIS && A.EMPHASIS.types[d.type]) || [];
@@ -25507,7 +25798,7 @@ class Component extends DCLogic {
       link(d.center ? 'Open and defined, ' + C.label : C.label, '', (d.center ? 'open:' : 'centers:') + this.atlasSlug(k));
       Object.keys(A.GATES).map(Number).filter(n => this.hdCenterOf(n) === k).slice(0, 12).forEach(n => link('Gate ' + n, String(n), 'gates:g' + n));
       term('Defined Center', 'terms:defined-center'); term('Undefined Center', 'terms:undefined-center'); term('Conditioning', 'terms:conditioning');
-      if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held'); }
+      if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held', { kind: 'centre', c: k }); }
     if (d.gate) { const g = A.GATES[d.gate];
       kicker = 'In the ' + this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate);
       facets.push({ label: 'Low expression', text: g[3] }, { label: 'High expression', text: g[4] });
@@ -25516,19 +25807,19 @@ class Component extends DCLogic {
       links.push({ label: 'Hexagram ' + d.gate + ' in the Book of Changes', glyph: '☷', c: 'var(--ac2-hi)', aria: 'Hexagram ' + d.gate + ' in the Book of Changes',
         go: () => this.setState({ libSub: 'readings', libView: 'iching', icSec: null, icHex: d.gate, icQuery: String(d.gate), selId: null }) });
       term('Line', 'terms:line'); term('Hanging Gate', 'terms:hanging-gate');
-      if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line)); }
+      if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line, { kind: 'gate', n: d.gate })); }
     if (d.channel) { const c = A.CHANNELS[d.channel], p = d.channel.split('-').map(Number);
       kicker = c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · ');
       p.forEach(n => link('Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''), String(n), 'gates:g' + n));
       { const ci = A.circuitOf ? A.circuitOf(d.channel) : ''; if (ci) term(ci + ' Circuit', 'terms:' + this.atlasSlug(ci + ' circuit')); }
       term('Definition', 'definition:single-definition');
       if (myChan.has(d.channel)) yourLine('Defined in your chart', 'both gates held');
-      else if (mine && p.some(n => myGates.has(n))) yourLine('Half held in your chart', 'gate ' + p.filter(n => myGates.has(n)).join(' and ') + ', a hanging gate'); }
+      else if (mine && p.some(n => myGates.has(n))) p.filter(n => myGates.has(n)).forEach(n => yourLine('Half held in your chart', 'gate ' + n + ', a hanging gate', { kind: 'gate', n: n })); }
     if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = c.keynote; lead = c.text; facets.push({ label: 'Circuits within it', text: c.sub }); }
     if (d.definition) { const dn = A.DEFINITION.find(x => x.name === d.definition); lead = dn.text; dropcap = true;
       if (myDef && d.definition.toLowerCase().indexOf(myDef.toLowerCase()) === 0) yourLine('Your definition', myDef); }
     if (d.cross) { lead = A.CROSS[d.cross]; dropcap = true; link('Profiles', '', 'profiles:' + this.atlasSlug(Object.keys(A.PROFILES)[0]));
-      crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line)); }
+      crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line, { kind: 'gate', n: a.gate })); }
     if (d.strategy) { const s = A.STRATEGIES.find(x => x.name === d.strategy);
       kicker = 'Strategy for the ' + s.who; facets.push({ label: 'When to use it', text: s.when }, { label: 'Correct timing', text: s.recognize }, { label: 'When it is ignored', text: s.ignored });
       Object.keys(A.TYPES).filter(t => s.who.indexOf(t) !== -1).forEach(t => { bold = bold.concat((A.EMPHASIS && A.EMPHASIS.types[t]) || []); });
@@ -25557,7 +25848,7 @@ class Component extends DCLogic {
       if (mine && L.name === 'Inner Authority') yourLine('Your authority', String(hd.authority).split(':')[0]);
       if (mine && L.name === 'Profile' && pr) yourLine('Your profile', pr.key);
       if (mine && L.name === 'Definition' && myDef) yourLine('Your definition', myDef);
-      if (mine && L.name === 'Angle') crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line)); }
+      if (mine && L.name === 'Angle') crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line, { kind: 'gate', n: a.gate })); }
     if (d.studyIntro) {
       kicker = 'Beyond what the tradition holds firmly';
       lead = 'The modern study gathers what the field teaches past the Atlas\u2019s firm ground, each claim weighed by how surely the sources read for it state what the field teaches. A weight is never a judgement of whether a claim is true of anyone. Below seventy it becomes a field study, and what you notice in your own life is what it waits on.';
@@ -25574,7 +25865,9 @@ class Component extends DCLogic {
       if (x.see) { const k = x.see[0] + ':' + this.atlasSlug(x.see[1]); link((find(k) || {}).name || x.see[1], '', k); }
       link('How the study is weighed', this.HD_SEC_GLYPH.study, 'study:how');
       const holds = !mine ? null : x.type ? hd.type === x.type : x.gates ? x.gates.some(g => myGates.has(g)) : null;
-      if (mine && x.gates) { const h = x.gates.filter(g => myGates.has(g)); yourLine(h.length ? 'Held in your chart' : 'Not held in your chart', h.length ? 'gate ' + h.join(', ') : 'none of gates ' + x.gates.join(', ')); }
+      if (mine && x.gates) { const h = x.gates.filter(g => myGates.has(g));
+        if (h.length) h.forEach(n => yourLine('Held in your chart', 'gate ' + n, { kind: 'gate', n: n }));
+        else yourLine('Not held in your chart', 'none of gates ' + x.gates.join(', ')); }
       if (mine && x.type) yourLine(hd.type === x.type ? 'Your type' : 'Not your type', hd.type);
       if (W.field) fs = this.fieldVals(x, holds, sample);
     }
@@ -25600,7 +25893,7 @@ class Component extends DCLogic {
       c: ownKey(x) ? 'var(--ac2-hi)' : 'var(--tx)', mine: !!ownKey(x), on: x.key === e.key,
       bd: x.key === e.key ? 'var(--ac2-hi)' : 'var(--bd)', bg: x.key === e.key ? 'rgba(var(--atmc),.2)' : 'var(--sf)',
       go: () => this.atlasPick(x.key, true) });
-    const where = yours.map(y => y.label);
+    const where = yours.map(y => y.label).filter((l, i, all) => all.indexOf(l) === i);
     return { libAtlas: true,
       atlasBack: () => this.setState({ libView: null, atlasSec: null, atlasItem: null, atlasQuery: '' }),
       atlasSecAnchor: 'incommon-atlas-' + chap,
@@ -32835,7 +33128,7 @@ class Component extends DCLogic {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, aboutOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false, obsRoom: false, obsExplore: false,
+      avaDraft: null, dpSel: null, atlasRec: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false, obsRoom: false, obsExplore: false,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
@@ -33386,8 +33679,9 @@ class Component extends DCLogic {
       tabs: [['today', 'Today'], ['spirit', 'My Charts'], ['library', 'Library'], ['settings', 'Settings']].map(([id, t]) => {
         const on = st.tab === id;
         return { t, on: on, c: on ? 'var(--ac)' : 'var(--dim)', dot: on ? 'var(--ac)' : 'transparent',
-          /* Tapping a tab returns to the root of that tab, the way a tab bar should. */
-          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.sectionRoot(id) }) };
+          /* Tapping a tab returns to the root of that tab, the way a tab bar should,
+             except the Library and My Charts, which resume (tabResume). */
+          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.tabResume(id) }) };
       }),
       greet: (h => h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')(new Date().getHours()),
       pyLine: py ? this.artNum(py.value).replace(/^a/, 'A') + ' ' + py.value + ' Personal Year.' : '',
@@ -33463,6 +33757,8 @@ class Component extends DCLogic {
           ...this.hdPopVals(),
           ...this.hdTeachVals(),
           ...this.atlasVals(),
+          ...this.atlasRecVals(),
+          ...this.pingVals(),
           ...this.apVals(),
           ...this.numBookVals(),
           ...this.studyVals(),
@@ -35469,7 +35765,7 @@ class Component extends DCLogic {
         return { id, label, glyph, icon: this.uiIcon(id), cur: on ? 'page' : 'false', meta: '',
           c: on ? 'var(--tx)' : 'var(--dim)', gc: on ? 'var(--ac)' : 'rgba(238,240,248,.42)',
           bg: on ? 'rgba(var(--atmc),.28)' : 'transparent', edge: on ? 'var(--ac)' : 'transparent',
-          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.sectionRoot(id) }) };
+          go: () => on ? this.navAgain(id, this.DT_NAV.findIndex(r => r[0] === id)) : this.setState({ tab: id, ...this.tabResume(id) }) };
       })
     };
   }
@@ -35895,7 +36191,7 @@ class Component extends DCLogic {
   }
   isVt() { return (this.state.dtW || window.innerWidth || 1440) < this.BP.md; }
   navAgain(id, i) {
-    this.setState({ tab: id, ...this.sectionRoot(id), ...this.sectionOpening(id) });
+    this.setState({ tab: id, pingBack: null, ...this.sectionRoot(id), ...this.sectionOpening(id) });
     if (this.isVt() && id === 'spirit') this.vtGoTab(0);
     const top = () => {
       const root = this.isVt() ? this.vtSecEls()[i] : document.querySelector('main[data-shell="desktop"]');
@@ -35908,6 +36204,17 @@ class Component extends DCLogic {
     };
     requestAnimationFrame(() => requestAnimationFrame(top));
     setTimeout(top, 260);
+  }
+  /* The Library and My Charts resume (the owner, 6 November 2026: ping pong
+     between a section of the Library and the chart "without losing their
+     place"). A first press on either lands on the room, the entry and the
+     scroll the reader left; only what floats over a screen is closed. A second
+     press is still the fresh start (navAgain). Every other tab opens at its
+     root on a first press, as it did. */
+  TAB_RESUME = { library: true, spirit: true };
+  tabResume(id) {
+    if (!this.TAB_RESUME[id]) return this.sectionRoot(id);
+    return { aspSel: null, dpSel: null, memSel: null, lexDeg: null };
   }
   sectionRoot(id) {
     const shared = { placeSel: null, aspSel: null, dpSel: null, numSel: null, memSel: null, lexDeg: null };
@@ -36024,9 +36331,9 @@ class Component extends DCLogic {
              shell the pager IS how deep you are. */
           go: () => {
             if (on) { this.navAgain(id, i); return; }
-            this.setState(this.sectionRoot(id));
+            this.setState(this.tabResume(id));
             this.vtGoSection(i);
-            if (id === 'spirit') this.vtGoTab(0);
+            if (id === 'spirit' && !this.TAB_RESUME[id]) this.vtGoTab(0);
           } };
       }),
       vtSpiritTabs: this.VT_TABS.map(([k, label], i) => {
