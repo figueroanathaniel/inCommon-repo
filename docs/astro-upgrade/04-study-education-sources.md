@@ -103,5 +103,16 @@ Facts in the lessons:
   translation of BPHS 6.31 at enjoylearningsanskrit.com reads movable from
   Aries, fixed from Leo and dual from Sagittarius, which disagrees, and was
   not followed. No D9 wheel is drawn.
-- Zodiacal releasing is described without its period lengths, because the
-  Capricorn period differs between sources and none was checked.
+- Zodiacal releasing is computed for the Hellenistic study (6 November
+  2026), levels 1 and 2 from the Lots of Spirit and Fortune, in the dossier
+  and the study card. Periods: Aries and Scorpio 15, Taurus and Libra 8,
+  Gemini and Virgo 20, Cancer 25, Leo 19, Sagittarius and Pisces 12,
+  Capricorn 27, Aquarius 30 (theastrologypodcast.com, 11 February 2019);
+  Capricorn 27 is the standard and 30 is rejected by Valens, years are 360
+  days, level 2 is a twelfth of its parent and its last subperiod is cut at
+  the parent's end, and the loosing of the bond jumps to the opposite sign
+  after twelve subperiods (stellium.readthedocs.io, methodology, zodiacal
+  releasing, whose Riley quotes are secondary). Lots by day: Fortune is
+  Ascendant plus Moon less Sun, Spirit the reverse; both reversed by night.
+  Not checked against another program's output for a real chart. Levels 3
+  and 4, peak periods and the lesson text are unchanged.

@@ -18971,6 +18971,18 @@ class Component extends DCLogic {
         '; chart ruler ' + RULER[Math.floor(this.norm360(asc.asc) / 30)] + ' (traditional rulers); whole sign houses.');
       const yr = this.profection();
       if (yr) out.push('ANNUAL PROFECTION: age ' + yr.age + ', the ' + yr.house + ' house from the Ascendant (' + yr.sign + '); lord of the year ' + yr.lordName + '.');
+      const moonR = natal.find(r => r.name === 'Moon');
+      if (T.zodiacalReleasing && moonR && day != null) {
+        const ymd = j => new Date((j - 2440587.5) * 864e5).toISOString().slice(0, 10);
+        const lot = (a, b) => Math.floor(this.norm360(asc.asc + a - b) / 30);
+        const zr = (label, ls) => { const z = T.zodiacalReleasing(ls, jd, jdAt); if (!z) return null;
+          return label + ' (' + SIGNS[ls] + '): level 1 ' + SIGNS[z.l1.sign] + ' ' + ymd(z.l1.start) + ' to ' + ymd(z.l1.end) +
+            (z.l2 ? ', level 2 ' + SIGNS[z.l2.sign] + ' ' + ymd(z.l2.start) + ' to ' + ymd(z.l2.end) + (z.l2.loosed ? ' (after the loosing of the bond)' : '') : '') +
+            (z.loosing && !(z.l2 && z.l2.loosed) && z.loosing > jdAt ? ', loosing of the bond ' + ymd(z.loosing) : ''); };
+        const sp = zr('from the Lot of Spirit', day ? lot(sun.lon, moonR.lon) : lot(moonR.lon, sun.lon)),
+          fo = zr('from the Lot of Fortune', day ? lot(moonR.lon, sun.lon) : lot(sun.lon, moonR.lon));
+        if (sp || fo) out.push('ZODIACAL RELEASING (Valens, minor years, years of 360 days) AT THIS PERIOD: ' + [sp, fo].filter(Boolean).join('; ') + '.');
+      }
     }
     return out;
   }

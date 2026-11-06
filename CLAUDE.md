@@ -3684,7 +3684,11 @@ vargottama marked, in the dossier and the study card. It counts a movable
 sign from itself, a fixed sign from its 9th and a dual sign from its 5th,
 which HinduTone and DekhoPanchang both teach and which equals the element
 rule; one translation of BPHS 6.31 reads the verse otherwise and is not
-followed. The two relationship charts, a harmonic wheel and solar arc are
+followed. Zodiacal releasing is built for the Hellenistic study
+(`ChartTraditions.zodiacalReleasing()`, CT8): levels 1 and 2 from Spirit and
+Fortune at the period's instant, Capricorn 27 years, years of 360 days, the
+loosing of the bond to the opposite sign after twelve subperiods. The two
+relationship charts, a harmonic wheel and solar arc are
 not built and wait on the owner.
 
 **The solar return is a chapter, The Return, on the Sun's packet** (`solarReturn()`,
