@@ -1090,20 +1090,20 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
         </sc-for>
       </div>
-        </div>
-        <div style="position:relative">
         <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
-          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+          <div data-chart-rail="1" style="display:flex;flex-direction:row;align-items:center;gap:6px;flex:0 0 auto;margin-left:auto;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" aria-orientation="horizontal" style="display:flex;flex-direction:row;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:2px">
               <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
-                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;padding:0 9px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
               </sc-for>
             </div>
             <sc-if value="{{ hsLockOn }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" aria-label="Screen lock, turn the wiring freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ hsFreeBd }};border-radius:12px;background:{{ hsFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ hsLockPath }}"></path></svg></button>
+              <button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" aria-label="Screen lock, turn the wiring freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ hsFreeBd }};border-radius:50%;background:{{ hsFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ hsLockPath }}"></path></svg></button>
             </sc-if>
           </div>
         </sc-if>
+        </div>
+        <div style="position:relative">
         <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
           <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
@@ -1446,7 +1446,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 <sc-if value="{{ spiritAstro }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Spirit / Astrology" style="flex:1;overflow-y:auto;padding:16px 18px 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
     <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="font:400 24px/1.25 var(--fd)">Your Natal Chart</div>
+      <div style="font:400 24px/1.25 var(--fd)">{{ astroTitle }}</div>
     </div>
     <sc-if value="{{ fbAstroOn }}" hint-placeholder-val="{{ false }}">
       <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:6px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 12px 12px 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:0 12px 0 14px">
@@ -1566,22 +1566,22 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
-        </div>
-        <div style="position:relative;padding-right:{{ railPad }}">
         <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
-          <!-- THE VIEWS ARE A RAIL ON THE RIGHT (owner, 5 November 2026): only the
-               detail switch sits above the chart; the views and the lock live here. -->
-          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+          <!-- THE VIEWS SIT IN THE CARD'S BAR (owner, 6 November 2026: "Make sure the
+               vertical menu and lock screen button do not lay over the chart itself"). -->
+          <div data-chart-rail="1" style="display:flex;flex-direction:row;align-items:center;gap:6px;flex:0 0 auto;margin-left:auto;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="horizontal" style="display:flex;flex-direction:row;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:2px">
               <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
-                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;padding:0 9px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
               </sc-for>
             </div>
             <sc-if value="{{ csLockOn }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+              <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:50%;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
             </sc-if>
           </div>
         </sc-if>
+        </div>
+        <div style="position:relative;padding-right:{{ railPad }}">
         <sc-if value="{{ cvNative }}" hint-placeholder-val="{{ false }}">
         <sc-if value="{{ sqOn }}" hint-placeholder-val="{{ false }}">
           <div data-chart="square" role="group" aria-label="Rashi chart, South Indian style" style="position:relative;box-sizing:border-box;width:100%;max-width:640px;margin:0 auto;aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:3px;padding:6px">
@@ -8483,7 +8483,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
         <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:6px">
           <button onClick="{{ spiritBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11px var(--fk);letter-spacing:.06em;text-transform:uppercase;color:var(--ac)"><span style="font:400 13px var(--fb)">←</span> Back</button>
-          <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">Your Natal Chart</div>
+          <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">{{ astroTitle }}</div>
         </div>
       </div>
       <sc-if value="{{ fbAstroOn }}" hint-placeholder-val="{{ false }}">
@@ -8604,22 +8604,22 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
-        </div>
-        <div style="position:relative;padding-right:{{ railPad }}">
         <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
-          <!-- THE VIEWS ARE A RAIL ON THE RIGHT (owner, 5 November 2026): only the
-               detail switch sits above the chart; the views and the lock live here. -->
-          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+          <!-- THE VIEWS SIT IN THE CARD'S BAR (owner, 6 November 2026: "Make sure the
+               vertical menu and lock screen button do not lay over the chart itself"). -->
+          <div data-chart-rail="1" style="display:flex;flex-direction:row;align-items:center;gap:6px;flex:0 0 auto;margin-left:auto;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="horizontal" style="display:flex;flex-direction:row;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:2px">
               <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
-                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;padding:0 9px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
               </sc-for>
             </div>
             <sc-if value="{{ csLockOn }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+              <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:50%;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
             </sc-if>
           </div>
         </sc-if>
+        </div>
+        <div style="position:relative;padding-right:{{ railPad }}">
         <sc-if value="{{ cvNative }}" hint-placeholder-val="{{ false }}">
         <sc-if value="{{ sqOn }}" hint-placeholder-val="{{ false }}">
           <div data-chart="square" role="group" aria-label="Rashi chart, South Indian style" style="position:relative;box-sizing:border-box;width:100%;max-width:640px;margin:0 auto;aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:3px;padding:6px">
@@ -9330,20 +9330,20 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fc);color:{{ m.c }}">{{ m.label }}</button>
                 </sc-for>
               </div>
-            </div>
-        <div style="position:relative">
               <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
-          <div data-chart-rail="1" style="position:absolute;right:8px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:stretch;gap:6px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+          <div data-chart-rail="1" style="display:flex;flex-direction:row;align-items:center;gap:6px;flex:0 0 auto;margin-left:auto;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" aria-orientation="horizontal" style="display:flex;flex-direction:row;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:2px">
               <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
-                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;padding:0 9px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
               </sc-for>
             </div>
             <sc-if value="{{ hsLockOn }}" hint-placeholder-val="{{ false }}">
-              <button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" aria-label="Screen lock, turn the wiring freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-end;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ hsFreeBd }};border-radius:12px;background:{{ hsFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ hsLockPath }}"></path></svg></button>
+              <button data-lift onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" aria-label="Screen lock, turn the wiring freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ hsFreeBd }};border-radius:50%;background:{{ hsFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ hsLockPath }}"></path></svg></button>
             </sc-if>
           </div>
         </sc-if>
+            </div>
+        <div style="position:relative">
         <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
           <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
@@ -18414,10 +18414,28 @@ class Component extends DCLogic {
   /* Rahu and Ketu are the Vedic names of the nodes; the key stays the name,
      so every reading and lookup is unchanged. */
   studyName(n) {
-    const x = this.chartStudyOf();
-    if (x && x.zodiac === 'lahiri') { if (n === 'North Node') return 'Rahu'; if (n === 'South Node') return 'Ketu'; }
-    return n;
+    const t = this.studyTalk();
+    return t.names && t.names[n] ? t.names[n] : n;
   }
+  /* THE STUDY'S OWN WORDS ON THE CHARTS TAB (owner, 6 November 2026:
+     "Verbiage specific to the study should exist in the charts tab once
+     selected"). Display only: every key, lookup and reading still goes by
+     the Western name, so nothing stored or computed moves. Vedic names the
+     seven grahas and the Lagna in Sanskrit and the houses bhavas; the
+     Hellenistic study calls the Ascendant the Hour Marker and the houses
+     places (topoi). The western family names its houses by the system. */
+  STUDY_TALK = {
+    vedic: { title: 'Your Janma Kundali', houses: 'Bhavas', house: 'Bhava', body: 'Grahas & Outer Planets', rashi: true,
+      names: { Sun: 'Surya', Moon: 'Chandra', Mars: 'Mangala', Mercury: 'Budha', Jupiter: 'Guru', Venus: 'Shukra', Saturn: 'Shani',
+        'North Node': 'Rahu', 'South Node': 'Ketu', Ascendant: 'Lagna' } },
+    chinese: { title: 'Your Four Pillars' },
+    hellenistic: { title: 'Your Nativity', houses: 'Places', house: 'Place', names: { Ascendant: 'Hour Marker' } },
+    sidereal: { title: 'Your Sidereal Chart' },
+    draconic: { title: 'Your Draconic Chart' },
+    heliocentric: { title: 'Your Chart from the Sun' }
+  };
+  studyTalk() { return this.STUDY_TALK[this.chartStudy()] || {}; }
+  astroTitle() { return this.studyTalk().title || 'Your Natal Chart'; }
   /* The heliocentric study: where each planet stood seen from the Sun at
      the birth instant, and the Earth opposite the Sun. The Moon, the nodes,
      the angles and the houses belong to the view from the Earth, so they
@@ -22523,7 +22541,12 @@ class Component extends DCLogic {
       meta: x.meta || '', metaOn: !!x.meta, sub: x.sub || '', edge: x.edge || 'transparent', go: x.go || null, btn: !!x.go, plain: !x.go,
       aria: x.aria || [x.title, x.hi, x.lit ? 'lit now' : '', x.sub].filter(Boolean).join(', '), litOn: !!x.lit, arrow: x.go ? '›' : '' });
     const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived', 'cluster'];
-    const LABEL = { ...this.CAT_LABEL, body: 'Luminaries & Planets' };
+    const talk = this.studyTalk();
+    const LABEL = { ...this.CAT_LABEL, body: talk.body || 'Luminaries & Planets' };
+    const houseWord = talk.house || 'House';
+    const housesHead = talk.houses || (o.asc ? this.houseSysName(this.houseCusps(o.asc).drawn) + ' Houses' : 'Houses');
+    const cuspWord = h => { const sg = ctx.cuspSign(h), i = this.SIGNS12.indexOf(sg), T = window.ChartTraditions;
+      return talk.rashi && T && T.RASHI && i >= 0 ? T.RASHI[i] + ' (' + sg + ')' : sg; };
     const pts = CATS.map(cat => {
       const rs = o.rows.filter(r => r.category === cat);
       if (!rs.length) return null;
@@ -22600,17 +22623,17 @@ class Component extends DCLogic {
       return { ...g, open: true, rot: '90deg', bd: 'var(--ac2-hi)', count: String(cards.length), modesOn: false, listOn: false, cardsOn: true, cards: cards,
         deckAria: 'Placements, ' + cards.length + ' cards, the most active first', toggle: () => this.setState({ ledgerMode: 'table' }) };
     })();
-    const houses = group('houses', 'Houses', this.HOUSE_THEMES.map((th, i) => row({ glyph: String(i + 1), title: 'House ' + (i + 1), hi: ctx.cuspSign(i + 1), sub: th,
-      aria: 'House ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
+    const houses = group('houses', housesHead, this.HOUSE_THEMES.map((th, i) => row({ glyph: String(i + 1), title: houseWord + ' ' + (i + 1), hi: cuspWord(i + 1), sub: th,
+      aria: houseWord + ' ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
       { cards: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => this.impactHouseCard(h, ctx)) });
     const aspects = group('aspects', o.expanded ? 'Aspects' : 'Major Aspects', o.asps.slice(0, 40).map((x, i) => row({
-      title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
+      title: x.a.glyph + ' ' + this.studyName(x.a.name) + ' ' + x.asp + ' ' + x.b.glyph + ' ' + this.studyName(x.b.name), meta: x.orb.toFixed(1) + '° orb',
       edge: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', sub: this.ASP_SHORT[x.asp] || '', go: () => this.setState({ aspSel: i }) })));
     const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map(x => row({
-      title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb', edge: 'var(--ac2-hi)',
+      title: x.a.glyph + ' ' + this.studyName(x.a.name) + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + this.studyName(x.b.name), meta: x.orb.toFixed(1) + '° orb', edge: 'var(--ac2-hi)',
       sub: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => o.openBody(x.b.name) })));
     const trS = group('tr-sky', 'Current Transits', o.tr.global.map(x => row({
-      title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
+      title: x.a.glyph + ' ' + this.studyName(x.a.name) + ' ' + x.asp + ' ' + x.b.glyph + ' ' + this.studyName(x.b.name), meta: x.orb.toFixed(1) + '° orb',
       sub: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })));
     /* The windows that open after today, from the same scan the Throughline
        stamps its entries with: the soonest first, eight at most. */
@@ -24277,10 +24300,14 @@ class Component extends DCLogic {
   /* The study the reader chose in Settings brings its own chapter, first in
      the room, when it is not a plain Western study (the owner, 5 November
      2026: each study teaches its own field). The Western chapters stay. */
+  /* A study word found in a sentence: whole word, any case, a plural allowed. */
+  apWordRe(t) { return new RegExp('(^|[^A-Za-z])' + String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(s|es)?(?![A-Za-z])', 'i'); }
   apStudyLessons() { const A = this.AP(); return A && A.studyLessons ? A.studyLessons(this.chartStudy()) : null; }
   apSections() {
     const A = this.AP(), L = this.apStudyLessons();
-    return A ? (L ? [['mystudy', 'Your study: ' + L.title]].concat(A.SECTIONS) : A.SECTIONS) : [];
+    if (!A) return [];
+    if (!L) return A.SECTIONS;
+    return [['mystudy', 'Your study: ' + L.title]].concat((L.words || []).length ? [['mywords', 'Words of ' + L.title]] : [], A.SECTIONS);
   }
   apEntries() {
     const sk = this.chartStudy();
@@ -24290,7 +24317,11 @@ class Component extends DCLogic {
     const out = [], add = e => out.push({ ...e, hay: (e.name + ' ' + e.sub + ' ' + (e.text || '')).toLowerCase() });
     const L = this.apStudyLessons();
     if (L) L.lessons.forEach((x, i) => add({ key: 'lesson:' + sk + ':' + i, ch: 'mystudy', kind: 'lesson', li: i, name: x.name,
-      glyph: L.glyph + '\uFE0E', sub: 'Lesson ' + (i + 1) + ', ' + x.band, c: 'var(--ac2-hi)', slug: this.slug(x.name), text: x.term + ' ' + x.text }));
+      glyph: L.glyph + '\uFE0E', sub: (x.unit ? x.unit + ', l' : 'L') + 'esson ' + (i + 1), c: 'var(--ac2-hi)', slug: this.slug(x.name), text: x.term + ' ' + x.text }));
+    /* The study's own words, each defined as its lessons use it (the owner,
+       6 November 2026: definitions live in the Astropedia). */
+    if (L) (L.words || []).forEach((w, i) => add({ key: 'term:' + sk + ':' + i, ch: 'mywords', kind: 'term', wi: i, name: w.term,
+      glyph: '\u2766', sub: this.apFirst(w.text, 46), c: 'var(--ac2-hi)', slug: this.slug(w.term), text: w.text }));
     A.SIGNS.forEach((s, i) => add({ key: 'sign:' + s.name, ch: 'signs', kind: 'sign', name: s.name, glyph: s.glyph + '︎',
       sub: s.modality + ' ' + s.element, c: this.AP_EL[s.element], idx: i, slug: this.slug(s.name),
       text: [s.text, s.key, s.sun, s.moon, s.asc, s.house, s.strengths, s.challenges].join(' ') }));
@@ -24481,8 +24512,17 @@ class Component extends DCLogic {
       lead = (e.kind === 'concept' ? A.CONCEPTS : A.TECHNIQUES).find(c => c.name === e.name).text; dropcap = true;
     } else if (e.kind === 'lesson') {
       const L = this.apStudyLessons(), x = L.lessons[e.li];
-      kicker = 'Lesson ' + (e.li + 1) + ' of ' + L.lessons.length + ' · ' + x.band + ' · ' + x.pace;
+      const units = []; L.lessons.forEach(l => { if (l.unit && units.indexOf(l.unit) === -1) units.push(l.unit); });
+      kicker = (x.unit ? 'Unit ' + (units.indexOf(x.unit) + 1) + ', ' + x.unit + ' · ' : '') + 'Lesson ' + (e.li + 1) + ' of ' + L.lessons.length + ' · ' + x.band + ' · ' + x.pace;
       epi = x.term; lead = x.text; dropcap = true;
+      (x.see || []).forEach(k => { const y = find(k); if (y) link(y.name, '', k); });
+      const next = L.lessons[e.li + 1];
+      if (next) link('Next lesson, ' + next.name, '', 'lesson:' + this.chartStudy() + ':' + (e.li + 1));
+    } else if (e.kind === 'term') {
+      const L = this.apStudyLessons(), w = L.words[e.wi], sk = this.chartStudy();
+      kicker = 'A word of ' + L.title; lead = w.text;
+      const re = this.apWordRe(w.term);
+      L.lessons.forEach((l, i) => { if (re.test(l.term + ' ' + l.text)) link('The lesson, ' + l.name, '', 'lesson:' + sk + ':' + i); });
     } else if (e.kind === 'essay') {
       essay = e.ess === 'orbs' ? [{ head: '', hasHead: false, rows: [A.ORBS.what, A.ORBS.how, A.ORBS.custom].map(t => ({ t: t })) }]
         : this.apBlocks(e.ess).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));
@@ -24502,6 +24542,8 @@ class Component extends DCLogic {
       if (e.name === 'Sun') { term('Combust and cazimi', 'concept:Combust and Cazimi'); term('Sect', 'concept:Sect'); } }
     if (e.kind === 'point' && /Node/.test(e.name)) term('Eclipses', 'concept:Eclipses');
     if (e.kind === 'housesys') term('Intercepted signs', 'concept:Intercepted Signs');
+    if (e.kind === 'lesson') { const L = this.apStudyLessons(), x = L.lessons[e.li], sk = this.chartStudy();
+      (L.words || []).forEach((w, i) => { if (terms.length < 8 && this.apWordRe(w.term).test(x.term + ' ' + x.text)) term(w.term, 'term:' + sk + ':' + i); }); }
     if (e.kind === 'aspect') { term('Orb', 'essay:orbs'); term('Aspect patterns', 'concept:Aspect Patterns'); }
     const sib = all.filter(x => x.ch === e.ch), at = sib.findIndex(x => x.key === e.key);
     const step = d => sib[(at + d + sib.length) % sib.length];
@@ -25390,7 +25432,7 @@ class Component extends DCLogic {
     const v = this.todayValsBase(), rows = v.alignRows || [];
     const pick = k => rows.filter(r => r.key === k).map(r => ({ ...r, shut: !r.open }));
     const a = pick('astro'), h = pick('hd'), n = pick('num');
-    return { ...v, fbAstro: a, fbAstroOn: a.length > 0, fbAstroOpen: !!(a[0] && a[0].open),
+    return { ...v, astroTitle: this.astroTitle(), fbAstro: a, fbAstroOn: a.length > 0, fbAstroOpen: !!(a[0] && a[0].open),
       fbHd: h, fbHdOn: h.length > 0, fbHdOpen: !!(h[0] && h[0].open),
       fbNum: n, fbNumOn: n.length > 0, fbNumOpen: !!(n[0] && n[0].open) };
   }
@@ -33278,7 +33320,7 @@ class Component extends DCLogic {
               /* The screen lock (owner, 5 November 2026): offered on every device in
                  the deep views; locked, a drag turns the chart every way and the
                  page holds still. */
-              csLockOn: deep, csFree: !!st.csFree, railPad: !deep && nativeOn ? '70px' : '0px',
+              csLockOn: deep, csFree: !!st.csFree, railPad: '0px',
               csLockPath: st.csFree ? 'M7 9V6.5a3 3 0 0 1 6 0V9' : 'M7 9V6.5a3 3 0 0 1 5.6-1.5',
               csFreeGo: () => this.setState({ csFree: !st.csFree }),
               csFreeBg: st.csFree ? 'rgba(var(--atmc),.4)' : 'var(--bg)', csFreeBd: st.csFree ? 'var(--ac2-hi)' : 'var(--bd)',

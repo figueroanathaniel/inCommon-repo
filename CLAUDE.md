@@ -5775,6 +5775,32 @@ every source are `docs/astro-upgrade/04-study-education-sources.md`; the bands
 are a reading of course outlines, not a tally, and the doc says so. No lesson
 names a fact no source was read for (the hidden stems, the releasing periods).
 
+**Every study has a course now, in units, with a glossary** (the owner, 6
+November 2026: "Jyotish, sidereal, Placidus, etc should all have a tailored
+curriculum around them in the Astropedia. Definitions should be in the
+Astropedia."). Placidus, Koch, Equal and Whole Sign are house systems inside
+the Western chart, so `STUDY_COURSES` gives each the Western course taught
+through its own division (13 or 14 lessons, built from shared lesson
+functions), and they sit in `STUDY_LESSONS` beside the six others.
+`STUDY_UNITS` groups the six others' lessons into units; a lesson's kicker
+names its unit, and its `see` list links the Astropedia entries it rests on.
+`STUDY_WORDS` is each study's glossary, drawn as a second chapter ("Words of
+<study>", entries `term:<study>:<i>`); a lesson shows chips for the study
+words it uses (`apWordRe()`), and a word links back to its lessons. Sources
+and what they leave open: `docs/astro-upgrade/05-study-courses-sources.md`.
+
+**The Charts tab speaks the chosen study** (`STUDY_TALK`, `studyTalk()`, the
+same day: "Verbiage specific to the study should exist in the charts tab once
+selected"). The title (`astroTitle`: Your Janma Kundali, Your Four Pillars,
+Your Nativity, Your Sidereal Chart, Your Draconic Chart, Your Chart from the
+Sun; Your Natal Chart otherwise), the houses heading (Bhavas, Places, or the
+drawn system's name with Houses), the house rows (Bhava 1, with the rashi;
+Place 1), the body category under Vedic (Grahas & Outer Planets), and the
+names through `studyName()`: Surya, Chandra, Mangala, Budha, Guru, Shukra,
+Shani, Rahu, Ketu and Lagna under Vedic, the Hour Marker under Hellenistic.
+**Display only**: every key, lookup, reading and Oracle dossier still goes by
+the Western name, so `studyName()` must never be used as a key.
+
 ## The reader chooses the house system, and Whole Sign is where it starts
 Decided by the owner on 4 November 2026: the Astropedia has a House Systems
 chapter where the reader picks the system they study, and the choice changes
@@ -6558,15 +6584,19 @@ glow in `--atmc2`, so the glow is the identity's own; under reduced motion
 they simply appear. The dialog's two buttons read Advanced and Expert, and the
 dialog and the Observatory still place every point.
 
-**The view switch and the lock live in a rail inside the chart**
-(`data-chart-rail`, top right of the drawing, both charts, both shells): the
-views as a small vertical radiogroup (2D, Orbital, 3D, and the study's own
-first view, named Rashi, Pillars or Sun), and under it a lock that holds the
-page still so a finger turns the chart freely (`csFree`/`hsFree`, the same
+**The view switch and the lock sit in the card's bar, never on the drawing**
+(the owner, 6 November 2026: "Make sure the vertical menu and lock screen
+button do not lay over the chart itself"). `data-chart-rail` was a vertical
+column over the top right of the chart for one day; it is now a row at the
+right end of the bar above the drawing, both charts, both shells: the views as
+a small horizontal radiogroup (2D, Orbital, 3D, and the study's own first
+view, named Rashi, Pillars or Sun), and beside it a lock that holds the page
+still so a finger turns the chart freely (`csFree`/`hsFree`, the same
 `setExplore()` Free look used; offered in the deep views on every device).
-The Human Design card keeps only Design / Personality / Both above its
-drawing. A native view pads its right edge (`railPad`) so the rail sits
-beside the square, not on it. **3D turns a full circle in every direction**:
+The bar wraps, so on a phone the views take their own line under the detail
+switch. `railPad` is 0 now and kept only so the markup hole still resolves.
+The Expanded Chart dialog keeps its own rail in the wheel square's corner.
+**3D turns a full circle in every direction**:
 pitch is not clamped, the camera's up vector turns with it, and the reset
 homes the short way round.
 
