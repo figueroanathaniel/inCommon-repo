@@ -2805,8 +2805,9 @@ one line footer there, because Apple requires it (owner, 12 October 2026; see
 Asked for by the owner on 11 October 2026: the Oracle's disclosure in a privacy
 policy, a generic and accurate About that discloses no method, folded into
 Terms & Conditions, and the Terms "right above the privacy policy". The owner's
-answers decide four facts written into both pages: **Nathaniel J. Figueroa, an
-individual in Florida**, until an LLC is formed; **Florida law and courts**;
+answers decide four facts written into both pages: **Kin Common LLC, based in
+Florida**, the registered business (the owner, 6 November 2026; until then both
+pages named Nathaniel J. Figueroa as an individual); **Florida law and courts**;
 **16** as the minimum age (a parent's permission to subscribe under 18); and
 **Contact Support** as the contact route, because there is no domain for an
 email address yet. `docs/LEGAL-SETUP.md` is the owner's half, including what a
@@ -7892,7 +7893,7 @@ home page was the wordmark, "enter here" and, from the markup, the SIGNAL LOST
 line. Its head now carries a title, a description, a canonical address, Open
 Graph and Twitter tags with `og-image.jpg` (cut from the horizontal lockup in
 `inCommon Logo/identity/`, 1200x630), icon links, and JSON-LD naming the
-WebSite and INCOMMON LLC. The SIGNAL LOST text is written by the 9 second
+WebSite and Kin Common LLC. The SIGNAL LOST text is written by the 9 second
 timer rather than sitting in the markup.
 
 **The cover links them, once, under the legal links** (`.learn`, the owner,
