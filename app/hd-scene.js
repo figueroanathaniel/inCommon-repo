@@ -271,7 +271,7 @@
     }
     var out = {
       bg: toVec(css('--bg', 'rgb(5,6,10)')), tx: toVec(css('--tx')), ac2: toVec(css('--ac2')), hi: toVec(css('--ac2-hi')), blue: toVec(css('--blue')),
-      atm: toVec(css('--atmc')), atm2: toVec(css('--atmc2')), atm3: toVec(css('--atmc3')), ac: toVec(css('--ac')), des: toVec(css('--hd-des', 'rgb(223,154,95)')),
+      atm: toVec(css('--atmc')), atm2: toVec(css('--atmc2')), atm3: toVec(css('--atmc3')), ac: toVec(css('--ac')), des: toVec(css('--hd-des', 'rgb(223,154,95)')), chl: toVec(css('--chl', 'rgb(38,42,64)')),
       cTx: css('--tx'), cMut: css('--mut'), cHi: css('--ac2-hi'), cBlue: css('--blue'), cBg: css('--bg'), cDes: css('--hd-des', 'rgb(223,154,95)'),
       atmo: parseFloat(cs.getPropertyValue('--atmo')) || 0.6,
       fd: cs.getPropertyValue('--fd').trim() || 'serif', fu: cs.getPropertyValue('--fu').trim() || 'sans-serif'
@@ -714,8 +714,8 @@
     var fu = this.floorMat.uniforms, lift = [t.bg[0] + (t.atm[0] - t.bg[0]) * 0.07, t.bg[1] + (t.atm[1] - t.bg[1]) * 0.07, t.bg[2] + (t.atm[2] - t.bg[2]) * 0.07];
     fu.uBg.value.set(lift[0], lift[1], lift[2]); fu.uLine.value.set(t.tx[0], t.tx[1], t.tx[2]); fu.uAtm.value.set(t.atm[0], t.atm[1], t.atm[2]); fu.uAtm2.value.set(t.atm2[0], t.atm2[1], t.atm2[2]);
     var ru = this.ringMat.uniforms;
-    ru.uLine.value.set(t.tx[0], t.tx[1], t.tx[2]); ru.uP.value.set(t.tx[0], t.tx[1], t.tx[2]); ru.uD.value.set(t.des[0], t.des[1], t.des[2]);
-    ru.uSky.value.set(t.blue[0], t.blue[1], t.blue[2]); ru.uSel.value.set(t.ac[0], t.ac[1], t.ac[2]); ru.uAc2.value.set(t.ac2[0], t.ac2[1], t.ac2[2]);
+    ru.uLine.value.set(t.tx[0], t.tx[1], t.tx[2]); ru.uP.value.set(t.atm[0], t.atm[1], t.atm[2]); ru.uD.value.set(t.atm[0], t.atm[1], t.atm[2]);
+    ru.uSky.value.set(t.blue[0], t.blue[1], t.blue[2]); ru.uSel.value.set(t.tx[0], t.tx[1], t.tx[2]); ru.uAc2.value.set(t.atm[0], t.atm[1], t.atm[2]);
     var dm = this.dustMat.uniforms; dm.uC1.value.set(t.tx[0], t.tx[1], t.tx[2]); dm.uC2.value.set(t.atm2[0], t.atm2[1], t.atm2[2]);
     var c = this.starCol;
     for (var i = 0; i < c.length / 3; i++) { var k = (i * 0.61803) % 1, a = k < 0.7 ? t.tx : k < 0.88 ? t.atm2 : t.hi; c[i * 3] = a[0] * 0.8; c[i * 3 + 1] = a[1] * 0.8; c[i * 3 + 2] = a[2] * 0.8; }
@@ -849,22 +849,24 @@
       var geo = new T.ExtrudeGeometry(sh, { depth: DEPTH, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 3, curveSegments: 4 });
       geo.translate(0, 0, -DEPTH / 2);
       geo.computeVertexNormals();
-      var col = self.colorOf(c.c);
+      /* one blue, as the Atlas and the 2D wiring draw it: a defined centre in
+         the identity's --atmc, an open one a faint wash of it in a --chl outline */
+      var col = { v: tk.atm.slice(), c: '' };
       var mat = new T.ShaderMaterial({ vertexShader: V_CEN, fragmentShader: F_CEN, transparent: !c.defined, depthWrite: !!c.defined, side: c.defined ? T.FrontSide : T.DoubleSide,
-        uniforms: { uCam: self.U.uCam, uFog: self.U.uFog, uTime: self.U.uTime, uC: { value: v3(col.v) }, uRim: { value: v3(tk.tx) }, uCond: { value: v3(tk.tx) }, uBg: { value: v3(tk.bg) },
+        uniforms: { uCam: self.U.uCam, uFog: self.U.uFog, uTime: self.U.uTime, uC: { value: v3(col.v) }, uRim: { value: v3(tk.chl) }, uCond: { value: v3(tk.atm) }, uBg: { value: v3(c.defined ? tk.bg : [mix(tk.bg[0], tk.atm[0], 0.3), mix(tk.bg[1], tk.atm[1], 0.3), mix(tk.bg[2], tk.atm[2], 0.3)]) },
           uDef: { value: c.defined ? 1 : 0 }, uLit: { value: 1 }, uCondK: { value: 0.1 }, uHover: { value: 0 }, uPulse: { value: 0 }, uDim: { value: 1 } } });
       var mesh = new T.Mesh(geo, mat);
       mesh.position.set(cx, cy, 0);
       mesh.renderOrder = c.defined ? 1 : 3;
       g.add(mesh);
       var edgeG = new T.EdgesGeometry(geo, 30);
-      var edge = new T.LineSegments(edgeG, new T.LineBasicMaterial({ color: new T.Color(c.defined ? col.v[0] : tk.tx[0], c.defined ? col.v[1] : tk.tx[1], c.defined ? col.v[2] : tk.tx[2]), transparent: true, opacity: c.defined ? 0.85 : 0.4, depthWrite: false, blending: T.AdditiveBlending }));
+      var edge = new T.LineSegments(edgeG, new T.LineBasicMaterial({ color: new T.Color(c.defined ? Math.min(1, col.v[0] * 1.5 + 0.08) : tk.chl[0] * 2.2, c.defined ? Math.min(1, col.v[1] * 1.5 + 0.08) : tk.chl[1] * 2.2, c.defined ? Math.min(1, col.v[2] * 1.5 + 0.08) : tk.chl[2] * 2.2), transparent: true, opacity: c.defined ? 0.85 : 0.6, depthWrite: false, blending: T.AdditiveBlending }));
       edge.position.copy(mesh.position);
       g.add(edge);
-      var lab = self.text(c.short, { px: Math.max(7.5, 8.6 * ui), weight: 700, caps: true, ls: 0.12, color: c.defined ? tk.cBg : tk.cMut, shadow: !c.defined });
+      var lab = self.text(c.short, { px: Math.max(7.5, 8.6 * ui), weight: 700, caps: true, ls: 0.12, color: c.defined ? tk.cTx : tk.cMut, shadow: true });
       lab.position.set(cx, cy + (c.name === 'Head' ? -h * 0.18 : c.name === 'Ajna' ? h * 0.18 : 0), FACE + 0.08);
       g.add(lab);
-      var o = { c: c, mesh: mesh, edge: edge, lab: lab, cx: cx, cy: cy, w: w, h: h, poly: poly, col: col, lit: 0, hover: 0, cond: [tk.tx[0], tk.tx[1], tk.tx[2]], ph: Math.random() * 6.28 };
+      var o = { c: c, mesh: mesh, edge: edge, lab: lab, cx: cx, cy: cy, w: w, h: h, poly: poly, col: col, lit: 0, hover: 0, cond: [tk.atm[0], tk.atm[1], tk.atm[2]], ph: Math.random() * 6.28 };
       cByName[c.name] = o;
       self.centres.push(o);
     });
@@ -914,7 +916,7 @@
     });
 
     /* The activations, in the order a printed chart lists them. */
-    var colR = { design: tk.des, personality: tk.tx }, colC = { design: tk.cDes, personality: tk.cTx };
+    var colR = { design: tk.tx, personality: tk.tx }, colC = { design: tk.cTx, personality: tk.cTx };
     var D = Math.round(19 * ui);
     var rows = { design: 0, personality: 0 };
     var acts = m.acts.slice().sort(function (a, b) { return ORDER.indexOf(a.body) - ORDER.indexOf(b.body); });
@@ -932,7 +934,7 @@
       g.add(thread);
       self.acts.push({ a: a, spr: spr, sprF: null, orb: orb, thread: thread, col3: col3, ringP: ringP, idx: idx, pos: new T.Vector3(), hover: 0, vis: 1, D: D, colC: colC[a.kind], th: 0 });
     });
-    var hd = this.text('Design', { px: Math.max(8, 9 * ui), weight: 700, caps: true, ls: 0.16, color: tk.cDes });
+    var hd = this.text('Design', { px: Math.max(8, 9 * ui), weight: 700, caps: true, ls: 0.16, color: tk.cTx });
     hd.position.set(-COL_X + 0.5, COL_TOP + 0.75, 0.2); g.add(hd);
     var hp = this.text('Personality', { px: Math.max(8, 9 * ui), weight: 700, caps: true, ls: 0.16, color: tk.cTx });
     hp.position.set(COL_X + 0.5, COL_TOP + 0.75, 0.2); g.add(hp);
@@ -981,12 +983,14 @@
       if (a.kind === 'design' && L !== 'personality') G.des = 1;
     });
     (this.sky || []).forEach(function (a) { var G = self.gates[a.gate]; if (G) G.sky = 1; });
+    var lit = [Math.min(1, tk.atm[0] * 1.35 + 0.06), Math.min(1, tk.atm[1] * 1.35 + 0.06), Math.min(1, tk.atm[2] * 1.35 + 0.06)];
+    var off = [Math.min(1, tk.chl[0] * 3), Math.min(1, tk.chl[1] * 3), Math.min(1, tk.chl[2] * 3)];
     var tone = function (G) {
-      if (G.per && G.des) return { c: tk.tx, c2: tk.des, braid: 1, on: 1, sky: 0 };
-      if (G.per) return { c: tk.tx, c2: tk.tx, braid: 0, on: 1, sky: 0 };
-      if (G.des) return { c: tk.des, c2: tk.des, braid: 0, on: 1, sky: 0 };
+      /* one blue: a half the reader holds is --atmc whichever side holds it,
+         the sky's is --blue and dashed, the rest --chl */
+      if (G.per || G.des) return { c: lit, c2: lit, braid: 0, on: 1, sky: 0 };
       if (G.sky) return { c: tk.blue, c2: tk.blue, braid: 0, on: 0.85, sky: 1 };
-      return { c: tk.tx, c2: tk.tx, braid: 0, on: 0, sky: 0 };
+      return { c: off, c2: off, braid: 0, on: 0, sky: 0 };
     };
     this.channels.forEach(function (x) {
       var a = tone(x.A), b = tone(x.B);
@@ -1019,7 +1023,7 @@
         var w = (x.A.per || x.A.des || x.B.per || x.B.des) ? 2 : 1;
         acc[0] += O.col.v[0] * w; acc[1] += O.col.v[1] * w; acc[2] += O.col.v[2] * w; n += w;
       });
-      C.cond = n ? [acc[0] / n, acc[1] / n, acc[2] / n] : [tk.tx[0], tk.tx[1], tk.tx[2]];
+      C.cond = n ? [acc[0] / n, acc[1] / n, acc[2] / n] : [tk.atm[0], tk.atm[1], tk.atm[2]];
       C.mesh.material.uniforms.uCond.value.set(C.cond[0], C.cond[1], C.cond[2]);
     });
     this.acts.forEach(function (o) { o.visGoal = L === 'both' || L === o.a.kind ? 1 : 0; });
@@ -1551,7 +1555,7 @@
       var on = G.per || G.des ? 1 : 0, sky = G.sky * self.skyK;
       var hot = hk === 'g:' + G.n || fk === 'g:' + G.n || fg === G.n ? 1 : 0;
       G.hover = damp(G.hover, hot, kh);
-      var mu = G.orb.material.uniforms, tcol = G.per && G.des ? self.tok.atm2 : G.per ? self.tok.tx : G.des ? self.tok.des : sky ? self.tok.blue : self.tok.tx;
+      var mu = G.orb.material.uniforms, tcol = G.per || G.des ? self.tok.tx : sky ? self.tok.blue : self.tok.chl;
       mu.uC.value.set(tcol[0], tcol[1], tcol[2]); mu.uCore.value.set(tcol[0], tcol[1], tcol[2]);
       var dimG = lit && !litC.gates[G.n] ? 0.4 : 1;
       mu.uOp.value = (on ? 0.95 : sky ? 0.7 : 0.22) * cl * dimG + G.hover * 0.5;
@@ -1567,8 +1571,8 @@
       [[x.hA, CA], [x.hB, CB]].forEach(function (p) {
         var u = p[0].material.uniforms, on = p[0].userData.on || 0, sky = p[0].userData.sky ? self.skyK : 1;
         var wl = p[1] ? ease(p[1].lit) : 1;
-        u.uI.value = (on ? 0.95 * sky : 0.09) * (on ? wl : 1) * (mine ? 1 : 0.3) + 0.6 * x.hover;
-        u.uW.value = (on ? 3.4 : 2.0) * (self.ui || 1) * (1 + 0.5 * x.hover);
+        u.uI.value = (on ? 0.95 * sky : 0.5) * (on ? wl : 1) * (mine ? 1 : 0.3) + 0.6 * x.hover;
+        u.uW.value = (on ? 2.6 : 1.6) * (self.ui || 1) * (1 + 0.5 * x.hover);
         var flows = (x.natal || x.skyDef * self.skyK) ? 1 : 0;
         u.uFlow.value = rm ? 0 : flows * wl * (mine ? 1 : 0.3) * (x.natal ? 0.9 : 0.6);
       });

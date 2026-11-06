@@ -5725,8 +5725,8 @@ faint `--atmc` fill in a `--chl` outline, a defined centre the same blue a
 little fuller and a brighter `--atmc` outline, never a category colour and
 never warm; a defined channel is `--atmc` and thin, every other channel
 `--chl`; the reader's gates are white points and the sky's are ringed in
-`--blue`. The 3D and Wheel views keep their
-personality and design inks.
+`--blue`. The 3D and Wheel views speak the same blue (the owner, 6 November
+2026: "Start with the blue 3D Atlas chart views"): see "A channel is two halves".
 
 **Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
 holds each Type's and each authority's theme words; `atlasRich()` bolds the
@@ -6220,21 +6220,26 @@ not drawn. `hdSceneSync()` runs from the one `componentDidUpdate`.
 
 **It draws the model, never its own chart.** `this._hsModel` is built in the
 wiring vals from the same `hdChart()` the SVG reads: the nine centres at the
-SVG's own `BG_POS` boxes, in the shapes the field draws them, coloured from the
-atlas as the SVG colours them; all thirty six channels; every activation with
+SVG's own `BG_POS` boxes, in the shapes the field draws them; all thirty six channels; every activation with
 its gate and line. Centres keep the chart's own definition in every layer, as
 the SVG does; gates and channel halves follow the layer. The one thing the scene
 is handed besides the model is the sky now (`setSky`), the same minute's
 hd-transit reading the gates card on Today reads.
 
-**A channel is two halves and a half lights from its own gate**: Personality in
-`--tx`, Design in `--hd-des`, a gate held by both as a braid of the two, and the
-sky now in `--blue`, dashed. That is how a hanging gate reads, as half a channel
-reaching for somebody else, and it is why the scene draws all thirty six rather
-than only the defined ones. `--hd-des` (`#df9a5f`) is a fixed hue declared in all
-three roots beside the ledger hues: the tradition's design red sits on
-`--crisis`, which nothing but safety may go near. It is a fill and a stroke,
-never text. Gates sit on the edge of their centre facing the centre their first
+**A channel is two halves and a half lights from its own gate**, in the one
+blue the 2D wiring and the Atlas draw (6 November 2026): a half the reader holds
+is `--atmc` whichever side holds it, and every other half is `--chl` (the
+scene's dashed `--blue` sky half is dormant: see "Human Design has no sky now"). A defined centre is `--atmc` with a brighter
+`--atmc` edge, an open one glass over a faint `--atmc` wash in a `--chl` edge,
+and the open glass still takes on the light of the defined centres it reaches.
+The reader's gates and activations are white (`--tx`); Personality and Design
+are told apart by their columns, their headings and the layer control, not by
+colour, so the stage carries no colour key. The Wheel's cells light in `--atmc`.
+That is how a hanging gate reads, as half a channel reaching for somebody else,
+and it is why the scene draws all thirty six rather than only the defined ones.
+`--hd-des` (`#df9a5f`) is still declared in all three roots, beside the ledger
+hues, for the activation sheet: the tradition's design red sits on `--crisis`,
+which nothing but safety may go near. Gates sit on the edge of their centre facing the centre their first
 channel runs to, with the channels between one pair of centres kept parallel
 (`layoutGates`), and a channel whose straight path would cross a third centre
 bows toward the reader to pass in front of it.
