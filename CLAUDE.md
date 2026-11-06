@@ -7810,3 +7810,57 @@ aspect sheet fall back to; `ASP_CLOSE` is untouched. Anything drawn over the
 flight carries `data-flight-off`, which `Flight.claimedElsewhere()` honours,
 or W in the cabin would fly the camera behind it. Escape closes the book, a
 glance, then the window, then the Observatory.
+
+## The reader's place is kept between the Library and My Charts
+Asked for by the owner on 6 November 2026: "let the user ping pong back and
+forth between a section of the library and their chart without losing their
+place", and a lesson that names a gate the reader holds opens a window on that
+gate that returns them where they left off.
+
+**A first press on the Library or My Charts resumes** (`TAB_RESUME`,
+`tabResume()`): the room, the entry and the scroll the reader left, with only
+what floats over a screen closed. Every other tab still opens at its root on a
+first press, and a second press on any tab is still the fresh start
+(`navAgain()`, which also drops the pill). This reverses "Tapping a tab returns
+to the root of that tab" for these two tabs only.
+
+**The scroll is kept by template id** (`placeSync()`, `placeRecord()`,
+`placeRestore()`, from the one `componentDidUpdate`). A capture listener records
+each scroller's `scrollTop` against `placeKey()` (the section, the room and the
+entry open in it) by its `data-dc-tpl`, which is the same each time the markup
+is drawn. On a crossing between sections every remembered scroller is put back,
+four tries over about a second, and a press, wheel or key after the arrival
+cancels them. The phone's section column (`[data-vt-scroll]`) and anything
+sideways are never touched. On the phone a scroll is recorded only inside the
+section on screen, because the section left behind shrinks as its room closes
+and that clamp is not the reader. `hdAtlasTo()` sets `_placeSkip`, because it
+lands on an entry of its own.
+
+**The place pill** (`pingBack`, `pingVals()`): a crossing between the Library
+and My Charts, by any route, leaves a pill in the section arrived at naming
+where the reader came from, "Back to Inadequacy, intimacy and fate" or "Back to
+your wiring". Pressing it restores that section's own keys only (the chart's
+bag never closes the Library's room, nor the other way) and leaves the pill
+pointing back, so it ping pongs. Any other crossing drops it. It sits in the
+desktop header beside the title, and on the phone above the dock, centred, clear
+of the help square.
+
+**A line about the reader's own wiring opens a window** (`atlasRec`,
+`atlasRecVals()`, the `arw*` vals; `rec*` belongs to the voice recorder). Under
+In your chart, a line naming a gate (a held gate of a study claim, a hanging
+gate of a channel, an activation, a Cross gate) or a centre opens it; the rest
+still go to the wiring, and the pill brings the reader back. A study claim gives
+each held gate its own line. The window says what it is, how it sits in your
+chart (each activation and its line, the centre defined or open, each channel
+complete or hanging) and what you might meet (the gate's low and high
+expressions), then the sky now when the sky is on it. **Every word is the
+Atlas's own or the reader's chart**: it makes no Human Design claim
+`hd-atlas.js` does not. Back to where you were closes it and changes nothing
+underneath, so the folio is where it was and focus returns to the line
+(`trapRelease`); See gate N in your wiring goes to the chart with that gate's
+own panel open (`hdSel`).
+
+`tools/drive-place.js` (PL1 to PL6) drives all of it at a desktop's size and an
+iPhone's, and measures the window and the pill with the harness's own
+`contrastFails()` and `tapTargets()` over four identities, hardened and not, at
+1440 and 375: 32 cases, clean on 6 November 2026.
