@@ -6511,6 +6511,19 @@ entered from here only** (the owner's choice, same day): Enter the Observatory
 (`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
 buttons are gone. N40 goes through both.
 
+**The dialog has the card's controls** (owner, 5 November 2026: "When the
+chart is full view, let the user choose between the three view option it has
+on that screen as well, with zoom in and zoom out and screen lock"). A rail
+in the wheel square's top right corner switches 2D, Orbital and 3D
+(`bloomView`, opened on 2D every time) with the screen lock under it in the
+deep views, and zoom sits in the bottom right corner. The deep views are the
+card's one scene: `chartSceneSync()` moves it into `[data-cs-scene="bloom"]`
+while the dialog shows one, and never takes the card's host while the dialog
+is open. 2D zoom scales the wheel itself (`bloomZoom`, panned by a drag once
+zoomed, and by a trackpad pinch, never by a plain wheel, which scrolls the
+dialog). The deep views draw the scene's model, which does not follow the
+category switches.
+
 **Basic, Advanced and Expert** (owner, 5 November 2026, renamed the same
 evening). The chart card's only control above the wheel is Basic / Advanced /
 Expert (`chartModes`): Basic is `chartMode: 'basic'`; Advanced is the 22 in

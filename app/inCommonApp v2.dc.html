@@ -6109,7 +6109,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
           </div>
           <div style="position:relative;width:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
-            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+            <sc-if value="{{ bloomFlat }}" hint-placeholder-val="{{ true }}">
+            <div onPointerDown="{{ bloomPanDown }}" onPointerMove="{{ bloomPanMove }}" onPointerUp="{{ bloomPanUp }}" onPointerLeave="{{ bloomPanUp }}" onWheel="{{ bloomWheelEv }}" style="position:absolute;inset:0;overflow:{{ bloomOv }};border-radius:{{ bloomClipR }};touch-action:{{ bloomTouch }};cursor:{{ bloomCursor }}">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%;transform:scale({{ bloomScale }}) translate({{ bloomTx }},{{ bloomTy }});transform-origin:center;transition:transform .25s ease">
                       <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
                         <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
                         <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
@@ -6148,6 +6150,35 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ bloomDeep }}" hint-placeholder-val="{{ false }}">
+              <div data-chart="bloom-stage" role="group" aria-roledescription="natal chart" aria-label="{{ bloomStageAria }}" style="position:absolute;inset:0;border-radius:18px;overflow:hidden;outline:1px solid {{ csStageBd }}">
+                <div data-cs-scene="bloom" style="position:absolute;inset:0"></div>
+                <div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(60% 50% at 50% 40%,rgba(var(--atmc),.28),transparent 70%),radial-gradient(70% 45% at 50% 110%,rgba(var(--atmc2),.12),transparent 70%),var(--bg);font:600 11px var(--fk);letter-spacing:.2em;text-transform:uppercase;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s;pointer-events:none">Loading...</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bloomViewsOn }}" hint-placeholder-val="{{ false }}">
+              <!-- THE FULL VIEW HAS THE CARD'S CONTROLS (owner, 5 November 2026):
+                   the three views, zoom and the screen lock, in the empty corners
+                   of the wheel's square. -->
+              <div data-chart-rail="1" style="position:absolute;right:0;top:0;z-index:6;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+                  <sc-for list="{{ bloomViews }}" as="v" hint-placeholder-count="3">
+                    <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ bloomLockOn }}" hint-placeholder-val="{{ false }}">
+                  <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+                </sc-if>
+              </div>
+            </sc-if>
+            <div role="group" aria-label="Zoom" style="position:absolute;right:0;bottom:0;z-index:6;display:flex;flex-direction:row;gap:6px;opacity:{{ bloomZmO }};visibility:{{ bloomZmV }}">
+              <button data-lift onClick="{{ bloomZoomIn }}" aria-label="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">+</button>
+              <button data-lift onClick="{{ bloomZoomOut }}" aria-label="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
+              <button data-lift onClick="{{ bloomZoomReset }}" aria-label="Reset zoom" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10px var(--fc);color:var(--tx)">1:1</button>
+            </div>
+
           </div>
           <div class="bloom-rail" style="justify-self:start;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
           <sc-for list="{{ bloomRight }}" as="g" hint-placeholder-count="4">
@@ -6180,7 +6211,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <sc-if value="{{ bloomNarrow }}" hint-placeholder-val="{{ false }}">
         <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:18px;padding:6px 16px 24px">
           <div style="position:relative;width:min(100%,72vh);aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
-            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+            <sc-if value="{{ bloomFlat }}" hint-placeholder-val="{{ true }}">
+            <div onPointerDown="{{ bloomPanDown }}" onPointerMove="{{ bloomPanMove }}" onPointerUp="{{ bloomPanUp }}" onPointerLeave="{{ bloomPanUp }}" onWheel="{{ bloomWheelEv }}" style="position:absolute;inset:0;overflow:{{ bloomOv }};border-radius:{{ bloomClipR }};touch-action:{{ bloomTouch }};cursor:{{ bloomCursor }}">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%;transform:scale({{ bloomScale }}) translate({{ bloomTx }},{{ bloomTy }});transform-origin:center;transition:transform .25s ease">
                       <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
                         <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
                         <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
@@ -6219,6 +6252,35 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ bloomDeep }}" hint-placeholder-val="{{ false }}">
+              <div data-chart="bloom-stage" role="group" aria-roledescription="natal chart" aria-label="{{ bloomStageAria }}" style="position:absolute;inset:0;border-radius:18px;overflow:hidden;outline:1px solid {{ csStageBd }}">
+                <div data-cs-scene="bloom" style="position:absolute;inset:0"></div>
+                <div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(60% 50% at 50% 40%,rgba(var(--atmc),.28),transparent 70%),radial-gradient(70% 45% at 50% 110%,rgba(var(--atmc2),.12),transparent 70%),var(--bg);font:600 11px var(--fk);letter-spacing:.2em;text-transform:uppercase;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s;pointer-events:none">Loading...</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bloomViewsOn }}" hint-placeholder-val="{{ false }}">
+              <!-- THE FULL VIEW HAS THE CARD'S CONTROLS (owner, 5 November 2026):
+                   the three views, zoom and the screen lock, in the empty corners
+                   of the wheel's square. -->
+              <div data-chart-rail="1" style="position:absolute;right:0;top:0;z-index:6;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+                  <sc-for list="{{ bloomViews }}" as="v" hint-placeholder-count="3">
+                    <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ bloomLockOn }}" hint-placeholder-val="{{ false }}">
+                  <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+                </sc-if>
+              </div>
+            </sc-if>
+            <div role="group" aria-label="Zoom" style="position:absolute;right:0;bottom:0;z-index:6;display:flex;flex-direction:row;gap:6px;opacity:{{ bloomZmO }};visibility:{{ bloomZmV }}">
+              <button data-lift onClick="{{ bloomZoomIn }}" aria-label="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">+</button>
+              <button data-lift onClick="{{ bloomZoomOut }}" aria-label="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
+              <button data-lift onClick="{{ bloomZoomReset }}" aria-label="Reset zoom" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10px var(--fc);color:var(--tx)">1:1</button>
+            </div>
+
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
@@ -13164,7 +13226,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
           </div>
           <div style="position:relative;width:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
-            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+            <sc-if value="{{ bloomFlat }}" hint-placeholder-val="{{ true }}">
+            <div onPointerDown="{{ bloomPanDown }}" onPointerMove="{{ bloomPanMove }}" onPointerUp="{{ bloomPanUp }}" onPointerLeave="{{ bloomPanUp }}" onWheel="{{ bloomWheelEv }}" style="position:absolute;inset:0;overflow:{{ bloomOv }};border-radius:{{ bloomClipR }};touch-action:{{ bloomTouch }};cursor:{{ bloomCursor }}">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%;transform:scale({{ bloomScale }}) translate({{ bloomTx }},{{ bloomTy }});transform-origin:center;transition:transform .25s ease">
                       <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
                         <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
                         <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
@@ -13203,6 +13267,35 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ bloomDeep }}" hint-placeholder-val="{{ false }}">
+              <div data-chart="bloom-stage" role="group" aria-roledescription="natal chart" aria-label="{{ bloomStageAria }}" style="position:absolute;inset:0;border-radius:18px;overflow:hidden;outline:1px solid {{ csStageBd }}">
+                <div data-cs-scene="bloom" style="position:absolute;inset:0"></div>
+                <div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(60% 50% at 50% 40%,rgba(var(--atmc),.28),transparent 70%),radial-gradient(70% 45% at 50% 110%,rgba(var(--atmc2),.12),transparent 70%),var(--bg);font:600 11px var(--fk);letter-spacing:.2em;text-transform:uppercase;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s;pointer-events:none">Loading...</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bloomViewsOn }}" hint-placeholder-val="{{ false }}">
+              <!-- THE FULL VIEW HAS THE CARD'S CONTROLS (owner, 5 November 2026):
+                   the three views, zoom and the screen lock, in the empty corners
+                   of the wheel's square. -->
+              <div data-chart-rail="1" style="position:absolute;right:0;top:0;z-index:6;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+                  <sc-for list="{{ bloomViews }}" as="v" hint-placeholder-count="3">
+                    <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ bloomLockOn }}" hint-placeholder-val="{{ false }}">
+                  <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+                </sc-if>
+              </div>
+            </sc-if>
+            <div role="group" aria-label="Zoom" style="position:absolute;right:0;bottom:0;z-index:6;display:flex;flex-direction:row;gap:6px;opacity:{{ bloomZmO }};visibility:{{ bloomZmV }}">
+              <button data-lift onClick="{{ bloomZoomIn }}" aria-label="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">+</button>
+              <button data-lift onClick="{{ bloomZoomOut }}" aria-label="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
+              <button data-lift onClick="{{ bloomZoomReset }}" aria-label="Reset zoom" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10px var(--fc);color:var(--tx)">1:1</button>
+            </div>
+
           </div>
           <div class="bloom-rail" style="justify-self:start;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
           <sc-for list="{{ bloomRight }}" as="g" hint-placeholder-count="4">
@@ -13235,7 +13328,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <sc-if value="{{ bloomNarrow }}" hint-placeholder-val="{{ false }}">
         <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:18px;padding:6px 16px 24px">
           <div style="position:relative;width:min(100%,72vh);aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
-            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+            <sc-if value="{{ bloomFlat }}" hint-placeholder-val="{{ true }}">
+            <div onPointerDown="{{ bloomPanDown }}" onPointerMove="{{ bloomPanMove }}" onPointerUp="{{ bloomPanUp }}" onPointerLeave="{{ bloomPanUp }}" onWheel="{{ bloomWheelEv }}" style="position:absolute;inset:0;overflow:{{ bloomOv }};border-radius:{{ bloomClipR }};touch-action:{{ bloomTouch }};cursor:{{ bloomCursor }}">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%;transform:scale({{ bloomScale }}) translate({{ bloomTx }},{{ bloomTy }});transform-origin:center;transition:transform .25s ease">
                       <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
                         <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
                         <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
@@ -13274,6 +13369,35 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         <button onClick="{{ k.go }}" aria-label="{{ k.aria }}" title="{{ k.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ k.l }};top:{{ k.t }};transform:translate(-50%,-50%);width:{{ k.sz }};height:{{ k.sz }};display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px dashed {{ k.ring }};background:var(--bg);font:400 {{ k.fs }}/1 Georgia,serif;color:var(--tx);animation:bloomIn .35s ease both">{{ k.glyph }}</button>
                       </sc-for>
                     </div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ bloomDeep }}" hint-placeholder-val="{{ false }}">
+              <div data-chart="bloom-stage" role="group" aria-roledescription="natal chart" aria-label="{{ bloomStageAria }}" style="position:absolute;inset:0;border-radius:18px;overflow:hidden;outline:1px solid {{ csStageBd }}">
+                <div data-cs-scene="bloom" style="position:absolute;inset:0"></div>
+                <div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(60% 50% at 50% 40%,rgba(var(--atmc),.28),transparent 70%),radial-gradient(70% 45% at 50% 110%,rgba(var(--atmc2),.12),transparent 70%),var(--bg);font:600 11px var(--fk);letter-spacing:.2em;text-transform:uppercase;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s;pointer-events:none">Loading...</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bloomViewsOn }}" hint-placeholder-val="{{ false }}">
+              <!-- THE FULL VIEW HAS THE CARD'S CONTROLS (owner, 5 November 2026):
+                   the three views, zoom and the screen lock, in the empty corners
+                   of the wheel's square. -->
+              <div data-chart-rail="1" style="position:absolute;right:0;top:0;z-index:6;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" aria-orientation="vertical" style="display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:2px">
+                  <sc-for list="{{ bloomViews }}" as="v" hint-placeholder-count="3">
+                    <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" aria-label="{{ v.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:52px;min-height:44px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 10.5px var(--fc);letter-spacing:.06em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ bloomLockOn }}" hint-placeholder-val="{{ false }}">
+                  <button data-lift onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" aria-label="Screen lock, turn the chart freely" title="Screen lock" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ csFreeBd }};border-radius:12px;background:{{ csFreeBg }};color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="9" width="11" height="8" rx="2"></rect><path d="{{ csLockPath }}"></path></svg></button>
+                </sc-if>
+              </div>
+            </sc-if>
+            <div role="group" aria-label="Zoom" style="position:absolute;right:0;bottom:0;z-index:6;display:flex;flex-direction:row;gap:6px;opacity:{{ bloomZmO }};visibility:{{ bloomZmV }}">
+              <button data-lift onClick="{{ bloomZoomIn }}" aria-label="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">+</button>
+              <button data-lift onClick="{{ bloomZoomOut }}" aria-label="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
+              <button data-lift onClick="{{ bloomZoomReset }}" aria-label="Reset zoom" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10px var(--fc);color:var(--tx)">1:1</button>
+            </div>
+
           </div>
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
@@ -19473,7 +19597,7 @@ class Component extends DCLogic {
       chartBloomOn: open, bloomIntro: st.chartBloomIntro ? '1' : '0',
       chartBloomGo: () => {
         this._bloomGrp = null; this._bloomShow = null;
-        this.setState({ chartBloom: true, chartBloomIntro: true, chartBloomPrev: st.chartMode || 'basic', chartMode: 'expanded', chartBloomGrp: null, chartBloomShow: null, aspSel: null, dpSel: null });
+        this.setState({ chartBloom: true, chartBloomIntro: true, bloomView: '2d', bloomZoom: 1, bloomPanX: 0, bloomPanY: 0, chartBloomPrev: st.chartMode || 'basic', chartMode: 'expanded', chartBloomGrp: null, chartBloomShow: null, aspSel: null, dpSel: null });
         /* Every point glows in once and the ones not switched on fade back
            out; the attribute that runs it comes off when the glow is over. */
         clearTimeout(this._bloomIntroT);
@@ -19539,6 +19663,39 @@ class Component extends DCLogic {
       bloomShowCore: () => setShow(this.bloomShowOf(true)),
       bloomSkyOn: st.bloomSky ? 'true' : 'false', bloomSkyDot: st.bloomSky ? 'var(--ac2-hi)' : 'transparent',
       bloomSkyGo: () => this.setState({ bloomSky: !this.state.bloomSky }),
+      /* THE FULL VIEW HAS THE CARD'S CONTROLS (owner, 5 November 2026): 2D,
+         Orbital and 3D, zoom, and the screen lock. The deep views are the
+         card's one scene, moved into this square by chartSceneSync(); 2D
+         zooms and pans the wheel itself. The view is this dialog's own and
+         opens on 2D every time. */
+      ...(() => {
+        const deepOn = this.chartSceneOn() || this.scenePending('ChartScene');
+        const bv = deepOn && (st.bloomView === 'orbit' || st.bloomView === '3d') ? st.bloomView : '2d';
+        const deep = bv !== '2d', z = st.bloomZoom || 1, px = st.bloomPanX || 0, py = st.bloomPanY || 0;
+        const zoomTo = nz => { nz = Math.min(3, Math.max(1, +nz.toFixed(2))); this.setState(nz <= 1 ? { bloomZoom: 1, bloomPanX: 0, bloomPanY: 0 } : { bloomZoom: nz }); };
+        const deepZoom = d => () => { if (this._csS) this._csS.zoom(d); };
+        return {
+          bloomFlat: !deep, bloomDeep: deep, bloomViewsOn: deepOn, bloomLockOn: deep,
+          bloomViews: [['2d', '2D', '2D wheel'], ['orbit', 'Orbital', 'Orbital'], ['3d', '3D', '3D']].map(([id, label, aria]) => {
+            const on = bv === id;
+            return { label, aria, on: on ? 'true' : 'false', bg: on ? 'rgba(var(--atmc),.34)' : 'transparent', bd: on ? 'var(--ac2)' : 'transparent',
+              c: on ? 'var(--tx)' : 'var(--dim)', go: () => this.setState({ bloomView: id, bloomZoom: 1, bloomPanX: 0, bloomPanY: 0 }) };
+          }),
+          bloomStageAria: bv === 'orbit' ? 'Expanded chart as an orrery. Arrow keys move between the bodies, Enter opens one.' : 'Expanded chart in three dimensions. Arrow keys move between the bodies, Enter opens one.',
+          bloomZmO: (!deep || st.csLive) ? '1' : '0', bloomZmV: (!deep || st.csLive) ? 'visible' : 'hidden',
+          bloomZoomIn: deep ? deepZoom(-1) : () => zoomTo(z + .35),
+          bloomZoomOut: deep ? deepZoom(1) : () => zoomTo(z - .35),
+          bloomZoomReset: deep ? deepZoom(0) : () => zoomTo(1),
+          bloomScale: String(z), bloomTx: (px / z).toFixed(1) + 'px', bloomTy: (py / z).toFixed(1) + 'px',
+          bloomOv: z > 1 ? 'hidden' : 'visible', bloomClipR: z > 1 ? '18px' : '0', bloomTouch: z > 1 ? 'none' : 'pan-y', bloomCursor: z > 1 ? 'grab' : 'default',
+          /* a trackpad pinch arrives as a wheel event with ctrlKey; a plain
+             wheel is left to scroll the dialog */
+          bloomWheelEv: e => { if (!e.ctrlKey) return; e.preventDefault(); zoomTo((this.state.bloomZoom || 1) - e.deltaY * .01); },
+          bloomPanDown: e => { if ((this.state.bloomZoom || 1) <= 1) return; this._bloomDrag = { x: e.clientX, y: e.clientY, px: this.state.bloomPanX || 0, py: this.state.bloomPanY || 0 }; },
+          bloomPanMove: e => { const d = this._bloomDrag; if (!d) return; this.setState({ bloomPanX: d.px + (e.clientX - d.x), bloomPanY: d.py + (e.clientY - d.y) }); },
+          bloomPanUp: () => { this._bloomDrag = null; }
+        };
+      })(),
       bloomObsGo: () => {
         let seen = true;
         try { seen = !!localStorage.getItem('incommon.obs.keys'); localStorage.setItem('incommon.obs.keys', '1'); } catch (e) {}
@@ -30730,17 +30887,20 @@ class Component extends DCLogic {
        open the scene lives there whatever the card's own view is, and the
        card's host behind it is never taken in its place. */
     const st = this.state, obs = !!st.chartExpandOpen;
-    const view = obs ? (st.chartView === 'orbit' ? 'orbit' : '3d') : this.chartViewNow();
-    const host = obs ? document.querySelector('[data-cs-scene="obs"]') : view === '2d' ? null : document.querySelector('[data-cs-scene="1"]');
+    /* the Expanded Chart's own deep view takes the scene while it is open */
+    const bloom = !obs && !!st.chartBloom && (st.bloomView === 'orbit' || st.bloomView === '3d');
+    const view = obs ? (st.chartView === 'orbit' ? 'orbit' : '3d') : bloom ? st.bloomView : this.chartViewNow();
+    const host = obs ? document.querySelector('[data-cs-scene="obs"]') : bloom ? document.querySelector('[data-cs-scene="bloom"]')
+      : view === '2d' || st.chartBloom ? null : document.querySelector('[data-cs-scene="1"]');
     const vertical = (st.dtW || 1440) < this.BP.md;
     clearTimeout(this._csSyncT);
     if (!host) {
       if (this._csS) this.scenePark(this._csS);
-      const want = st.ready && (obs || (view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology')));
+      const want = st.ready && (obs || bloom || (!st.chartBloom && view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology')));
       if (want && (retry || 0) < 8) this._csSyncT = setTimeout(() => this.chartSceneSync((retry || 0) + 1), 60);
       return;
     }
-    if (!this._csS && !obs && vertical && this.curTab() !== 'spirit') return;
+    if (!this._csS && !obs && !bloom && vertical && this.curTab() !== 'spirit') return;
     if (!this._csS) this._csS = this.chartSceneMake();
     const m = this._csModel, S = this._csS;
     if (m) S.setModel(m);
