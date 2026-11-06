@@ -10,7 +10,7 @@
   if (typeof module === 'object' && module.exports) { module.exports = factory(); }
   else { root.Astropedia = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
-  var VERSION = '1.1.0';
+  var VERSION = '1.2.0';
 
   var SECTIONS = [
     ['signs', 'The Twelve Signs'],
@@ -450,6 +450,269 @@
           text: "Heliocentric charts are as old as the Sun centred system. Andreas Aurifaber in the sixteenth century and Joshua Childrey in the 1650s argued astrology should follow Copernicus; Holmes Merton revived the idea in 1899, and Philip Sedgwick's primer of 1990 brought it to astrologers working today." }
       ] }
   };
+
+  /* ---------- the four Western courses ----------
+     Asked for by the owner on 6 November 2026: every chart study is a course,
+     Placidus, Koch, Equal and Whole Sign among them. Those four are house
+     systems inside the Western chart, so each is the Western course taught
+     through its own division of the sky: the same foundations, a unit on its
+     houses, and reading and timing as that division changes them. Sources are
+     in docs/astro-upgrade/05-study-courses-sources.md. */
+  function L(name, unit, band, pace, term, text, see) {
+    return { name: name, unit: unit, band: band, pace: pace, term: term, text: text, see: see || [] };
+  }
+  var EVERY = 'taught almost everywhere', MOST = 'taught in most courses', SOME = 'taught in some courses', LATER = 'taught later';
+  function westernFoundations(sysLine) {
+    return [
+      L('The Celestial Bodies', 'Foundations', EVERY, 'gentle', 'The luminaries and the planets',
+        "A Western chart is read first through its celestial bodies. The Sun and the Moon are the two luminaries; Mercury, Venus, Mars, Jupiter and Saturn are the planets the eye can see; Uranus, Neptune and Pluto were found by telescope and joined the chart as they were found, Pluto staying beside them by convention though astronomy now names it a dwarf planet. Each body is a kind of motive in a life: the Sun what it lives for, the Moon what it needs, Mercury how it thinks. The faster bodies are read as personal, and the slower ones as the weather a whole generation shares.",
+        ['body:Sun', 'body:Moon']),
+      L('The Twelve Signs', 'Foundations', EVERY, 'gentle', 'The tropical zodiac',
+        "The signs are twelve equal stretches of thirty degrees along the Sun's yearly path. Western astrology measures them from the seasons: 0 degrees Aries is where the Sun stands at the March equinox, so the zodiac is tied to the turning of the year rather than to the stars behind it. Each sign carries one of four elements, fire, earth, air or water, and one of three modalities, cardinal, fixed or mutable, and between them those two give every sign its manner. A body takes on the manner of the sign it stands in.",
+        ['sign:Aries', 'concept:Elements', 'concept:Modalities']),
+      L('The Angles and the Houses', 'Foundations', EVERY, 'gentle', 'The four angles',
+        "Where the signs belong to the sky, the houses belong to the place of birth. The horizon and the meridian there cross the zodiac at four angles: the Ascendant rising in the east, the Midheaven overhead, the Descendant setting in the west and the IC beneath. From them the chart is divided into twelve houses, each an area of life, from the self in the first to what is hidden in the twelfth. How the sky between the angles is shared out is the question a house system answers. " + sysLine,
+        ['house:1', 'concept:Angular, Succedent, and Cadent Houses']),
+      L('The Aspects', 'Foundations', EVERY, 'gentle', 'Aspect, a way of looking',
+        "Two bodies a meaningful angle apart are read as being in conversation. The five major aspects are the conjunction at 0 degrees, the sextile at 60, the square at 90, the trine at 120 and the opposition at 180, each allowed a little leeway, its orb. Western astrology reads aspects by degree, so two bodies in neighbouring signs can still meet, and two bodies whose signs agree can still stand too far apart to count.",
+        ['aspect:Conjunction', 'essay:orbs'])
+    ];
+  }
+  function westernReading(rulerLine) {
+    return [
+      L('The Chart Ruler and the House Rulers', 'Reading', EVERY, 'steady', 'Ruler',
+        "The chart ruler is the ruler of the rising sign, and where it stands, by house and by sign, is read as the course of the whole chart. Every house has a ruler in the same way, and a house is read through wherever its ruler actually stands. " + rulerLine,
+        ['concept:Chart Ruler']),
+      L('Angular, Succedent and Cadent', 'Reading', EVERY, 'gentle', 'The three kinds of house',
+        "The houses fall into three groups of four by their place beside the angles. The angular houses, the first, fourth, seventh and tenth, are read as the most forceful, where a placement acts directly on a life. The succedent houses, the second, fifth, eighth and eleventh, follow and hold what the angles start. The cadent houses, the third, sixth, ninth and twelfth, fall away from the angles and are read as the places where a life is adjusted and made sense of.",
+        ['concept:Angular, Succedent, and Cadent Houses']),
+      L('Dignity and Retrograde Motion', 'Reading', MOST, 'steady', 'Essential dignity',
+        "A body is at home in the sign it rules, exalted in the sign that lifts it, and in detriment or fall in the signs opposite those. Its dignity says how freely it can do its work. A body that appears from the Earth to move backward is retrograde, and its work is read as turned inward or done again. Both are read the same way whatever the house system.",
+        ['concept:Essential Dignity', 'concept:Retrograde Motion'])
+    ];
+  }
+  function westernTiming(transitLine, progLine) {
+    return [
+      L('Transits Through the Houses', 'Timing', EVERY, 'steady', 'Transit',
+        "The bodies keep moving after birth, and their present places laid over the birth chart are the transits. A transit is read by the natal body it touches and by the house it is crossing. " + transitLine,
+        ['essay:transits']),
+      L('Secondary Progressions', 'Timing', MOST, 'steady', 'A day for a year',
+        "Secondary progression moves the birth chart forward one day for each year of life, so the chart of someone thirty years old is progressed thirty days past the birth. The progressed Sun moves about a degree a year and the progressed Moon about a sign every two and a half years, and both are read as a slow inner season rather than an event. " + progLine,
+        ['technique:Secondary Progressions'])
+    ];
+  }
+  function quadrantHouses(sysName, key) {
+    return L('Quadrant Houses', sysName + ' Houses', EVERY, 'gentle', 'Cusp',
+      "In " + sysName + " the four angles are the cusps of the angular houses: the Ascendant begins the first house, the IC the fourth, the Descendant the seventh and the Midheaven the tenth. The quarter of the sky between each pair of angles is cut into three houses, which can be of very different sizes, and each house begins at its cusp, the degree where its doorway stands.",
+      ['housesys:' + key]);
+  }
+  function interceptedSigns(sysName) {
+    return L('Intercepted Signs', sysName + ' Houses', MOST, 'steady', 'Interception',
+      "Because the houses are unequal, a wide house can enclose a whole sign without that sign touching either cusp. That sign is intercepted, and the sign opposite it is intercepted in the opposite house. Elsewhere in the same chart two neighbouring houses share one sign on their cusps. Interceptions grow more common the further from the equator a person is born, and the tradition reads an intercepted sign as a quality carried without an obvious doorway, something found rather than simply used.",
+      ['concept:Intercepted Signs']);
+  }
+  function nearThePoles(sysName) {
+    return L('Near the Poles', sysName + ' Houses', LATER, 'steady', 'The polar circles',
+      "Inside the Arctic and Antarctic circles some degrees of the zodiac never rise and others never set, so there is no climb to divide and " + sysName + " cusps cannot be found: some houses vanish and others swell. A chart born there is drawn here in Porphyry instead, which cuts each quarter into three equal parts.",
+      ['housesys:P']);
+  }
+  var QUAD_RULER = "A house takes the ruler of the sign on its cusp. In a quadrant system one sign can sit on two cusps, so one ruler can hold two houses, and many astrologers also hear the ruler of an intercepted sign in the house that encloses it.";
+  var QUAD_TRANSIT = "A slow body crossing a cusp changes the room it works in, and because the cusps move with every few minutes of birth time, quadrant systems ask for an exact birth time before a transit to a cusp can be trusted.";
+  var QUAD_PROG = "The progressed angles move too, and in a quadrant chart the progressed Ascendant and Midheaven carry the house cusps along with them.";
+  var STUDY_COURSES = {
+    western: { title: 'Whole Sign Houses', glyph: '◫',
+      lessons: westernFoundations("This study answers it by signs: every house is one whole sign.").concat([
+        L('One Sign, One House', 'Whole Sign Houses', EVERY, 'gentle', 'Whole sign house',
+          "In Whole Sign the rising sign is the first house from its first degree to its last, wherever in that sign the Ascendant falls, and each sign after it is the next house. A house and a sign are always the same room, there are no cusps inside a sign, and no sign is ever intercepted. The chart reads the same at every latitude, and a birth time only has to be good enough to know which sign was rising.",
+          ['housesys:W']),
+        L('The Ascendant and the Midheaven as Points', 'Whole Sign Houses', EVERY, 'steady', 'A floating point',
+          "The Ascendant is still the degree that was rising, but it no longer starts the first house: it floats inside it as a sensitive point. The Midheaven floats too, and it can fall in the ninth, tenth or eleventh sign from the rising sign. Wherever it lands it brings the tenth house's themes, work and standing, into that house, while the tenth sign stays the tenth house in its own right.",
+          ['essay:chart']),
+        L('Where Whole Sign Came From', 'Whole Sign Houses', MOST, 'gentle', 'The oldest division',
+          "Whole sign houses are the oldest form of house division with clear textual evidence, and they were the dominant one for roughly the first thousand years of horoscopic astrology, used by Dorotheus of Sidon and Vettius Valens among others. Jyotish has kept them as its primary system ever since. Their return in Western astrology began with James Holden's paper Ancient House Division in 1982 and the translations of Project Hindsight in the 1990s by Robert Schmidt and Robert Hand. Hand taught the system from the middle of that decade, and it was widely taken up in the late 2000s.",
+          []),
+        L('Counting by Signs', 'Whole Sign Houses', SOME, 'gentle', 'Profection',
+          "Because each house is a sign, every technique that counts sign by sign fits it exactly. The annual profection moves one sign a year from the rising sign, and in Whole Sign that is one house a year, so the sign of the year and the house of the year are the same.",
+          ['technique:Profection'])
+      ]).concat(westernReading("In Whole Sign the sign is the house, so each house has exactly one ruler, the ruler of its sign."))
+        .concat(westernTiming("A body changes house only when it changes sign, so the rooms turn at the same moments for everyone born with the same sign rising.",
+          "In Whole Sign the progressed Ascendant moves through the first house without changing the houses, which stay fixed to the signs.")) },
+    placidus: { title: 'Placidus Houses', glyph: '◫',
+      lessons: westernFoundations("This study answers it by time: Placidus divides the hours each degree takes to climb the sky.").concat([
+        quadrantHouses('Placidus', 'O'),
+        L('Houses Measured by Time', 'Placidus Houses', MOST, 'steady', 'Semi-arc',
+          "Every degree of the zodiac takes its own time to climb from the horizon to the Midheaven, its semi-arc. A Placidus cusp is the degree that has climbed a third, or two thirds, of its own semi-arc, and the same below the horizon. The houses are divisions of time rather than of space, which is why they are found by repeated approximation rather than one formula, and why a few minutes in the birth time can move every cusp.",
+          ['housesys:O']),
+        interceptedSigns('Placidus'),
+        L('Where Placidus Came From', 'Placidus Houses', SOME, 'gentle', 'Placidus de Titis',
+          "The system carries the name of Placidus de Titis (1603 to 1668), an Olivetan monk who taught mathematics, physics and astronomy at the University of Pavia, though he popularised the method rather than invented it. It was rejected when it first reached England, but Raphael's Ephemeris and Raphael's Tables of Houses, printed with Placidus cusps from the middle of the nineteenth century, made it the system most English speaking astrologers learned. It is the system most used in Western astrology today, and most textbooks and software assume it.",
+          []),
+        nearThePoles('Placidus')
+      ]).concat(westernReading(QUAD_RULER)).concat(westernTiming(QUAD_TRANSIT, QUAD_PROG)) },
+    koch: { title: 'Koch Houses', glyph: '◫',
+      lessons: westernFoundations("This study answers it from the birthplace: Koch divides one span of time read off the local horizon.").concat([
+        quadrantHouses('Koch', 'K'),
+        L('The Birthplace System', 'Koch Houses', MOST, 'steady', 'Birthplace houses',
+          "Koch takes one span of time, the time the Midheaven degree needed to climb to its place from the horizon, and divides it into three. Each intermediate cusp is the degree that stood on the birthplace's own horizon at one of those moments, which is why it is also called the birthplace system. It is close kin to the older Alcabitius system, which divides the Ascendant's journey instead, and like Placidus it asks for an exact birth time.",
+          ['housesys:K', 'housesys:A']),
+        interceptedSigns('Koch'),
+        L('Where Koch Came From', 'Koch Houses', SOME, 'gentle', 'Walter Koch',
+          "Walter Koch (1895 to 1970), a German astrologer born in Esslingen, put the system forward in the early 1960s and published tables for it in 1965; tables in English followed in 1971. It remains a respected choice in Central European practice. Bruno Huber chose it for the Huber Method of astrological psychology, which he and Louise Huber taught from 1968 at their institute in Adliswil, Switzerland, a choice that drew controversy of its own.",
+          []),
+        nearThePoles('Koch')
+      ]).concat(westernReading(QUAD_RULER)).concat(westernTiming(QUAD_TRANSIT, QUAD_PROG)) },
+    equal: { title: 'Equal Houses', glyph: '◫',
+      lessons: westernFoundations("This study answers it from the Ascendant: every house is thirty degrees from the rising degree.").concat([
+        L('Thirty Degrees from the Ascendant', 'Equal Houses', EVERY, 'gentle', 'Equal house',
+          "Every house is exactly thirty degrees, counted from the degree of the Ascendant. If the Ascendant stands at 15 degrees Leo, the second cusp is at 15 Virgo, the third at 15 Libra, and so round the wheel. The horizon is honoured to the degree, each sign holds exactly one cusp, so nothing is ever intercepted, and the chart can be drawn at any latitude.",
+          ['housesys:E']),
+        L('The Floating Midheaven', 'Equal Houses', MOST, 'steady', 'The Midheaven as a point',
+          "Because the houses are measured from the Ascendant, the Midheaven is not the tenth cusp. It floats in one of the upper houses, usually the ninth, the tenth or the eleventh, and is read as a point of its own wherever it lands, carrying work and standing into that house.",
+          ['essay:chart']),
+        L('Reading Across Two Signs', 'Equal Houses', SOME, 'steady', 'A house in two signs',
+          "An Equal house usually begins in one sign and ends in the next, at the same degree. The sign on the cusp is the house's doorway and the sign after it the room most of the house stands in, so a body early in a sign can belong to the house before the one its sign alone would suggest.",
+          []),
+        L('Where Equal Came From', 'Equal Houses', SOME, 'gentle', 'An ancient division',
+          "Equal division is very old. It is thought to have arisen around the time of Petosiris in the first century BC, and some Hellenistic astrologers used it beside whole signs. In the twentieth century the English Faculty of Astrological Studies made an Equal system the one it taught, which is why many astrologers trained in Britain learned their houses this way.",
+          [])
+      ]).concat(westernReading("Each cusp falls in its own sign, so every house has one ruler, the ruler of the sign on its cusp, even though most of the house stands in the sign after it."))
+        .concat(westernTimingEqual()) }
+  };
+  function westernTimingEqual() {
+    return westernTiming("A body changes house when it passes the Ascendant's own degree in a new sign, so every cusp is crossed at the same degree of each sign.",
+      "The progressed Ascendant carries all twelve cusps with it, thirty degrees apart.");
+  }
+
+  /* ---------- the units of the six other courses ----------
+     Each lesson keeps its place; a unit names a run of them, in order. */
+  var STUDY_UNITS = {
+    vedic: [[5, 'Foundations'], [3, 'Timing'], [2, 'Reading'], [1, 'Deeper Study']],
+    chinese: [[5, 'Foundations'], [1, 'Reading'], [2, 'Timing'], [2, 'Movement'], [3, 'Deeper Study']],
+    hellenistic: [[4, 'Foundations'], [3, 'First Techniques'], [2, 'Reading'], [3, 'Deeper Study']],
+    sidereal: [[2, 'Foundations'], [2, 'The School']],
+    draconic: [[2, 'Foundations'], [1, 'Practice'], [1, 'The School']],
+    heliocentric: [[2, 'Foundations'], [2, 'Practice'], [1, 'The School']]
+  };
+  Object.keys(STUDY_UNITS).forEach(function (k) {
+    var at = 0;
+    STUDY_UNITS[k].forEach(function (u) { for (var i = 0; i < u[0]; i++) { var x = STUDY_LESSONS[k].lessons[at++]; x.unit = u[1]; x.see = x.see || []; } });
+  });
+  Object.keys(STUDY_COURSES).forEach(function (k) { STUDY_LESSONS[k] = STUDY_COURSES[k]; });
+
+  /* ---------- the words of each study ----------
+     Every study's own terms, defined as its lessons use them, so a term met
+     in a lesson opens its definition. Nothing here goes beyond what the
+     lessons themselves say. */
+  var WESTERN_WORDS = [
+    ['Ascendant', "The degree of the zodiac rising on the eastern horizon at birth."],
+    ['Midheaven', "The degree of the zodiac at the top of the sky, where the meridian crosses it, also called the MC."],
+    ['Descendant', "The degree setting on the western horizon, opposite the Ascendant."],
+    ['IC', "The degree at the bottom of the chart, opposite the Midheaven, the imum coeli."],
+    ['Luminaries', "The Sun and the Moon, the two lights."],
+    ['Orb', "The leeway an aspect is allowed and still counted."],
+    ['Chart ruler', "The ruler of the sign on the Ascendant."],
+    ['Transit', "A body's present place read against the birth chart."],
+    ['Progression', "The birth chart moved forward symbolically, a day for each year of life."]
+  ];
+  var QUAD_WORDS = [
+    ['Cusp', "The degree where a house begins."],
+    ['Quadrant system', "A house system that cuts each quarter between the angles into three houses, so the angles are cusps and the houses differ in size."],
+    ['Intercepted sign', "A sign enclosed by a house without touching either of its cusps; the sign opposite it is intercepted too."]
+  ];
+  var STUDY_WORDS = {
+    western: WESTERN_WORDS.concat([
+      ['Whole sign house', "A house that is exactly one sign, the rising sign being the first."],
+      ['Floating point', "An angle, such as the Ascendant or the Midheaven, that stands inside a house rather than beginning one."],
+      ['Profection', "The year by year turning of the chart one sign forward from the rising sign."]]),
+    placidus: WESTERN_WORDS.concat(QUAD_WORDS, [
+      ['Semi-arc', "The time a degree of the zodiac takes to climb from the horizon to the meridian, or to fall from it."],
+      ['Polar circles', "The Arctic and Antarctic circles, inside which Placidus cusps cannot be found."]]),
+    koch: WESTERN_WORDS.concat(QUAD_WORDS, [
+      ['Birthplace system', "Another name for Koch houses, read from the birthplace's own horizon."],
+      ['Polar circles', "The Arctic and Antarctic circles, inside which Koch cusps cannot be found."]]),
+    equal: WESTERN_WORDS.concat([
+      ['Cusp', "The degree where a house begins; in Equal houses every cusp is at the Ascendant's degree of a different sign."],
+      ['Equal house', "A house of exactly thirty degrees, counted from the Ascendant's degree."]]),
+    vedic: [
+      ['Jyotish', "The astrology of India, the science of light."],
+      ['Graha', "A seizer: one of the nine bodies Jyotish reads, the Sun, the Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu and Ketu."],
+      ['Rahu', "The north lunar node, a graha of shadow."],
+      ['Ketu', "The south lunar node, a graha of shadow."],
+      ['Rashi', "A sign, measured against the stars."],
+      ['Lagna', "The rashi rising in the east at birth, the first bhava."],
+      ['Bhava', "A house, a state of being; in Jyotish each bhava is a whole rashi."],
+      ['Kendra', "The first, fourth, seventh and tenth bhavas, the pillars of the chart."],
+      ['Trikona', "The first, fifth and ninth bhavas, the blessings of the chart."],
+      ['Ayanamsa', "The gap between the starry zodiac and the seasonal one."],
+      ['Lahiri', "The ayanamsa India's Calendar Reform Committee adopted in the 1950s, used for this chart."],
+      ['Nakshatra', "One of twenty seven lunar mansions of 13 degrees 20 minutes."],
+      ['Pada', "A quarter of a nakshatra, 3 degrees 20 minutes."],
+      ['Birth star', "The nakshatra holding the Moon at birth."],
+      ['Dasha', "A period of life ruled by one graha."],
+      ['Mahadasha', "A main period of the Vimshottari dasha."],
+      ['Antardasha', "One of the nine smaller periods inside a mahadasha."],
+      ['Panchanga', "The five limbs of the day: tithi, vara, nakshatra, yoga and karana."],
+      ['Tithi', "A lunar day, one of thirty steps of twelve degrees between the Sun and the Moon."],
+      ['Gochara', "The transits of the grahas, read above all from the Moon's rashi."],
+      ['Sade sati', "Saturn's seven and a half years across the rashis before, on and after the Moon's."],
+      ['Yoga', "A joining of grahas, bhavas and lords read as one signature; also one of the panchanga's five limbs."],
+      ['Drishti', "The glance a graha casts on whole signs."],
+      ['Varga', "A divisional chart made by cutting each rashi again."],
+      ['Navamsa', "The ninth division, the most used varga."],
+      ['Combust', "A graha too close to the Sun to show its own light."]],
+    chinese: [
+      ['Bazi', "The eight characters: a birth written as four pillars of a stem and a branch."],
+      ['Pillar', "A stem standing on a branch, for the year, the month, the day or the hour."],
+      ['Tiangan', "The ten heavenly stems."],
+      ['Dizhi', "The twelve earthly branches, each with its animal."],
+      ['Sexagenary cycle', "The sixty pairings of stem and branch that count years, months, days and hours."],
+      ['Day Master', "The stem of the day pillar, read as the self."],
+      ['Wuxing', "The five phases: wood, fire, earth, metal and water."],
+      ['Yin and yang', "The two polarities every stem and branch carries."],
+      ['Ten gods', "The names each stem takes by its relation to the Day Master."],
+      ['Luck pillar', "A stem and branch ruling about ten years of life."],
+      ['Solar term', "One of twenty four fifteen degree steps of the Sun's year; a pillar month begins at every second one."],
+      ['Lichun', "The beginning of spring, when the year pillar turns."],
+      ['Symbolic stars', "Special branches found by rule, read as accents on a chart."],
+      ['Clash', "Two branches six apart meeting and shaking one another."],
+      ['Useful god', "The phase that brings a chart toward balance."],
+      ['Structure', "A whole chart's shape named at once, mostly from the ten god the month branch gives."]],
+    hellenistic: [
+      ['Sect', "Whether a chart is of the day or of the night, and the party each planet belongs to."],
+      ['Benefic', "Jupiter or Venus, the planets read as helpers."],
+      ['Malefic', "Mars or Saturn, the planets read as testers."],
+      ['Thema Mundi', "The teaching chart of the birth of the world."],
+      ['Place', "A house, counted by whole signs."],
+      ['Joy', "The place where a planet rejoices."],
+      ['Hour marker', "The rising sign, horoskopos."],
+      ['Profection', "The chart turned one sign forward each year of life."],
+      ['Lord of the year', "The ruler of the sign the profected year falls in."],
+      ['Lot', "A point found by casting the distance between two planets from the Ascendant."],
+      ['Zodiacal releasing', "Valens's timing of a life released from a lot through the signs."],
+      ['Aversion', "Signs that cannot see each other, one, five, seven or eleven signs apart."],
+      ['Bonification', "The ways one planet improves another."],
+      ['Triplicity lords', "The three lords of each element."]],
+    sidereal: [
+      ['Sidereal', "Of the stars: a zodiac measured against the constellations."],
+      ['Tropical', "Of the seasons: a zodiac measured from the March equinox."],
+      ['Precession', "The slow drift of the equinox backward against the stars."],
+      ['Ayanamsa', "How far the starry zodiac now stands from the seasonal one."],
+      ['Fagan-Bradley', "The ayanamsa that puts Aldebaran at 15 Taurus and Spica at 29 degrees 06 minutes of Virgo, used for this chart."],
+      ['Aldebaran', "The eye of the Bull, one of the two anchor stars of the Fagan-Bradley zodiac."],
+      ['Spica', "The star of the wheat sheaf in Virgo, the other anchor."]],
+    draconic: [
+      ['Draconic', "Of the dragon: the chart turned until the North Node stands at 0 Aries."],
+      ['Lunar nodes', "The two points where the Moon's path crosses the Sun's, the dragon's head and tail."],
+      ['Overlay', "The draconic chart laid over the birth chart as a second ring."]],
+    heliocentric: [
+      ['Heliocentric', "Seen from the Sun."],
+      ['Geocentric', "Seen from the Earth, as the ordinary birth chart is."],
+      ['Retrograde', "The apparent backward motion of a planet seen from the Earth, which never happens seen from the Sun."]]
+  };
+  Object.keys(STUDY_WORDS).forEach(function (k) {
+    if (STUDY_LESSONS[k]) STUDY_LESSONS[k].words = STUDY_WORDS[k].map(function (w) { return { term: w[0], text: w[1] }; });
+  });
+
   function studyLessons(k) { return STUDY_LESSONS[String(k || '')] || null; }
 
   /* ---------- the birth chart ---------- */
