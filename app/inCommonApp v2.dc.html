@@ -5234,11 +5234,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
   <div data-vt-page="1" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column">
 <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Settings" style="flex:1;overflow-y:auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
-    <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
-      <div style="font:400 19px var(--fd);color:var(--tx)">About inCommon</div>
-      <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is a space for self-reflection. It brings astrology, Human Design, numerology and other reflective traditions together with a private journal, so you can look at your own patterns over time and notice what you hold in common with the people around you. Your experience is the final authority. Here, everyone has something in common.</div>
-      
-    </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Profiles · {{ profCountLabel }}</div>
       <div data-lift="card" style="display:flex;align-items:center;gap:13px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -5248,6 +5243,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:flex;align-items:center;gap:8px">
             <span style="flex:1;min-width:0;font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ actBirth }}</span>
             <button onClick="{{ piReveal }}" aria-pressed="{{ piOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 9px;font:600 9.5px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ piLabel }}</button>
+            <button onClick="{{ actEditGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 9px;font:600 9.5px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Edit</button>
           </div>
           <div style="font:italic 400 11.5px var(--fb);color:var(--ac)">This is the profile being read today</div>
         </div>
@@ -5513,6 +5509,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-if>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
+      <div style="padding:0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">by Kin Common LLC</div>
     </footer>
   </div>
 </sc-if>
@@ -6926,7 +6923,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </button>
       <button onClick="{{ pmAboutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.6" style="flex:none;display:block;color:var(--mut)"><circle cx="9.5" cy="12" r="6"></circle><circle cx="14.5" cy="12" r="6"></circle></svg>
-        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">About</span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">About Us</span>
       </button>
       <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
@@ -7366,7 +7363,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
      is the mark as a lens: two whole circles, and the light where they meet. -->
 <sc-if value="{{ aboutOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ aboutClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:82">
-    <div role="dialog" aria-label="About inCommon" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:90%;border-radius:22px 22px 0 0;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--bg);border:1px solid var(--bd);padding:0 0 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
+    <div role="dialog" aria-label="About Us" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:90%;border-radius:22px 22px 0 0;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--bg);border:1px solid var(--bd);padding:0 0 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
       <div data-portal="1" style="position:relative;flex:none;overflow:hidden;border-bottom:1px solid var(--bd);background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 70% at 50% 110%,rgba(var(--atmc2),.22),transparent 66%),var(--bg)">
         <svg aria-hidden="true" viewBox="0 0 320 168" style="display:block;width:100%;height:auto;max-height:220px">
           <defs><clipPath id="abLensClip"><circle cx="138" cy="84" r="46"></circle></clipPath></defs>
@@ -7398,10 +7395,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </g>
           <circle data-pl="breath" cx="160" cy="84" r="3.2" fill="var(--tx)"></circle>
         </svg>
-        <button data-lift onClick="{{ aboutClose }}" aria-label="Close About" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font:400 20px/1 var(--fc)"><span aria-hidden="true">&#215;</span></button>
+        <button data-lift onClick="{{ aboutClose }}" aria-label="Close About Us" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font:400 20px/1 var(--fc)"><span aria-hidden="true">&#215;</span></button>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;padding:0 22px">
-        <div style="font:600 9.5px var(--fk);letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">About</div>
+        <div style="font:600 9.5px var(--fk);letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">About Us</div>
         <h2 style="margin:0;font:400 34px/1.1 var(--fd);color:var(--tx)">inCommon</h2>
         <div style="font:italic 400 17px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">A place to look closer, and to find what is shared.</div>
       </div>
@@ -7428,6 +7425,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="font:400 17px var(--fd);color:var(--tx)">{{ aboutCo }}</div>
         </sc-if>
         <div style="font:400 11px/1.5 var(--fu);color:var(--tx)">Created and maintained by Nathaniel J. Figueroa.</div>
+        <div style="font:400 11px/1.5 var(--fu);color:var(--tx)">by Kin Common LLC</div>
       </div>
     </div>
   </div>
@@ -7483,7 +7481,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </div>
         </sc-if>
       </div>
+      <sc-if value="{{ profOthersOn }}" hint-placeholder-val="{{ false }}">
       <div style="font:400 17px var(--fd);margin-top:6px">Who are we reading for?</div>
+      </sc-if>
       <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="2">
         <button data-lift onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ p.edge }};border-radius:12px;padding:11px 14px">
           <span style="flex:none;width:34px;height:34px;border-radius:50%;background:{{ p.color }};display:flex;align-items:center;justify-content:center;font:600 12px var(--fu);color:var(--onac)">{{ p.initials }}</span>
@@ -12817,11 +12817,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 
 <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Settings" style="flex:1;overflow-y:auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
-    <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
-      <div style="font:400 19px var(--fd);color:var(--tx)">About inCommon</div>
-      <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is a space for self-reflection. It brings astrology, Human Design, numerology and other reflective traditions together with a private journal, so you can look at your own patterns over time and notice what you hold in common with the people around you. Your experience is the final authority. Here, everyone has something in common.</div>
-      
-    </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Profiles · {{ profCountLabel }}</div>
       <div data-lift="card" style="display:flex;align-items:center;gap:13px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -12831,6 +12826,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:flex;align-items:center;gap:8px">
             <span style="flex:1;min-width:0;font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ actBirth }}</span>
             <button onClick="{{ piReveal }}" aria-pressed="{{ piOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 9px;font:600 9.5px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ piLabel }}</button>
+            <button onClick="{{ actEditGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 9px;font:600 9.5px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Edit</button>
           </div>
           <div style="font:italic 400 11.5px var(--fb);color:var(--ac)">This is the profile being read today</div>
         </div>
@@ -13096,6 +13092,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-if>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
+      <div style="padding:0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">by Kin Common LLC</div>
     </footer>
   </div>
 </sc-if>
@@ -14005,7 +14002,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </button>
       <button onClick="{{ pmAboutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.6" style="flex:none;display:block;color:var(--mut)"><circle cx="9.5" cy="12" r="6"></circle><circle cx="14.5" cy="12" r="6"></circle></svg>
-        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">About</span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">About Us</span>
       </button>
       <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
@@ -14445,7 +14442,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
      is the mark as a lens: two whole circles, and the light where they meet. -->
 <sc-if value="{{ aboutOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ aboutClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:center;justify-content:center;z-index:12;padding:24px;box-sizing:border-box">
-    <div role="dialog" aria-label="About inCommon" onClick="{{ swallow }}" style="width:100%;max-width:600px;max-height:100%;border-radius:22px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--bg);border:1px solid var(--bd);padding:0 0 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
+    <div role="dialog" aria-label="About Us" onClick="{{ swallow }}" style="width:100%;max-width:600px;max-height:100%;border-radius:22px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--bg);border:1px solid var(--bd);padding:0 0 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
       <div data-portal="1" style="position:relative;flex:none;overflow:hidden;border-bottom:1px solid var(--bd);background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 70% at 50% 110%,rgba(var(--atmc2),.22),transparent 66%),var(--bg)">
         <svg aria-hidden="true" viewBox="0 0 320 168" style="display:block;width:100%;height:auto;max-height:220px">
           <defs><clipPath id="abLensClip"><circle cx="138" cy="84" r="46"></circle></clipPath></defs>
@@ -14477,10 +14474,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </g>
           <circle data-pl="breath" cx="160" cy="84" r="3.2" fill="var(--tx)"></circle>
         </svg>
-        <button data-lift onClick="{{ aboutClose }}" aria-label="Close About" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font:400 20px/1 var(--fc)"><span aria-hidden="true">&#215;</span></button>
+        <button data-lift onClick="{{ aboutClose }}" aria-label="Close About Us" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:10px;right:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font:400 20px/1 var(--fc)"><span aria-hidden="true">&#215;</span></button>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;padding:0 22px">
-        <div style="font:600 9.5px var(--fk);letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">About</div>
+        <div style="font:600 9.5px var(--fk);letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">About Us</div>
         <h2 style="margin:0;font:400 34px/1.1 var(--fd);color:var(--tx)">inCommon</h2>
         <div style="font:italic 400 17px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">A place to look closer, and to find what is shared.</div>
       </div>
@@ -14507,6 +14504,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="font:400 17px var(--fd);color:var(--tx)">{{ aboutCo }}</div>
         </sc-if>
         <div style="font:400 11px/1.5 var(--fu);color:var(--tx)">Created and maintained by Nathaniel J. Figueroa.</div>
+        <div style="font:400 11px/1.5 var(--fu);color:var(--tx)">by Kin Common LLC</div>
       </div>
     </div>
   </div>
@@ -14562,7 +14560,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </div>
         </sc-if>
       </div>
+      <sc-if value="{{ profOthersOn }}" hint-placeholder-val="{{ false }}">
       <div style="font:400 17px var(--fd);margin-top:6px">Who are we reading for?</div>
+      </sc-if>
       <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="2">
         <button data-lift onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ p.edge }};border-radius:12px;padding:11px 14px">
           <span style="flex:none;width:34px;height:34px;border-radius:50%;background:{{ p.color }};display:flex;align-items:center;justify-content:center;font:600 12px var(--fu);color:var(--onac)">{{ p.initials }}</span>
@@ -34467,7 +34467,7 @@ class Component extends DCLogic {
       ...this.supportVals(),
       ...this.profileMenuVals(),
       ...(() => {
-        if (!PM || !prof) return { hasProfile: false, profiles: [], actName: 'this profile', actInitials: '?', actColor: 'var(--ac)', actBirth: '', hasOthers: false, canAddProfile: false, atCapacity: false, soloProfile: false, quickOpen: false, switchOpen: false, formOpen: false, delOpen: false, needsBirthTime: false, profCountLabel: '', shareRows: [], vProfiles: '\u2717',
+        if (!PM || !prof) return { hasProfile: false, profiles: [], actName: 'this profile', actInitials: '?', actColor: 'var(--ac)', actBirth: '', hasOthers: false, profOthersOn: false, canAddProfile: false, atCapacity: false, soloProfile: false, quickOpen: false, switchOpen: false, formOpen: false, delOpen: false, needsBirthTime: false, profCountLabel: '', shareRows: [], vProfiles: '\u2717',
           avaIsImg: false, avaImg: '', avaText: '?', avaBg: 'var(--ac)', avaPrevBg: 'var(--ac)', avaBgImg: 'none', avaPrevBgImg: 'none', avaFontS: '600 9.5px var(--fu)', avaFontM: '600 12px var(--fu)', avaFontL: '600 17px var(--fu)',
           avaOpen: false, avaModes: [], avaColors: [], avaShowColor: false, avaModeInitials: true, avaModePhoto: false, avaModeSign: false,
           avaPrevIsImg: false, avaPrevImg: '', avaPrevText: '?', avaPrevFont: '600 23px var(--fu)', avaPrevColor: 'var(--ac)',
@@ -34640,7 +34640,8 @@ class Component extends DCLogic {
           needsBirthTime: !prof.timedChart,
           needsBirthTimeText: !prof.hasBirthTime ? 'Add a birth time and city for a timed chart.' : 'That place has not been placed yet, so houses stay whole-sign. Try the fuller name with its region, or enter the exact coordinates.',
           actEditGo: () => openForm('edit', prof),
-          profiles: all.map(p => ({ ...p, color: p.avatarColor, edge: p.isActive ? 'var(--ok)' : 'transparent', locked: p.hasPin,
+          profOthersOn: all.length > 1,
+          profiles: all.filter(p => !p.isActive).map(p => ({ ...p, color: p.avatarColor, edge: p.isActive ? 'var(--ok)' : 'transparent', locked: p.hasPin,
             meta: (st.revealPI ? meta(p) : this.maskPI(meta(p))) + (p.isActive ? '' : ' \u00b7 tap to switch'),
             aria: p.isActive ? 'Edit ' + p.name : 'Switch to ' + p.name,
             go: () => p.isActive ? openForm('edit', prof) : this.setState({ switchTo: p.id, pin: ['', '', '', ''], pinErr: '', quickOpen: false }) })),
