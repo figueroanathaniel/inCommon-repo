@@ -13884,7 +13884,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
        'Sincerity clears the blood and the fear goes with it.',
        'Held by loyalty rather than by arrangement, and better off for what the neighbour has.',
        'The rain has come and it stops. Push now and it turns.']],
-    10: ['Treading', 'Lu', 'lake', 'heaven',
+    10: ['Treading', 'L\u00fc', 'lake', 'heaven',
       'Conduct in a dangerous position: treading on the tiger\'s tail. The tradition says the tiger does not bite, and the reason is manner, not luck.',
       'Heaven above the lake, a difference in height that cannot be argued with. The reading is that a person acts by knowing where they actually stand.',
       'Where are you standing, and are you behaving as though you know it?',
@@ -14344,7 +14344,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
        'Stars at noon again, and this time meeting an equal. Good fortune.',
        'What is coming brings recognition with it. Good fortune, and it arrives rather than being taken.',
        'The house at its fullest and screened off. Three years and nobody seen. Abundance turned into a wall.']],
-    56: ['The Wanderer', 'Lu', 'mountain', 'fire',
+    56: ['The Wanderer', 'L\u00fc', 'mountain', 'fire',
       'A stranger passing through, with no standing and no claim on anyone. The tradition says success in small things only, and that the wanderer\'s safety is made entirely of their own conduct.',
       'Fire on the mountain, burning through and moving on. The reading is that a person is clear-minded and cautious in imposing penalties, and does not protract lawsuits.',
       'Where are you a stranger, and are you behaving like one?',
@@ -14539,12 +14539,14 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     return null;
   }
   function search(raw, limit) {
-    var q = String(raw || '').trim().toLowerCase();
+    /* Pinyin carries a diaeresis (Lü), and a reader types lu: fold marks off both sides. */
+    var fold = function (x) { return String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); };
+    var q = fold(String(raw || '').trim());
     if (!q) return [];
     var out = [];
     for (var n = 1; n <= 64; n++) {
       var h = HEX[n];
-      if (String(n) === q || h[0].toLowerCase().indexOf(q) > -1 || h[1].toLowerCase().indexOf(q) > -1) out.push(hexagram(n));
+      if (String(n) === q || fold(h[0]).indexOf(q) > -1 || fold(h[1]).indexOf(q) > -1) out.push(hexagram(n));
     }
     return limit ? out.slice(0, limit) : out;
   }
@@ -16028,7 +16030,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     var au = L.authorityFor(c.authority);
     var lc = (A.LINES || {})[c.cLine] || {}, lu = (A.LINES || {})[c.uLine] || {};
     return [
-      'Begin here, because everything else in your chart is read through it. You are ' + an(c.type) + c.type + ', and the tradition arrives at that not by temperament or by preference but by looking at which of your nine centers hold a consistent charge. ' +
+      'Begin here, because everything else in your chart is read through it. Your chart is ' + an(c.type) + c.type + ' chart, and the tradition arrives at that not by temperament or by preference but by looking at which of your nine centers hold a consistent charge. ' +
         (c.definedCount === 0
           ? 'None of yours do, which is the rarest arrangement of all and the reason your reading turns on time rather than on energy.'
           : 'In your chart ' + c.definedCount + ' of them do: ' + list(c.defined) + '. ') +
@@ -16119,10 +16121,10 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       (isGen(t)
         ? 'For your type specifically, solitude has a physical shape. You have a working engine, and it wants to be used whether or not anyone is watching. Time alone spent making something, moving something, finishing something, satisfies this design more reliably than time alone spent resting. The tradition would rather you ended a solitary day tired in the body than rested and vaguely unsettled.'
         : t === 'Projector'
-          ? 'For your type specifically, solitude is not optional maintenance, it is the maintenance schedule. You have no consistent engine, and in company you are absorbing and guiding at once. The tradition says a Projector without regular unwatched hours becomes bitter, and that the bitterness is not a character flaw but an accounting error. Time alone is how the account is settled.'
+          ? 'For your type specifically, solitude is not optional maintenance, it is the maintenance schedule. With no consistent engine of your own, company asks you to take in and guide at once. The tradition says a Projector without regular unwatched hours becomes bitter, and that the bitterness is not a character flaw but an accounting error. Time alone is how the account is settled.'
           : t === 'Manifestor'
-            ? 'For your type specifically, solitude is where the initiating energy gathers. You are not built to be available continuously, and the tradition is unusually direct about this: a Manifestor needs to be left alone, and the anger that arrives when they are not is the design reporting correctly. Take the time before anyone has to ask you why you need it.'
-            : 'For your type specifically, solitude is the whole practice. You are the most permeable design there is, and the tradition\u2019s single strongest instruction for a Reflector is to sleep alone and to spend real time in your own space. Not because company is bad for you, but because you cannot tell what you are until the room stops answering the question for you.'),
+            ? 'For your type specifically, solitude is where the initiating energy gathers. This design is not built to be available continuously, and the tradition is unusually direct about this: a Manifestor needs to be left alone, and the anger that arrives when they are not is the design reporting correctly. Take the time before anyone has to ask you why you need it.'
+            : 'For your type specifically, solitude is the whole practice. This is the most permeable design there is, and the tradition\u2019s single strongest instruction for a Reflector is to sleep alone and to spend real time in your own space. Not because company is bad for you, but because you cannot tell what you are until the room stops answering the question for you.'),
       'What thriving looks like in a long stretch alone is more specific than people expect. It looks like keeping your strategy even when there is nobody to keep it with, which sounds absurd until you try it: ' + lower(c.strategy) + ', with the day itself as the thing you are responding to or informing. It looks like letting the first two or three days be unpleasant, because draining is not the same as emptying. It looks like noticing which of your habits were only ever for an audience.',
       'And there is a genuine appreciation owed here. The parts of you that feel like too much in a room, ' + (c.channelCount ? 'your fixed circuitry, ' + list(c.channelNames.slice(0, 3)) + ', which cannot be turned down' : 'the consistency you carry, which cannot be turned down') + ', are not too much when there is no room. Alone, the same material simply becomes what you are like. The tradition holds that a person who has spent real time with their own design without an audience for it is very difficult to knock off centre afterwards, and that this is the actual reward.',
       'Do not turn this into a programme. One stretch of unwatched time, entered without a plan for what it will produce, teaches more than a schedule of solitary practice. You are allowed to be alone without it being for something, and this design in particular gets more from that than from any technique in the material.'
@@ -16132,7 +16134,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   function atMeParas(c, A, L) {
     var lu = (A.LINES || {})[c.uLine] || {};
     return [
-      'This tab is about the half of your effect you do not witness. The tradition is unusually confident here, because the mechanics are not subtle: what is fixed in you radiates, and what radiates is felt by everyone near you whether or not either of you names it. You are the only person in the room who cannot feel your own aura.',
+      'This tab is about the half of your effect you do not witness. The tradition is unusually confident here, because the mechanics are not subtle: what is fixed in you radiates, and what radiates is felt by everyone near you whether or not either of you names it. Your own aura is the one aura in the room you cannot feel.',
       'Yours is described as ' + AURA[c.type] + '. Read that twice. It is not a description of your manner, which you can adjust, and not of your intentions, which are your own. It is a description of what arrives before you speak. Much of what you have been told about yourself that seemed to come from nowhere is people reporting this accurately and attributing it to character.',
       c.definedCount
         ? 'The specific transmission is your defined centers: ' + list(c.defined) + '. Anyone whose corresponding center is open receives them from you, amplified. ' + (c.defined.indexOf('Throat') !== -1 ? 'With a defined Throat, people feel spoken to and expect you to carry the conversation. ' : '') + (c.defined.indexOf('Solar Plexus') !== -1 ? 'With a defined Solar Plexus, your wave sets the emotional weather for people who are open there, and they will experience your mood as the room\u2019s mood. ' : '') + (c.defined.indexOf('Sacral') !== -1 ? 'With a defined Sacral, people find you energising and stay near you longer than they intended. ' : '') + (c.defined.indexOf('G') !== -1 ? 'With a defined G, people feel a direction near you and often borrow it. ' : '') + (c.defined.indexOf('Heart') !== -1 ? 'With a defined Heart, people feel your willpower as a standard and quietly measure themselves against it. ' : '') + 'None of this is under your control, and none of it stops when you are tired.'
@@ -16173,7 +16175,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       health: 'Hold it as a place to watch, not as a finding.'
     };
 
-    p.push(OPENER[dom] + ' You are ' + an(c.type) + c.type + '. ' + clean(typeLife[f] || '') + ' ' + TAIL[dom]);
+    p.push(OPENER[dom] + ' Your chart is ' + an(c.type) + c.type + ' chart. ' + clean(typeLife[f] || '') + ' ' + TAIL[dom]);
     p.push('Your authority shapes this as much as your type does. Your chart gives ' + clean(c.authority) + ' ' + clean(au[f] || '') + ' A student will ask how to tell the difference between the authority speaking and the mind speaking. The answer is unsatisfying and correct: the authority arrives without an argument attached. The mind arrives with reasons. When you find yourself building a case, you are already past the moment.');
 
     if (defRel.length) {
@@ -16196,7 +16198,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
 
     p.push('Your lines add the rhythm. Line ' + c.cLine + ', which you are conscious of: ' + clean(lc[f] || '') + ' Line ' + c.uLine + ', which runs without your permission: ' + clean(lu[f] || '') + ' ' + (c.channelCount
       ? 'And your ' + c.channelCount + ' defined ' + (c.channelCount === 1 ? 'channel holds' : 'channels hold') + ' this in place. Fixed circuitry does not soften with effort, and the tradition would rather you arranged a life around it than spent one arguing with it.'
-      : 'With no channel fully defined, none of this is locked. You are more changeable here than most, and the practice is to stop reading that changeability as a lack of discipline.'));
+      : 'With no channel fully defined, none of this is locked. Here the chart leaves room to change more than most, and the practice is to stop reading that changeability as a lack of discipline.'));
 
     var CLOSE = {
       work: 'So the whole of it comes to one question, asked before anything is agreed to: was this responded to, or was this reasoned into? Answer honestly and act on the answer. The tradition promises nothing more dramatic than that the answer, kept for long enough, changes what a working life feels like from the inside.',
@@ -47619,7 +47621,7 @@ class Component extends DCLogic {
   SIGN_LAST = [19, 18, 20, 19, 20, 20, 22, 22, 22, 22, 21, 21];
   SIGN_NAMES = ['Capricorn', 'Aquarius', 'Pisces', 'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn'];
   SIGN_INFO = { Aries: { g: '\u2648', el: 'Fire', ruler: 'Mars' }, Taurus: { g: '\u2649', el: 'Earth', ruler: 'Venus' }, Gemini: { g: '\u264A', el: 'Air', ruler: 'Mercury' }, Cancer: { g: '\u264B', el: 'Water', ruler: 'the Moon' }, Leo: { g: '\u264C', el: 'Fire', ruler: 'the Sun' }, Virgo: { g: '\u264D', el: 'Earth', ruler: 'Mercury' }, Libra: { g: '\u264E', el: 'Air', ruler: 'Venus' }, Scorpio: { g: '\u264F', el: 'Water', ruler: 'Pluto' }, Sagittarius: { g: '\u2650', el: 'Fire', ruler: 'Jupiter' }, Capricorn: { g: '\u2651', el: 'Earth', ruler: 'Saturn' }, Aquarius: { g: '\u2652', el: 'Air', ruler: 'Uranus' }, Pisces: { g: '\u2653', el: 'Water', ruler: 'Neptune' } };
-  SIGN_CORE = { Aries: 'Your instinct is to lead from the front. The quiet courage today is letting someone else set the pace.', Taurus: 'You build things that last, slowly. What looks like stubbornness is usually loyalty to your own timing.', Gemini: 'You hold two truths at once with ease. The work is choosing which one to actually live by.', Cancer: 'You feel the room before a word is spoken. Keep some of that tenderness turned toward yourself.', Leo: 'You warm the people around you. Notice who warms you back, and stay near them.', Virgo: 'You see what\u2019s out of place. Some things can stay imperfect and still be more than enough.', Libra: 'You weigh every side fairly. The decision that keeps waiting is the one only you can make.', Scorpio: 'You go deep or not at all. Trust is a door you can open slowly and still be safe behind.', Sagittarius: 'You are built for the horizon. Meaning is also here, in this ordinary hour.', Capricorn: 'You carry more than you admit. Rest is not a reward you have to earn first.', Aquarius: 'You see the pattern others miss. Let people get close before you have finished explaining it.', Pisces: 'You dissolve the line between you and everyone else. A boundary is a kindness, to them and to you.' };
+  SIGN_CORE = { Aries: 'Your instinct is to lead from the front. The quiet courage today is letting someone else set the pace.', Taurus: 'You build things that last, slowly. What looks like stubbornness is usually loyalty to your own timing.', Gemini: 'You hold two truths at once with ease. The work is choosing which one to actually live by.', Cancer: 'You feel the room before a word is spoken. Keep some of that tenderness turned toward yourself.', Leo: 'You warm the people around you. Notice who warms you back, and stay near them.', Virgo: 'You see what\u2019s out of place. Some things can stay imperfect and still be more than enough.', Libra: 'You weigh every side fairly. The decision that keeps waiting is the one only you can make.', Scorpio: 'You go deep or not at all. Trust is a door you can open slowly and still be safe behind.', Sagittarius: 'Your eyes go to the horizon. Meaning is also here, in this ordinary hour.', Capricorn: 'You carry more than you admit. Rest is not a reward you have to earn first.', Aquarius: 'You see the pattern others miss. Let people get close before you have finished explaining it.', Pisces: 'You dissolve the line between you and everyone else. A boundary is a kindness, to them and to you.' };
   HORO_TODAY = ['A small honesty you have postponed will cost less today than it will tomorrow.', 'Something you have been carrying can be set down for an hour without dropping it for good.', 'The plan can bend today. Let it. Rigidity is not the same as strength.', 'Say the smaller true thing now, before the larger one arrives on its own.', 'Attend to one relationship, not the whole crowd. Depth over reach today.', 'Rest is the productive act today; the clarity you want waits on the other side of it.', 'Begin the thing at half its size. Momentum, not perfection, is the point.'];
   HORO_FOCUS = ['Rest', 'Boundaries', 'Voice', 'Patience', 'Depth', 'Momentum', 'Presence'];
   NUM_MEANING = { 1: 'beginnings, initiative, standing alone', 2: 'pairs, patience, the quiet partner', 3: 'expression, play, the social voice', 4: 'foundations, work, the steady hand', 5: 'change, freedom, the restless turn', 6: 'care, home, the responsible heart', 7: 'inwardness, study, the seeker', 8: 'power, structure, the material test', 9: 'endings, compassion, letting go', 11: 'the intuitive: a 2 lit from within', 22: 'the builder: vision made concrete', 33: 'the teacher: care at scale' };
@@ -52525,7 +52527,7 @@ class Component extends DCLogic {
     }
     groups.push({ hasHead: false, head: '', cta: '', go: () => {}, lines: [
       T('CALCULATED', 'The Moon is in Gate ' + d.moonGate.gate + '.' + d.moonGate.line + ', ' + gname(d.moonGate.gate) + ', moving about one gate every eleven hours.'),
-      T('TRADITIONAL', 'You are ' + (/^[AEIOU]/.test(d.hd.type) ? 'an ' : 'a ') + d.hd.type + '. ' + d.hd.strategy + ' Your authority is ' + d.hd.authority.replace(/^([A-Za-z ]+): /, '$1, which means ') + '.')
+      T('TRADITIONAL', 'Your chart is ' + (/^[AEIOU]/.test(d.hd.type) ? 'an ' : 'a ') + d.hd.type + ' chart. ' + d.hd.strategy + ' Your authority is ' + d.hd.authority.replace(/^([A-Za-z ]+): /, '$1, which means ') + '.')
     ] });
     return groups;
   }
@@ -65702,7 +65704,7 @@ class Component extends DCLogic {
                 const stellBody = (() => {
                   const out = [];
                   if (!stel.any) {
-                    out.push(S('What that means', 'A chart with no stellium is read across its whole wheel. No single room carries a disproportionate share of the weight, and the older texts treat that as breadth rather than as something missing. You are likelier to be competent across several arenas than obsessed with one.'));
+                    out.push(S('What that means', 'A chart with no stellium is read across its whole wheel. No single room carries a disproportionate share of the weight, and the older texts treat that as breadth rather than as something missing. A chart like this tends toward competence across several arenas rather than obsession with one.'));
                     out.push(S('The trade', 'What you give up is the sheer force a concentration lends. Nothing in your chart shouts loudly enough to organise the rest of it around itself, which means the organising is your job. Some find that freeing and some find it exhausting, in roughly equal number.'));
                     return out;
                   }
@@ -65714,7 +65716,7 @@ class Component extends DCLogic {
                   stel.house.forEach(h => out.push(S('The ' + ordinal(h.key) + '-house gathering',
                     h.names.join(', ') + ' occupy one arena of your life: ' + first(this.HOUSE_LONG[h.key - 1]) + '. Expect that room to be where your energy, your attention, and a fair share of your trouble collect. Where a chart concentrates, life tends to concentrate too, not because the sky insists, but because that is where you keep going back.')));
                   if (stel.sign.length && stel.house.length) out.push(S('Read twice',
-                    'The ' + stel.sign[0].key + ' emphasis and the ' + ordinal(stel.house[0].key) + '-house focus are the same handful of bodies read from two angles: once as a manner, once as a place. When the two agree this strongly, the pattern is hard to step outside of. It is also, when it works, the thing you are unmistakably good at.'));
+                    'The ' + stel.sign[0].key + ' emphasis and the ' + ordinal(stel.house[0].key) + '-house focus are the same handful of bodies read from two angles: once as a manner, once as a place. When the two agree this strongly, the pattern is hard to step outside of. It is also, when it works, where your strength shows most plainly.'));
                   out.push(S('The difficulty', 'Concentration is force, and force is not the same as perspective. The classic difficulty with a stellium is not weakness in that area: it is that everything gets routed through it, including questions that belong somewhere else entirely. If the answer to every problem in your life arrives in the same accent, that is worth noticing.'));
                   return out;
                 })();

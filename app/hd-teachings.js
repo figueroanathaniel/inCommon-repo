@@ -95,7 +95,7 @@
     var au = L.authorityFor(c.authority);
     var lc = (A.LINES || {})[c.cLine] || {}, lu = (A.LINES || {})[c.uLine] || {};
     return [
-      'Begin here, because everything else in your chart is read through it. You are ' + an(c.type) + c.type + ', and the tradition arrives at that not by temperament or by preference but by looking at which of your nine centers hold a consistent charge. ' +
+      'Begin here, because everything else in your chart is read through it. Your chart is ' + an(c.type) + c.type + ' chart, and the tradition arrives at that not by temperament or by preference but by looking at which of your nine centers hold a consistent charge. ' +
         (c.definedCount === 0
           ? 'None of yours do, which is the rarest arrangement of all and the reason your reading turns on time rather than on energy.'
           : 'In your chart ' + c.definedCount + ' of them do: ' + list(c.defined) + '. ') +
@@ -186,10 +186,10 @@
       (isGen(t)
         ? 'For your type specifically, solitude has a physical shape. You have a working engine, and it wants to be used whether or not anyone is watching. Time alone spent making something, moving something, finishing something, satisfies this design more reliably than time alone spent resting. The tradition would rather you ended a solitary day tired in the body than rested and vaguely unsettled.'
         : t === 'Projector'
-          ? 'For your type specifically, solitude is not optional maintenance, it is the maintenance schedule. You have no consistent engine, and in company you are absorbing and guiding at once. The tradition says a Projector without regular unwatched hours becomes bitter, and that the bitterness is not a character flaw but an accounting error. Time alone is how the account is settled.'
+          ? 'For your type specifically, solitude is not optional maintenance, it is the maintenance schedule. With no consistent engine of your own, company asks you to take in and guide at once. The tradition says a Projector without regular unwatched hours becomes bitter, and that the bitterness is not a character flaw but an accounting error. Time alone is how the account is settled.'
           : t === 'Manifestor'
-            ? 'For your type specifically, solitude is where the initiating energy gathers. You are not built to be available continuously, and the tradition is unusually direct about this: a Manifestor needs to be left alone, and the anger that arrives when they are not is the design reporting correctly. Take the time before anyone has to ask you why you need it.'
-            : 'For your type specifically, solitude is the whole practice. You are the most permeable design there is, and the tradition\u2019s single strongest instruction for a Reflector is to sleep alone and to spend real time in your own space. Not because company is bad for you, but because you cannot tell what you are until the room stops answering the question for you.'),
+            ? 'For your type specifically, solitude is where the initiating energy gathers. This design is not built to be available continuously, and the tradition is unusually direct about this: a Manifestor needs to be left alone, and the anger that arrives when they are not is the design reporting correctly. Take the time before anyone has to ask you why you need it.'
+            : 'For your type specifically, solitude is the whole practice. This is the most permeable design there is, and the tradition\u2019s single strongest instruction for a Reflector is to sleep alone and to spend real time in your own space. Not because company is bad for you, but because you cannot tell what you are until the room stops answering the question for you.'),
       'What thriving looks like in a long stretch alone is more specific than people expect. It looks like keeping your strategy even when there is nobody to keep it with, which sounds absurd until you try it: ' + lower(c.strategy) + ', with the day itself as the thing you are responding to or informing. It looks like letting the first two or three days be unpleasant, because draining is not the same as emptying. It looks like noticing which of your habits were only ever for an audience.',
       'And there is a genuine appreciation owed here. The parts of you that feel like too much in a room, ' + (c.channelCount ? 'your fixed circuitry, ' + list(c.channelNames.slice(0, 3)) + ', which cannot be turned down' : 'the consistency you carry, which cannot be turned down') + ', are not too much when there is no room. Alone, the same material simply becomes what you are like. The tradition holds that a person who has spent real time with their own design without an audience for it is very difficult to knock off centre afterwards, and that this is the actual reward.',
       'Do not turn this into a programme. One stretch of unwatched time, entered without a plan for what it will produce, teaches more than a schedule of solitary practice. You are allowed to be alone without it being for something, and this design in particular gets more from that than from any technique in the material.'
@@ -199,7 +199,7 @@
   function atMeParas(c, A, L) {
     var lu = (A.LINES || {})[c.uLine] || {};
     return [
-      'This tab is about the half of your effect you do not witness. The tradition is unusually confident here, because the mechanics are not subtle: what is fixed in you radiates, and what radiates is felt by everyone near you whether or not either of you names it. You are the only person in the room who cannot feel your own aura.',
+      'This tab is about the half of your effect you do not witness. The tradition is unusually confident here, because the mechanics are not subtle: what is fixed in you radiates, and what radiates is felt by everyone near you whether or not either of you names it. Your own aura is the one aura in the room you cannot feel.',
       'Yours is described as ' + AURA[c.type] + '. Read that twice. It is not a description of your manner, which you can adjust, and not of your intentions, which are your own. It is a description of what arrives before you speak. Much of what you have been told about yourself that seemed to come from nowhere is people reporting this accurately and attributing it to character.',
       c.definedCount
         ? 'The specific transmission is your defined centers: ' + list(c.defined) + '. Anyone whose corresponding center is open receives them from you, amplified. ' + (c.defined.indexOf('Throat') !== -1 ? 'With a defined Throat, people feel spoken to and expect you to carry the conversation. ' : '') + (c.defined.indexOf('Solar Plexus') !== -1 ? 'With a defined Solar Plexus, your wave sets the emotional weather for people who are open there, and they will experience your mood as the room\u2019s mood. ' : '') + (c.defined.indexOf('Sacral') !== -1 ? 'With a defined Sacral, people find you energising and stay near you longer than they intended. ' : '') + (c.defined.indexOf('G') !== -1 ? 'With a defined G, people feel a direction near you and often borrow it. ' : '') + (c.defined.indexOf('Heart') !== -1 ? 'With a defined Heart, people feel your willpower as a standard and quietly measure themselves against it. ' : '') + 'None of this is under your control, and none of it stops when you are tired.'
@@ -240,7 +240,7 @@
       health: 'Hold it as a place to watch, not as a finding.'
     };
 
-    p.push(OPENER[dom] + ' You are ' + an(c.type) + c.type + '. ' + clean(typeLife[f] || '') + ' ' + TAIL[dom]);
+    p.push(OPENER[dom] + ' Your chart is ' + an(c.type) + c.type + ' chart. ' + clean(typeLife[f] || '') + ' ' + TAIL[dom]);
     p.push('Your authority shapes this as much as your type does. Your chart gives ' + clean(c.authority) + ' ' + clean(au[f] || '') + ' A student will ask how to tell the difference between the authority speaking and the mind speaking. The answer is unsatisfying and correct: the authority arrives without an argument attached. The mind arrives with reasons. When you find yourself building a case, you are already past the moment.');
 
     if (defRel.length) {
@@ -263,7 +263,7 @@
 
     p.push('Your lines add the rhythm. Line ' + c.cLine + ', which you are conscious of: ' + clean(lc[f] || '') + ' Line ' + c.uLine + ', which runs without your permission: ' + clean(lu[f] || '') + ' ' + (c.channelCount
       ? 'And your ' + c.channelCount + ' defined ' + (c.channelCount === 1 ? 'channel holds' : 'channels hold') + ' this in place. Fixed circuitry does not soften with effort, and the tradition would rather you arranged a life around it than spent one arguing with it.'
-      : 'With no channel fully defined, none of this is locked. You are more changeable here than most, and the practice is to stop reading that changeability as a lack of discipline.'));
+      : 'With no channel fully defined, none of this is locked. Here the chart leaves room to change more than most, and the practice is to stop reading that changeability as a lack of discipline.'));
 
     var CLOSE = {
       work: 'So the whole of it comes to one question, asked before anything is agreed to: was this responded to, or was this reasoned into? Answer honestly and act on the answer. The tradition promises nothing more dramatic than that the answer, kept for long enough, changes what a working life feels like from the inside.',
