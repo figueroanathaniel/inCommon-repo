@@ -80,7 +80,7 @@
     work: { label: 'Work', title: 'Work', kicker: 'how this design is built to spend itself' },
     sleep: { label: 'Sleep', title: 'Sleep', kicker: 'how the day is meant to end' },
     body: { label: 'Diet & Exercise', title: 'Diet and Exercise', kicker: 'what the body is asking for' },
-    health: { label: 'Health', title: 'Health', kicker: 'where the tradition says attention goes' },
+    health: { label: 'Health', title: 'Health', kicker: 'where attention goes' },
     synastry: { label: 'Synastry', title: 'Synastry', kicker: 'which designs tend to feel good beside yours, and why' },
     justme: { label: 'Just Me', title: 'Just Me', kicker: 'what solitude gives back to this design' },
     atme: { label: 'At Me', title: 'At Me', kicker: 'what the world sees, and what that does to you' }
@@ -123,7 +123,7 @@
       'Here is the practical consequence. Personality can be worked on. You can study it, argue with it, refine it, and much of what a person calls growth happens on that side. Design cannot be worked on in the same way. It can only be observed and then arranged around. The tradition says the effort to change your design is the single largest waste of a life\u2019s energy available to you, and that recognising the difference is worth more than any technique.',
       (c.definedCount === 0
         ? 'With no center defined, both sides of your chart are unusually permeable, and the two-chart distinction matters even more: what feels like your personality on a given day is frequently the room, arriving through a design that was built to sample.'
-        : 'Both sides feed the same nine centers. Your defined centers, ' + list(c.defined) + ', are fixed no matter which side activated them, and your open centers, ' + list(c.open) + ', are open the same way. The tradition would have you stop asking which side a trait came from and start asking only whether it is consistent. Consistency is what defines a center, and definition is what you can actually rely on.'),
+        : 'Both sides feed the same nine centers. Your defined centers, ' + list(c.defined) + ', are fixed no matter which side activated them, and your open centers, ' + list(c.open) + ', are open the same way. It helps to stop asking which side a trait came from and ask only whether it is consistent. Consistency is what defines a center, and definition is what you can actually rely on.'),
       'Sit with the pair for a while before doing anything with it. The reading that helps most is not a technique. It is the moment a student stops treating the unconscious half as a flaw in the conscious half, and starts treating it as the body they were given to live the conscious half inside.'
     ];
   }
@@ -147,7 +147,7 @@
       'What navigating emotion actually looks like, then, is unglamorous. It looks like naming the wave when it starts. It looks like refusing to make a decision inside it and saying so out loud. It looks like asking, before you interpret a mood, whether you were alone when it started. ' +
         (spDef ? 'For you the question is how long, not whether.' : 'For you the question is whose, and the answer is very often not yours.') +
         ' None of this asks you to feel less. It asks you to stop treating feeling as evidence.',
-      'The tradition offers one encouragement here and it is worth keeping. The wave is not a defect in the design, and neither is the amplification. Both are described as the source of the depth other people come to you for. What is being asked is not that you become even. It is that you stop signing things at the peak.'
+      'One encouragement here is worth keeping. The wave is not a defect in the design, and neither is the amplification. Both are described as the source of the depth other people come to you for. What is being asked is not that you become even. It is that you stop signing things at the peak.'
     ];
   }
 
@@ -230,8 +230,8 @@
     var OPENER = {
       work: 'Work is where a design shows itself fastest, because work is where energy is either spent correctly or spent anyway.',
       sleep: 'Sleep is the least negotiable teaching in this system, and the one students most often skip. Everything else can be experimented with slowly. This one is nightly.',
-      body: 'The tradition speaks about the body carefully. It prescribes no diet and names no food. What it describes is the manner in which your particular body wants to be consulted.',
-      health: 'Approach this reading the way a teacher would want it approached. Human Design is a tradition of self-observation. It has no clinical standing, it diagnoses nothing, and it is at its most useful when it tells you where to pay attention rather than what is wrong.'
+      body: 'None of this is medical or dietary advice, and no food is named. What follows is the way your particular body may want to be consulted, and the people you eat and move with are part of it.',
+      health: 'None of this is medical advice. It is a place to pay attention, never a diagnosis.'
     };
     var TAIL = {
       work: 'Read that again slowly. The tradition is not describing what you are capable of. It is describing what leaves you intact.',

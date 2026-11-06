@@ -5715,6 +5715,14 @@ eyebrows, meaning no ---- How to meet the moment ----"): it sits in the title
 column under the kicker, italic 13px in the reading face, in gold with a soft glow
 (`[data-epi]` in the head sheet, plain under the contrast modifier). Do not put an
 uppercase label or a ruled line back on these pages.
+The wiring's detail sheet on My Charts (a type, centre, gate, channel,
+profile or authority) follows the same rule since 6 November 2026: the line
+under its title is italic reading type in `--tx`, a row's own heading is an
+italic lead-in at the start of its sentence rather than a label over it, the
+rows that only named their source (What the system holds, What your chart
+shows, What a channel is) carry no heading, and the sheet's edge is the one
+blue, `rgba(var(--atmc),.55)`, never the action green, the success green or
+the violet.
 
 **The wiring is drawn one way in the Atlas and on My Charts** (same day):
 `hdWireGeom()` places each gate on the side of its centre that faces where its

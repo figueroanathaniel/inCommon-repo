@@ -7878,7 +7878,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <div style="display:flex;align-items:flex-start;gap:9px">
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
           <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ hdPopTitle }}</div>
-          <div style="font:600 9.5px var(--fk);letter-spacing:.09em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdPopKicker }}</div>
+          <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">{{ hdPopKicker }}</div>
         </div>
         <button onClick="{{ hdPopClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;min-width:36px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 17px var(--fc);color:var(--dim)">×</button>
       </div>
@@ -7888,12 +7888,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-for>
       </div>
       <sc-for list="{{ hdPopLines }}" as="l" hint-placeholder-count="4">
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
-            <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
-          </sc-if>
-          <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
-        </div>
+        <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty"><sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}"><span style="font-style:italic;font-weight:600">{{ l.head }}. </span></sc-if>{{ l.text }}</div>
       </sc-for>
       <sc-if value="{{ hdPopHasSoco }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
@@ -15123,7 +15118,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <div style="display:flex;align-items:flex-start;gap:9px">
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
           <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ hdPopTitle }}</div>
-          <div style="font:600 9.5px var(--fk);letter-spacing:.09em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdPopKicker }}</div>
+          <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">{{ hdPopKicker }}</div>
         </div>
         <button onClick="{{ hdPopClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;min-width:36px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 17px var(--fc);color:var(--dim)">×</button>
       </div>
@@ -15133,12 +15128,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-for>
       </div>
       <sc-for list="{{ hdPopLines }}" as="l" hint-placeholder-count="4">
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
-            <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
-          </sc-if>
-          <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
-        </div>
+        <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty"><sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}"><span style="font-style:italic;font-weight:600">{{ l.head }}. </span></sc-if>{{ l.text }}</div>
       </sc-for>
       <sc-if value="{{ hdPopHasSoco }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
@@ -23585,7 +23575,7 @@ class Component extends DCLogic {
     let title = '', kicker = '', youKicker = '', gen = [], you = [], sc = {}, sec = 'intro', item = null, edge = 'var(--bd)', ask = '';
     if (sel.kind === 'type') {
       const t = A.TYPES[hd.type] || {};
-      title = hd.type; kicker = 'Type \u00b7 ' + (t.pct || ''); sec = 'types'; item = hd.type; edge = 'rgba(47,255,143,.42)';
+      title = hd.type; kicker = 'Type \u00b7 ' + (t.pct || ''); sec = 'types'; item = hd.type; edge = 'rgba(var(--atmc),.55)';
       youKicker = 'Yours \u00b7 ' + hd.defined.size + ' of nine centers defined';
       gen = [H('What the system holds', t.def || ''),
         H('The strategy it comes with', t.strategy || ''),
@@ -23598,7 +23588,7 @@ class Component extends DCLogic {
       ask = 'What does being ' + art(hd.type) + hd.type + ' actually ask of me day to day?';
     } else if (sel.kind === 'strategy') {
       const s2 = (A.STRATEGIES || []).find(x => x.who.indexOf(hd.type) !== -1) || A.STRATEGIES[1];
-      title = s2.name; kicker = 'Strategy \u00b7 ' + s2.who; sec = 'strategies'; item = s2.name; edge = 'rgba(47,255,143,.42)';
+      title = s2.name; kicker = 'Strategy \u00b7 ' + s2.who; sec = 'strategies'; item = s2.name; edge = 'rgba(var(--atmc),.55)';
       youKicker = 'Yours \u00b7 ' + s2.who;
       gen = [H('What the system holds', s2.when), H('How correct timing is recognised', s2.recognize), H('When it is ignored', s2.ignored)];
       you = [H('What your chart gives', 'Your chart gives the strategy as: ' + hd.strategy),
@@ -23612,7 +23602,7 @@ class Component extends DCLogic {
     } else if (sel.kind === 'authority') {
       const first = String(hd.authority).split(':')[0].trim().split(/\s+/)[0].toLowerCase();
       const au = (A.AUTHORITIES || []).find(x => x.name.toLowerCase().indexOf(first) !== -1) || A.AUTHORITIES[0];
-      title = au.name; kicker = 'Inner authority'; sec = 'authorities'; item = au.name; edge = 'rgba(139,92,246,.4)';
+      title = au.name; kicker = 'Inner authority'; sec = 'authorities'; item = au.name; edge = 'rgba(var(--atmc),.55)';
       youKicker = 'Yours \u00b7 ' + au.name;
       gen = [H('What the system holds', au.how), H('How the signal is recognised', au.recognize), H('How it is followed', au.follow)];
       you = [H('What your chart gives', 'Your chart gives: ' + hd.authority),
@@ -23625,7 +23615,7 @@ class Component extends DCLogic {
       ask = 'Walk me through using my authority on a decision I am sitting on.';
     } else if (sel.kind === 'profile') {
       const pr = this.hdProfile(), lc = A.LINES[pr.c] || {}, lu = A.LINES[pr.u] || {};
-      title = pr.key + ' \u00b7 ' + pr.name; kicker = 'Profile \u00b7 conscious over unconscious'; sec = 'profiles'; item = pr.key; edge = 'rgba(139,92,246,.4)';
+      title = pr.key + ' \u00b7 ' + pr.name; kicker = 'Profile \u00b7 conscious over unconscious'; sec = 'profiles'; item = pr.key; edge = 'rgba(var(--atmc),.55)';
       youKicker = 'Yours \u00b7 line ' + pr.c + ' over line ' + pr.u;
       gen = [H('Line ' + pr.c + ', ' + lc.name, (lc.theme || '') + ' ' + (lc.behavior || '')),
         H('Line ' + pr.u + ', ' + lu.name, (lu.theme || '') + ' ' + (lu.behavior || '')),
@@ -23643,7 +23633,7 @@ class Component extends DCLogic {
       const c = A.CENTERS[sel.name] || {}, defined = hd.defined.has(sel.name);
       const mine = hd.gates.filter(g => this.hdCenterOf(g.gate) === sel.name);
       title = c.label || sel.name; kicker = defined ? 'Defined center' : 'Undefined center'; sec = 'centers'; item = sel.name;
-      edge = defined ? 'rgba(89,179,125,.4)' : 'var(--bd)';
+      edge = defined ? 'rgba(var(--atmc),.55)' : 'var(--bd)';
       youKicker = (defined ? 'Defined in yours' : 'Open in yours') + ' \u00b7 ' + (mine.length ? mine.length + (mine.length === 1 ? ' gate' : ' gates') : 'no gates');
       gen = [H('What this center handles', c.fn || ''),
         H('When it is defined', c.defined || ''),
@@ -23664,7 +23654,7 @@ class Component extends DCLogic {
       ask = 'What does my ' + (defined ? 'defined' : 'open') + ' ' + sel.name + ' center mean for how I decide things?';
     } else if (sel.kind === 'gate') {
       const g = A.GATES[sel.gate] || [], gl = this.hdGateLines(sel.gate, sel.line) || [];
-      title = 'Gate ' + sel.gate + (g[0] ? ', ' + g[0] : ''); kicker = 'Gate \u00b7 ' + (g[1] || '') + ' center'; sec = 'gates'; item = 'g' + sel.gate; edge = 'rgba(47,255,143,.42)';
+      title = 'Gate ' + sel.gate + (g[0] ? ', ' + g[0] : ''); kicker = 'Gate \u00b7 ' + (g[1] || '') + ' center'; sec = 'gates'; item = 'g' + sel.gate; edge = 'rgba(var(--atmc),.55)';
       youKicker = sel.line ? 'Yours \u00b7 line ' + sel.line : 'In your chart';
       const take = tags => gl.filter(l => tags.indexOf(l.tag) !== -1)
         .map((l, i) => H(i === 0 ? (tags[0] === 'TRADITIONAL' ? 'What the system holds' : 'What your chart shows') : '', l.text));
@@ -23672,7 +23662,7 @@ class Component extends DCLogic {
       you = take(['CALCULATED', 'POSSIBILITY', 'SYNTHESIS']);
       if (!gen.length) gen = gl.map(l => H('', l.text));
       if (!you.length) you = gen;
-      you = you.concat([H('The lesson', 'Watch this theme once this week and act on it knowingly rather than reflexively. A single instance you noticed is worth more than the description of it.')]);
+      you = you.concat([H('The lesson', 'Watch this theme once this week and act on it knowingly rather than reflexively, and notice who is near when it shows. A single instance you noticed is worth more than the description of it.')]);
       sc = { strengths: ['A gate you carry is available on purpose rather than by accident, and using it deliberately is the whole difference between a trait and a tool.'],
         opportunities: ['One concrete move: name the moment this gate is running while it is running. Naming it is what converts it into something you can choose.'],
         challenges: ['Every gate has a version that overshoots. The failure is nearly always the strength applied where nobody asked for it.'],
@@ -23682,7 +23672,7 @@ class Component extends DCLogic {
       const info = A.channel(sel.a, sel.b);
       const ca = this.hdCenterOf(sel.a), cb = this.hdCenterOf(sel.b);
       title = (info ? info.name : 'Channel') + ' \u00b7 ' + sel.a + '-' + sel.b; kicker = 'Channel \u00b7 ' + ca + ' to ' + cb; sec = 'channels';
-      item = info ? info.key : Math.min(sel.a, sel.b) + '-' + Math.max(sel.a, sel.b); edge = 'rgba(139,92,246,.4)';
+      item = info ? info.key : Math.min(sel.a, sel.b) + '-' + Math.max(sel.a, sel.b); edge = 'rgba(var(--atmc),.55)';
       youKicker = 'Defined in yours \u00b7 ' + ca + ' to ' + cb;
       gen = [H('What the system holds', info ? info.theme + '. ' + info.meaning : 'A completed circuit between two centers.'),
         H('What a channel is', 'Two gates meeting across two centers. Both ends have to be activated for the circuit to exist, which is why some charts carry a theme outright and others only borrow it from the people around them.')];
@@ -23696,7 +23686,9 @@ class Component extends DCLogic {
       ask = 'What does the ' + (info ? info.name : sel.a + '-' + sel.b) + ' channel mean for me?';
     }
     const TV = this.hdTabVals(sel), soco = this.dpSocoBlocks(sc);
-    const lines = (TV.hdPopYou ? you : gen).filter(l => l && l.text && String(l.text).trim().length > 2);
+    const SRC = ['What the system holds', 'What your chart shows', 'What a channel is'];
+    const lines = (TV.hdPopYou ? you : gen).filter(l => l && l.text && String(l.text).trim().length > 2)
+      .map(l => SRC.indexOf(l.head) !== -1 ? { ...l, head: '', hasHead: false } : l);
     return { hdPopOpen: true, hdPopTitle: title, hdPopEdge: edge, ...TV,
       hdPopKicker: TV.hdPopYou ? (youKicker || kicker) : kicker,
       hdPopLines: lines,
@@ -23865,28 +23857,28 @@ class Component extends DCLogic {
   STUDY_TUT = {
     hdatlas: {
       first: [
-        ['Type', 'hd:bedrock:type', 'The diagram in this room is the wiring, which the field calls a bodygraph: nine centres, thirty six channels and sixty four gates. Tap any part once for its name and again to open it. This lesson is the five types, and with a chart of your own on this device yours is named under In your chart. The words under each lesson open their own entries.'],
-        ['Strategy', 'hd:bedrock:strategy', 'Find the strategy beside your type. It is offered as an experiment for ordinary days, and the last tile sets it next to authority, which comes two lessons on.'],
-        ['Aura', 'hd:bedrock:aura', 'The aura is how a type is met before anything is said. Read the tile for your type, then the one on conditioning, which the Horizon lessons take further.'],
-        ['Signature', 'hd:bedrock:signature', 'Each type has one feeling the tradition reads as being on course. Notice which of the four you already know well.'],
-        ['Not-Self Theme', 'hd:bedrock:not-self-theme', 'The not-self theme is the signature turned inside out: a signal to stop and come back, never a verdict. The last two tiles carry the idea into the open centres and the mind.'],
-        ['Inner Authority', 'hd:bedrock:inner-authority', 'The authorities are listed in the order the tradition checks for them, and the first one a chart holds is its authority. With a chart of your own, yours is named under In your chart.'],
+        ['Type', 'hd:bedrock:type', 'The diagram in this room is the wiring, which the field calls a bodygraph: nine centres, thirty six channels and sixty four gates. Tap any part once for its name and again to open it. This lesson is the five types, and with a chart of your own on this device yours is named under In your chart. Each type is one way of meeting other people, and the words under each lesson open their own entries.'],
+        ['Strategy', 'hd:bedrock:strategy', 'Find the strategy beside your type. It is an experiment for ordinary days, easier with someone who knows about the experiment, and it travels with authority, which comes two lessons on.'],
+        ['Aura', 'hd:bedrock:aura', 'The aura is how a type is met before anything is said. Read the tile for your type, then think of the last person whose presence you felt before they spoke.'],
+        ['Signature', 'hd:bedrock:signature', 'Each type has one feeling that marks being on course. Notice which of the four you already know well, and when you last felt it.'],
+        ['Not-Self Theme', 'hd:bedrock:not-self-theme', 'The not-self theme is the signature turned inside out: a signal to stop and come back, never a verdict. The last two tiles carry it into the open centres and the mind, and read both kindly.'],
+        ['Inner Authority', 'hd:bedrock:inner-authority', 'The authorities are listed in the order they are checked, and the first one a chart holds is its authority. With a chart of your own, yours is named under In your chart.'],
         ['Outer Authority', 'hd:bedrock:outer-authority', 'The last Bedrock lesson is what the mind is for once it is not deciding. When this feels familiar, Finding my way opens the Weather lessons.']
       ],
       way: [
-        ['Definition', 'hd:weather:definition', 'Weather begins with how a chart is joined. With a chart of your own, its definition is named; the tiles go from one piece to four, and end with the bridging gates that join a split.'],
-        ['Profile', 'hd:weather:profile', 'Two numbers, one from the Sun on each side. Read the lower and upper lines, then find your own pair among the twelve.'],
+        ['Definition', 'hd:weather:definition', 'Weather begins with how a chart is joined. With a chart of your own, its definition is named; the tiles go from one piece to four, and end with the bridging gates other people carry.'],
+        ['Profile', 'hd:weather:profile', 'Two numbers, one from the Sun on each side. Read the lower and upper lines, then find your own pair among the twelve, and ask someone close which half they see first.'],
         ['Angle', 'hd:weather:angle', 'The angle is the shape of a life’s theme, and it comes from the profile you just read. Yours is named here when a chart of your own is on this device.'],
         ['Centers', 'hd:weather:centers', 'The nine centres sorted by the work they do. Show me lights them on the wiring; tap any centre there to open its own page.'],
         ['Circuits', 'hd:weather:circuits', 'Every channel belongs to one circuit. Read the seven families, then open a channel of your own and look for its family in the list.'],
-        ['Streams', 'hd:weather:streams', 'Streams are currents of gates running through the three awareness centres. Follow one stream on the wiring from its first gate to its last.'],
-        ['Rave Cosmology', 'hd:weather:rave-cosmology', 'The story the tradition tells about where the chart comes from. Each tile opens a term in the lexicon; read it as the system’s own account.'],
+        ['Streams', 'hd:weather:streams', 'Streams are currents of gates running through the three awareness centres. Follow one stream on the wiring from its first gate to its last, where it is spoken.'],
+        ['Rave Cosmology', 'hd:weather:rave-cosmology', 'The system’s own account of where the chart comes from. Each tile opens a term in the lexicon; read it as that account, a story about how everything is joined.'],
         ['Practice', 'hd:example:0', 'An example wiring that belongs to nobody, read in eight steps. Read it with the Weather lessons beside it before the steps do, then compare. Deep study opens the Horizon lessons.']
       ],
       deep: [
-        ['Evolution', 'hd:horizon:evolution', 'Horizon begins with the longest view: a body the tradition says is still changing. Read it as the system’s account of history, not as a forecast.'],
-        ['Conditioning', 'hd:horizon:conditioning', 'What the open centres take in, and how. Open each of your open centres afterwards and read what it is said to borrow.'],
-        ['Cycles', 'hd:horizon:cycles', 'The returns across a life, from the Moon’s month to the Kiron return. Find the one nearest your own age.'],
+        ['Evolution', 'hd:horizon:evolution', 'Horizon begins with the longest view: a body the system says is still changing. Read it as its account of history, not as a forecast.'],
+        ['Conditioning', 'hd:horizon:conditioning', 'What the open centres take in, and from whom. Open each of your open centres afterwards and read what it is said to borrow, and who might have lent it.'],
+        ['Cycles', 'hd:horizon:cycles', 'The returns across a life, from the Moon’s month to the Kiron return. Find the one nearest your own age, and the people crossing it with you.'],
         ['Mechanics', 'hd:horizon:mechanics', 'How a chart is built, from the two moments to a type. Then open your Sun’s gate and read its hexagram beside it, since gate N is hexagram N.'],
         ['Awareness', 'hd:horizon:awareness', 'The three ways of knowing, and the fears, anxieties and nervousness each is said to carry. Show me lights the three centres.'],
         ['Variable', 'hd:horizon:variable', 'The four arrows and the finest layers of a position. Notice which side of the chart each arrow comes from.'],
