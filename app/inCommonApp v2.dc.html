@@ -1125,7 +1125,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
                 <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:{{ c.ai }};justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
-                  <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
+                  <span style="position:absolute;left:{{ c.llp }};top:{{ c.ltp }};transform:translate(-50%,-50%);white-space:nowrap;font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
               </sc-for>
@@ -9346,7 +9346,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
                 <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:{{ c.ai }};justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
-                  <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
+                  <span style="position:absolute;left:{{ c.llp }};top:{{ c.ltp }};transform:translate(-50%,-50%);white-space:nowrap;font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
               </sc-for>
@@ -24906,7 +24906,49 @@ class Component extends DCLogic {
       }
       paths[ch.key] = { d: d, a: a, b: b, via: via };
     });
-    const geom = { spots: spots, paths: paths };
+    /* Each centre's name sits where no gate dot touches it (owner, 6 November
+       2026: "clean up the labels so the dots aren't overlapped"). Inside the
+       shape where there is room; Heart, Spleen and the Solar Plexus carry too
+       many gates for their size, so their name rests just outside, clear of
+       the outline, the dots and every channel. Sized in chart units for the
+       widest rendering (the phone), so both views stay clear. */
+    const segD = (px, py, a, b) => { const ex = b[0] - a[0], ey = b[1] - a[1], t = Math.max(0, Math.min(1, ((px - a[0]) * ex + (py - a[1]) * ey) / (ex * ex + ey * ey)));
+      return Math.hypot(px - a[0] - ex * t, py - a[1] - ey * t); };
+    const lineP = [];
+    Object.keys(paths).forEach(k => { const g = paths[k], A = g.a, B = g.b, V = g.via;
+      for (let s = 0; s <= 40; s++) { const t = s / 40; let x, y;
+        if (V) { const cx = 2 * V.x - (A.x + B.x) / 2, cy = 2 * V.y - (A.y + B.y) / 2; x = (1 - t) * (1 - t) * A.x + 2 * (1 - t) * t * cx + t * t * B.x; y = (1 - t) * (1 - t) * A.y + 2 * (1 - t) * t * cy + t * t * B.y; }
+        else { x = A.x + (B.x - A.x) * t; y = A.y + (B.y - A.y) * t; }
+        lineP.push([x, y]); } });
+    const dotP = Object.keys(spots).map(g => [spots[g].x, spots[g].y]);
+    const labels = {};
+    names.forEach(c => { const P = poly[c], w = String(this.BG_SHORT[c] || c).length * 7 + 1, h = 8, C = cen[c];
+      const xs = P.map(q => q[0]), ys = P.map(q => q[1]);
+      let best = null;
+      for (let y = Math.min(...ys) - 24; y <= Math.max(...ys) + 24; y += 1) for (let x = Math.min(...xs) - 30; x <= Math.max(...xs) + 30; x += 1) {
+        const L = x - w / 2, R = x + w / 2, T = y - h / 2, B = y + h / 2;
+        if (L < 2 || R > 298 || T < 2 || B > 518) continue;
+        const inside = inPoly(L, T, P) && inPoly(R, T, P) && inPoly(L, B, P) && inPoly(R, B, P);
+        const penal = (inside ? 0 : 4) + Math.hypot(x - C[0], y - C[1]) * .04;
+        if (best && 6 - penal <= best.score) continue;
+        let bad = false;
+        names.forEach(o => { if (bad || (o === c && inside)) return;
+          for (let i = 0; i <= 6 && !bad; i++) for (let j = 0; j <= 2 && !bad; j++) if (inPoly(L + w * i / 6, T + h * j / 2, poly[o])) bad = true; });
+        if (bad) continue;
+        const dr = (px, py) => Math.hypot(Math.max(L - px, px - R, 0), Math.max(T - py, py - B, 0));
+        let cl = 6;
+        dotP.forEach(d => { cl = Math.min(cl, dr(d[0], d[1]) - 5); });
+        for (let i = 0; i < P.length && cl > 0; i++) { const a = P[i], b = P[(i + 1) % P.length];
+          for (let k = 0; k <= 8; k++) { const fx = L + w * k / 8; cl = Math.min(cl, segD(fx, T, a, b) + (inside ? 1 : 0), segD(fx, B, a, b) + (inside ? 1 : 0)); }
+          [L, R].forEach(fx => { cl = Math.min(cl, segD(fx, y, a, b) + (inside ? 1 : 0)); });
+          cl = Math.min(cl, dr(a[0], a[1])); }
+        if (!inside && cl > 0) lineP.forEach(d => { cl = Math.min(cl, dr(d[0], d[1]) - 1.5); });
+        const score = cl - penal;
+        if (!best || score > best.score) best = { x: x, y: y, score: score };
+      }
+      labels[c] = best ? { x: best.x, y: best.y } : { x: C[0], y: C[1] };
+    });
+    const geom = { spots: spots, paths: paths, labels: labels };
     if (pairs.length) this._hdGeom = geom;
     return geom;
   }
@@ -25165,7 +25207,7 @@ class Component extends DCLogic {
         fill: defined ? 'rgba(var(--atmc),.24)' : 'rgba(var(--atmc),.07)', fo: '1',
         stroke: lit ? 'var(--ac2-hi)' : defined ? 'rgba(var(--atmc),.95)' : 'var(--chl)', sw: lit ? '3' : defined ? '1.8' : '1.5',
         glow: lit ? 'drop-shadow(0 0 8px rgba(var(--atmc),.75))' : 'none',
-        l: pct(q[0] + q[2] / 2 + (name === 'Spleen' ? -q[2] * .2 : name === 'Solar Plexus' ? q[2] * .2 : 0), 300), t: pct(q[1] + q[3] / 2 + (name === 'Heart' ? q[3] * .16 : name === 'Head' ? -q[3] * .02 : name === 'Ajna' ? -q[3] * .12 : 0), 520),
+        l: pct(geo.labels[name].x, 300), t: pct(geo.labels[name].y, 520),
         label: this.BG_SHORT[name], lc: defined || lit ? 'var(--tx)' : 'var(--mut)',
         go: peek('c:' + name, { l: pct(q[0] + q[2] / 2, 300), t: pct(q[1], 520) }, A.CENTERS[name] ? A.CENTERS[name].label : name, 'centers:' + this.atlasSlug(name)) };
     });
@@ -33790,9 +33832,8 @@ class Component extends DCLogic {
                 stroke: defined ? 'rgba(var(--atmc),.95)' : 'var(--chl)', sw: defined ? '1.8' : '1.5',
                 lp: (q[0] / 300 * 100).toFixed(2) + '%', tp: (q[1] / 520 * 100).toFixed(2) + '%',
                 wp: (q[2] / 300 * 100).toFixed(2) + '%', hp: (q[3] / 520 * 100).toFixed(2) + '%',
-                jc: name === 'Heart' ? 'flex-end' : 'center',
-                ai: name === 'Spleen' ? 'flex-start' : name === 'Solar Plexus' ? 'flex-end' : 'center',
-                pad: name === 'Heart' ? '0 0 4px' : name === 'Head' ? '10px 0 0' : name === 'Ajna' ? '0 0 10px' : name === 'Spleen' ? '0 0 0 9%' : name === 'Solar Plexus' ? '0 9% 0 0' : '0',
+                jc: 'center', ai: 'center', pad: '0',
+                llp: ((geo.labels[name].x - q[0]) / q[2] * 100).toFixed(2) + '%', ltp: ((geo.labels[name].y - q[1]) / q[3] * 100).toFixed(2) + '%',
                 name: name, short: this.BG_SHORT[name],
                 labelC: defined ? 'var(--tx)' : 'var(--mut)', subC: 'var(--mut)',
                 count: '',
