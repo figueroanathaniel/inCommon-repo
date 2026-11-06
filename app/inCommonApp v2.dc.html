@@ -1831,6 +1831,25 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
         <sc-for list="{{ chSkyOpen }}" as="f" hint-placeholder-count="0">
           <div data-lift="card" data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--ac2-hi);border-radius:12px;padding:13px 15px;animation:fadeUp .22s ease-out">
+            <sc-if value="{{ f.hmOn }}" hint-placeholder-val="{{ false }}">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
+                <sc-for list="{{ f.hmTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:14px/1 Georgia,serif;color:var(--ac2-hi)">{{ h.sym }}</span><span style="font:600 9px var(--fk);letter-spacing:.04em;text-transform:uppercase">{{ h.label }}</span></button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ f.hmLine }}</p>
+              <sc-if value="{{ f.hmPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+                  <sc-for list="{{ f.hmPairs }}" as="q" hint-placeholder-count="3"><li><button data-lift onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></button></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ f.hmPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ f.hmNone }}</p>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:6px">
+                <sc-for list="{{ f.hmRows }}" as="r" hint-placeholder-count="10"><button data-lift onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:7px;min-height:44px;padding:0"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:{{ r.c }}">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></sc-for>
+              </div>
+            </sc-if>
 <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
                 <div style="display:flex;flex-direction:column;gap:3px">
                   <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
@@ -8880,6 +8899,25 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
         <sc-for list="{{ chSkyOpen }}" as="f" hint-placeholder-count="0">
           <div data-lift="card" data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--ac2-hi);border-radius:12px;padding:13px 15px;animation:fadeUp .22s ease-out">
+            <sc-if value="{{ f.hmOn }}" hint-placeholder-val="{{ false }}">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
+                <sc-for list="{{ f.hmTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:14px/1 Georgia,serif;color:var(--ac2-hi)">{{ h.sym }}</span><span style="font:600 9px var(--fk);letter-spacing:.04em;text-transform:uppercase">{{ h.label }}</span></button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ f.hmLine }}</p>
+              <sc-if value="{{ f.hmPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+                  <sc-for list="{{ f.hmPairs }}" as="q" hint-placeholder-count="3"><li><button data-lift onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></button></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ f.hmPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ f.hmNone }}</p>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:6px">
+                <sc-for list="{{ f.hmRows }}" as="r" hint-placeholder-count="10"><button data-lift onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:7px;min-height:44px;padding:0"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:{{ r.c }}">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></sc-for>
+              </div>
+            </sc-if>
 <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
                 <div style="display:flex;flex-direction:column;gap:3px">
                   <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
@@ -34390,16 +34428,58 @@ class Component extends DCLogic {
                   return n ? 'next: ' + n.kind.toLowerCase() + ' eclipse ' + this.fmtDay(n.date) + ' \u00b7 ' + Math.floor(n.deg) + '\u00b0 ' + n.sign : 'none ahead in the scanned window';
                 })();
                 const eclRow = { key: 'eclipse', when: eclNow ? 'weather' : 'horizon', title: 'Eclipses', sub: eclSub, lines: eclLines, tabs: eclTabs, body: eclBody };
+                /* HARMONICS (owner, 6 November 2026: "Replace Important Today in
+                   astrology with Harmonics"). The four major aspects are the first
+                   four harmonics of the circle, in harmonic order: the whole circle
+                   (conjunction), halved (opposition), in thirds (trine) and in
+                   quarters (square). Each tab gives its line, the reader's own
+                   pairs closest first, and the placements under it in the same
+                   table the harmonic charts card uses, the pair's bodies lit. */
+                const hm = (() => {
+                  const SET = [['conjunct', 'Conjunction'], ['opposite', 'Opposition'], ['trine', 'Trine'], ['square', 'Square']];
+                  const cur = SET.find(a => a[0] === st.hmAsp) ? st.hmAsp : 'conjunct';
+                  const MIRROR = ['Descendant', 'IC', 'South Node'];
+                  const keyOf = p => p.id || p.name;
+                  const mine = asps.map((x, i) => ({ x, i })).filter(({ x }) => SET.some(a => a[0] === x.asp)
+                    && MIRROR.indexOf(x.a.name) === -1 && MIRROR.indexOf(x.b.name) === -1);
+                  const pairs = mine.filter(({ x }) => x.asp === cur).sort((p, q) => p.x.orb - q.x.orb).map(({ x, i }) => ({
+                    key: keyOf(x.a) + '|' + keyOf(x.b), g: (x.a.glyph || '') + ' ' + (x.b.glyph || ''),
+                    t: this.pointLabel(x.a) + ' and ' + this.pointLabel(x.b),
+                    o: x.orb < 1 ? 'within a degree' : Math.round(x.orb) + '\u00b0 from exact',
+                    aria: this.pointLabel(x.a) + ' ' + this.aspName(x.asp) + ' ' + this.pointLabel(x.b) + ', ' + x.orb.toFixed(1) + ' degrees from exact. Open the reading.',
+                    go: () => this.setState({ aspSel: i }) }));
+                  const lit = new Set();
+                  pairs.length && mine.filter(({ x }) => x.asp === cur).forEach(({ x }) => { lit.add(keyOf(x.a)); lit.add(keyOf(x.b)); });
+                  const mean = this.ASP_MEAN[cur] || '';
+                  const placeRows = rows.filter(r => ['body', 'node', 'angle'].indexOf(r.category) !== -1 && r.lon != null && !r.uncomputed && MIRROR.indexOf(r.name) === -1)
+                    .map(r => { const k = this.pointKey(r), on = lit.has(k) || lit.has(r.name), d = Math.floor(r.deg), m = Math.floor((r.deg - d) * 60);
+                      return { key: k, g: r.glyph || '', name: this.pointLabel(r), pos: d + '\u00b0 ' + String(m).padStart(2, '0') + '\u2032 ' + r.sign,
+                        c: on ? 'var(--tx)' : 'var(--mut)', gc: on ? 'var(--ac2-hi)' : 'var(--dim)',
+                        aria: this.pointLabel(r) + ', ' + d + ' degrees ' + r.sign + '. Open the reading.', go: () => openBody(k) }; });
+                  return {
+                    hmOn: true,
+                    hmTabs: SET.map(([k, label]) => ({ key: k, label: label, sym: this.ASP_SYM[k], on: k === cur,
+                      bg: k === cur ? 'rgba(var(--atmc),.32)' : 'var(--sf2)', bd: k === cur ? 'rgba(var(--atmc),.9)' : 'var(--bd)',
+                      go: () => this.setState({ hmAsp: k }) })),
+                    hmLine: mean.charAt(0).toUpperCase() + mean.slice(1) + '.',
+                    hmPairs: pairs, hmPairsOn: pairs.length > 0, hmPairsOff: !pairs.length,
+                    hmNone: 'No two placements of yours meet in ' + (cur === 'opposite' ? 'an opposition' : 'a ' + SET.find(a => a[0] === cur)[1].toLowerCase()) + '.',
+                    hmRows: placeRows,
+                    sub: SET.map(([k]) => this.ASP_SYM[k] + ' ' + mine.filter(({ x }) => x.asp === k).length).join('  \u00b7  ')
+                  };
+                })();
                 const rows2 = [
-                  { key: 'today', when: 'weather', title: 'Important Today', sub: 'what the sky is presently touching', lines: todayLines, body: todayBody },
+                  { key: 'harmonics', when: 'bedrock', title: 'Harmonics', sub: hm.sub, lines: [], body: [], hm: hm },
                   { key: 'retro', when: 'weather', title: 'Current Retrogrades', sub: retroSub, lines: retroLines, tabs: retroTabs, body: retroBody },
                   { key: 'stellium', when: 'bedrock', title: 'Stellium', sub: stel.any ? 'a gathering in your wheel' : 'no gathering found', lines: stellLines, body: stellBody }
                 ];
                 // An eclipse inside its five-day window is the loudest thing in the sky, so
-                // it sits directly under Important Today. Otherwise it waits its turn after
+                // it sits directly after Harmonics. Otherwise it waits its turn after
                 // the retrogrades rather than crowding the panel with a date months away.
                 rows2.splice(eclNow ? 1 : 2, 0, eclRow);
+                const hmOff = { hmOn: false, hmTabs: [], hmLine: '', hmPairs: [], hmPairsOn: false, hmPairsOff: false, hmNone: '', hmRows: [] };
                 return rows2.map(r => ({
+                  ...hmOff, ...(r.hm ? (({ sub, ...h }) => h)(r.hm) : {}),
                   key: r.key, when: r.when, title: r.title, sub: r.sub, lines: r.lines,
                   hasTabs: !!(r.tabs && r.tabs.length), tabs: r.tabs || [],
                   hasBody: !!(r.body && r.body.length), body: r.body || [],
