@@ -113,22 +113,26 @@ of these, and move the "Effective and last updated" date on both:
 - a price, a plan, or what Luminary includes (Terms section 7, and Stripe);
 - signing in by phone being switched on (the SMS provider's name can then be
   named in the provider table);
-- the LLC (next section) or the domain (the one after).
+- the company's details (next section) or the domain (the one after).
 
 A material change to the Terms needs 14 days' notice in the app or by email
 before it applies (Terms section 19).
 
-## 4. When the LLC is formed
+## 4. The LLC is formed: Kin Common LLC
 
-Both pages name "Nathaniel J. Figueroa, an individual based in the State of
-Florida". When the company exists:
+The company is Kin Common LLC, a Florida LLC (`docs/BUSINESS-SETUP.md`). Until
+the pages say so they name "Nathaniel J. Figueroa, an individual based in the
+State of Florida". Pull request #169 changes the Terms, the Privacy Policy, the
+account deletion and thanks pages and the cover's search engine card to name
+Kin Common LLC. What is left after it merges:
 
-1. Replace that with the company's exact registered name and state in both
-   pages (search for `an individual based in`), and in the contact sections.
-2. Update the date and tell readers in the app: the Terms already allow the
-   transfer (section 20, Assignment), and the Privacy Policy says the company
-   becomes the controller.
-3. Point Stripe's account and payout details at the company.
+1. Update the "Effective and last updated" date on both pages if #169 did not,
+   and tell readers in the app: the Terms already allow the transfer (section
+   20, Assignment), and the Privacy Policy says the company becomes the
+   controller.
+2. Point Stripe's account and payout details at the company, once the EIN's
+   name is corrected and the 147C letter has arrived.
+3. Sign the IP assignment from you to the company.
 
 ## 5. When the domain is live
 
