@@ -24872,18 +24872,90 @@ class Component extends DCLogic {
           let ox = px * off, oy = py * off, k2 = 0;
           while (!inPoly(C[0] + ox, C[1] + oy, P) && k2++ < 8) { ox *= .6; oy *= .6; }
           const t = rayOut(C[0] + ox, C[1] + oy, sx, sy, P), ins = Math.min(5.5, t * .45);
-          spots[g] = { x: C[0] + ox + sx * (t - ins), y: C[1] + oy + sy * (t - ins), c: c };
+          spots[g] = { x: C[0] + ox + sx * (t - ins), y: C[1] + oy + sy * (t - ins), c: c,
+            hx: C[0] + ox + sx * t, hy: C[1] + oy + sy * t };
         });
       });
     });
-    /* Gates of one centre that land on each other are eased apart, inside the shape. */
-    for (let it = 0; it < 40; it++) names.forEach(c => {
-      const gs = Object.keys(spots).filter(g => spots[g].c === c), C = cen[c];
-      for (let i = 0; i < gs.length; i++) for (let j = i + 1; j < gs.length; j++) {
-        const a = spots[gs[i]], b = spots[gs[j]], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
-        if (d < 7.5) { const m = (7.5 - d) / 2 + .01, ux = d > 1e-6 ? dx / d : 1, uy = d > 1e-6 ? dy / d : 0; a.x -= ux * m; a.y -= uy * m; b.x += ux * m; b.y += uy * m; }
+    /* The gates are laid out in tidy rows (owner, 6 November 2026: "make sure
+       the dots are in a clean, organized position"). Each gate keeps the edge
+       its channel leaves through, and the gates on one edge sit in a straight
+       row a fixed step in from it, evenly spaced, in the order their channels
+       arrive, so no two channels cross on the way out. The row is centred where
+       its channels aim and held clear of the corners. */
+    const ROW_IN = 6, ROW_GAP = 9, ROW_MIN = 7.5, EDGE_M = 5;
+    const segDist = (px, py, a, b) => { const ex = b[0] - a[0], ey = b[1] - a[1], t = Math.max(0, Math.min(1, ((px - a[0]) * ex + (py - a[1]) * ey) / (ex * ex + ey * ey)));
+      return Math.hypot(px - a[0] - ex * t, py - a[1] - ey * t); };
+    names.forEach(c => { const P = poly[c], C = cen[c], N = P.length, gs = Object.keys(spots).filter(g => spots[g].c === c);
+      const fits = (x, y) => inPoly(x, y, P) && P.every((a, i) => segDist(x, y, a, P[(i + 1) % N]) >= EDGE_M - .01);
+      /* which edge each channel leaves through, and where along it */
+      const hit = {};
+      gs.forEach(g => { const q = spots[g]; let bi = 0, bd = Infinity, bt = 0;
+        for (let i = 0; i < N; i++) { const a = P[i], b = P[(i + 1) % N], ex = b[0] - a[0], ey = b[1] - a[1];
+          const t = Math.max(0, Math.min(1, ((q.hx - a[0]) * ex + (q.hy - a[1]) * ey) / (ex * ex + ey * ey))), d = Math.hypot(q.hx - a[0] - ex * t, q.hy - a[1] - ey * t);
+          if (d < bd) { bd = d; bi = i; bt = t; } }
+        hit[g] = { e: bi, t: bt, x: q.hx, y: q.hy }; });
+      /* a row along an edge: evenly spaced, in the order the channels leave, clear of the corners */
+      const edgeRow = (i, list) => { const a = P[i], b = P[(i + 1) % N], ex = b[0] - a[0], ey = b[1] - a[1], L = Math.hypot(ex, ey);
+        let nx = -ey / L, ny = ex / L; if ((C[0] - (a[0] + b[0]) / 2) * nx + (C[1] - (a[1] + b[1]) / 2) * ny < 0) { nx = -nx; ny = -ny; }
+        const ok = t => fits(a[0] + ex * t + nx * ROW_IN, a[1] + ey * t + ny * ROW_IN);
+        let lo = 0, hi = 1; while (lo < 1 && !ok(lo)) lo += .5 / L; while (hi > 0 && !ok(hi)) hi -= .5 / L;
+        const n = list.length, span = hi - lo;
+        if (span < 0 || (n > 1 && span * L / (n - 1) < ROW_MIN)) return null;
+        const step = n > 1 ? Math.min(ROW_GAP / L, span / (n - 1)) : 0, mean = list.reduce((s2, g) => s2 + hit[g].t, 0) / n;
+        let t0 = mean - step * (n - 1) / 2; t0 = Math.max(lo, Math.min(t0, hi - step * (n - 1)));
+        return list.map((g, k) => ({ g: g, x: a[0] + ex * (t0 + step * k) + nx * ROW_IN, y: a[1] + ey * (t0 + step * k) + ny * ROW_IN })); };
+      /* a row across a corner: perpendicular to the corner's bisector, as near the corner as it fits */
+      const cornerRow = (v, list) => { const V = P[v], A = P[(v - 1 + N) % N], B = P[(v + 1) % N];
+        const ua = [(A[0] - V[0]) / Math.hypot(A[0] - V[0], A[1] - V[1]), (A[1] - V[1]) / Math.hypot(A[0] - V[0], A[1] - V[1])];
+        const ub = [(B[0] - V[0]) / Math.hypot(B[0] - V[0], B[1] - V[1]), (B[1] - V[1]) / Math.hypot(B[0] - V[0], B[1] - V[1])];
+        let u = [ua[0] + ub[0], ua[1] + ub[1]]; const ul = Math.hypot(u[0], u[1]) || 1; u = [u[0] / ul, u[1] / ul];
+        const w = [-u[1], u[0]], n = list.length;
+        const ord = list.slice().sort((p, q) => (hit[p].x * w[0] + hit[p].y * w[1]) - (hit[q].x * w[0] + hit[q].y * w[1]));
+        for (let s2 = 4; s2 < 80; s2 += .5) { const pts = ord.map((g, k) => { const o = (k - (n - 1) / 2) * ROW_GAP; return { g: g, x: V[0] + u[0] * s2 + w[0] * o, y: V[1] + u[1] * s2 + w[1] * o }; });
+          if (pts.every(p => fits(p.x, p.y))) return pts; }
+        return null; };
+      /* a lone gate right at a square corner joins the row round that corner when it fits there, so a
+         box's row runs straight from end to end rather than turning down its side */
+      const countOn = e => gs.filter(g => hit[g].e === e).length;
+      gs.forEach(g => { const h = hit[g], a = P[h.e], b = P[(h.e + 1) % N], L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const atA = h.t * L < 14, atB = (1 - h.t) * L < 14; if (!atA && !atB) return;
+        const v = atA ? h.e : (h.e + 1) % N, e2 = atA ? (h.e - 1 + N) % N : (h.e + 1) % N;
+        const A2 = P[(v - 1 + N) % N], B2 = P[(v + 1) % N], V = P[v];
+        const cosv = ((A2[0] - V[0]) * (B2[0] - V[0]) + (A2[1] - V[1]) * (B2[1] - V[1])) / (Math.hypot(A2[0] - V[0], A2[1] - V[1]) * Math.hypot(B2[0] - V[0], B2[1] - V[1]));
+        if (Math.abs(cosv) > .2 || countOn(h.e) > 2 || countOn(e2) < 3) return;
+        const P2a = P[e2], P2b = P[(e2 + 1) % N], L2 = Math.hypot(P2b[0] - P2a[0], P2b[1] - P2a[1]);
+        if ((countOn(e2) + 1 - 1) * ROW_GAP > L2 - 2 * EDGE_M - 4 && (L2 - 2 * EDGE_M) / countOn(e2) < 8.5) return;
+        hit[g] = { e: e2, t: v === e2 ? 0 : 1, x: h.x, y: h.y }; });
+      const byEdge = {}; gs.forEach(g => (byEdge[hit[g].e] = byEdge[hit[g].e] || []).push(g));
+      Object.keys(byEdge).forEach(k => byEdge[k].sort((p, q) => hit[p].t - hit[q].t));
+      /* lay the edges out; where an edge cannot hold its row, or two rows crowd a corner,
+         the gates nearest that corner from both edges become one row across it */
+      const place = {}, corner = {};
+      for (let pass = 0; pass < 6; pass++) {
+        Object.keys(place).forEach(g => delete place[g]);
+        Object.keys(corner).forEach(v => { const r = cornerRow(+v, corner[v]); if (r) r.forEach(p => { place[p.g] = p; }); });
+        let moved = false;
+        Object.keys(byEdge).forEach(k => { const i = +k, list = byEdge[k].filter(g => !Object.values(corner).some(L2 => L2.indexOf(g) !== -1));
+          if (!list.length) return;
+          const r = edgeRow(i, list);
+          if (r) { r.forEach(p => { place[p.g] = p; }); return; }
+          /* too many for the edge: the end nearest a corner moves to it */
+          const g = hit[list[0]].t < 1 - hit[list[list.length - 1]].t ? list[0] : list[list.length - 1];
+          const v = g === list[0] ? i : (i + 1) % N; (corner[v] = corner[v] || []).push(g); moved = true; });
+        if (moved) continue;
+        /* two dots too close: the pair joins the corner they share, or the nearer corner */
+        const ids = Object.keys(place); let clash = null;
+        for (let x = 0; x < ids.length && !clash; x++) for (let y = x + 1; y < ids.length && !clash; y++) {
+          const p = place[ids[x]], q = place[ids[y]]; if (Math.hypot(p.x - q.x, p.y - q.y) < ROW_MIN) clash = [ids[x], ids[y]]; }
+        if (!clash) break;
+        let bv = 0, bd = Infinity; P.forEach((V, v) => { const d = Math.hypot(V[0] - (place[clash[0]].x + place[clash[1]].x) / 2, V[1] - (place[clash[0]].y + place[clash[1]].y) / 2); if (d < bd) { bd = d; bv = v; } });
+        Object.keys(corner).forEach(v => { corner[v] = corner[v].filter(g => clash.indexOf(g) === -1); });
+        corner[bv] = (corner[bv] || []).concat(clash.filter(g => (corner[bv] || []).indexOf(g) === -1));
+        /* anything already beside that corner on either edge joins it too, so the row reads whole */
+        gs.forEach(g => { if (corner[bv].indexOf(g) !== -1) return; const p = place[g]; if (p && Math.hypot(p.x - P[bv][0], p.y - P[bv][1]) < bd + 4) corner[bv].push(g); });
       }
-      gs.forEach(g => { const q = spots[g]; let k = 0; while (!inPoly(q.x, q.y, poly[c]) && k++ < 12) { q.x = C[0] + (q.x - C[0]) * .9; q.y = C[1] + (q.y - C[1]) * .9; } });
+      gs.forEach(g => { const q = spots[g], p = place[g]; if (p) { q.x = p.x; q.y = p.y; } delete q.hx; delete q.hy; });
     });
     /* Any gate the topology did not place falls back to its centre's middle. */
     for (let n = 1; n <= 64; n++) if (!spots[n]) { const c = cOf(n); if (cen[c]) spots[n] = { x: cen[c][0], y: cen[c][1], c: c }; }

@@ -5700,7 +5700,7 @@ uppercase label or a ruled line back on these pages.
 **The wiring is drawn one way in the Atlas and on My Charts** (same day):
 `hdWireGeom()` places each gate on the side of its centre that faces where its
 channel runs, keeps channels between one pair of centres parallel, and bows a
-channel round a centre it would cross (20-34 round the G). It is all one blue,
+channel round a centre it would cross (20-34 round the G). The gates on one edge stand in an even row a fixed step in from it, in the order their channels leave; a corner too tight for two rows takes one row across it, and a lone gate at a box's corner joins the row round it. Each centre's name is placed by the same geometry (`labels`) where no dot, outline or channel touches it, inside the shape or, for Heart, Spleen and the Solar Plexus, just outside. It is all one blue,
 as the owner's sample (the Atlas Reflector page) draws it: an open centre is a
 faint `--atmc` fill in a `--chl` outline, a defined centre the same blue a
 little fuller and a brighter `--atmc` outline, never a category colour and
