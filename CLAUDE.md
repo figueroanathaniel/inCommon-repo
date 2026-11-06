@@ -3700,6 +3700,19 @@ station behind and ahead is named. Checked against swisseph-wasm for two births:
 every crossing and station within a fifth of a year, including a backward
 crossing of Mercury from Scorpio into Libra.
 
+**The composite and the relationship chart are a card in Synastry** (6
+November 2026), "The charts you make", above The blend in both shells
+(`synMade()`, `synMade`, `synMadeOn`). Positions only, no reading. The
+composite is the nearer midpoint of each pair of bodies; its Midheaven is the
+midpoint of the two and its Ascendant is derived from that Midheaven at the
+mean latitude (Robert Hand's method), because a midpoint of two Ascendants is
+not a horizon. The relationship chart (Ronald Davison) is cast for the moment
+halfway between the births at the place halfway between them. Angles appear
+only when both births have a time and a place. `horizonFrom()` is the horizon
+arithmetic `ascAt()` now calls, so the derived Ascendant uses the same code.
+Checked against swisseph-wasm for a 1985 San Juan and 1981 New York pair: every
+body, both Midheavens and both Ascendants to the arcminute.
+
 ## The sky weather, and the star clusters among the bodies
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
 (cazimis, moon phases, stations, meteor showers, alignments, the clusters),

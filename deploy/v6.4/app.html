@@ -34868,6 +34868,28 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </div>
     </sc-if>
+    <sc-if value="{{ synMadeOn }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
+      <span style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The charts you make</span>
+      <sc-for list="{{ synMade }}" as="m" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <span style="font:600 15px var(--fd);color:var(--tx)">{{ m.title }}</span>
+            <span style="font:italic 12.5px var(--fb);color:var(--tx)">{{ m.meta }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 14px">
+            <sc-for list="{{ m.rows }}" as="r" hint-placeholder-count="6">
+              <div style="display:flex;align-items:baseline;gap:7px;min-height:24px">
+                <span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span>
+                <span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span>
+                <span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
       <span style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The blend</span>
       <sc-for list="{{ synElRows }}" as="e" hint-placeholder-count="4">
@@ -42426,6 +42448,28 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </div>
         </div>
       </div>
+    </sc-if>
+    <sc-if value="{{ synMadeOn }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:18px 20px">
+      <span style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The charts you make</span>
+      <sc-for list="{{ synMade }}" as="m" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <span style="font:600 15px var(--fd);color:var(--tx)">{{ m.title }}</span>
+            <span style="font:italic 12.5px var(--fb);color:var(--tx)">{{ m.meta }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 14px">
+            <sc-for list="{{ m.rows }}" as="r" hint-placeholder-count="6">
+              <div style="display:flex;align-items:baseline;gap:7px;min-height:24px">
+                <span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span>
+                <span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span>
+                <span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
     </sc-if>
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:18px 20px">
       <span style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The blend</span>
@@ -50693,8 +50737,18 @@ class Component extends DCLogic {
   ascAt(t, latDeg, lonDeg, signT) {
     if (![t, latDeg, lonDeg].every(Number.isFinite)) return null;
     const R = this.RAD;
-    const fr = this.chartSkyFrame(t, lonDeg), lst = fr.ramc;
-    const eps = fr.eps, phi = latDeg * R, ramc = lst * R;
+    const fr = this.chartSkyFrame(t, lonDeg);
+    const h = this.horizonFrom(fr.ramc, fr.eps, latDeg);
+    const s = signT === undefined ? this.signOf(h.asc) : this.signOf(h.asc, signT);
+    return { asc: h.asc, mc: h.mc, sign: s.sign, deg: s.deg, idx: s.idx,
+      ramc: fr.ramc * R, obliquity: fr.eps, latitude: latDeg * R };
+  }
+  /* The horizon from a sidereal time in degrees, an obliquity in radians and a
+     latitude in degrees. ascAt() reads the sky for an instant; the composite
+     reads it for a Midheaven that no instant owns, so the arithmetic is here
+     once for both. */
+  horizonFrom(lst, eps, latDeg) {
+    const R = this.RAD, phi = latDeg * R, ramc = lst * R;
     let asc = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
     // A horizon cuts the ecliptic at two antipodal points. Beyond the polar
     // circle the closed form can pick the western crossing. Select the east
@@ -50703,9 +50757,7 @@ class Component extends DCLogic {
     const ra = this.norm360(Math.atan2(Math.sin(asc * R) * Math.cos(eps), Math.cos(asc * R)) / R);
     if (this.norm360(lst - ra) < 180) asc = this.norm360(asc + 180);
     const mc = this.norm360(Math.atan2(Math.sin(ramc), Math.cos(ramc) * Math.cos(eps)) / R);
-    const s = signT === undefined ? this.signOf(asc) : this.signOf(asc, signT);
-    return { asc: asc, mc: mc, sign: s.sign, deg: s.deg, idx: s.idx,
-      ramc: ramc, obliquity: eps, latitude: phi };
+    return { asc: asc, mc: mc };
   }
   // ==========================================================================
   // EXPANDED CHART COMPUTATION. Plain-JS port of app/ephemeris/engine.ts and
@@ -59327,6 +59379,55 @@ class Component extends DCLogic {
     if (hit && hit.cached) this.track('connection_chart_cached');
     return build();
   }
+  /* The two charts a pair makes, as positions only. The composite is the
+     nearer midpoint of each pair of bodies, with the Midheaven the midpoint of
+     the two and the Ascendant derived from it at the mean latitude (Robert
+     Hand's method, the one most software defaults to), because a midpoint of
+     two Ascendants is not a horizon. The relationship chart (Ronald Davison)
+     is cast for the moment halfway between the two births at the place
+     halfway between them. Angles only when both births have a time and a
+     place. Nothing is stored. */
+  synMade(me, other) {
+    const BT = this.BT(), R = this.RAD;
+    const iA = BT && BT.instant(me), iB = BT && BT.instant(other);
+    const dA = this.natalDateFor(me), dB = this.natalDateFor(other);
+    const tA = this.t2000(dA), tB = this.t2000(dB);
+    if (!Number.isFinite(tA) || !Number.isFinite(tB)) return [];
+    const placed = p => Number.isFinite(+p.birthLat) && Number.isFinite(+p.birthLon) && (p.birthLat !== '' && p.birthLat != null);
+    const timed = !!(iA && iA.timeKnown && iB && iB.timeKnown && placed(me) && placed(other));
+    const tM = (tA + tB) / 2;
+    const fmt = lon => { const s = this.signOf(lon, tM), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60);
+      return d + '\u00b0 ' + String(m).padStart(2, '0') + '\u2032 ' + s.sign; };
+    const mid = (a, b) => { const d = this.norm360(b - a); return this.norm360(d > 180 ? a + (d - 360) / 2 : a + d / 2); };
+    const bodies = this.PLNS.filter(([n]) => n !== 'South Node');
+    const cA = this.chartAt(dA), cB = this.chartAt(dB);
+    const byA = {}, byB = {};
+    cA.forEach(r => { byA[r.name] = r.lon; }); cB.forEach(r => { byB[r.name] = r.lon; });
+    const comp = bodies.filter(([n]) => Number.isFinite(byA[n]) && Number.isFinite(byB[n]))
+      .map(([n, g]) => ({ g: g, name: n, pos: fmt(mid(byA[n], byB[n])) }));
+    const dvT = tM, dvDate = new Date((dA.getTime() + dB.getTime()) / 2);
+    const dv = this.chartAt(dvDate).filter(r => r.name !== 'South Node')
+      .map(r => ({ g: r.glyph, name: r.name, pos: fmt(r.lon) }));
+    if (timed) {
+      const hA = this.ascAt(tA, +me.birthLat, +me.birthLon), hB = this.ascAt(tB, +other.birthLat, +other.birthLon);
+      if (hA && hB) {
+        const mc = mid(hA.mc, hB.mc), eps = (hA.obliquity + hB.obliquity) / 2;
+        const lst = this.norm360(Math.atan2(Math.sin(mc * R) * Math.cos(eps), Math.cos(mc * R)) / R);
+        const h = this.horizonFrom(lst, eps, (+me.birthLat + +other.birthLat) / 2);
+        comp.push({ g: 'AC', name: 'Ascendant', pos: fmt(h.asc) }, { g: 'MC', name: 'Midheaven', pos: fmt(mc) });
+      }
+      const lat = (+me.birthLat + +other.birthLat) / 2;
+      const lon = mid(+me.birthLon, +other.birthLon);
+      const h2 = this.ascAt(dvT, lat, lon > 180 ? lon - 360 : lon);
+      if (h2) dv.push({ g: 'AC', name: 'Ascendant', pos: fmt(h2.asc) }, { g: 'MC', name: 'Midheaven', pos: fmt(h2.mc) });
+    }
+    const day = dvDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+    const when = timed ? day + ', ' + dvDate.toISOString().slice(11, 16) + ' UTC' : day;
+    return [
+      { key: 'composite', title: 'Composite', meta: '', rows: comp },
+      { key: 'davison', title: 'Relationship chart', meta: when, rows: dv }
+    ];
+  }
   synVals() {
     const st = this.state, PM = this.PM(), me = this.activeProfile();
     /* The phone draws Synastry as a pager page that is always mounted, so its
@@ -59410,7 +59511,7 @@ class Component extends DCLogic {
         'Their birth date stays on this device, is never sent anywhere, is not used to build any picture of them, and one tap removes it.'
     };
     const off = { ...formVals, ...cardVals, libSyn: show, synSolo: false, synPick: false, synGate: false, synOpen: false,
-      synPickRows: [], synTop: [], synRows: [], synCols: [], synElRows: [], synNum: [], synHd: [], synLegend: [],
+      synPickRows: [], synTop: [], synRows: [], synCols: [], synElRows: [], synMade: [], synMadeOn: false, synNum: [], synHd: [], synLegend: [],
       synToSettings: () => this.setState({ tab: 'settings', spiritView: null }),
       synOneSided: false, synOneSidedNote: '',
       synManualClear: () => this.setState({ synManual: null, synWith: null }),
@@ -59465,6 +59566,7 @@ class Component extends DCLogic {
       : B.first + ' has not switched Shared Guidance on, so this is your reading of the two of you rather than a shared one. Turning it on in Settings makes it theirs as well.';
     const cA = this.chartAt(this.natalDateFor(me)), cB = this.chartAt(this.natalDateFor(other));
     const pairs = this.aspectPairs(cA, cB, false);
+    const made = this.synMade(me, other);
     const warm = pairs.filter(pr => (this.SYN_ASP[pr.asp] || {}).k === 'h').length;
     const edge = pairs.length - warm;
     const ranked = pairs.slice().sort((x, y) => this.synWeight(y) - this.synWeight(x)).slice(0, 6);
@@ -59724,6 +59826,7 @@ class Component extends DCLogic {
       synLegend: Object.keys(this.SYN_ASP).map(k => ({ glyph: this.SYN_ASP[k].g, label: this.aspName(k),
         c: this.SYN_ASP[k].k === 'f' ? 'var(--warn)' : k === 'conjunct' ? 'var(--ac2-hi)' : 'var(--ac)' })),
       synElRows: elRows,
+      synMade: made, synMadeOn: made.length > 0,
       synElNote: 'Counted across every body in each chart. Together you are heaviest in ' + richest.toLowerCase() + ' and lightest in ' + shortest.toLowerCase() + ', which is usually where one of you ends up covering for the other.',
       synNum: num, synHd: hd, synBridges: bridges, synHasBridges: bridges.length > 0,
       cxShow: !!comp, cxGroups: cxGroups,
