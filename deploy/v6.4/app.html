@@ -6443,147 +6443,147 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
      verb     how it acts on an arena
      gifts / shadows / growth / blocks  seed the Working With lists            */
   var BODIES = {
-    'Sun': { glyph: '\u2609', kind: 'luminary', energy: 'identity and conscious will',
+    'Sun': { voice: 'The Sun burns at the centre and asks to be lived out loud.', glyph: '\u2609', kind: 'luminary', energy: 'identity and conscious will',
       definition: 'Under the personality there is a fire that wants to become someone in particular. The Sun is where it burns: the warmth you give off without trying, and the will that keeps walking you toward yourself.',
       role: 'Follow the Sun and you find what you are still growing into, and the places that hand your energy back to you instead of taking it.',
       verb: 'centres', gifts: ['hold a centre other people can locate', 'give warmth without being asked for it', 'know what you actually want when the room is undecided'],
       shadows: ['need the room to notice before something feels real', 'confuse being seen with being understood', 'burn through vitality proving a point'],
       growth: ['spend your warmth where it is received rather than where it is contested', 'let your identity be a practice rather than a verdict'],
       blocks: ['audiences that reward performance over substance', 'a self-image formed before you knew yourself'] },
-    'Moon': { glyph: '\u263D', kind: 'luminary', energy: 'feeling, memory, and what soothes',
+    'Moon': { voice: 'The Moon keeps feelings close, remembers what soothed you, and reaches for it again.', glyph: '\u263D', kind: 'luminary', energy: 'feeling, memory, and what soothes',
       definition: 'Before a thought forms, something in you has already flinched or softened. The Moon keeps that first response, the private weather under the day, and every old comfort it still reaches for.',
       role: 'When pressure comes, the Moon is where you go home: what actually soothes you, and the feeling habits laid down long before you could choose them.',
       verb: 'softens', gifts: ['read a room before anyone speaks', 'remember what people needed last time', 'self-soothe without needing anyone to arrive'],
       shadows: ['mistake a familiar feeling for a true one', 'withdraw before asking', 'tend everyone\u2019s weather but your own'],
       growth: ['name a need out loud while it is still small', 'let comfort change shape as you do'],
       blocks: ['an old comfort that no longer comforts', 'moods treated as facts rather than reports'] },
-    'Mercury': { glyph: '\u263F', kind: 'planet', energy: 'thought, language, and exchange',
+    'Mercury': { voice: 'Mercury darts between people, carrying words and coming back with more.', glyph: '\u263F', kind: 'planet', energy: 'thought, language, and exchange',
       definition: 'Somewhere between hearing a thing and saying it back, your mind does its sorting. Mercury lives in that traffic: what catches your attention first, how you turn it over, and the words you finally hand to someone else.',
       role: 'Mercury follows how you learn, the shape your explanations take, and the questions you cannot stop asking.',
       verb: 'articulates', gifts: ['find the sentence that makes a tangle legible', 'change your mind on new evidence', 'ask the question nobody framed'],
       shadows: ['talk past the point at which you knew', 'use precision as a way of not committing', 'mistake having words for having understanding'],
       growth: ['write down the thought you keep re-thinking', 'let silence carry part of the meaning'],
       blocks: ['a story about yourself repeated until it stopped being examined', 'rooms where speed is mistaken for intelligence'] },
-    'Venus': { glyph: '\u2640', kind: 'planet', energy: 'affection, taste, and worth',
+    'Venus': { voice: 'Venus leans toward what is lovely and quietly decides what it is worth.', glyph: '\u2640', kind: 'planet', energy: 'affection, taste, and worth',
       definition: 'Some things you love before you can say why. Venus keeps that pull: your taste, the way you come close to people, and the quiet sum you carry of what you believe you deserve.',
       role: 'Venus lights the way you love, your sense of what is fair between people, and the terms on which you let yourself be cared for.',
       verb: 'harmonises', gifts: ['make people feel welcome without effort', 'know what is worth keeping', 'bring beauty to something purely functional'],
       shadows: ['keep the peace past the point of honesty', 'confuse being wanted with being valued', 'spend on the appearance of a life rather than the life'],
       growth: ['say the unlovely true thing to someone who can hold it', 'let your taste be yours rather than defensible'],
       blocks: ['a standard of worth borrowed from someone who did not love you well', 'pleasure postponed as though it were owed later'] },
-    'Mars': { glyph: '\u2642', kind: 'planet', energy: 'appetite, anger, and assertion',
+    'Mars': { voice: 'Mars wants, and moves before the wanting has finished speaking.', glyph: '\u2642', kind: 'planet', energy: 'appetite, anger, and assertion',
       definition: 'There is heat in you that wants something and will move for it. Mars is that appetite, the way you chase, the way you claim, and the shape your anger takes when it finally stands up.',
       role: 'Mars traces where your initiative runs freely, how your anger behaves when nobody is managing it, and where conflict tends to come looking for you.',
       verb: 'drives', gifts: ['start the thing while others are still deciding', 'stay in a difficult conversation', 'want something plainly enough to act on it'],
       shadows: ['spend force on the wrong target', 'read friction as proof of aliveness', 'let anger arrive as cold distance instead of speech'],
       growth: ['aim the heat rather than damping it', 'let a want be spoken before it becomes a demand'],
       blocks: ['a rule about anger set by someone else\u2019s temper', 'competition that is not actually a contest'] },
-    'Jupiter': { glyph: '\u2643', kind: 'planet', energy: 'growth, belief, and meaning',
+    'Jupiter': { voice: 'Jupiter opens the door wider and trusts there is more on the other side.', glyph: '\u2643', kind: 'planet', energy: 'growth, belief, and meaning',
       definition: 'Part of you keeps reaching for a bigger frame, a reason, a horizon. Jupiter is that reach: the faith that keeps you widening, and the generosity that sometimes promises more than the hours can hold.',
       role: 'Jupiter opens the places where you grow without forcing it, where you overreach out of hope, and what you simply take on trust.',
       verb: 'expands', gifts: ['see the larger frame while others fight the detail', 'give generously without keeping the ledger', 'stay hopeful with your eyes open'],
       shadows: ['promise at the size of your optimism', 'mistake a good story for a true one', 'expand past what you can actually tend'],
       growth: ['let a belief be tested rather than defended', 'choose depth once breadth has been had'],
       blocks: ['a conviction inherited and never examined', 'more open doors than hours'] },
-    'Saturn': { glyph: '\u2644', kind: 'planet', energy: 'structure, limit, and responsibility',
+    'Saturn': { voice: 'Saturn sets one stone on another and stays until the wall will hold.', glyph: '\u2644', kind: 'planet', energy: 'structure, limit, and responsibility',
       definition: 'Some things will only be built slowly, and no amount of charm will lower their price. Saturn sits with those: the limits you keep meeting, the time things take, and the steadiness that grows from staying.',
       role: 'Saturn marks where resistance turns into mastery if you keep showing up, and the weight of what you feel answerable for.',
       verb: 'disciplines', gifts: ['finish what stopped being interesting', 'hold a boundary without a speech', 'be the one who is actually reliable'],
       shadows: ['audit yourself in a voice you would not use on anyone else', 'call fear prudence', 'wait for qualification that never certifies itself'],
       growth: ['let sufficiency be a standard you can actually reach', 'build the small structure rather than plan the large one'],
       blocks: ['a standard set by someone who was never satisfied', 'a delay that has become a residence'] },
-    'Uranus': { glyph: '\u2645', kind: 'planet', energy: 'individuation and the break in the pattern',
+    'Uranus': { voice: 'Uranus breaks the pattern the moment it starts to feel like a cage.', glyph: '\u2645', kind: 'planet', energy: 'individuation and the break in the pattern',
       definition: 'Every so often the pattern cracks and light gets in. Uranus is that crack: the sudden insight, the swerve, the part of you that will not inherit a life without looking at it first.',
       role: 'Uranus finds the places you refuse to be standardised, and where change tends to arrive before you have finished getting ready for it.',
       verb: 'pursues', gifts: ['see the arrangement everyone stopped questioning', 'tolerate being the odd one', 'change your life in a week when it is warranted'],
       shadows: ['break something because it is intact', 'call restlessness freedom', 'leave before being known'],
       growth: ['stay long enough for a change to take root', 'let difference be a contribution rather than a position'],
       blocks: ['belonging treated as a threat', 'a reflex against structure, including your own'] },
-    'Neptune': { glyph: '\u2646', kind: 'planet', energy: 'longing and imagination',
+    'Neptune': { voice: 'Neptune softens every edge and listens for the longing underneath.', glyph: '\u2646', kind: 'planet', energy: 'longing and imagination',
       definition: 'The edges soften here, between you and other people, between what is and what could be. Neptune carries longing, imagination and compassion, and the sweet pull toward something larger than a single life.',
       role: 'Neptune drifts through the places where your boundaries thin, where inspiration arrives as a gift, and where you are most tender to being fooled.',
       verb: 'thins the edges of', gifts: ['feel what someone will not say', 'make something from almost nothing', 'forgive at scale'],
       shadows: ['soften a fact until it stops requiring action', 'merge until you cannot locate yourself', 'wait for rescue and call it faith'],
       growth: ['put the vision into a form that can be corrected', 'keep compassion and clear sight in the same hand'],
       blocks: ['a fog that arrives whenever a decision does', 'an ideal held close enough to obscure the actual' ] },
-    'Pluto': { glyph: '\u2647', kind: 'dwarf planet', energy: 'power and compulsion',
+    'Pluto': { voice: 'Pluto goes down to the roots and comes back carrying what was buried.', glyph: '\u2647', kind: 'dwarf planet', energy: 'power and compulsion',
       definition: 'Some things in a life will not stay buried. Pluto works at that depth, where power is real, where an ending clears ground, and where something truer keeps asking to be born.',
       role: 'Pluto circles the places you grip hardest, where your strength runs deepest, and where life keeps asking for a letting go and a rebuild.',
       verb: 'transforms', gifts: ['stay present to what others cannot look at', 'rebuild after a loss that should have ended it', 'sense the real power in a room'],
       shadows: ['hold control long past its usefulness', 'test a bond to see if it survives', 'go underground with what needed daylight'],
       growth: ['let a thing end while there is still choice in it', 'use intensity to hold something rather than to grip it'],
       blocks: ['a secret that has become the architecture', 'an old survival tactic still on duty'] },
-    'Chiron': { glyph: '\u26B7', kind: 'body', energy: 'the tender place and the skill grown around it',
+    'Chiron': { voice: 'Chiron touches the tender place and slowly grows a skill around it.', glyph: '\u26B7', kind: 'body', energy: 'the tender place and the skill grown around it',
       definition: 'Some places stay tender long after the reason is gone. Chiron sits on one of them, and on the quiet skill that grows around it, the one that lets you stay with someone else\u2019s pain without looking away.',
       role: 'Chiron touches an early hurt, the spot that still answers out of proportion, and the way that same tenderness slowly turns into something you can offer.',
       verb: 'works through', gifts: ['recognise pain without flinching from it', 'teach what you had to learn the hard way', 'sit with someone who is not fixable yet'],
       shadows: ['help others where you will not be helped', 'treat the wound as an identity', 'over-qualify before offering what you already know'],
       growth: ['let someone tend the thing you tend in everyone else', 'offer the skill without re-opening the injury'],
       blocks: ['a hurt whose story is smoother than the truth', 'expertise used as armour'] },
-    'Ceres': { glyph: '\u26B3', kind: 'body', energy: 'nurture, loss, and return',
+    'Ceres': { voice: 'Ceres feeds, grieves what is lost, and waits for it to return in its season.', glyph: '\u26B3', kind: 'body', energy: 'nurture, loss, and return',
       definition: 'Feeding and being fed, holding on and having to let go: Ceres moves through all of it. She carries the rhythm of care, and what grief does to that rhythm when someone is taken from it.',
       role: 'Ceres shapes your terms of care: what you give freely, what you struggle to receive, and how you weather a separation.',
       verb: 'nourishes through', gifts: ['make people materially safer', 'stay through a season of grief', 'know what someone actually needs'],
       shadows: ['make care the price of closeness', 'hold on where release is the care', 'feed others while running empty'],
       growth: ['receive without immediately repaying', 'let care survive distance'],
       blocks: ['an early loss still setting the terms', 'nurture confused with control'] },
-    'Pallas': { glyph: '\u26B4', kind: 'body', energy: 'strategy and pattern-sight',
+    'Pallas': { voice: 'Pallas steps back, sees the pattern whole, and plans the next move.', glyph: '\u26B4', kind: 'body', energy: 'strategy and pattern-sight',
       definition: 'Before you can explain it, you have often seen the pattern. Pallas is that applied intelligence, the strategist who would rather fight well than simply fight, and who can read a whole board from three moves.',
       role: 'Pallas sharpens how you solve, where your judgement cuts cleanest, and how you defend what matters to you.',
       verb: 'applies', gifts: ['see the pattern from few examples', 'find the move that costs least', 'argue a position without becoming it'],
       shadows: ['solve what needed only to be felt', 'win the exchange and lose the person', 'strategise instead of arriving'],
       growth: ['use the pattern in service of something you love', 'let a problem be somebody else\u2019s to solve'],
       blocks: ['cleverness standing in for courage', 'analysis extended until action expires'] },
-    'Juno': { glyph: '\u26B5', kind: 'body', energy: 'commitment and its terms',
+    'Juno': { voice: 'Juno holds out a promise and asks what its terms really are.', glyph: '\u26B5', kind: 'body', energy: 'commitment and its terms',
       definition: 'Every long bond has terms, spoken or not. Juno keeps yours: what you need before you can commit, and what you will not live with once you have.',
       role: 'Juno holds what you bring to a lasting partnership, and what a broken promise means in your own particular language.',
       verb: 'holds', gifts: ['name what you need in a bond', 'stay loyal without disappearing', 'hold a partner to something real'],
       shadows: ['enforce a contract nobody was shown', 'trade equality for security', 'keep score in the name of fairness'],
       growth: ['renegotiate rather than endure', 'let commitment be chosen again rather than assumed'],
       blocks: ['a marriage template absorbed before consent', 'a grievance filed but never raised'] },
-    'Vesta': { glyph: '\u26B6', kind: 'body', energy: 'devotion and focus',
+    'Vesta': { voice: 'Vesta tends one flame and keeps the door closed around it.', glyph: '\u26B6', kind: 'body', energy: 'devotion and focus',
       definition: 'There is a flame you tend when nobody is watching. Vesta is that devotion, the focus that narrows the world to one thing, and the things you quietly set aside so it can keep burning.',
       role: 'Vesta shows what you are devoted to, how you concentrate, and the price you have agreed to pay for that concentration.',
       verb: 'tends', gifts: ['go deep where others sample', 'keep a practice with no audience', 'protect the conditions your work needs'],
       shadows: ['make the sacrifice larger than the flame', 'call withdrawal purity', 'let devotion crowd out intimacy'],
       growth: ['let someone into the room where you work', 'check whether the sacrifice is still buying anything'],
       blocks: ['a vow made in a season that has passed', 'a standard of purity nobody asked for'] },
-    'North Node': { glyph: '\u260A', kind: 'point', energy: 'the unfamiliar direction of growth',
+    'North Node': { voice: 'The North Node points down the road that still feels unfamiliar.', glyph: '\u260A', kind: 'point', energy: 'the unfamiliar direction of growth',
       definition: 'Growth rarely feels like talent at first. The North Node points toward the ground you have not practised yet, the direction that feels awkward precisely because it is new.',
       role: 'Lean toward the North Node and you lean into your own unfamiliar edge, the place that only becomes yours by walking it.',
       verb: 'draws toward', gifts: ['keep going in the direction that is not yet fluent', 'take instruction late', 'grow in public'],
       shadows: ['wait for confidence before beginning', 'read awkwardness as wrongness'],
       growth: ['choose the version of the day that is slightly unpractised', 'let competence arrive after the attempt'],
       blocks: ['an old fluency that keeps paying just enough', 'progress measured against people further along'] },
-    'South Node': { glyph: '\u260B', kind: 'point', energy: 'the practised, easy, worn direction',
+    'South Node': { voice: 'The South Node knows the worn road by heart, and offers its ease.', glyph: '\u260B', kind: 'point', energy: 'the practised, easy, worn direction',
       definition: 'Some skills feel like they came with you. The South Node is that well worn groove: real fluency, easy to reach, and very easy to hide in.',
       role: 'The South Node knows where you already know how, and where retreat feels most like comfort.',
       verb: 'falls back on', gifts: ['do this well with little preparation', 'stabilise a situation quickly', 'teach from long practice'],
       shadows: ['return here when growth is available elsewhere', 'call an old strength a whole identity'],
       growth: ['use the fluency as a base rather than a residence', 'give it away by teaching it'],
       blocks: ['comfort that looks exactly like competence', 'a reputation built on the easy thing'] },
-    'Ascendant': { glyph: 'AC', kind: 'angle', energy: 'arrival and first impression',
+    'Ascendant': { voice: 'The Ascendant steps through the door first, and the room meets it before a word.', glyph: 'AC', kind: 'angle', energy: 'arrival and first impression',
       definition: 'The room has already met you before you speak. The Ascendant was the horizon at your first breath, and it holds that arrival: the style through which everything else in you reaches the world.',
       role: 'Through the Ascendant people meet your manner first, and through it you look back at them.',
       verb: 'presents as', gifts: ['set a tone on entering', 'be legible quickly'],
       shadows: ['be taken for the manner rather than the person', 'perform the entrance long after arriving'],
       growth: ['let the first impression be an opening rather than a whole account'],
       blocks: ['a style that was armour first'] },
-    'Descendant': { glyph: 'DC', kind: 'angle', energy: 'the qualities you find in other people',
+    'Descendant': { voice: 'The Descendant waits across the room, in the faces of the people who meet you.', glyph: 'DC', kind: 'angle', energy: 'the qualities you find in other people',
       definition: 'Across the horizon sits everything you tend to find in other people first. The Descendant holds those qualities, often met in someone else long before you recognise them as yours.',
       role: 'The Descendant draws the partners you seek, and the ones you provoke, and what each of them is quietly teaching you.',
       verb: 'meets', gifts: ['draw complements toward you', 'learn fast through relationship'],
       shadows: ['outsource a quality rather than develop it', 'choose the same lesson in new company'],
       growth: ['take back one quality you keep hiring others to carry'],
       blocks: ['a type mistaken for a fate'] },
-    'Midheaven': { glyph: 'MC', kind: 'angle', energy: 'vocation and public standing',
+    'Midheaven': { voice: 'The Midheaven climbs into the open, where your work can be seen.', glyph: 'MC', kind: 'angle', energy: 'vocation and public standing',
       definition: 'At the top of the chart is the part of your life that faces the open sky. The Midheaven carries vocation and visibility, the shape of what you may become known for.',
       role: 'The Midheaven bends toward your public work and the long direction of your ambition.',
       verb: 'aims at', gifts: ['be recognised for something specific', 'work toward a long horizon'],
       shadows: ['let the role eat the life', 'measure worth in visibility'],
       growth: ['choose the work for the work, and let standing follow'],
       blocks: ['someone else\u2019s definition of arrival'] },
-    'IC': { glyph: 'IC', kind: 'angle', energy: 'roots and private ground',
+    'IC': { voice: 'The IC settles at the floor of the chart, the private ground that holds you up.', glyph: 'IC', kind: 'angle', energy: 'roots and private ground',
       definition: 'Underneath everything you show is the floor you stand on. The IC holds origin, home, and the private ground that any standing in the world quietly depends on.',
       role: 'The IC remembers where you come from, and what you need underfoot before anything else feels steady.',
       verb: 'rests on', gifts: ['build a private base that actually holds', 'know where you are from without romance'],
@@ -7203,73 +7203,73 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
      manner  fills "acts <manner>"   demand  what the sign requires
      decans  Chaldean decan rulers, 0-9 / 10-19 / 20-29                      */
   var SIGNS = {
-    'Aries': { element: 'fire', modality: 'cardinal', quality: 'directness and initiative',
+    'Aries': { enters: 'Aries walks in first, already moving, the spark that starts the room before anyone has decided to.', element: 'fire', modality: 'cardinal', quality: 'directness and initiative',
       definition: 'Cardinal fire, the spark that moves before the reasons arrive. Here courage comes easily and patience has to be practised, and something always wants to start.',
       manner: 'first and fast, before the argument for waiting can be made', demand: 'Aries needs something to actually begin.',
       gift: 'begin without a guarantee', shadow: 'burn the first third of your force on the starting gun',
       edge: 'and do it first, before anyone else has decided', move: 'make the first move and decide afterwards',
       decans: ['Mars', 'Sun', 'Venus'] },
-    'Taurus': { element: 'earth', modality: 'fixed', quality: 'steadiness and sensory trust',
+    'Taurus': { enters: 'Taurus walks in slowly and stays, setting its weight down until the room feels solid.', element: 'earth', modality: 'fixed', quality: 'steadiness and sensory trust',
       definition: 'Fixed earth, slow and sure and deeply physical. Taurus trusts what it can touch, keeps its own pace, and will not be rushed into anything it has not chosen.',
       manner: 'slowly, physically, and only once', demand: 'Taurus wants it real, and worth keeping.',
       gift: 'stay with something until it is solid', shadow: 'keep a comfortable arrangement past its expiry',
       edge: 'and keep at it long after others have drifted off', move: 'slow down, use your hands, and let your body have a vote',
       decans: ['Mercury', 'Moon', 'Saturn'] },
-    'Gemini': { element: 'air', modality: 'mutable', quality: 'curiosity and quickness',
+    'Gemini': { enters: 'Gemini walks in talking, a door open on either side, introducing the room to itself.', element: 'air', modality: 'mutable', quality: 'curiosity and quickness',
       definition: 'Mutable air, quick and curious and always holding a second door open. Gemini gathers, connects, and lets a contradiction sit without needing to settle it.',
       manner: 'in several directions at once, testing as it goes', demand: 'Gemini needs to be interested, and cannot pretend.',
       gift: 'hold two ideas without collapsing them', shadow: 'move on at the moment depth becomes available',
       edge: 'and find more than one way to say it', move: 'ask two more questions before you settle on an answer',
       decans: ['Jupiter', 'Mars', 'Sun'] },
-    'Cancer': { element: 'water', modality: 'cardinal', quality: 'protectiveness and memory',
+    'Cancer': { enters: 'Cancer walks in and checks who needs looking after, and the room becomes a little more like home.', element: 'water', modality: 'cardinal', quality: 'protectiveness and memory',
       definition: 'Cardinal water, moving sideways toward what it loves. Cancer protects, remembers, and treats a feeling as information rather than an interruption.',
       manner: 'protectively, sideways, tending the vulnerable part first', demand: 'Cancer needs to feel safe before it can be honest.',
       gift: 'make a place where people can be unguarded', shadow: 'defend an old hurt as though it were current',
       edge: 'and make people feel held while you do it', move: 'tend the most tender person in the room first, yourself included',
       decans: ['Venus', 'Mercury', 'Moon'] },
-    'Leo': { element: 'fire', modality: 'fixed', quality: 'warmth and expressive pride',
+    'Leo': { enters: 'Leo walks in warm and lit, and the room turns toward the light without being asked.', element: 'fire', modality: 'fixed', quality: 'warmth and expressive pride',
       definition: 'Fixed fire, warm and steady and generous with its light. Leo commits to its own expression and wants what it makes to be truly seen.',
       manner: 'warmly and visibly, with the whole self behind it', demand: 'Leo needs it to matter, and to be witnessed.',
       gift: 'be generous from the centre', shadow: 'need the witness before the act feels real',
       edge: 'and do it warmly enough that others light up too', move: 'let yourself be seen doing it, wholeheartedly',
       decans: ['Saturn', 'Jupiter', 'Mars'] },
-    'Virgo': { element: 'earth', modality: 'mutable', quality: 'precision and usefulness',
+    'Virgo': { enters: 'Virgo walks in noticing, quietly setting straight the one thing nobody else saw was crooked.', element: 'earth', modality: 'mutable', quality: 'precision and usefulness',
       definition: 'Mutable earth, attentive to the small thing that is not quite right. Virgo refines and mends, and loves through competence more than declaration.',
       manner: 'carefully, in small corrections, keeping the standard in view', demand: 'Virgo wants it done with care, properly.',
       gift: 'improve the thing rather than describe it', shadow: 'let the standard become a tax on every attempt',
       edge: 'and get the small details exactly right', move: 'fix one small thing properly and leave the rest for later',
       decans: ['Sun', 'Venus', 'Mercury'] },
-    'Libra': { element: 'air', modality: 'cardinal', quality: 'balance and relation',
+    'Libra': { enters: 'Libra walks in as the delegator, weighing the room and everyone in it before a word is spoken.', element: 'air', modality: 'cardinal', quality: 'balance and relation',
       definition: 'Cardinal air, always feeling for the other side of the scale. Libra relates, weighs and begins things through other people, with fairness as its compass.',
       manner: 'relationally, weighing the other side before moving', demand: 'Libra wants it fair, and shared.',
       gift: 'hold two interests at once without erasing one', shadow: 'defer until the decision is made by default',
       edge: 'and keep everyone at the table while you do it', move: 'say what you want before you start weighing what they want',
       decans: ['Moon', 'Saturn', 'Jupiter'] },
-    'Scorpio': { element: 'water', modality: 'fixed', quality: 'depth and intensity',
+    'Scorpio': { enters: 'Scorpio walks in and goes straight to what the room is not saying.', element: 'water', modality: 'fixed', quality: 'depth and intensity',
       definition: 'Fixed water, still on the surface and very deep underneath. Scorpio goes looking for the truth of a feeling, keeps what is hidden, and knows that some things have to end to be reborn.',
       manner: 'quietly and completely, holding the depth of it', demand: 'Scorpio wants the real version, whatever it costs.',
       gift: 'stay with what others look away from', shadow: 'hold on and call the grip loyalty',
       edge: 'and go one layer deeper than anyone expected', move: 'name what is actually happening underneath',
       decans: ['Mars', 'Sun', 'Venus'] },
-    'Sagittarius': { element: 'fire', modality: 'mutable', quality: 'breadth and conviction',
+    'Sagittarius': { enters: 'Sagittarius walks in with a window already open, pointing the room toward somewhere farther.', element: 'fire', modality: 'mutable', quality: 'breadth and conviction',
       definition: 'Mutable fire, restless for a horizon. Sagittarius ranges, believes, and will trade comfort for meaning almost every time.',
       manner: 'expansively, aimed at somewhere larger', demand: 'Sagittarius needs room, and a reason.',
       gift: 'keep faith in something bigger than the week', shadow: 'answer before the question is finished',
       edge: 'and point everyone toward something bigger', move: 'ask what it means and where it could lead',
       decans: ['Mercury', 'Moon', 'Saturn'] },
-    'Capricorn': { element: 'earth', modality: 'cardinal', quality: 'discipline and long ambition',
+    'Capricorn': { enters: 'Capricorn walks in, takes the measure of the room, and starts building something that will last.', element: 'earth', modality: 'cardinal', quality: 'discipline and long ambition',
       definition: 'Cardinal earth, patient with the long climb. Capricorn builds, endures, and earns its authority one season at a time.',
       manner: 'strategically and patiently, with the long climb accounted for', demand: 'Capricorn wants it to last.',
       gift: 'stay with a plan past the interesting part', shadow: 'defer the living until the building is finished',
       edge: 'and build it to last', move: 'take one step you will still be glad of in a year',
       decans: ['Jupiter', 'Mars', 'Sun'] },
-    'Aquarius': { element: 'air', modality: 'fixed', quality: 'detachment and principle',
+    'Aquarius': { enters: 'Aquarius walks in at a slight angle, seeing how the room could be arranged instead.', element: 'air', modality: 'fixed', quality: 'detachment and principle',
       definition: 'Fixed air, standing a little apart so it can see the whole system. Aquarius holds a position on principle, even when principle costs it a place to belong.',
       manner: 'at a deliberate distance, on principle rather than pressure', demand: 'Aquarius needs it to make sense from the outside.',
       gift: 'see the arrangement nobody questions', shadow: 'stay outside where inside was the point',
       edge: 'and see the whole pattern while you do it', move: 'step back far enough to see the system, then speak',
       decans: ['Venus', 'Mercury', 'Moon'] },
-    'Pisces': { element: 'water', modality: 'mutable', quality: 'porousness and mercy',
+    'Pisces': { enters: 'Pisces walks in and the walls soften, the room taking on the feeling of everyone in it.', element: 'water', modality: 'mutable', quality: 'porousness and mercy',
       definition: 'Mutable water, where the edges thin and almost everything gets in. In Pisces compassion and escape share a door, and mercy is the native tongue.',
       manner: 'permeably, taking in more than was addressed to you', demand: 'Pisces asks for mercy, your own included.',
       gift: 'feel what has not been said', shadow: 'dissolve the edge that was holding you',
@@ -7374,7 +7374,23 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     'Here your single life joins a larger one. The 11th House shows where your hopes meet other people\u2019s, and which future you will work toward together.',
     'Here the visible world thins. The 12th House works through solitude and surrender, and through strengths you may not know you have until the day they are needed.'
   ];
-  HOUSES.forEach(function (h, i) { h.presence = HOUSE_PRESENCE[i]; h.inLife = HOUSE_IN_LIFE[i]; });
+  /* What each house is, said the way the owner asked on 6 November 2026: "A
+     part of living where [this] happens consistently". */
+  var HOUSE_LIVING = [
+    'your in-person visibility, your impression on the world,',
+    'money, keeping and the worth you feel underneath',
+    'everyday talk, errands and the people close by',
+    'home, family and the ground under your feet',
+    'play, making things and falling for someone',
+    'the ordinary workday and the care of your body',
+    'being met by one other person as an equal',
+    'closeness, shared resources and the endings that change you',
+    'belief, study and the long road out',
+    'your work in the open and the way the world sees it',
+    'friendship, the groups you choose and the future you hope for together',
+    'solitude, dreams and what you let go of'
+  ];
+  HOUSES.forEach(function (h, i) { h.presence = HOUSE_PRESENCE[i]; h.inLife = HOUSE_IN_LIFE[i]; h.living = HOUSE_LIVING[i]; });
 
   /* ---- LAYER 4: dignity (traditional table) ------------------------------- */
   var DIGNITY = {
@@ -11744,7 +11760,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     27: ['Caring', 'Sacral', 'Responsibility for other people\u2019s wellbeing.', 'Care that will not let go.', 'Nourishment offered, not imposed.'],
     28: ['The Game Player', 'Spleen', 'Struggle in search of what is worth it.', 'Risk taken to feel alive.', 'Purpose found in the difficulty.'],
     29: ['Saying Yes', 'Sacral', 'Commitment with the whole body.', 'Yes said to avoid the discomfort of no.', 'Commitment that follows through.'],
-    30: ['Feelings', 'Solar Plexus', 'Desire that starts everything.', 'Wanting more than living.', 'Feeling used as fuel.'],
+    30: ['Feelings', 'Solar Plexus', 'Desire that starts everything.', 'Wanting more than living.', 'Letting the feeling fuel the living.'],
     31: ['Influence', 'Throat', 'Leading because you were asked.', 'Leading because nothing stopped you.', 'Influence held on loan.'],
     32: ['Continuity', 'Spleen', 'Instinct for what will endure.', 'Fear of failure that stops the start.', 'Judgment about what deserves to last.'],
     33: ['Privacy', 'Throat', 'Retelling experience after it is over.', 'Secrecy for status.', 'Witness that becomes something useful.'],
@@ -11963,91 +11979,86 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   var LESSONS = [
     /* ---------------- Bedrock ---------------- */
     { tier: 'bedrock', name: 'Type', epi: 'Five ways of meeting the world',
-      lead: 'Type is the first sort the system makes, and every other idea is read through it. It is not a temperament and it is not chosen. It falls out of the wiring: which centers are defined, and whether a motor reaches the Throat. The Sacral is the hinge. Defined, it makes a Generator of one kind or another. Undefined, a motor wired to the Throat makes a Manifestor, any other definition makes a Projector, and no definition at all makes a Reflector.',
+      lead: 'Type is the first sort the system makes, and every other idea is read through it. It is not a temperament and nobody chooses it. It comes from the wiring: which centers are defined, and whether a motor reaches the Throat. The Sacral is the hinge. Defined, it makes a Generator of one kind or another. Undefined, a motor wired to the Throat makes a Manifestor, any other definition makes a Projector, and no definition at all makes a Reflector. Perhaps there are five ways so that each one has something to bring the others.',
       parts: [
-        ['Manifestor', 'No defined Sacral, and one of the other three motors (Heart, Solar Plexus or Root) joined to the Throat. Read as built to initiate. Published figures put it near 9 percent of people.'],
-        ['Generator', 'A defined Sacral with no motor reaching the Throat. Read as built to respond, with sustainable energy for the work that is correct for it.'],
+        ['Manifestor', 'No defined Sacral, and one of the other three motors (Heart, Solar Plexus or Root) joined to the Throat. Read as built to initiate, to start what others can then join. Published figures put it near 9 percent of people.'],
+        ['Generator', 'A defined Sacral with no motor reaching the Throat. Read as built to respond, with lasting energy for the work that is right for it. Much of what there is to respond to arrives through other people.'],
         ['Manifesting Generator', 'A defined Sacral plus a motor joined to the Throat. The published convention counts four types and files it under Generator rather than as a fifth, with the same strategy, aura, signature and not-self theme. Many schools and some reference works treat it as a fifth type and add informing to its strategy. The two kinds of Generator chart together are given as roughly two thirds to seven tenths of all charts, about half of them Manifesting Generator charts.'],
-        ['Projector', 'No defined Sacral and no motor to the Throat, with at least one channel defined. Read as built to see and guide the energy of others. Just over 20 percent in published figures.'],
-        ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for its surroundings. About 1 percent.'],
-        ['Energy types and non-energy types', 'The Manifestor and both kinds of Generator are called energy types. The Projector and the Reflector are non-energy types: the tradition holds that neither carries consistent working energy of its own, and that both do best once they stop keeping pace with the energy types.'],
-        ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar, because the Moon’s monthly passage is what gives its decisions their shape.'],
+        ['Projector', 'No defined Sacral and no motor to the Throat, with at least one channel defined. Read as built to see and guide the energy of others, a gift that comes alive when someone asks for it. Just over 20 percent in published figures.'],
+        ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for the people around it. About 1 percent.'],
+        ['Energy types and non-energy types', 'The Manifestor and both kinds of Generator are called energy types. The Projector and the Reflector are non-energy types: the tradition holds that neither carries consistent working energy of its own, and that both do best once they stop keeping pace with the energy types. Seen another way, that is a body asking to lean on others rather than to match them, and leaning is not a smaller way to live.'],
+        ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar: the Moon’s monthly passage is what gives its decisions their shape.'],
         ['Kinds of Projector', 'A modern sorting, by what the chart defines. An energy Projector chart has the Heart, the Solar Plexus or the Root defined, none of them reaching the Throat; despite the name it is still a non-energy type. A classic Projector chart has no motor defined and some definition below the Throat, in the Spleen or the G. A mental Projector chart has definition only above and at the Throat, so it has no direct inner authority, a condition it shares with the Reflector. The founding teaching named the mental Projector and read a chart by its type and authority, an emotional Projector or a splenic one; the energy and classic names came later from other schools, and nearly every school now draws them the same way.'],
       ],
       see: [['types', 'Manifestor'], ['types', 'Generator'], ['types', 'Manifesting Generator'], ['types', 'Projector'], ['types', 'Reflector']],
       words: [['bedrock', 'Strategy'], ['bedrock', 'Aura'], ['weather', 'Centers']] },
 
     { tier: 'bedrock', name: 'Strategy', epi: 'How to meet the moment',
-      lead: 'Strategy is the practical instruction each type carries: a way of engaging with life so that decisions have something correct to work on. It is offered as an experiment to try in ordinary days rather than as a rule, and the tradition is candid that the mind will argue with it.',
+      lead: 'Strategy is the practical instruction each type carries: a way of meeting life so that decisions have something true to work on. Authority, two lessons on, says how to decide inside a moment, and the two always travel together. Strategy is offered as an experiment for ordinary days rather than as a rule. The mind will probably argue with it, and that is all right. It may be easier with someone beside you who knows about the experiment.',
       parts: [
-        ['To inform (Manifestor)', 'Tell the people an action will touch before you take it. Informing is not a request for permission. It is said to ease the resistance a closed aura otherwise meets.'],
-        ['To respond (Generator)', 'Wait for life to bring something, an offer, a question, a sound, and let the Sacral answer it before the mind does.'],
-        ['To respond, then inform (Manifesting Generator)', 'The published convention gives the Manifesting Generator the Generator\u2019s strategy. Many schools add a second step: once the response has come, tell the people the action will touch, as the Manifestor strategy does.'],
-        ['To wait for the invitation (Projector)', 'For the large things, love, work, home and close bonds, wait to be recognised and invited. Everyday exchanges need no formal invitation.'],
-        ['To wait a lunar cycle (Reflector)', 'Give a large decision about 28 days, one pass of the Moon through all 64 gates, and talk it over with people you trust along the way.'],
-        ['Strategy beside authority', 'Strategy says how to meet a moment. Authority says how to decide inside it. The tradition always presents the two together.']
+        ['Manifestor', 'To inform: tell the people an action will touch before you take it. It is not asking permission. It lets them make room, and it is said to ease the resistance a closed aura otherwise meets.'],
+        ['Generator', 'To respond: wait for life to bring something, an offer, a question, a sound, and let the Sacral answer it before the mind does. The waiting is not idle. It can be a quiet trust that the right things keep arriving.'],
+        ['Manifesting Generator', 'To respond, then inform: the published convention gives the Manifesting Generator the Generator’s strategy. Many schools add a second step: once the response has come, tell the people the action will touch, as the Manifestor does.'],
+        ['Projector', 'To wait for the invitation: for the large things, love, work, home and close bonds, wait to be recognised and invited. Everyday exchanges need no formal invitation. An invitation is two people meeting halfway, and that may be the whole point of it.'],
+        ['Reflector', 'To wait a lunar cycle: give a large decision about 28 days, one pass of the Moon through all 64 gates, and talk it over with people you trust along the way.']
       ],
       see: [['strategies', 'Informing'], ['strategies', 'Responding'], ['strategies', 'Waiting for the invitation'], ['strategies', 'Waiting a lunar cycle']],
       words: [['bedrock', 'Inner Authority'], ['bedrock', 'Signature']] },
 
     { tier: 'bedrock', name: 'Aura', epi: 'Met before a word is said',
-      lead: 'The aura is the field the tradition says every body carries, reaching about two metres in each direction, through which every meeting begins before anything is spoken. Its quality is set by type, which is why the system calls it mechanical rather than a matter of manners or mood.',
+      lead: 'The aura is the field the tradition says every body carries, reaching about two metres in each direction. Every meeting begins there, before anything is spoken. Its quality is set by type, so the way others first feel you is read as mechanical, never as a failing of manners or mood. Where two auras overlap, conditioning happens: whatever one chart defines is felt by the other wherever the other is open. Nobody passes through anyone untouched, and much of what we take from each other can be a gift.',
       parts: [
-        ['Closed and repelling (Manifestor)', 'Said to keep others at a distance and make a Manifestor chart hard to read from outside, which is part of why informing matters so much.'],
-        ['Open and enveloping (Generator)', 'Said to take in whatever is near, which is how so much reaches a Generator chart to respond to. The Manifesting Generator carries the same aura.'],
-        ['Focused and absorbing (Projector)', 'Aimed at one person at a time and said to take that person in deeply. Some schools call it focused and penetrating; both describe the same narrow beam.'],
-        ['Resistant and sampling (Reflector)', 'Said to taste everyone present without taking anyone in, which is what gives a Reflector chart its read on the health of a group.'],
-        ['Aura and conditioning', 'Two auras overlapping is where conditioning happens: whatever one chart defines is felt by the other wherever the other is open.']
+        ['Manifestor', 'Closed and repelling: said to keep others at a distance and make a Manifestor chart hard to read from outside. Informing is how the distance gets crossed.'],
+        ['Generator', 'Open and enveloping: said to take in whatever is near, so a great deal reaches a Generator chart ready to be answered. The Manifesting Generator carries the same aura.'],
+        ['Projector', 'Focused and absorbing: aimed at one person at a time and said to take that person in deeply. Some schools call it focused and penetrating; both describe the same narrow beam.'],
+        ['Reflector', 'Resistant and sampling: said to taste everyone present without taking anyone in, so a Reflector chart can feel how a whole group is doing.']
       ],
       see: [['terms', 'Aura']],
       words: [['horizon', 'Conditioning'], ['bedrock', 'Type']] },
 
     { tier: 'bedrock', name: 'Signature', epi: 'The feeling of being on course',
-      lead: 'The signature is the feeling the tradition says arrives with a life lived by your own strategy and authority. It is a check noticed afterwards rather than a target, since it cannot be produced by aiming at it.',
+      lead: 'The signature is the feeling the tradition says arrives with a life lived by your own strategy and authority. Aiming at it does not produce it. It is noticed afterwards, the way warmth is noticed only after stepping into it.',
       parts: [
-        ['Peace (Manifestor)', 'Ease after moving freely, with nobody blindsided.'],
-        ['Satisfaction (Generator)', 'The good tiredness at the end of work that was truly responded to. The published convention gives Manifesting Generators the same signature; some schools add peace, for the informing half.'],
-        ['Success (Projector)', 'Not status but the quiet recognition of having guided something well, after being invited to.'],
-        ['Surprise (Reflector)', 'Delight at a cycle that turned out differently than expected, in a place that suited it.']
+        ['Manifestor', 'Peace: ease after moving freely, with nobody blindsided.'],
+        ['Generator', 'Satisfaction: the good tiredness at the end of work that was truly responded to. The published convention gives Manifesting Generators the same signature; some schools add peace, for the informing half.'],
+        ['Projector', 'Success: not status but the quiet recognition of having guided something well, after being invited to. It is a success shared with whoever asked.'],
+        ['Reflector', 'Surprise: delight at a cycle that turned out differently than expected, in a place that suited it.']
       ],
       see: [['terms', 'Signature']],
       words: [['bedrock', 'Not-Self Theme']] },
 
     { tier: 'bedrock', name: 'Not-Self Theme', epi: 'The signal to come back',
-      lead: 'The not-self theme is the signature\u2019s counterpart: the feeling reported when your life runs on the mind\u2019s agenda or on borrowed pressure rather than on your design. The tradition treats it as early information, a nudge back toward strategy, and never as a verdict on you.',
+      lead: 'The not-self theme is the signature’s counterpart: the feeling that comes when life runs on the mind’s agenda or on borrowed pressure rather than on your design. It is early information, a nudge back toward strategy, and never a verdict on you. Underneath it, perhaps, is the tiredness of trying to carry everything alone.',
       parts: [
-        ['Anger (Manifestor)', 'Read as the sign of having been held back, or of having moved without informing.'],
-        ['Frustration (Generator)', 'Read as the sign of having initiated, or of having said yes without the energy for it. The published convention gives Manifesting Generators the same theme; some schools add anger.'],
-        ['Bitterness (Projector)', 'Read as the sign of having entered without an invitation, or of having gone unrecognised for too long.'],
-        ['Disappointment (Reflector)', 'Read as the sign of the wrong surroundings, or of having been hurried into a decision.'],
-        ['In the open centers', 'Each open center carries a habit the tradition names. The open Head chases questions that belong to others; the open Ajna performs certainty; the open Throat works for attention; the open G searches for love and direction; the open Heart sets out to prove its worth; the open Spleen holds on to what is not good for it; the open Sacral cannot tell when enough is enough; the open Solar Plexus dodges truth to dodge confrontation; the open Root hurries to be free of pressure.'],
-        ['The not-self mind', 'The tradition’s name for the mind trying to run decisions it is not built to make, usually by acting out the habits of the open centers.']
+        ['Manifestor', 'Anger: a sign of having been held back, or of having moved without informing.'],
+        ['Generator', 'Frustration: a sign of having initiated, or of having said yes without the energy for it. The published convention gives Manifesting Generators the same theme; some schools add anger.'],
+        ['Projector', 'Bitterness: a sign of having entered without an invitation, or of having gone unrecognised for too long. Going unseen hurts, and the hurt is not a flaw.'],
+        ['Reflector', 'Disappointment: a sign of the wrong surroundings, or of having been hurried into a decision.'],
+        ['In the open centers', 'Each open center carries a habit the tradition names, and each one, looked at kindly, may be a way of trying to earn a place among others. The open Head chases questions that belong to others; the open Ajna performs certainty; the open Throat works for attention; the open G searches for love and direction; the open Heart sets out to prove its worth; the open Spleen holds on to what is not good for it; the open Sacral cannot tell when enough is enough; the open Solar Plexus dodges truth to dodge confrontation; the open Root hurries to be free of pressure. Perhaps they ease most among people who never asked for them.'],
+        ['The not-self mind', 'The tradition’s name for the mind trying to run decisions it is not built to make, usually by acting out the habits of the open centers. It means well. It is only carrying too much.']
       ],
       see: [['terms', 'Not-Self Theme']],
       words: [['bedrock', 'Signature'], ['horizon', 'Conditioning']] },
 
     { tier: 'bedrock', name: 'Inner Authority', epi: 'Where a decision is made',
-      lead: 'Inner authority is where the tradition says a reliable decision comes from in a given chart, and it is never the mind. It is found by a fixed order of precedence: the first of the centers below that the chart defines is the authority, and the ones after it are not consulted.',
+      lead: 'Inner authority is where a reliable decision comes from in a given chart, and it is never the mind. It is found by a fixed order: the first of the centers below that the chart defines is the authority, and the ones after it are not consulted. Whichever it turns out to be, it can sit easily beside the people you ask for advice. They help you hear it; they do not have to replace it.',
       parts: [
-        ['1. Emotional', 'A defined Solar Plexus outranks everything else, and about half of all charts carry one. Clarity comes over time, across the wave. Possible for every type except the Reflector.'],
-        ['2. Sacral', 'A defined Sacral with the Solar Plexus open: a response in the body in the moment, often a sound before a sentence. Generators of both kinds only.'],
-        ['3. Splenic', 'A defined Spleen with the Solar Plexus and Sacral open: a quiet instinct in the present that speaks once. Manifestors and Projectors.'],
-        ['4. Ego manifested', 'A defined Heart joined to the Throat, with the three above open: decisions run through what the will truly wants and can commit to. Manifestors only.'],
-        ['5. Ego projected', 'A defined Heart joined to the G but not to the Throat. The will speaks through what you hear yourself say you want. Projectors only.'],
-        ['6. Self-projected', 'A defined G joined to the Throat, nothing else above it in the order. Direction becomes clear by talking and listening to your own voice. Projectors only.'],
-        ['7. Mental', 'Definition only in the Head, Ajna or Throat, which the published material calls no direct inner authority. Clarity comes from the right surroundings and from talking things over with trusted people. Projectors only. Ego, self-projected and mental together are sometimes called the minor authorities, a small share of people.'],
-        ['8. Lunar', 'No definition, the Reflector: a lunar cycle is given to the decision, and the decision takes shape across it.']
+        ['Emotional', 'A defined Solar Plexus outranks everything else, and about half of all charts carry one. Clarity comes over time, across the wave, so a decision can wait for it. Possible for every type except the Reflector.'],
+        ['Sacral', 'A defined Sacral with the Solar Plexus open: a response in the body in the moment, often a sound before a sentence. Generators of both kinds only.'],
+        ['Splenic', 'A defined Spleen with the Solar Plexus and Sacral open: a quiet instinct in the present that speaks once. Manifestors and Projectors.'],
+        ['Ego manifested', 'A defined Heart joined to the Throat, with the three above open: decisions run through what the will truly wants and can commit to. Manifestors only.'],
+        ['Ego projected', 'A defined Heart joined to the G but not to the Throat. The will speaks through what you hear yourself say you want. Projectors only.'],
+        ['Self-projected', 'A defined G joined to the Throat, nothing else above it in the order. Direction becomes clear by talking and listening to your own voice, which is easiest with someone to talk to. Projectors only.'],
+        ['Mental', 'Definition only in the Head, Ajna or Throat, which the published material calls no direct inner authority. Clarity comes from the right surroundings and from talking things over with trusted people. Projectors only. Ego, self-projected and mental together are sometimes called the minor authorities, a small share of people.'],
+        ['Lunar', 'No definition, the Reflector: a lunar cycle is given to the decision, and the decision takes shape across it.']
       ],
       see: [['authorities', 'Emotional (Solar Plexus)'], ['authorities', 'Sacral'], ['authorities', 'Splenic'], ['authorities', 'Ego (Heart)'], ['authorities', 'Self-projected (G)'], ['authorities', 'Mental (environmental)'], ['authorities', 'Lunar (Reflector)']],
       words: [['terms', 'Emotional Wave'], ['bedrock', 'Outer Authority']] },
 
     { tier: 'bedrock', name: 'Outer Authority', epi: 'What the mind is for',
-      lead: 'Outer authority is the tradition\u2019s name for the mind\u2019s proper work. Released from running your own decisions, the mind becomes a source of knowledge, perspective and insight for others, offered when it is asked for.',
+      lead: 'Outer authority is the name for the mind’s proper work. The mind can compare, research and describe, and the tradition holds that it cannot decide for the body it lives in; that belongs to inner authority. Released from that job, the mind becomes something to give: knowledge, perspective and insight for other people, offered when they ask. Inner authority decides for you, outer authority is what you can bring to others, and the two work side by side. It is not mental authority, which is one of the inner authorities; outer authority belongs to every chart.',
       parts: [
-        ['Not a decision maker', 'The mind can compare, research and describe. The tradition holds that it cannot decide for the body it lives in, which is inner authority’s work.'],
-        ['Inner and outer together', 'Inner authority decides for you. Outer authority is what you can give. The two are meant to work side by side rather than compete.'],
-        ['Outer authority is not mental authority', 'Mental authority is one of the inner authorities, the one that decides through surroundings and sounding boards. Outer authority belongs to every type and every chart.'],
-        ['Passenger', 'The tradition pictures the mind as a passenger in the vehicle of the body: free to look out of the window and describe the view, and happiest when it is not reaching for the wheel.']
+        ['Passenger', 'The mind pictured as a passenger in the vehicle of the body: free to look out of the window and describe the view, and happiest when it is not reaching for the wheel. Passengers keep each other company, and that may be the kindest thing a mind can do.']
       ],
       see: [],
       words: [['bedrock', 'Inner Authority'], ['weather', 'Rave Cosmology']] },
@@ -20537,8 +20548,465 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     ctx.closePath();
   }
 
+
+  /* THE LOADING ORB IN DEPTH. The owner, 6 November 2026: "Make the oracle on
+     the loading screen more 3 dimensional and realistic", with a recording of
+     a lobed torus drawn in dense contour lines, lit, cool above and warm
+     below, turning slowly. The orb span (data-glyph-orb) is drawn that way:
+     the same three lobed ring as the nav symbol, raymarched as a solid, and
+     its contours are the level lines of a slow field over the surface, so
+     they crowd, close into eyes and cross at saddles as the form turns. Lit
+     from above left; the line colour runs from the identity's --atmc above
+     to its --atmc2 below, lightened, so each world tints it. Each world keeps
+     its weather: Cyberspace steps in time and is drawn in coarse pixels,
+     Nature's Roots is lumpier and slower, the Biome ripples. Without WebGL 2,
+     or if the shader will not build, the orb falls back to the flat glyph. */
+  const VS = '#version 300 es\nin vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  const FS = `#version 300 es
+precision highp float;
+uniform vec2 uRes; uniform float uT; uniform int uW; uniform mat3 uRot;
+uniform vec3 uTop; uniform vec3 uBot; uniform float uZ;
+out vec4 o;
+float Ts;
+float h1(float n){ return fract(sin(n*127.1 + 311.7)*43758.5453); }
+float h2(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)))*43758.5453); }
+float vn(vec2 p){
+  vec2 i = floor(p), f = fract(p); f = f*f*(3.0 - 2.0*f);
+  return mix(mix(h2(i), h2(i + vec2(1.0, 0.0)), f.x), mix(h2(i + vec2(0.0, 1.0)), h2(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float smin(float a, float b, float k){ float h = clamp(0.5 + 0.5*(b - a)/k, 0.0, 1.0); return mix(b, a, h) - k*h*(1.0 - h); }
+float smax(float a, float b, float k){ return -smin(-a, -b, k); }
+mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, s, -s, c); }
+float seg(vec2 p, vec2 a, vec2 b){ vec2 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba)/max(dot(ba, ba), 1e-6), 0.0, 1.0); return length(pa - ba*h); }
+float lobe(float a){ return cos(3.0*a + 0.5*sin(Ts*0.31)) + 0.18*sin(2.0*a - Ts*0.23); }
+float sdf(vec3 p){
+  p = uRot*p;
+  float a = atan(p.z, p.x);
+  float l = lobe(a);
+  float R = 0.57 + 0.14*l;
+  float r = 0.285 + 0.06*l;
+  float y = p.y - 0.10*sin(2.0*a + Ts*0.27) - 0.06*cos(3.0*a - Ts*0.19);
+  if (uW == 2) { R += 0.035*sin(5.0*a + Ts*0.21); r += 0.025*sin(7.0*a - Ts*0.17 + p.y*6.0); }
+  if (uW == 3) { R += 0.022*sin(9.0*a - Ts*2.2); y += 0.02*sin(6.0*a + Ts*1.7); }
+  vec2 q = vec2(length(p.xz) - R, y*1.12);
+  float d = length(q) - r;
+  if (uW == 2) {
+    /* two thumbs working the clay: each presses in, eases off, and moves on */
+    float a1 = Ts*0.21, k1 = 0.5 + 0.5*sin(Ts*0.9);
+    vec3 c1 = vec3(cos(a1)*0.6, 0.47 - 0.15*k1, sin(a1)*0.6);
+    d = smax(d, 0.2 - length(p - c1), 0.06);
+    float a2 = 2.4 - Ts*0.17, k2 = 0.5 + 0.5*sin(Ts*0.7 + 2.0);
+    vec3 c2 = vec3(cos(a2), 0.0, sin(a2))*(1.0 - 0.08*k2);
+    d = smax(d, 0.16 - length(p - c2), 0.07);
+  }
+  return d*0.62;
+}
+vec3 nrm(vec3 p){
+  vec2 e = vec2(0.0015, 0.0);
+  return normalize(vec3(sdf(p+e.xyy)-sdf(p-e.xyy), sdf(p+e.yxy)-sdf(p-e.yxy), sdf(p+e.yyx)-sdf(p-e.yyx)));
+}
+float field(vec3 p){
+  vec3 q = uRot*p;
+  float s = uW == 3 ? Ts*0.25 : Ts*0.06;
+  return sin(q.x*2.3 + s) * cos(q.z*2.1 - s*0.7)
+       + 0.65*sin(q.y*3.1 + q.x*1.3 + s*1.3)
+       + 0.45*cos(length(q.xz)*4.2 - s);
+}
+vec3 P; float A;
+void glow(vec3 e){ e = max(e, 0.0); P += e; A = clamp(A + max(e.r, max(e.g, e.b))*0.85, 0.0, 1.0); }
+void over(vec3 c, float m){ P = P*(1.0 - m) + c*m; A = A*(1.0 - m) + m; }
+vec3 star(vec2 uv, vec2 c, float s){
+  vec2 d = uv - c;
+  float core = exp(-dot(d, d)/(s*s*0.18));
+  float spike = exp(-abs(d.x)/(s*0.05))*exp(-abs(d.y)/(s*1.6)) + exp(-abs(d.y)/(s*0.05))*exp(-abs(d.x)/(s*1.6));
+  return vec3(core*1.3 + spike*0.55);
+}
+/* Deep Field: stars on tilted orbits round the orb */
+void dfStars(vec2 uv, bool front){
+  for (int i = 0; i < 5; i++) {
+    float fi = float(i), h = h1(fi*3.7 + 1.0);
+    float th = Ts*(0.35 + 0.25*h)*(i == 2 ? -1.0 : 1.0) + h*6.283;
+    if ((sin(th) < 0.0) != front) continue;
+    vec2 pos = rot(-0.5 + h*1.1)*vec2(cos(th)*(1.08 + 0.3*h), sin(th)*(0.18 + 0.2*h1(fi + 9.0)));
+    float s = 0.05 + 0.035*h1(fi*5.1);
+    vec3 tint = mix(vec3(1.0), mix(uTop, uBot, h), 0.35);
+    glow(star(uv, pos, s)*tint*(front ? 1.0 : 0.7));
+    vec2 back = rot(-0.5 + h*1.1)*vec2(cos(th - 0.25)*(1.08 + 0.3*h), sin(th - 0.25)*(0.18 + 0.2*h1(fi + 9.0)));
+    glow(tint*0.18*exp(-seg(uv, pos, back)/0.008));
+  }
+}
+/* Biome: the current that wraps the orb, now and then, a different size each time */
+vec3 bolt(vec2 uv, bool front, out float on){
+  float k = floor(Ts/2.3), ph = fract(Ts/2.3);
+  on = 0.0;
+  if (h1(k*13.1) < 0.3 || ph > 0.42) return vec3(0.0);
+  on = smoothstep(0.0, 0.04, ph)*smoothstep(0.42, 0.3, ph)*(0.7 + 0.3*vn(vec2(Ts*40.0, 1.0)));
+  float s = 0.78 + 0.5*h1(k*7.3), fl = 0.22 + 0.5*h1(k*5.7);
+  vec2 lp = rot(-(h1(k*3.1) - 0.5)*1.8)*uv;
+  vec2 e = lp/vec2(s, s*fl);
+  float phi = atan(e.y, e.x);
+  if ((sin(phi) < 0.0) != front) return vec3(0.0);
+  float tg = 1.0 + 0.16*(vn(vec2(phi*7.0 + k*9.0, Ts*18.0)) - 0.5) + 0.06*(vn(vec2(phi*23.0, Ts*31.0)) - 0.5);
+  float d = abs(length(e) - tg)*s*fl*1.2;
+  float head = 0.35 + 0.65*pow(0.5 + 0.5*cos(phi - Ts*22.0), 6.0);
+  vec3 c = vec3(1.0)*exp(-d*d/0.00003) + uTop*0.9*exp(-d/0.02) + uBot*0.25*exp(-d/0.06);
+  return c*head*on;
+}
+void main(){
+  Ts = uW == 1 ? floor(uT*6.0)/6.0 : uT;
+  P = vec3(0.0); A = 0.0;
+  vec2 uv = (gl_FragCoord.xy*2.0 - uRes)/uRes.y*uZ;
+  float px = 2.0*uZ/uRes.y;
+  vec2 raw = uv;
+  /* Cyberspace: glitch bursts shove bands sideways and swap the channels */
+  bool swap = false;
+  if (uW == 1) {
+    float k = floor(uT*7.0);
+    float burst = step(0.55, h1(floor(uT*1.3)))*step(0.35, h1(k));
+    float band = floor(uv.y*9.0 + h1(k)*4.0);
+    if (burst > 0.5 && h1(band*1.7 + k*7.0) > 0.55) { uv.x += (h1(band*3.0 + k) - 0.5)*0.4; swap = h1(band + k*2.0) > 0.5; }
+    uv.y -= 0.05*sin(uT*1.1);
+  }
+  float pulse = 0.75 + 0.25*sin(uT*2.2);
+  float fl = 0.72 + 0.28*vn(vec2(uT*6.0, 0.0));
+  vec3 warm = vec3(1.0, 0.45, 0.12);
+  float bOn = 0.0;
+
+  /* behind the orb */
+  if (uW == 0) {
+    float r = length(uv);
+    vec2 dir = uv/max(r, 1e-4);
+    float rays = pow(vn(dir*9.0 + vec2(uT*0.15, -uT*0.1)), 4.0) + 0.7*pow(vn(dir*23.0 - uT*0.2), 6.0);
+    float stream = 0.6 + 0.4*sin(r*22.0 - uT*3.0 + rays*4.0);
+    float out1 = smoothstep(0.7, 0.95, r)*exp(-(r - 0.9)*2.2);
+    glow(mix(uTop, uBot, 0.5 + 0.5*dir.y)*rays*stream*out1*0.55);
+    glow(uTop*0.12*exp(-abs(r - 0.92)/0.06));
+    dfStars(uv, false);
+  } else if (uW == 1) {
+    /* the beam from overhead, its rings climbing, and the craft that holds it */
+    float y = uv.y, w = mix(0.12, 1.05, clamp((1.55 - y)/2.6, 0.0, 1.0));
+    float beam = smoothstep(w, w*0.55, abs(uv.x))*step(y, 1.55)*smoothstep(-1.6, -0.4, y);
+    float rings = pow(0.5 + 0.5*sin(y*16.0 + uT*6.0), 6.0);
+    glow(uTop*beam*(0.16 + 0.22*rings)*pulse);
+    vec2 sc = (uv - vec2(0.0, 1.52))/vec2(0.55, 0.08);
+    glow(uTop*exp(-dot(sc, sc)*1.4)*0.9*pulse + vec3(0.9)*exp(-dot(sc, sc)*5.0)*0.4);
+  } else if (uW == 2) {
+    /* the hearth under the orb: its flames, and the glow it throws */
+    vec2 f = uv - vec2(0.0, -1.5);
+    float n = vn(vec2(f.x*7.0, f.y*5.0 - uT*5.0));
+    float n2 = vn(vec2(f.x*13.0 + 3.0, f.y*9.0 - uT*8.0));
+    float wdt = 0.5*(1.0 - clamp(f.y/0.85, 0.0, 1.0));
+    float edge = abs(f.x) + (n - 0.5)*0.18 + (n2 - 0.5)*0.08;
+    float fm = smoothstep(wdt, wdt - 0.12, edge)*smoothstep(0.85, 0.15, f.y + (n - 0.5)*0.35);
+    float heat = clamp(1.0 - f.y/0.6 - abs(f.x)*1.4, 0.0, 1.0);
+    vec3 fc = mix(vec3(0.8, 0.12, 0.03), mix(vec3(1.0, 0.55, 0.12), vec3(1.0, 0.92, 0.6), heat), heat);
+    glow(fc*fm*1.2*fl);
+    glow(warm*exp(-length((uv - vec2(0.0, -1.3))*vec2(0.9, 1.2))*2.4)*0.5*fl);
+  } else {
+    /* the lighthouse lamp turns in the orb, its beam sweeping the water */
+    float th = uT*1.1;
+    vec2 e = uv/vec2(1.0, 0.32);
+    float a = atan(e.y, e.x);
+    float df = abs(mod(a - atan(sin(th), cos(th)) + 3.14159, 6.28318) - 3.14159);
+    float rr = length(e);
+    float wedge = smoothstep(0.36, 0.0, df)*smoothstep(0.55, 0.95, rr)*exp(-(rr - 0.9)*0.6);
+    float facing = 0.45 + 0.55*max(-sin(th), 0.0);
+    if (sin(th) > 0.0) glow(mix(uTop, vec3(1.0), 0.35)*wedge*0.9*facing);
+    glow(uTop*0.10*exp(-abs(length(uv) - 0.9)/0.08));
+    glow(bolt(uv, false, bOn));
+    /* drops falling from above onto the orb */
+    for (int i = 0; i < 4; i++) {
+      float fi = float(i), hh = h1(fi*7.7 + 40.0), per = 1.6 + hh;
+      float ag = fract(uT/per + hh)*per;
+      vec2 dp = vec2((hh - 0.5)*1.0, 1.65 - 0.55*ag*ag*1.6);
+      if (dp.y < 0.35) continue;
+      vec2 q = (uv - dp)*vec2(1.0, 0.6);
+      glow(mix(uTop, vec3(1.0), 0.3)*exp(-dot(q, q)/0.00035)*0.9);
+    }
+    /* drops pulled from the orb's underside, stretching, falling, landing */
+    for (int i = 0; i < 9; i++) {
+      float fi = float(i), hh = h1(fi*5.3 + 2.0), per = 2.2 + 1.2*h1(fi + 30.0);
+      float ag = fract(uT/per + hh)*per;
+      float x = (hh - 0.5)*1.5;
+      float y0 = -0.25 - 0.2*h1(fi*2.1);
+      float yd = y0 - 0.12*ag - 0.75*ag*ag;
+      vec3 dc = mix(uTop, uBot, h1(fi*9.3)*0.6);
+      if (yd > -1.42) {
+        vec2 q = uv - vec2(x, yd);
+        float tail = seg(uv, vec2(x, yd), vec2(x, yd + 0.06 + 0.1*smoothstep(0.0, 0.8, ag)));
+        float m = exp(-dot(q*vec2(1.0, 0.8), q*vec2(1.0, 0.8))/0.0006) + 0.55*exp(-tail*tail/0.00008);
+        if (ag < 0.55) m += 0.35*exp(-pow(seg(uv, vec2(x, y0), vec2(x, yd)), 2.0)/0.00002);
+        glow(dc*m*0.95);
+        glow(vec3(1.0)*exp(-dot(q - vec2(-0.008, 0.01), q - vec2(-0.008, 0.01))/0.00004)*0.6);
+      } else {
+        float hit = (-0.12 + sqrt(max(0.0144 + 3.0*(y0 + 1.42), 0.0)))/1.5;
+        float sa = ag - hit;
+        vec2 q = (uv - vec2(x, -1.44))*vec2(1.0, 4.0);
+        float ring = abs(length(q) - (0.03 + sa*0.45));
+        glow(dc*exp(-ring*ring/0.0003)*max(1.0 - sa*1.6, 0.0)*0.8);
+        float up = sa*2.2 - sa*sa*6.0;
+        if (up > 0.0) { vec2 s1 = uv - vec2(x - 0.04 - sa*0.1, -1.44 + up*0.2), s2 = uv - vec2(x + 0.04 + sa*0.1, -1.44 + up*0.2);
+          glow(dc*(exp(-dot(s1, s1)/0.0002) + exp(-dot(s2, s2)/0.0002))*0.7); }
+      }
+    }
+  }
+  /* falling leaves, odd ones behind the orb */
+  if (uW == 2) {
+    for (int i = 1; i < 8; i += 2) {
+      float fi = float(i), hh = h1(fi*4.1 + 7.0), per = 6.0 + 3.0*h1(fi + 3.0);
+      float f = fract(uT/per + hh);
+      vec2 pos = vec2((hh - 0.5)*2.6 + 0.22*sin(uT*0.9 + hh*6.0), 1.75 - f*3.5);
+      float ang = sin(uT*1.3 + hh*5.0)*1.2 + hh*6.0;
+      vec2 lp = rot(-ang)*(uv - pos);
+      lp.x /= 0.35 + 0.65*abs(cos(uT*2.0 + hh*7.0));
+      float wv = 0.06*(1.0 - pow(lp.x/0.13, 2.0));
+      float m = smoothstep(px*1.5, 0.0, abs(lp.y) - wv)*step(abs(lp.x), 0.13);
+      vec3 lc = h1(fi*2.3) < 0.33 ? vec3(0.78, 0.52, 0.14) : (h1(fi*2.3) < 0.66 ? vec3(0.66, 0.25, 0.09) : vec3(0.45, 0.48, 0.15));
+      lc *= 0.55 + 0.45*fl - 0.3*smoothstep(0.006, 0.0, abs(lp.y));
+      over(lc*0.7, m*0.95);
+    }
+  }
+
+  /* the orb */
+  float t = 1.6, d = 1.0, md = 1e9;
+  vec3 ro = vec3(0.0, 0.0, 3.1), rd = normalize(vec3(uv*0.4, -1.0));
+  if (length(uv) < 1.5) {
+    for (int i = 0; i < 80; i++) {
+      d = sdf(ro + rd*t);
+      md = min(md, d);
+      if (d < 0.0008 || t > 4.6) break;
+      t += d;
+    }
+  }
+  if (d > 0.002) {
+    float c = 1.0 - smoothstep(0.0, px*0.8, md);
+    glow(uBot*0.12*c);
+  } else {
+    vec3 p = ro + rd*t, n = nrm(p);
+    vec3 L = normalize(vec3(-0.55, 0.7, 0.6));
+    float dif = max(dot(n, L), 0.0);
+    float rim = pow(1.0 - max(dot(n, -rd), 0.0), 2.5);
+    float spec = pow(max(dot(reflect(-L, n), -rd), 0.0), 28.0)*(uW == 2 ? 0.25 : 1.0);
+    float h = smoothstep(-0.7, 0.7, p.y + 0.25*p.x);
+    vec3 col = mix(uBot, uTop, h);
+    float v = field(p)*clamp(uRes.y/uZ*0.072, 7.0, 20.0)*(uW == 1 ? 0.75 : 1.0);
+    float fw = fwidth(v);
+    float k = abs(fract(v) - 0.5);
+    float w = uW == 2 ? 0.13 + 0.07*sin(v*0.7) : (uW == 1 ? 0.16 : 0.11);
+    float line = smoothstep(w + fw, w - fw*0.5, 0.5 - k);
+    line = mix(line, 0.22, smoothstep(0.32, 0.8, fw));
+    vec3 lit = col*(0.16 + 1.0*dif) + vec3(spec*0.5) + col*rim*0.5;
+    vec3 body = col*(0.015 + 0.05*dif) + col*rim*0.06;
+    vec3 c = mix(body, lit, line);
+    vec3 q = uRot*p;
+    if (uW == 0) {
+      /* sparks running along the contours, and glints that come and go */
+      c += mix(uBot, vec3(1.0), 0.6)*line*pow(0.5 + 0.5*sin(v*0.37 - uT*2.0 + q.x*6.0), 18.0)*1.4;
+      vec3 cell = floor(q*11.0);
+      float gh = h2(cell.xy + cell.z*7.3);
+      vec3 cp = fract(q*11.0) - 0.5;
+      c += vec3(1.0)*step(0.86, gh)*pow(max(0.0, sin(uT*3.0 + gh*40.0)), 12.0)*exp(-dot(cp, cp)*40.0)*1.5;
+    } else if (uW == 1) {
+      c += uTop*0.5*smoothstep(-0.1, 1.0, n.y)*pulse*(0.4 + 0.6*line);
+    } else if (uW == 2) {
+      float below = smoothstep(0.35, -0.9, n.y);
+      c += warm*fl*below*(0.12 + 0.55*line*(0.3 + dif));
+    } else {
+      /* water running down the orb in thin bright threads */
+      float col1 = floor(uv.x*38.0);
+      float hh = h1(col1*1.3);
+      float fwv = fract(uv.y*2.6 + uT*(0.35 + 0.5*hh) + hh*9.0);
+      float thread = step(0.45, hh)*smoothstep(0.5, 0.15, abs(fract(uv.x*38.0) - 0.5))*smoothstep(0.0, 0.06, fwv)*smoothstep(0.4, 0.06, fwv);
+      c += mix(uTop, vec3(1.0), 0.4)*thread*0.55*(0.3 + 0.7*smoothstep(0.5, -0.6, n.y));
+      c += vec3(1.0)*pow(max(dot(reflect(-L, n), -rd), 0.0), 60.0)*0.4;
+      float th = uT*1.1;
+      vec2 bd = vec2(cos(th), -sin(th));
+      c += uTop*pow(max(dot(normalize(n.xz), bd), 0.0), 8.0)*0.45;
+      c += mix(uTop, vec3(1.0), 0.5)*bOn*0.35*(0.4 + 0.6*line);
+    }
+    over(c, 1.0);
+  }
+
+  /* in front of the orb */
+  if (uW == 0) {
+    dfStars(uv, true);
+    /* sparks thrown off the rim */
+    for (int i = 0; i < 12; i++) {
+      float fi = float(i), hh = h1(fi*6.1 + 3.0), per = 1.3 + 1.1*h1(fi + 20.0);
+      float f = fract(uT/per + hh);
+      float a = hh*6.283 + floor(uT/per + hh)*2.1;
+      vec2 dir = vec2(cos(a), sin(a));
+      vec2 pos = dir*(0.78 + f*0.75);
+      float m = exp(-pow(seg(uv, pos, pos - dir*(0.05 + 0.08*(1.0 - f))), 2.0)/0.000025);
+      glow(mix(vec3(1.0, 0.9, 0.7), uBot, f)*m*pow(1.0 - f, 1.5)*1.3);
+    }
+  } else if (uW == 1) {
+    /* the beam's light over the orb, and what it lifts */
+    float y = uv.y, w = mix(0.12, 1.05, clamp((1.55 - y)/2.6, 0.0, 1.0));
+    float beam = smoothstep(w, w*0.55, abs(uv.x))*step(y, 1.55)*smoothstep(-1.6, -0.4, y);
+    glow(uTop*beam*0.07*pulse);
+    for (int i = 0; i < 10; i++) {
+      float fi = float(i), hh = h1(fi*2.9 + 11.0);
+      float yy = -1.3 + fract(uT*0.22 + hh)*2.8;
+      float ww = mix(0.12, 1.05, clamp((1.55 - yy)/2.6, 0.0, 1.0));
+      vec2 pp = vec2((h1(fi*8.1) - 0.5)*ww*1.1, yy);
+      vec2 dq = abs(uv - pp);
+      glow(mix(uTop, vec3(1.0), 0.5)*step(max(dq.x, dq.y), 0.017)*0.9*smoothstep(1.5, 1.0, yy));
+    }
+    /* the buzzsaw: every seven seconds it crosses and shreds */
+    float ph = fract(uT/7.0);
+    if (ph < 0.3) {
+      float s = ph/0.3;
+      vec2 cB = vec2(mix(-1.9, 1.9, s), mix(0.28, -0.28, s));
+      vec2 rl = raw - cB;
+      float rr = length(rl);
+      float an = atan(rl.y, rl.x) + uT*40.0;
+      float R = 0.3 + 0.055*fract(an*16.0/6.28318);
+      float disc = smoothstep(R + px, R - px, rr);
+      if (disc > 0.0) {
+        vec3 mc = vec3(0.62, 0.66, 0.7)*(0.75 + 0.25*sin(rr*90.0 + an*2.0)) + vec3(0.3)*pow(max(0.0, rl.x*0.7 + rl.y*0.7)/0.3, 3.0);
+        mc = mix(mc, vec3(0.12), smoothstep(0.07, 0.05, rr));
+        mc += vec3(0.9)*smoothstep(0.02, 0.0, abs(rr - R + 0.02));
+        over(mc, disc*0.96);
+      }
+      /* the cut it leaves, still glowing */
+      float yp = mix(0.28, -0.28, (raw.x + 1.9)/3.8);
+      float since = (s - (raw.x + 1.9)/3.8)*2.1;
+      if (since > 0.0 && abs(raw.y) < 1.2 && md < 0.002) {
+        glow(vec3(1.0, 0.5, 0.15)*exp(-pow(raw.y - yp, 2.0)/0.00015)*exp(-since*2.5)*1.4);
+      }
+      float contact = smoothstep(0.95, 0.75, abs(cB.x));
+      for (int i = 0; i < 26; i++) {
+        float fi = float(i), hh = h1(fi*3.3 + 50.0);
+        float t0 = mix(0.27, 0.73, h1(fi*1.9 + 5.0));
+        float ag = (s - t0)*2.1;
+        if (ag < 0.0 || ag > 0.55) continue;
+        vec2 c0 = vec2(mix(-1.9, 1.9, t0), mix(0.28, -0.28, t0));
+        float sg = i < 13 ? 1.0 : -1.0;
+        vec2 em = c0 + vec2(-0.05, sg*0.33);
+        vec2 vel = vec2(-(0.7 + 1.4*hh), sg*(0.25 + 0.9*h1(fi*4.4)));
+        vec2 pos = em + vel*ag + vec2(0.0, -2.2)*ag*ag;
+        vec2 vv = vel + vec2(0.0, -4.4)*ag;
+        float m = exp(-pow(seg(raw, pos, pos - vv*0.035), 2.0)/0.00002);
+        glow(mix(vec3(1.0, 0.95, 0.7), vec3(1.0, 0.45, 0.1), ag*2.0)*m*(1.0 - ag/0.55)*1.6);
+      }
+      if (contact > 0.0) {
+        vec2 cp1 = raw - (cB + vec2(-0.03, 0.31)), cp2 = raw - (cB + vec2(-0.03, -0.31));
+        glow(vec3(1.0, 0.6, 0.2)*(exp(-dot(cp1, cp1)/0.002) + exp(-dot(cp2, cp2)/0.002))*contact*0.8);
+      }
+    }
+  } else if (uW == 2) {
+    for (int i = 0; i < 8; i += 2) {
+      float fi = float(i), hh = h1(fi*4.1 + 7.0), per = 6.0 + 3.0*h1(fi + 3.0);
+      float f = fract(uT/per + hh);
+      vec2 pos = vec2((hh - 0.5)*2.6 + 0.22*sin(uT*0.9 + hh*6.0), 1.75 - f*3.5);
+      float ang = sin(uT*1.3 + hh*5.0)*1.2 + hh*6.0;
+      vec2 lp = rot(-ang)*(uv - pos);
+      lp.x /= 0.35 + 0.65*abs(cos(uT*2.0 + hh*7.0));
+      float wv = 0.06*(1.0 - pow(lp.x/0.13, 2.0));
+      float m = smoothstep(px*1.5, 0.0, abs(lp.y) - wv)*step(abs(lp.x), 0.13);
+      vec3 lc = h1(fi*2.3) < 0.33 ? vec3(0.78, 0.52, 0.14) : (h1(fi*2.3) < 0.66 ? vec3(0.66, 0.25, 0.09) : vec3(0.45, 0.48, 0.15));
+      lc *= 0.6 + 0.4*fl + 0.25*smoothstep(-0.2, -1.2, pos.y) - 0.3*smoothstep(0.006, 0.0, abs(lp.y));
+      over(lc, m*0.95);
+    }
+    for (int i = 0; i < 9; i++) {
+      float fi = float(i), hh = h1(fi*6.7 + 90.0);
+      float f = fract(uT*0.28 + hh);
+      vec2 pp = vec2((hh - 0.5)*0.7 + 0.12*sin(uT*1.7 + hh*9.0), -1.45 + f*2.6);
+      vec2 q = uv - pp;
+      glow(mix(vec3(1.0, 0.8, 0.4), vec3(0.9, 0.2, 0.05), f)*exp(-dot(q, q)/0.00012)*(1.0 - f)*(0.6 + 0.4*sin(uT*9.0 + hh*20.0)));
+    }
+  } else {
+    float th = uT*1.1;
+    vec2 e = uv/vec2(1.0, 0.32);
+    float a = atan(e.y, e.x);
+    float df = abs(mod(a - atan(sin(th), cos(th)) + 3.14159, 6.28318) - 3.14159);
+    float rr = length(e);
+    float wedge = smoothstep(0.36, 0.0, df)*smoothstep(0.55, 0.95, rr)*exp(-(rr - 0.9)*0.6);
+    if (sin(th) <= 0.0) glow(mix(uTop, vec3(1.0), 0.35)*wedge*0.9*(0.45 + 0.55*max(-sin(th), 0.0)));
+    float flash = pow(max(-sin(th), 0.0), 40.0);
+    glow(mix(uTop, vec3(1.0), 0.5)*flash*0.4*exp(-length(uv)*1.2));
+    float dummy;
+    glow(bolt(uv, true, dummy));
+  }
+
+  if (uW == 1) {
+    if (swap) P = P.gbr;
+    P *= 0.84 + 0.16*step(0.5, fract(gl_FragCoord.y*0.5));
+  }
+  float edge = smoothstep(1.0, 0.82, length(raw)/uZ);
+  o = vec4(clamp(P, 0.0, 1.0)*edge, A*edge);
+}`;
+  function rot3(T, world) {
+    /* a slow tumble that never repeats: the ring's axis leans toward the
+       viewer and sways, and the ring turns about it */
+    const S = world === 'dawn' ? 0.6 : world === 'gold' ? 1.1 : 1;
+    const ax = -1.05 + 0.32 * Math.sin(T * 0.21 * S), ay = 0.45 * Math.sin(T * 0.17 * S + 1.0), az = T * 0.12 * S;
+    const cx = Math.cos(ax), sx = Math.sin(ax), cy = Math.cos(ay), sy = Math.sin(ay), cz = Math.cos(az), sz = Math.sin(az);
+    /* R = Ry(ay) * Rx(ax) * Ry(az), column major for GLSL */
+    const Ry1 = [cz, 0, -sz, 0, 1, 0, sz, 0, cz];
+    const Rx = [1, 0, 0, 0, cx, sx, 0, -sx, cx];
+    const Ry2 = [cy, 0, -sy, 0, 1, 0, sy, 0, cy];
+    const mul = (A, B) => { const C = new Array(9); for (let c = 0; c < 3; c++) for (let r = 0; r < 3; r++) { let s2 = 0; for (let k = 0; k < 3; k++) s2 += A[k * 3 + r] * B[c * 3 + k]; C[c * 3 + r] = s2; } return C; };
+    return mul(Ry2, mul(Rx, Ry1));
+  }
+  function triplet(name, fb) {
+    const v = (rgbVar(name, fb) || fb).split(',').map(x => parseFloat(x) / 255);
+    return v.length === 3 && v.every(x => isFinite(x)) ? v : fb.split(',').map(x => parseFloat(x) / 255);
+  }
+  function lighten(c, k) { return c.map(x => x + (0.86 - x) * k); }
+  function glInit(cv) {
+    let gl = null;
+    try { gl = cv.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' }); } catch (e) { gl = null; }
+    if (!gl) return null;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null; };
+    const v = sh(gl.VERTEX_SHADER, VS), f = sh(gl.FRAGMENT_SHADER, FS);
+    if (!v || !f) return null;
+    const pr = gl.createProgram();
+    gl.attachShader(pr, v); gl.attachShader(pr, f); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+    gl.useProgram(pr);
+    const b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const u = {};
+    for (const n of ['uRes', 'uT', 'uW', 'uRot', 'uTop', 'uBot', 'uZ']) u[n] = gl.getUniformLocation(pr, n);
+    return { gl, u };
+  }
+  function glFree(g) {
+    if (!g.gl) return;
+    try { const x = g.gl.gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); } catch (e) { /* gone already */ }
+    g.gl = null;
+  }
+  /* the orb's canvas is larger than its span, so what each world throws off
+     (sparks, stars, the beam, the hearth, leaves, drops) has room round it */
+  const ORB_Z = 1.6;
+  const WORLD_ID = { deepfield: 0, midnight: 1, dawn: 2, gold: 3 };
+  function drawGL(g, T, world) {
+    const { gl, u } = g.gl, cv = g.cv;
+    const coarse = world === 'midnight';
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const px = Math.max(16, Math.round(g.size * ORB_Z * (coarse ? 0.5 : dpr)));
+    if (cv.width !== px) { cv.width = px; cv.height = px; cv.style.imageRendering = coarse ? 'pixelated' : ''; }
+    gl.viewport(0, 0, px, px);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    const Tq = coarse ? Math.floor(T * 6) / 6 : T;
+    gl.uniform2f(u.uRes, px, px);
+    gl.uniform1f(u.uT, T);
+    gl.uniform1f(u.uZ, ORB_Z);
+    gl.uniform1i(u.uW, WORLD_ID[world] || 0);
+    gl.uniformMatrix3fv(u.uRot, false, rot3(Tq, world));
+    gl.uniform3fv(u.uTop, lighten(triplet('--atmc', '47,79,214'), 0.7));
+    gl.uniform3fv(u.uBot, lighten(triplet('--atmc2', '242,214,158'), 0.45));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
   function draw(g, T) {
     const world = worldOf();
+    if (g.gl) { drawGL(g, T, world); return; }
     const cv = g.cv, ctx = g.ctx;
     const css = g.size, dpr = Math.min(3, window.devicePixelRatio || 1);
     const px = Math.round(css * dpr);
@@ -20664,9 +21132,22 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block';
       span.appendChild(cv);
     }
-    const ctx = cv.getContext('2d');
-    if (!ctx) { cv.remove(); return; }
-    const g = { span, cv, ctx, size: span.getBoundingClientRect().width || 21, ink: '', tok: '', seen: true };
+    let glx = null;
+    if (span.hasAttribute('data-glyph-orb') && !cv.hasAttribute('data-glyph-flat')) {
+      glx = glInit(cv);
+      if (!glx) {
+        /* a canvas that has handed out a WebGL context cannot give a 2D one,
+           so the flat fallback gets a fresh canvas */
+        const flat = cv.cloneNode(false);
+        flat.setAttribute('data-glyph-flat', '');
+        cv.replaceWith(flat); cv = flat;
+      }
+    }
+    if (glx) { const m = (ORB_Z - 1) * 50; cv.style.cssText = 'position:absolute;left:-' + m + '%;top:-' + m + '%;width:' + (ORB_Z * 100) + '%;height:' + (ORB_Z * 100) + '%;pointer-events:none;display:block'; }
+    const ctx = glx ? null : cv.getContext('2d');
+    if (!glx && !ctx) { cv.remove(); return; }
+    const g = { span, cv, ctx, gl: glx, size: span.getBoundingClientRect().width || 21, ink: '', tok: '', seen: true };
+    if (glx) span.setAttribute('data-glyph-3d', '');
     g.ink = inkOf(g);
     glyphs.add(g);
     observers();
@@ -20679,14 +21160,15 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (!root) return;
     for (const g of [...glyphs]) {
       if (!g.span.isConnected || !g.cv.isConnected) {
+        glFree(g);
         glyphs.delete(g);
         if (sizeObs) sizeObs.unobserve(g.span);
         if (seeObs) seeObs.unobserve(g.span);
-        if (g.span.isConnected) g.span.removeAttribute('data-glyph-live');
+        if (g.span.isConnected) { g.span.removeAttribute('data-glyph-live'); g.span.removeAttribute('data-glyph-3d'); }
       }
     }
     if (worldOf() === 'hc') {
-      for (const g of glyphs) { g.span.removeAttribute('data-glyph-live'); g.cv.remove(); }
+      for (const g of glyphs) { glFree(g); g.span.removeAttribute('data-glyph-live'); g.span.removeAttribute('data-glyph-3d'); g.cv.remove(); }
       glyphs.clear();
       return;
     }
@@ -20705,7 +21187,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       if (world !== lastWorld) { lastWorld = world; drops = []; scan(); }
       for (const g of glyphs) {
         if (!g.seen || !g.size) continue;
-        inkOf(g);
+        if (!g.gl) inkOf(g);
         draw(g, T);
       }
     }
@@ -20717,7 +21199,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   function still() {
     held = true;
     const T = 3.0;
-    for (const g of glyphs) { inkOf(g); if (g.size) draw(g, T); }
+    for (const g of glyphs) { if (!g.gl) inkOf(g); if (g.size) draw(g, T); }
   }
 
   function kick() {
@@ -20754,7 +21236,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       if (obs) obs.disconnect();
       obs = null;
       document.removeEventListener('visibilitychange', onVis);
-      for (const g of glyphs) { g.span.removeAttribute('data-glyph-live'); g.cv.remove(); }
+      for (const g of glyphs) { glFree(g); g.span.removeAttribute('data-glyph-live'); g.span.removeAttribute('data-glyph-3d'); g.cv.remove(); }
       glyphs.clear();
       if (sizeObs) sizeObs.disconnect();
       if (seeObs) seeObs.disconnect();
@@ -29891,7 +30373,18 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      A server that still writes the whole reading in one call (it has no
      chapters to add) answers the first with them already in, and the second
      call is skipped. The page may pass onFirst, called with the first half as
-     soon as it arrives, so it can be shown while the second is written. */
+     soon as it arrives, so it can be shown while the second is written.
+
+     BOTH HALVES ARE ASKED AT ONCE (6 November 2026). The second half's prompt
+     is the dossier alone, never the first half's text, so it does not wait on
+     the first; one after the other, every in-depth reading took the first
+     half's minute on top of the second's. Two answers send the second back to
+     the old order, after the first: BAD_REQUEST, from a server that still
+     writes the second only once the first is kept, and busy, from Kimi when
+     its tier writes one reading at a time (a first half turned away as busy
+     is asked again once the second is answered). Either way nothing was
+     written or counted, so the reading costs what it did before and arrives
+     no later. */
   /* THE PROFILE THE DOSSIER WAS WRITTEN FROM travels with it, the active one
      unless the page names another (server/migrations/0006). The server
      stores it beside the reading so it can withdraw what was written from a
@@ -29909,15 +30402,26 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     delete body.onFirst;
     if (body.profileId == null) { var pid = activeProfileId(); if (pid) body.profileId = pid; else delete body.profileId; }
     if (body.depth !== 'deep') return oracleCall(body);
-    return oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
+    var askA = function () { return oracleCall(Object.assign({}, body, { part: 'a' })); };
+    var askB = function () { return oracleCall(Object.assign({}, body, { part: 'b' })); };
+    var pa = askA();
+    var pb = askB();
+    /* Kimi took the second half and turned the first away: the first is asked
+       again once the second is answered, so the slot is free. */
+    return pa.then(function (a) {
+      return (!a.ok && a.reason === 'busy') ? pb.then(askA) : a;
+    }).then(function (a) {
       if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
-      /* The first half is on its way to the page before the second is asked
-         for, so the reader has something to read while it is written. */
+      /* The first half goes to the page the moment it arrives, so the reader
+         has something to read while the second is still being written. */
       if (onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
-      /* The server joins the two halves when it kept the first. When it did
-         not (the birth is not saved to the account, so nothing of the reading
-         is kept there), the second comes back alone and is joined here. */
-      return oracleCall(Object.assign({}, body, { part: 'b' })).then(function (b) {
+      return pb.then(function (b) {
+        return (!b.ok && (b.code === 'BAD_REQUEST' || b.reason === 'busy')) ? askB() : b;
+      }).then(function (b) {
+        /* The server joins the two halves when it had the first kept. When it
+           did not (the first was still being written, or the birth is not
+           saved to the account so nothing of the reading is kept there), the
+           second comes back alone and is joined here. */
         if (b.ok && a.reading && b.reading) b.reading = Object.assign({}, a.reading, b.reading);
         return b;
       });
@@ -29953,6 +30457,10 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
         if (st === 503) return { ok: false, reason: 'silent' };
         if (st === 409 || code === 'PENDING') return { ok: false, reason: 'pending' };
+        /* Only the second half of an in-depth reading is refused this way, by
+           a server that writes it only after the first is kept; oracleRead
+           asks again in that order. */
+        if (code === 'BAD_REQUEST') return { ok: false, reason: 'error', code: 'BAD_REQUEST' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
         return { ok: false, reason: 'error', error: (e && e.message) || 'no reading returned' };
       });
@@ -31898,6 +32406,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 [data-world="midnight"]:not([data-world-hc]) [data-greet]{background:linear-gradient(180deg,#fff 0,#c9d2e6 45%,#8d98b4 52%,#e8eefc 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 [data-world="dawn"]:not([data-world-hc]) [data-greet]{-webkit-text-fill-color:#e8b45a;text-shadow:0 0 14px rgba(232,140,60,.55)}
 [data-world="gold"]:not([data-world-hc]) [data-greet]{font-weight:800!important;background:linear-gradient(90deg,#5ff7ff,#c58bff,#ff7ad9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 6px rgba(95,247,255,.45))}
+[data-app-root]:not([data-world-hc]) [data-epi]{color:#f2d69e!important;text-shadow:0 0 10px rgba(242,214,158,.38),0 0 2px rgba(242,214,158,.25)}
 [data-world="midnight"]:not([data-world-hc]) [data-lift]{border-radius:0!important}
 [data-world="midnight"]:not([data-world-hc]) [data-lift="card"]{box-shadow:inset 0 5px 0 rgb(var(--atmc)),var(--lift)!important}
 [data-world="dawn"]:not([data-world-hc]) :is([data-lift="card"],[data-lift="box"]){border-radius:30px 12px 26px 14px / 14px 28px 12px 24px!important}
@@ -32787,31 +33296,31 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
               <div aria-hidden="true" style="position:absolute;inset:-4% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 52%,rgba(var(--atmc2),.12),rgba(var(--atmc),.16) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
               <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="position:relative;display:block;width:100%;height:auto;overflow:visible">
-                <sc-for list="{{ bgGlows }}" as="gl" hint-placeholder-count="2">
-                  <line data-pl="breath" x1="{{ gl.x1 }}" y1="{{ gl.y1 }}" x2="{{ gl.x2 }}" y2="{{ gl.y2 }}" style="stroke:rgba(var(--atmc2),.26);stroke-width:9;stroke-linecap:round"></line>
-                </sc-for>
-                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="72">
-                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></line>
+                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="36">
+                  <path d="{{ ln.d }}" style="fill:none;stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></path>
                 </sc-for>
                 <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                  <polygon points="{{ c.pts }}" style="fill:none;stroke:{{ c.halo }};stroke-opacity:.3;stroke-width:9;stroke-linejoin:round"></polygon>
-                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};fill-opacity:{{ c.fo }};stroke:{{ c.stroke }};stroke-width:1.6;stroke-linejoin:round"></polygon>
+                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};stroke:{{ c.stroke }};stroke-width:{{ c.sw }};stroke-linejoin:round"></polygon>
+                </sc-for>
+                <sc-for list="{{ bgSky }}" as="sk" hint-placeholder-count="0">
+                  <circle data-pl="breath" cx="{{ sk.x }}" cy="{{ sk.y }}" r="5" style="fill:none;stroke:var(--blue);stroke-opacity:.35;stroke-width:1.6"></circle>
                 </sc-for>
                 <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
                   <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
                 </sc-for>
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:{{ c.ai }};justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
                   <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
               </sc-for>
             </div>
-            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center">
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--tx)"></span>Personality</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--hd-des)"></span>Design</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:5px;border-radius:3px;background:linear-gradient(var(--hd-des) 0 30%,var(--tx) 30% 70%,var(--hd-des) 70%)"></span>Both</span>
+            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:rgba(var(--atmc),.4);box-shadow:inset 0 0 0 1.5px rgba(var(--atmc),.95)"></span>Defined</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Your gates</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--mut)"></span>Open</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--blue)"></span>In the sky now</span>
             </div>
           </div>
         </sc-if>
@@ -34779,7 +35288,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
             <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
-                <line data-lit="{{ ch.lit }}" x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+                <path data-lit="{{ ch.lit }}" d="{{ ch.d }}" style="fill:none;stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></path>
               </sc-for>
               <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
                 <polygon data-lit="{{ ce.lit }}" points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
@@ -34805,7 +35314,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.val }}</span>
               </button>
             </sc-for>
@@ -34833,7 +35342,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hdChapterName }}</div>
             <sc-if value="{{ hdFamOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 19px/1.2 var(--fd);color:var(--ac2-hi)">{{ hdFam }}</div>
             </sc-if>
@@ -34842,18 +35350,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
                 <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdEpi }}</div>
                 </sc-if>
               </div>
             </div>
-            <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
-              <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi);text-align:center;margin-bottom:-6px">{{ hdEpiLabel }}</div>
-              <div style="display:flex;align-items:center;gap:12px">
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
-                <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.5),transparent)"></span>
-              </div>
-            </sc-if>
             <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ hdLeadSeg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
             </sc-if>
@@ -34881,7 +35384,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ fc.seg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
                   </div>
                 </sc-for>
@@ -34890,7 +35392,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
               <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -34909,7 +35410,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ hdYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -34933,11 +35433,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ fsOn }}" hint-placeholder-val="{{ false }}">
               <div data-lift="box" style="display:flex;flex-direction:column;gap:12px;border:1px dashed rgba(var(--atmc),.8);border-radius:16px;padding:14px 15px;background:rgba(var(--atmc),.08)">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">&#10036; Field study</div>
                 <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fsAsk }}</div>
                 <sc-if value="{{ fsHoldsOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsHolds }}</div></sc-if>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How well did it fit what happened" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How well did it fit what happened</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How well did it fit what happened?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsFit }}" as="ff" hint-placeholder-count="3">
                       <button data-lift onClick="{{ ff.go }}" role="radio" aria-checked="{{ ff.on }}" tabindex="{{ ff.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ ff.bd }};border-radius:999px;background:{{ ff.bg }};font:600 11.5px var(--fc);color:{{ ff.c }}">{{ ff.label }}</button>
@@ -34945,7 +35444,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   </div>
                 </div>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How charged was the moment" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How charged was the moment</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How charged was the moment?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsCharge }}" as="fc2" hint-placeholder-count="3">
                       <button data-lift onClick="{{ fc2.go }}" role="radio" aria-checked="{{ fc2.on }}" tabindex="{{ fc2.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ fc2.bd }};border-radius:999px;background:{{ fc2.bg }};font:600 11.5px var(--fc);color:{{ fc2.c }}">{{ fc2.label }}</button>
@@ -35157,7 +35656,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your sky, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ apMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 16px/1 var(--fb);color:{{ m.c }}">{{ m.g }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.sign }}</span>
               </button>
@@ -35186,23 +35685,18 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ apChapterName }}</div>
             <div style="display:flex;align-items:center;gap:16px">
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ apKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ apEpi }}</div>
                 </sc-if>
               </div>
             </div>
-            <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;gap:12px">
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
-                <span style="font:italic 400 19px var(--fb);color:var(--tx)">{{ apEpi }}</span>
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.5),transparent)"></span>
-              </div>
-            </sc-if>
             <sc-if value="{{ apLeadOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ apLead }}</div>
             </sc-if>
@@ -35230,7 +35724,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ apFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
                   </div>
                 </sc-for>
@@ -35238,7 +35731,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ apTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -35262,7 +35754,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ apYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -35440,7 +35931,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 18px/1 var(--fd);color:{{ m.c }}">{{ m.n }}</span>
               </button>
             </sc-for>
@@ -35485,7 +35976,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
             <sc-if value="{{ bnTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ bnTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -36766,7 +37256,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
-          <span aria-hidden="true" data-icon="oracle" data-glyph-orb="1" style="flex:none;display:block;width:76px;height:76px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat"></span>
+          <span aria-hidden="true" data-icon="oracle" data-glyph-orb="1" style="flex:none;display:block;width:132px;height:132px;margin:10px 0 34px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat"></span>
           <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fb);color:var(--mut)">{{ orLoadingText }}</p>
           <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
           <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
@@ -41071,31 +41561,31 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
               <div aria-hidden="true" style="position:absolute;inset:-4% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 52%,rgba(var(--atmc2),.12),rgba(var(--atmc),.16) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
               <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="position:relative;display:block;width:100%;height:auto;overflow:visible">
-                <sc-for list="{{ bgGlows }}" as="gl" hint-placeholder-count="2">
-                  <line data-pl="breath" x1="{{ gl.x1 }}" y1="{{ gl.y1 }}" x2="{{ gl.x2 }}" y2="{{ gl.y2 }}" style="stroke:rgba(var(--atmc2),.26);stroke-width:9;stroke-linecap:round"></line>
-                </sc-for>
-                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="72">
-                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></line>
+                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="36">
+                  <path d="{{ ln.d }}" style="fill:none;stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></path>
                 </sc-for>
                 <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                  <polygon points="{{ c.pts }}" style="fill:none;stroke:{{ c.halo }};stroke-opacity:.3;stroke-width:9;stroke-linejoin:round"></polygon>
-                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};fill-opacity:{{ c.fo }};stroke:{{ c.stroke }};stroke-width:1.6;stroke-linejoin:round"></polygon>
+                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};stroke:{{ c.stroke }};stroke-width:{{ c.sw }};stroke-linejoin:round"></polygon>
+                </sc-for>
+                <sc-for list="{{ bgSky }}" as="sk" hint-placeholder-count="0">
+                  <circle data-pl="breath" cx="{{ sk.x }}" cy="{{ sk.y }}" r="5" style="fill:none;stroke:var(--blue);stroke-opacity:.35;stroke-width:1.6"></circle>
                 </sc-for>
                 <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
                   <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
                 </sc-for>
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:{{ c.ai }};justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
                   <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
               </sc-for>
             </div>
-            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center">
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--tx)"></span>Personality</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--hd-des)"></span>Design</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:5px;border-radius:3px;background:linear-gradient(var(--hd-des) 0 30%,var(--tx) 30% 70%,var(--hd-des) 70%)"></span>Both</span>
+            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:rgba(var(--atmc),.4);box-shadow:inset 0 0 0 1.5px rgba(var(--atmc),.95)"></span>Defined</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Your gates</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--mut)"></span>Open</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--blue)"></span>In the sky now</span>
             </div>
           </div>
         </sc-if>
@@ -42457,7 +42947,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
             <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
-                <line data-lit="{{ ch.lit }}" x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+                <path data-lit="{{ ch.lit }}" d="{{ ch.d }}" style="fill:none;stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></path>
               </sc-for>
               <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
                 <polygon data-lit="{{ ce.lit }}" points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
@@ -42483,7 +42973,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.val }}</span>
               </button>
             </sc-for>
@@ -42511,7 +43001,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hdChapterName }}</div>
             <sc-if value="{{ hdFamOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 19px/1.2 var(--fd);color:var(--ac2-hi)">{{ hdFam }}</div>
             </sc-if>
@@ -42520,18 +43009,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
                 <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdEpi }}</div>
                 </sc-if>
               </div>
             </div>
-            <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
-              <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi);text-align:center;margin-bottom:-6px">{{ hdEpiLabel }}</div>
-              <div style="display:flex;align-items:center;gap:12px">
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
-                <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.5),transparent)"></span>
-              </div>
-            </sc-if>
             <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ hdLeadSeg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
             </sc-if>
@@ -42559,7 +43043,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ fc.seg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
                   </div>
                 </sc-for>
@@ -42568,7 +43051,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
               <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -42587,7 +43069,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ hdYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -42611,11 +43092,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ fsOn }}" hint-placeholder-val="{{ false }}">
               <div data-lift="box" style="display:flex;flex-direction:column;gap:12px;border:1px dashed rgba(var(--atmc),.8);border-radius:16px;padding:14px 15px;background:rgba(var(--atmc),.08)">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">&#10036; Field study</div>
                 <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fsAsk }}</div>
                 <sc-if value="{{ fsHoldsOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsHolds }}</div></sc-if>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How well did it fit what happened" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How well did it fit what happened</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How well did it fit what happened?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsFit }}" as="ff" hint-placeholder-count="3">
                       <button data-lift onClick="{{ ff.go }}" role="radio" aria-checked="{{ ff.on }}" tabindex="{{ ff.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ ff.bd }};border-radius:999px;background:{{ ff.bg }};font:600 11.5px var(--fc);color:{{ ff.c }}">{{ ff.label }}</button>
@@ -42623,7 +43103,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   </div>
                 </div>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How charged was the moment" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How charged was the moment</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How charged was the moment?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsCharge }}" as="fc2" hint-placeholder-count="3">
                       <button data-lift onClick="{{ fc2.go }}" role="radio" aria-checked="{{ fc2.on }}" tabindex="{{ fc2.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ fc2.bd }};border-radius:999px;background:{{ fc2.bg }};font:600 11.5px var(--fc);color:{{ fc2.c }}">{{ fc2.label }}</button>
@@ -42835,7 +43315,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your sky, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ apMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 16px/1 var(--fb);color:{{ m.c }}">{{ m.g }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.sign }}</span>
               </button>
@@ -42864,23 +43344,18 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ apChapterName }}</div>
             <div style="display:flex;align-items:center;gap:16px">
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ apKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ apEpi }}</div>
                 </sc-if>
               </div>
             </div>
-            <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;gap:12px">
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
-                <span style="font:italic 400 19px var(--fb);color:var(--tx)">{{ apEpi }}</span>
-                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.5),transparent)"></span>
-              </div>
-            </sc-if>
             <sc-if value="{{ apLeadOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ apLead }}</div>
             </sc-if>
@@ -42908,7 +43383,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ apFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
                   </div>
                 </sc-for>
@@ -42916,7 +43390,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ apTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -42940,7 +43413,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ apYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -43118,7 +43590,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 18px/1 var(--fd);color:{{ m.c }}">{{ m.n }}</span>
               </button>
             </sc-for>
@@ -43163,7 +43635,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
             <sc-if value="{{ bnTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ bnTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -44442,7 +44913,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
-          <span aria-hidden="true" data-icon="oracle" data-glyph-orb="1" style="flex:none;display:block;width:76px;height:76px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat"></span>
+          <span aria-hidden="true" data-icon="oracle" data-glyph-orb="1" style="flex:none;display:block;width:132px;height:132px;margin:10px 0 34px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat"></span>
           <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fb);color:var(--mut)">{{ orLoadingText }}</p>
           <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
           <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
@@ -49417,11 +49888,11 @@ class Component extends DCLogic {
       paras.push((ahead < 3 && name === 'Sun' ? 'It stands on the threshold now, and reaches ' : 'It reaches ') + to + ' ' + when(next) + ', ' + old(next).replace('the year you turned', 'the year you turn') + '. ' + this.HANDOFF_PAIR[si]);
     }
     const lead = ter ? (name === 'Sun'
-      ? 'Under that clock runs a quicker one, which counts each day after birth as one month of the Moon. Read that way, your Sun walks a sign in about two and a half years.'
-      : 'Under that clock runs a quicker one, which counts each day after birth as one month of the Moon. Read that way, your Moon crosses a sign every two or three months, the weather of a season rather than of an era.')
+      ? 'Your Sun keeps walking on a quicker clock, a sign in about two and a half years.'
+      : 'Your Moon keeps walking on a quicker clock, a new sign every two or three months, the weather of a season.')
       : name === 'Sun'
-      ? 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
-      : 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Moon keeps walking, about a sign every two and a half years, and each crossing is a change of weather inside.';
+      ? 'Your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
+      : 'Your Moon keeps walking, a sign every two and a half years, and each crossing changes the weather inside.';
     void natalSi;
     return (memo[mk] = { heading: 'Your ' + name + (ter ? ', by the month' : ', progressed'), lead: lead, paras: paras, last: last, next: next, age: age, lonNow: lonNow });
   }
@@ -56317,7 +56788,6 @@ class Component extends DCLogic {
       /* The folio. */
       apAnim: (st.apFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
       apFolioLabel: e.name, apIcon: e.glyph, apIconC: e.c, apName: e.name,
-      apChapterName: (sections.find(s => s[0] === e.ch) || ['', ''])[1],
       apKicker: kicker, apKickerOn: !!kicker, apEpi: epi, apEpiOn: !!epi,
       apLead: lead, apLeadOn: !!lead && !dropcap, apLeadCap: !!lead && dropcap,
       apNow: now, apNowOn: !!now,
@@ -56637,26 +57107,81 @@ class Component extends DCLogic {
     if (name === 'Solar Plexus') return [[x + w, y], [x, cy], [x + w, y + h]];
     return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
   }
-  /* Each gate's place on the wiring: spread evenly round its centre's own
-     outline, drawn a little inside it. Memoised, because it never changes. */
-  hdGateSpots() {
-    if (this._hdSpots) return this._hdSpots;
-    const by = {}, out = {};
-    for (let n = 1; n <= 64; n++) { const c = this.hdCenterOf(n); if (this.BG_POS[c]) (by[c] = by[c] || []).push(n); }
-    Object.keys(by).forEach(c => {
-      const P = this.hdShape(c), cx = P.reduce((a, p) => a + p[0], 0) / P.length, cy = P.reduce((a, p) => a + p[1], 0) / P.length;
-      const seg = P.map((p, i) => { const q = P[(i + 1) % P.length]; return { p: p, q: q, len: Math.hypot(q[0] - p[0], q[1] - p[1]) }; });
-      const per = seg.reduce((a, s) => a + s.len, 0), list = by[c].sort((a, b) => a - b);
-      list.forEach((n, i) => {
-        let d = (i + .5) / list.length * per, k = 0;
-        while (k < seg.length - 1 && d > seg[k].len) { d -= seg[k].len; k++; }
-        const s = seg[k], f = d / s.len, px = s.p[0] + (s.q[0] - s.p[0]) * f, py = s.p[1] + (s.q[1] - s.p[1]) * f;
-        out[n] = { x: px + (cx - px) * .2, y: py + (cy - py) * .2, c: c };
+  /* The wiring's geometry, shared by the Atlas and My Charts (owner, 6 November
+     2026: "organise the lines better on the bodygraph"). Each gate sits on the
+     side of its centre that faces the centre its channel runs to, so a channel
+     leaves its centre toward where it is going; channels between one pair of
+     centres run parallel; and a channel whose straight path would cross a third
+     centre bows round it. Memoised, because it never changes. */
+  hdWireGeom() {
+    if (this._hdGeom) return this._hdGeom;
+    const T = window.HDTopology, names = Object.keys(this.BG_POS);
+    const poly = {}, cen = {};
+    names.forEach(c => { const P = this.hdShape(c); poly[c] = P; cen[c] = [P.reduce((a, q) => a + q[0], 0) / P.length, P.reduce((a, q) => a + q[1], 0) / P.length]; });
+    const inPoly = (x, y, P) => { let o = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const a = P[i], b = P[j];
+      if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) o = !o; } return o; };
+    const rayOut = (sx, sy, dx, dy, P) => { let best = Infinity;
+      for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length], ex = b[0] - a[0], ey = b[1] - a[1], den = dx * ey - dy * ex;
+        if (Math.abs(den) < 1e-9) continue;
+        const t = ((a[0] - sx) * ey - (a[1] - sy) * ex) / den, u = ((a[0] - sx) * dy - (a[1] - sy) * dx) / den;
+        if (t > 0 && u >= 0 && u <= 1 && t < best) best = t; }
+      return best === Infinity ? 0 : best; };
+    const pairs = T && T.pairs ? T.pairs() : [];
+    const cOf = g => this.hdCenterOf(g);
+    const groups = {};
+    pairs.forEach(ch => { const ca = cOf(ch.a), cb = cOf(ch.b); if (!poly[ca] || !poly[cb]) return;
+      const k = ca < cb ? ca + '|' + cb : cb + '|' + ca; (groups[k] = groups[k] || []).push(ch); });
+    const spots = {};
+    Object.keys(groups).forEach(k => { const list = groups[k], n = list.length;
+      list.forEach((ch, idx) => {
+        const ca = cOf(ch.a), cb = cOf(ch.b), first = ca < cb ? ca : cb, A0 = cen[first], B0 = cen[first === ca ? cb : ca];
+        let ux = B0[0] - A0[0], uy = B0[1] - A0[1]; const L = Math.hypot(ux, uy) || 1; ux /= L; uy /= L;
+        const px = -uy, py = ux, off = (idx - (n - 1) / 2) * 9;
+        [[ch.a, ca], [ch.b, cb]].forEach(([g, c]) => {
+          if (spots[g]) return;
+          const C = cen[c], P = poly[c], sx = c === first ? ux : -ux, sy = c === first ? uy : -uy;
+          let ox = px * off, oy = py * off, k2 = 0;
+          while (!inPoly(C[0] + ox, C[1] + oy, P) && k2++ < 8) { ox *= .6; oy *= .6; }
+          const t = rayOut(C[0] + ox, C[1] + oy, sx, sy, P), ins = Math.min(5.5, t * .45);
+          spots[g] = { x: C[0] + ox + sx * (t - ins), y: C[1] + oy + sy * (t - ins), c: c };
+        });
       });
     });
-    this._hdSpots = out;
-    return out;
+    /* Gates of one centre that land on each other are eased apart, inside the shape. */
+    for (let it = 0; it < 40; it++) names.forEach(c => {
+      const gs = Object.keys(spots).filter(g => spots[g].c === c), C = cen[c];
+      for (let i = 0; i < gs.length; i++) for (let j = i + 1; j < gs.length; j++) {
+        const a = spots[gs[i]], b = spots[gs[j]], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+        if (d < 7.5) { const m = (7.5 - d) / 2 + .01, ux = d > 1e-6 ? dx / d : 1, uy = d > 1e-6 ? dy / d : 0; a.x -= ux * m; a.y -= uy * m; b.x += ux * m; b.y += uy * m; }
+      }
+      gs.forEach(g => { const q = spots[g]; let k = 0; while (!inPoly(q.x, q.y, poly[c]) && k++ < 12) { q.x = C[0] + (q.x - C[0]) * .9; q.y = C[1] + (q.y - C[1]) * .9; } });
+    });
+    /* Any gate the topology did not place falls back to its centre's middle. */
+    for (let n = 1; n <= 64; n++) if (!spots[n]) { const c = cOf(n); if (cen[c]) spots[n] = { x: cen[c][0], y: cen[c][1], c: c }; }
+    const f1 = v => v.toFixed(1);
+    const paths = {};
+    pairs.forEach(ch => { const a = spots[ch.a], b = spots[ch.b]; if (!a || !b) return;
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      let hit = null;
+      names.forEach(c => { if (hit || c === a.c || c === b.c) return;
+        for (let s = 1; s < 20; s++) { const f = s / 20; if (inPoly(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f, poly[c])) { hit = c; break; } } });
+      let d = 'M' + f1(a.x) + ' ' + f1(a.y) + ' L' + f1(b.x) + ' ' + f1(b.y), via = null;
+      if (hit) {
+        let ux = b.x - a.x, uy = b.y - a.y; const L = Math.hypot(ux, uy) || 1; ux /= L; uy /= L;
+        let px = -uy, py = ux; const O = cen[hit];
+        if ((O[0] - mx) * px + (O[1] - my) * py > 0) { px = -px; py = -py; }
+        const P = poly[hit], reach = Math.max(...P.map(q => (q[0] - mx) * px + (q[1] - my) * py)) + 9;
+        via = { x: mx + px * reach, y: my + py * reach };
+        const cx = 2 * via.x - mx, cy = 2 * via.y - my;
+        d = 'M' + f1(a.x) + ' ' + f1(a.y) + ' Q' + f1(cx) + ' ' + f1(cy) + ' ' + f1(b.x) + ' ' + f1(b.y);
+      }
+      paths[ch.key] = { d: d, a: a, b: b, via: via };
+    });
+    const geom = { spots: spots, paths: paths };
+    if (pairs.length) this._hdGeom = geom;
+    return geom;
   }
+  hdGateSpots() { return this.hdWireGeom().spots; }
   /* Every entry the Atlas can open, once, keyed chapter:slug where the slug is
      the one atlasItem has always stored. */
   atlasEntries() {
@@ -57090,33 +57615,32 @@ class Component extends DCLogic {
       (L.see || []).forEach(([c, id]) => { const x = find(c + ':' + this.atlasSlug(id)); if (!x) return;
         if (x.d.center) litC.add(x.d.center); if (x.d.type) (this.HD_TYPE_LIGHT[x.d.type] || []).forEach(z => litC.add(z)); }); }
     if (d.essay === 'example') { (A.EXAMPLE.definedCenters || []).forEach(c => litC.add(c)); (A.EXAMPLE.channels || []).forEach(k => litK.add(k)); (A.EXAMPLE.gates || []).forEach(g => litG.add(g)); }
-    const spots = this.hdGateSpots();
-    const chans = Object.keys(A.CHANNELS).map(k => { const p = k.split('-').map(Number), a = spots[p[0]], b = spots[p[1]];
+    const geo = this.hdWireGeom(), spots = geo.spots;
+    const chans = Object.keys(A.CHANNELS).map(k => { const g = geo.paths[k];
       const lit = litK.has(k), own = myChan.has(k);
-      return a && b ? { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1), lit: lit ? '1' : '0',
-        c: lit ? 'var(--ac2-hi)' : own ? 'rgba(var(--atmc2),.75)' : 'var(--chl)', w: lit ? '3' : own ? '2.4' : '1.3', o: lit || own ? '1' : '.9' } : null; }).filter(Boolean);
+      return g ? { d: g.d, lit: lit ? '1' : '0',
+        c: lit ? 'var(--ac2-hi)' : own ? 'rgba(var(--atmc),.95)' : 'var(--chl)', w: lit ? '3' : own ? '2' : '1.3', o: lit || own ? '1' : '.9' } : null; }).filter(Boolean);
     const centres = Object.keys(this.BG_POS).map(name => {
       const P = this.hdShape(name), defined = mine && hd.defined.has(name), lit = litC.has(name);
-      const col = A.CENTERS[name] ? A.CENTERS[name].color : '';
       const q = this.BG_POS[name];
       return { pts: P.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), lit: lit ? '1' : '0',
-        fill: defined ? col : 'rgba(var(--atmc),.07)', fo: defined ? '.82' : '1',
-        stroke: lit ? 'var(--ac2-hi)' : defined ? col : 'var(--chl)', sw: lit ? '3' : '1.5',
-        glow: lit ? 'drop-shadow(0 0 8px rgba(var(--atmc2),.75))' : 'none',
-        l: pct(q[0] + q[2] / 2, 300), t: pct(q[1] + q[3] / 2 + (name === 'Head' || name === 'Heart' ? q[3] * .16 : name === 'Ajna' ? -q[3] * .16 : 0), 520),
-        label: this.BG_SHORT[name], lc: defined ? 'rgba(5,6,10,.85)' : lit ? 'var(--tx)' : 'var(--mut)',
+        fill: defined ? 'rgba(var(--atmc),.24)' : 'rgba(var(--atmc),.07)', fo: '1',
+        stroke: lit ? 'var(--ac2-hi)' : defined ? 'rgba(var(--atmc),.95)' : 'var(--chl)', sw: lit ? '3' : defined ? '1.8' : '1.5',
+        glow: lit ? 'drop-shadow(0 0 8px rgba(var(--atmc),.75))' : 'none',
+        l: pct(q[0] + q[2] / 2 + (name === 'Spleen' ? -q[2] * .2 : name === 'Solar Plexus' ? q[2] * .2 : 0), 300), t: pct(q[1] + q[3] / 2 + (name === 'Heart' ? q[3] * .16 : name === 'Head' ? -q[3] * .02 : name === 'Ajna' ? -q[3] * .12 : 0), 520),
+        label: this.BG_SHORT[name], lc: defined || lit ? 'var(--tx)' : 'var(--mut)',
         go: peek('c:' + name, { l: pct(q[0] + q[2] / 2, 300), t: pct(q[1], 520) }, A.CENTERS[name] ? A.CENTERS[name].label : name, 'centers:' + this.atlasSlug(name)) };
     });
     const gates = Object.keys(spots).map(Number).map(n => { const s = spots[n], lit = litG.has(n), own = myGates.has(n), now = skyGates.has(n);
       return { l: pct(s.x, 300), t: pct(s.y, 520), lit: lit ? '1' : '0', size: lit ? '9px' : own ? '7px' : '5px',
         fill: lit ? 'var(--ac2-hi)' : own ? 'var(--tx)' : 'rgba(var(--atmc),.75)',
-        ring: now ? '0 0 0 2px var(--blue),0 0 10px var(--blue)' : lit ? '0 0 10px rgba(var(--atmc2),.9)' : 'none',
+        ring: now ? '0 0 0 2px var(--blue),0 0 10px var(--blue)' : lit ? '0 0 10px rgba(var(--atmc),.9)' : 'none',
         anim: now ? 'pulseGentle 2.4s ease-in-out infinite' : 'none',
         tip: 'Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''),
         go: peek('g:' + n, { l: pct(s.x, 300), t: pct(s.y, 520) }, 'Gate ' + n + ' · ' + (A.GATES[n] ? A.GATES[n][0] : ''), 'gates:g' + n) }; });
     /* The folio. */
     const facets = [], links = [], yours = [], terms = [];
-    let kicker = '', lead = '', essay = [], dropcap = false, epi = '', epiLabel = '', now = '', bold = [];
+    let kicker = '', lead = '', essay = [], dropcap = false, epi = '', now = '', bold = [];
     const hexName = n => { const IC = this.IC(), h = IC && IC.hexagram ? IC.hexagram(n) : null; return h ? h.name : ''; };
     const skyLine = list => list.length ? 'In the sky now: ' + list.join(', ') : '';
     const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
@@ -57130,7 +57654,7 @@ class Component extends DCLogic {
     const yourLine = (label, text, rec) => yours.push({ label: label, text: text,
       go: rec ? () => this.setState({ atlasRec: { ...rec, from: e.name, said: arwSaid } }) : wiringGo });
     if (d.type) { const t = A.TYPES[d.type];
-      kicker = 'Share of people: ' + t.pct; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim(); epiLabel = 'Signature';
+      kicker = t.pct.charAt(0).toUpperCase() + t.pct.slice(1) + ' of people'; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim();
       bold = (A.EMPHASIS && A.EMPHASIS.types[d.type]) || [];
       [['Aura', t.aura], ['Strategy', t.strategy], ['Authority', t.authority], ['Signature', t.signature], ['Not-self theme', t.notSelf],
         ['Strengths', t.strengths], ['Challenges', t.challenges], ['Opportunities', t.opportunities], ['Obstacles', t.obstacles],
@@ -57139,7 +57663,7 @@ class Component extends DCLogic {
       term('Aura', 'terms:aura'); term('Signature', 'terms:signature'); term('Not-self theme', 'terms:not-self-theme');
       if (yourType === d.type) yourLine('Your type', d.type); }
     if (d.line) { const L = A.LINES[d.line];
-      kicker = 'Theme: ' + L.theme; lead = L.behavior; facets.push({ label: 'In men', text: L.male }, { label: 'In women', text: L.female });
+      kicker = L.theme; lead = L.behavior; facets.push({ label: 'In men', text: L.male }, { label: 'In women', text: L.female });
       Object.keys(A.PROFILES).filter(k => k.split('/').indexOf(String(d.line)) !== -1).forEach(k => link('Profile ' + k, k, 'profiles:' + this.atlasSlug(k)));
       if (pr && pr.c === d.line) yourLine('Your conscious line', 'Personality Sun, line ' + pr.c);
       if (pr && pr.u === d.line) yourLine('Your unconscious line', 'Design Sun, line ' + pr.u); }
@@ -57149,7 +57673,7 @@ class Component extends DCLogic {
       term('Line', 'terms:line');
       if (pr && pr.key === d.profile) yourLine('Your profile', d.profile + ', ' + P.name); }
     if (d.center || d.openc) { const k = d.center || d.openc, C = A.CENTERS[k];
-      kicker = 'Function: ' + C.fn;
+      kicker = C.fn;
       if (d.center) facets.push({ label: 'Defined', text: C.defined }, { label: 'Undefined', text: C.open }, { label: 'Wisdom when open', text: C.wisdom });
       else { lead = C.wisdom; facets.push({ label: 'Defined means consistent', text: C.defined }, { label: 'Undefined means variable', text: C.open }); }
       link(d.center ? 'Open and defined, ' + C.label : C.label, '', (d.center ? 'open:' : 'centers:') + this.atlasSlug(k));
@@ -57158,7 +57682,7 @@ class Component extends DCLogic {
       if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held', { kind: 'centre', c: k });
       now = skyLine(sky.filter(a => this.hdCenterOf(a.gate) === k).map(a => a.body + ' in gate ' + a.gate)); }
     if (d.gate) { const g = A.GATES[d.gate];
-      kicker = 'In the ' + this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate); epiLabel = 'Hexagram ' + d.gate;
+      kicker = 'In the ' + this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate);
       facets.push({ label: 'Low expression', text: g[3] }, { label: 'High expression', text: g[4] });
       link('Its centre, ' + this.hdCenterOf(d.gate), '', 'centers:' + this.atlasSlug(this.hdCenterOf(d.gate)));
       (A.channelsFor(d.gate) || []).forEach(c => link('Channel ' + c.key + ', ' + c.name, '⟷', 'channels:' + this.atlasSlug(c.key)));
@@ -57168,14 +57692,14 @@ class Component extends DCLogic {
       if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line, { kind: 'gate', n: d.gate }));
       now = skyLine(sky.filter(a => a.gate === d.gate).map(a => a.body + ', line ' + a.line)); }
     if (d.channel) { const c = A.CHANNELS[d.channel], p = d.channel.split('-').map(Number);
-      kicker = 'Keynote: ' + c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · '); epiLabel = 'Hexagrams ' + p.join(' and ');
+      kicker = c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · ');
       now = skyLine(sky.filter(a => p.indexOf(a.gate) !== -1).map(a => a.body + ' in gate ' + a.gate));
       p.forEach(n => link('Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''), String(n), 'gates:g' + n));
       { const ci = A.circuitOf ? A.circuitOf(d.channel) : ''; if (ci) term(ci + ' Circuit', 'terms:' + this.atlasSlug(ci + ' circuit')); }
       term('Definition', 'definition:single-definition');
       if (myChan.has(d.channel)) yourLine('Defined in your chart', 'both gates held');
       else if (mine && p.some(n => myGates.has(n))) p.filter(n => myGates.has(n)).forEach(n => yourLine('Half held in your chart', 'gate ' + n + ', a hanging gate', { kind: 'gate', n: n })); }
-    if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = 'Keynote: ' + c.keynote; lead = c.text; facets.push({ label: 'Circuits within it', text: c.sub }); }
+    if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = c.keynote; lead = c.text; facets.push({ label: 'Circuits within it', text: c.sub }); }
     if (d.definition) { const dn = A.DEFINITION.find(x => x.name === d.definition); lead = dn.text; dropcap = true;
       if (myDef && d.definition.toLowerCase().indexOf(myDef.toLowerCase()) === 0) yourLine('Your definition', myDef); }
     if (d.cross) { lead = A.CROSS[d.cross]; dropcap = true; link('Profiles', '', 'profiles:' + this.atlasSlug(Object.keys(A.PROFILES)[0]));
@@ -57193,11 +57717,11 @@ class Component extends DCLogic {
       if (/emotional/i.test(d.authority)) term('Emotional Wave', 'terms:emotional-wave');
       if (myAuth && myAuth.name === d.authority) yourLine('Your authority', String(hd.authority).split(':')[0]); }
     if (d.term) { const tm = A.TERMS.find(x => x.name === d.term); lead = tm.text; dropcap = true;
-      if (tm.aka) { epi = tm.aka; epiLabel = 'Also called'; }
+      if (tm.aka) { epi = 'Also called ' + tm.aka; }
       if (tm.see) { const k = tm.see[0] + ':' + this.atlasSlug(tm.see[1]), x = find(k); if (x) link((A.LESSONS || []).some(l => l.name === x.name && l.tier === x.ch) ? 'The lesson, ' + x.name : x.name, x.glyph, k); } }
     if (d.lesson) { const L = A.LESSONS.find(x => x.name === d.lesson), T = (A.TIERS || []).find(x => x.key === L.tier) || { name: '' };
       const tier = A.LESSONS.filter(x => x.tier === L.tier), at = tier.indexOf(L);
-      kicker = T.name + ' lesson ' + (at + 1) + ' of ' + tier.length; lead = L.lead; dropcap = true; epi = L.epi; epiLabel = 'In short';
+      kicker = T.name + ' · ' + (at + 1) + ' of ' + tier.length; lead = L.lead; dropcap = true; epi = L.epi;
       if (['Type', 'Strategy', 'Aura', 'Signature', 'Not-Self Theme'].indexOf(L.name) !== -1) Object.keys(A.TYPES).forEach(t => { bold = bold.concat((A.EMPHASIS && A.EMPHASIS.types[t]) || []); });
       L.parts.forEach(([l, x]) => facets.push({ label: l, text: x }));
       (L.see || []).forEach(([c, id]) => { const k = c + ':' + this.atlasSlug(id), x = find(k); if (x) link(x.name, x.glyph, k); });
@@ -57220,7 +57744,7 @@ class Component extends DCLogic {
     let fs = null;
     if (d.study) { const x = A.STUDY.find(z => z.key === d.study), W = A.weightOf(x.score);
       kicker = W.glyph + ' ' + W.name + ', weighed ' + (W.min === 0 ? 'under 60' : W.min + ' to ' + W.max) + ' in 100' + (W.field ? ' · a field study' : '');
-      lead = x.claim; epi = W.field ? 'Speculative' : ''; epiLabel = 'Standing';
+      lead = x.claim; epi = W.field ? 'Speculative' : '';
       facets.push({ label: 'Weight', text: W.line }, { label: 'Fidelity', text: x.note }, { label: 'Origins', text: x.from });
       if (x.see) { const k = x.see[0] + ':' + this.atlasSlug(x.see[1]); link((find(k) || {}).name || x.see[1], '', k); }
       link('How the study is weighed', this.HD_SEC_GLYPH.study, 'study:how');
@@ -57264,7 +57788,7 @@ class Component extends DCLogic {
       hdwPeekL: st.atlasPeekAt ? st.atlasPeekAt.l : '0%', hdwPeekT: st.atlasPeekAt ? st.atlasPeekAt.t : '0%', hdwPeekText: st.atlasPeekAt ? st.atlasPeekAt.text : '',
       hdwPeekGo: () => { if (st.atlasPeekAt) this.atlasPick(st.atlasPeekAt.key, false); },
       hdwKeyOn: lv !== 'deep',
-      hdwKey: (mine ? [{ label: 'Defined', sw: 'conic-gradient(' + Object.keys(A.CENTERS).map(k => A.CENTERS[k].color).filter(Boolean).join(',') + ')', ring: 'none' }, { label: 'Your gates', sw: 'var(--tx)', ring: 'none' }] : [])
+      hdwKey: (mine ? [{ label: 'Defined', sw: 'rgba(var(--atmc),.4)', ring: 'inset 0 0 0 1.5px rgba(var(--atmc),.95)' }, { label: 'Your gates', sw: 'var(--tx)', ring: 'none' }] : [])
         .concat([{ label: 'Open', sw: 'transparent', ring: 'inset 0 0 0 1.5px var(--mut)' }, { label: 'In the sky now', sw: 'transparent', ring: 'inset 0 0 0 2px var(--blue)' }]),
       hdwMarks: [].concat(mine ? [['Your type', hd.type, 'types:' + this.atlasSlug(hd.type)], ['Your profile', pr.key, 'profiles:' + this.atlasSlug(pr.key)],
           ['Your authority', String(hd.authority).split(':')[0], myAuth ? 'authorities:' + this.atlasSlug(myAuth.name) : null]] : [],
@@ -57273,11 +57797,10 @@ class Component extends DCLogic {
           aria: label + ', ' + val, go: () => this.atlasPick(key, true) })),
       hdAnim: (st.atlasFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
       hdFolioLabel: e.name, hdIcon: e.glyph, hdIconFs: String(e.glyph).length > 2 ? '20px' : '34px', hdName: e.name,
-      hdChapterName: (A.SECTIONS.find(s => s[0] === e.ch) || ['', ''])[1],
-      hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi, hdEpiLabel: epiLabel,
+      hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi,
       hdNow: now, hdNowOn: !!now,
       hdLeadOn: !!lead && !dropcap, hdLeadCap: !!lead && dropcap, hdLead: lead, hdLeadSeg: this.atlasRich(lead, bold, terms.map(t => t.label)),
-      hdFamOn: lv === 'first' && where.length > 0, hdFam: where.slice(0, 2).join(' · '),
+      hdFamOn: false, hdFam: where.slice(0, 2).join(' · '),
       hdEssay: essay, hdEssayOn: essay.length > 0,
       hdFacets: facets, hdFacetsOn: facets.length > 0,
       hdYours: yours, hdYoursOn: yours.length > 0,
@@ -60957,6 +61480,7 @@ class Component extends DCLogic {
      Today as a widget (18 October 2026). It is still asked of the Oracle as
      period 'cycle', from the widget's sheet, so the plumbing below keeps it. */
   ORACLE_ON_REQUEST_ONLY = true;
+  ORACLE_PREPARE_AHEAD = true;
   ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month']];
   orPeriodOf(v) { return ['daily', 'weekly', 'monthly'].indexOf(v) !== -1 ? v : 'daily'; }
   oracleLocalDate(d) {
@@ -61209,7 +61733,7 @@ class Component extends DCLogic {
     if (!again) this._orQuiet[slot] = !!quiet;
     this._orFirst = this._orFirst || {};
     if (!again) { delete this._orTry[slot]; delete this._orFirst[slot]; this.setState({ orBusyMap: { ...held }, orErr: quiet ? this.state.orErr : null }); }
-    if (!again && !quiet) this.speak(period === 'cycle' ? 'The Oracle is reading the long passages across your chart.' : depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
+    if (!again && !quiet) this.speak(period === 'cycle' ? 'The Oracle is reading the long passages across your chart.' : 'The Oracle is reading every point of your chart.', 'polite');
     /* The first half of an in-depth reading is shown the moment it arrives,
        while the second is still being written. It lives in memory only: the
        kept reading is the whole one, so a half is never mistaken for it. */
@@ -61903,8 +62427,10 @@ class Component extends DCLogic {
     if (!this.readLS(this.oracleConsentKey(), false)) return false;
     /* NO READING UNTIL IT IS ASKED FOR (owner, 4 November 2026: "No readings
        until requested. That's universal law."). Nothing of any depth or
-       period is asked for on open, prepared ahead, or put on the screen
-       before the reader presses Consult the Oracle for that slot. */
+       period is put on the screen before the reader presses Consult the
+       Oracle for that slot. Since 6 November 2026 a reading may be written
+       ahead, quietly (oraclePrepareAuto), but this function, which asks for
+       a reading the screen then shows, never asks. */
     if (period || depth) return false;
     /* The Cycle Audit is asked for on open once it is open to this reader and
        there is a passage to read. */
@@ -61962,26 +62488,40 @@ class Component extends DCLogic {
      in-depth reading, for one whose subscription the server has not confirmed,
      or on the sample chart. */
   oraclePrepareAuto() {
-    /* Retired by the rule in oracleWillAsk: a reading prepared before it is
-       asked for is a reading the reader did not ask for. */
+    /* WRITTEN AHEAD, SHOWN ON THE PRESS (owner, 6 November 2026: "write the
+       reading, but don't engage it until the reader asks for it! The standard
+       reading kept auto-populating, I only wanted to do away with that"). So
+       the current period's standard reading, and its in-depth reading for a
+       Luminary who has asked for one before, are asked for quietly and kept on
+       the device, and the screen still shows Consult the Oracle until it is
+       pressed for that slot (deepGate in oracleVals, orOpened). Only a reader
+       who has agreed to the Oracle is prepared for, one slot at a time, once a
+       slot per session. The Cycle Audit is not prepared. */
     const st = this.state, cs = st.cloudStatus, C = this.cloud;
-    if (this.ORACLE_ON_REQUEST_ONLY || !st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
-    if (!this.readLS(this.oracleConsentKey(), false) || !this.readLS(this.oracleDeepKey(), false)) return;
-    if (!this.addonsOpen()) return;
-    /* The Cycle Audit has no in-depth form, so a reader looking at it has
-       today's in-depth reading prepared. */
-    const deepOf = x => this.orPeriodOf(x);
-    const period = deepOf(st.orPeriod), slot = this.oracleSlot(period, 'deep');
+    if (!this.ORACLE_PREPARE_AHEAD || !st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
+    if (!this.readLS(this.oracleConsentKey(), false)) return;
     this._orPrepTried = this._orPrepTried || {};
-    if (this._orPrepTried[slot] || this.oracleCached(period, 'deep')) return;
-    if (this.orNonQuietBusy().length || (this._orBusy && this._orBusy[slot]) || this._orPrepT) return;
+    const next = () => {
+      const s2 = this.state, p = this.orPeriodOf(s2.orPeriod);
+      const depths = ['standard'];
+      if (this.readLS(this.oracleDeepKey(), false) && this.addonsOpen()) depths.push('deep');
+      for (const d of depths) {
+        const sl = this.oracleSlot(p, d);
+        if (this._orPrepTried[sl] || this.oracleCached(p, d) || (this._orBusy && this._orBusy[sl])) continue;
+        return [p, d, sl];
+      }
+      return null;
+    };
+    if (!next() || this._orPrepT) return;
+    if (this.orNonQuietBusy().length || (this._orBusy && Object.keys(this._orBusy).some(k => this._orBusy[k]))) return;
     this._orPrepT = setTimeout(() => {
       this._orPrepT = null;
-      const s2 = this.state, p2 = deepOf(s2.orPeriod), sl2 = this.oracleSlot(p2, 'deep');
-      if (this._orPrepTried[sl2] || this.oracleCached(p2, 'deep') || this.orNonQuietBusy().length || (this._orBusy && this._orBusy[sl2])) return;
-      if (!this.addonsOpen() || !s2.ready) return;
-      this._orPrepTried[sl2] = true;
-      this.oracleAsk(p2, 'deep', false, true);
+      if (!this.state.ready || this.orNonQuietBusy().length) return;
+      if (this._orBusy && Object.keys(this._orBusy).some(k => this._orBusy[k])) return;
+      const n = next();
+      if (!n) return;
+      this._orPrepTried[n[2]] = true;
+      this.oracleAsk(n[0], n[1], false, true);
     }, 4000);
   }
   /* ---- The Cycle Audit ----------------------------------------------------
@@ -63463,13 +64003,9 @@ class Component extends DCLogic {
       orAskGo: () => { this.orListenStop(); this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.birthEntryGo(),
-      orLoadingText: lumWait ? 'Checking your Codex Luminary…'
-        : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
-        : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
-        : otherBusy ? 'The Oracle is finishing another reading first. This one follows…'
-        : depth === 'deep'
-        ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
-        : 'The Oracle is reading the heavens for you…',
+      /* One line while a reading loads, whatever the wait (the owner,
+         6 November 2026): no second sentence and no line that changes. */
+      orLoadingText: 'The Oracle is reading every point of your chart',
       /* Who has Luminary, said once above the reading: a subscription from
          before the one time payment says when it ends and keeps Manage
          billing to cancel it; a payment says every add-on is open. */
@@ -64570,21 +65106,31 @@ class Component extends DCLogic {
     if (r.retro) out.push('From the Earth it was retrograde. From the Sun nothing turns back: the backward walk belongs to the Earth overtaking it, or being overtaken.');
     return out;
   }
+  /* The lead over each chapter of a placement (the owner, 6 November 2026):
+     no instruction and no explaining. The house is said as a part of living,
+     the sign walks into the room as itself, the body speaks as itself, and the
+     reader is trusted to go with it. The words live in placement-content.js;
+     a point with no voice of its own gets no lead rather than a generic one. */
+  plLeads(r, name, ordH, dig) {
+    const PC = window.PlacementContent || {}, hs = PC.houses || [], ss = PC.signs || {}, bs = PC.bodies || {};
+    const hn = Number(String(ordH).replace(/\D/g, '')) || 0, h = hs[hn - 1] || {}, sg = ss[r.sign] || {};
+    const bk = PC.keyFor ? PC.keyFor(r.id || r.name) : r.name, bd = bs[bk] || bs[r.name] || {};
+    return [
+      h.living ? 'A part of living where ' + h.living + ' happens consistently, and your ' + name + ' lives here.' : '',
+      sg.enters || '',
+      bd.voice || '',
+      h.cue ? 'Your ' + name + ' comes alive when ' + h.cue + '.' : '',
+      sg.manner ? 'Your ' + name + ' moves ' + sg.manner + '.' : '',
+      dig ? (dig.strong ? name + ' is at home in ' + r.sign + ', a well lit room given rather than earned.'
+        : name + ' is a guest in ' + r.sign + ', and a guest who works for the welcome often becomes the best company.') : ''
+    ];
+  }
   plPacket(rk, name, r, c, ordH, dig, min, b) {
     const st = this.state, ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
-    const leads = [
-      'Begin with the room. A house is a part of living where a certain kind of thing keeps finding you, and your ' + name + ' does its work here, in the ' + ordH + '.',
-      r.sign + ' sits over this house and gives the room its accent. Nobody chooses an accent, and most of us can barely hear our own.',
-      'Now ' + name + ' itself, before it lands anywhere. It carries much the same longing in every chart ever drawn; what changes is where it lands, and how it is held there.',
-      'Bring the two together and you meet ' + name + ' at home in the ' + ordH + ' house, the part of the reading most people come looking for.',
-      'The same ' + name + ', dressed in ' + r.sign + '. The house gave it a room; the sign gives it a way of moving.'
-    ];
+    const leads = this.plLeads(r, name, ordH, dig);
     const parts = [['The Room', c.house], ['The Accent', c.signInHouse], ['The Nature', c.body],
       ['At Home', c.astralBodyInHouse], ['The Way It Moves', c.astralBodyInSign]].map((p, i) => ({ tab: p[0], sec: p[1], lead: leads[i] }));
-    if (dig) parts.push({ tab: 'The Welcome', sec: { heading: dig.heading, lines: dig.lines },
-      lead: 'Dignity is the old question of whether a celestial body is at home or a guest. ' + (dig.strong
-        ? 'Yours is at home here, which the tradition counts as ease rather than merit: a well lit room, not a virtue.'
-        : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') });
+    if (dig) parts.push({ tab: 'The Welcome', sec: { heading: dig.heading, lines: dig.lines }, lead: leads[5] });
     /* Under the Vedic study the packet reads the chart as Jyotish does: the
        nakshatra and, for the Moon, the dasha. The Western techniques
        (progressions, the solstice mirror, the profected year) are not part of
@@ -64751,28 +65297,26 @@ class Component extends DCLogic {
       plTransitNote: plTransits.length
         ? 'Transit orbs are held tighter than natal ones: 4\u00b0 conjunction and opposition, 3\u00b0 trine and square, 2\u00b0 sextile. A tightening contact usually reads louder than a separating one, though that is a tendency rather than a promise. Positions come from the offline ephemeris, so treat the final degree as approximate.'
         : 'No transiting body is within orb of this point today. Most days are like this for most placements, which is worth remembering before reading much into a quiet one.' };
+    const plL = this.plLeads(r, name, ordH, dig);
     return {
       spiritPlacement: true, ...nav, plComputed: true, plUncomputed: false,
       plName: name.toUpperCase(), plGlyph: r.glyph || c.glyph,
       plSummary: name + ' in ' + r.sign + ' at ' + Math.floor(r.deg) + '\u00b0' + min + '\u2032 \u00b7 ' + PC.ord(house) + ' House',
       plSections: [
-        [c.house, 'Begin with the room. A house is a part of living where a certain kind of thing keeps finding you, and your ' + name + ' does its work here, in the ' + ordH + '. Everything further down grows from this.'],
-        [c.signInHouse, r.sign + ' sits over this house and gives the room its accent. Nobody chooses an accent, and most of us can barely hear our own.'],
-        [c.body, 'Now ' + name + ' itself, before it lands anywhere. It carries much the same longing in every chart ever drawn; what changes is where it lands, and how it is held there.'],
-        [c.astralBodyInHouse, 'Bring the two together and you meet ' + name + ' at home in the ' + ordH + ' house, the part of the reading most people come looking for.'],
-        [c.astralBodyInSign, 'The same ' + name + ', dressed in ' + r.sign + '. The house gave it a room; the sign gives it a way of moving, one that tends to show up whether or not the moment asked for it.']
+        [c.house, plL[0]], [c.signInHouse, plL[1]], [c.body, plL[2]],
+        [c.astralBodyInHouse, plL[3]], [c.astralBodyInSign, plL[4]]
       ].map(x => sec(x[0], x[1])),
       plHasDignity: !!dig,
       plDignity: dig ? { heading: dig.heading, label: dig.label.toUpperCase(),
         c: dig.strong ? 'var(--ac2-hi)' : 'var(--blue)', bg: dig.strong ? 'rgba(var(--atmc2),.1)' : 'rgba(var(--atmc),.12)',
-        lines: [{ text: 'Dignity is the old question of whether a celestial body is at home or a guest. ' + (dig.strong ? 'Yours is at home here, which the tradition counts as ease rather than merit: a well lit room, not a virtue.' : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
+        lines: [{ text: plL[5] }]
           .concat(dig.lines.map(l => ({ text: l.text }))) } : null,
       ...plContacts,
-      plSynth: sec(c.synthesis, 'Everything above, held in one hand. A chart is one arrangement seen from several sides, and it speaks most clearly where the sides agree.'),
+      plSynth: sec(c.synthesis, 'Everything above, held in one hand.'),
       plWorking: [['Strengths', c.working.strengths], ['Challenges', c.working.challenges],
         ['Opportunities', c.working.opportunities], ['Obstacles', c.working.obstacles]]
         .map(([label, items]) => ({ label: label, items: items.map(t => ({ t: t })) })),
-      plDegree: (() => { const d = sec(c.degree, 'The last layer, and the one to hold most lightly. A single degree is a fine thread to pull on; sit with it as a prompt rather than a finding.');
+      plDegree: (() => { const d = sec(c.degree, 'One degree, a fine thread held lightly.');
         const dp = r.category === 'angle' ? null : this.decanPair(r.sign, r.deg); if (dp) d.lines.push({ text: dp.text }); return d; })(),
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),
@@ -65694,52 +66238,41 @@ class Component extends DCLogic {
             const shown = hd.gates.filter(g => sideLines(g).length > 0);
             const shownSet = new Set(shown.map(g => g.gate));
             const A = this.A();
-            /* The 2D wiring is drawn as the Atlas draws it: the centres in their
-               own shapes, every channel as two halves that each light from their
-               own gate, and the gates round each centre. A half lights in --tx for
-               personality and --hd-des for design, both when both hold it, the
-               same language the 3D scene speaks. */
-            const spots = this.hdGateSpots();
-            const layer = {};
-            shown.forEach(g => { layer[g.gate] = layer[g.gate] && layer[g.gate] !== g.kind ? 'both' : g.kind; });
-            const ink = { personality: 'var(--tx)', design: 'var(--hd-des)' };
+            /* The 2D wiring is drawn exactly as the Atlas draws it (owner, 6
+               November 2026): the centres outlined in their own shapes, a defined
+               centre lit warm rather than filled with a category colour, every
+               channel thin and whole along the shared geometry, the reader's gates
+               as white points and the gates the sky holds this minute ringed in
+               --blue. The layer control decides which side's gates count. */
+            const geo = this.hdWireGeom(), spots = geo.spots;
+            const held = new Set(shown.map(g => g.gate));
             const keys = A ? Object.keys(A.CHANNELS) : hd.activeChannels.map(ch => ch[0] + '-' + ch[1]);
-            const lines = [], glows = [];
             const f1 = v => v.toFixed(1);
-            keys.forEach(k => {
-              const pq = k.split('-').map(Number), a = spots[pq[0]], b = spots[pq[1]];
-              if (!a || !b) return;
-              const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-              if (layer[pq[0]] && layer[pq[1]]) glows.push({ x1: f1(a.x), y1: f1(a.y), x2: f1(b.x), y2: f1(b.y) });
-              [[a, pq[0]], [b, pq[1]]].forEach(([e, n]) => {
-                const L = layer[n], seg = { x1: f1(e.x), y1: f1(e.y), x2: f1(m.x), y2: f1(m.y) };
-                if (!L) lines.push(Object.assign({ c: 'var(--chl)', w: '1.4', o: '1' }, seg));
-                else if (L === 'both') lines.push(Object.assign({ c: ink.design, w: '4', o: '1' }, seg), Object.assign({ c: ink.personality, w: '1.6', o: '1' }, seg));
-                else lines.push(Object.assign({ c: ink[L], w: '2.6', o: '1' }, seg));
-              });
-            });
+            const ownK = new Set(keys.filter(k => k.split('-').map(Number).every(n => held.has(n))));
+            const lines = keys.map(k => { const g = geo.paths[k]; if (!g) return null; const own = ownK.has(k);
+              return { d: g.d, c: own ? 'rgba(var(--atmc),.95)' : 'var(--chl)', w: own ? '2' : '1.3', o: own ? '1' : '.9' }; }).filter(Boolean);
             const centers = Object.keys(this.BG_POS).map(name => {
               const q = this.BG_POS[name], defined = hd.defined.has(name);
-              const col = A && A.CENTERS[name] ? A.CENTERS[name].color : 'var(--ac2-hi)';
-              const n = shown.filter(g => this.hdCenterOf(g.gate) === name).length;
               const P = this.hdShape(name);
               return { pts: P.map(pt => f1(pt[0]) + ',' + f1(pt[1])).join(' '),
-                fill: defined ? col : 'rgba(var(--atmc),.08)', fo: defined ? '.9' : '1',
-                stroke: defined ? col : 'rgba(var(--atmc),.6)', halo: defined ? col : 'transparent',
+                fill: defined ? 'rgba(var(--atmc),.24)' : 'rgba(var(--atmc),.07)',
+                stroke: defined ? 'rgba(var(--atmc),.95)' : 'var(--chl)', sw: defined ? '1.8' : '1.5',
                 lp: (q[0] / 300 * 100).toFixed(2) + '%', tp: (q[1] / 520 * 100).toFixed(2) + '%',
                 wp: (q[2] / 300 * 100).toFixed(2) + '%', hp: (q[3] / 520 * 100).toFixed(2) + '%',
-                jc: name === 'Head' || name === 'Heart' ? 'flex-end' : name === 'Ajna' ? 'flex-start' : 'center',
-                pad: name === 'Head' || name === 'Heart' ? '0 0 4px' : name === 'Ajna' ? '3px 0 0' : '0',
+                jc: name === 'Heart' ? 'flex-end' : 'center',
+                ai: name === 'Spleen' ? 'flex-start' : name === 'Solar Plexus' ? 'flex-end' : 'center',
+                pad: name === 'Heart' ? '0 0 4px' : name === 'Head' ? '10px 0 0' : name === 'Ajna' ? '0 0 10px' : name === 'Spleen' ? '0 0 0 9%' : name === 'Solar Plexus' ? '0 9% 0 0' : '0',
                 name: name, short: this.BG_SHORT[name],
-                labelC: defined ? 'rgba(5,6,10,.88)' : 'var(--mut)',
-                subC: defined ? 'rgba(5,6,10,.7)' : 'var(--mut)',
-                count: n ? n + (n === 1 ? ' gate' : ' gates') : '',
+                labelC: defined ? 'var(--tx)' : 'var(--mut)', subC: 'var(--mut)',
+                count: '',
                 go: this.hdOpen({ kind: 'center', name: name }) };
             });
-            const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], L = layer[n];
-              return { x: f1(sp.x), y: f1(sp.y), r: L ? '3.3' : '1.7',
-                fill: L === 'design' ? ink.design : L ? ink.personality : 'rgba(var(--atmc),.75)',
-                ring: L === 'both' ? ink.design : 'none', rw: L === 'both' ? '1.8' : '0' }; });
+            const skyG = new Set(this.hdSkyNow().map(a => a.gate));
+            const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], own = held.has(n), now = skyG.has(n);
+              return { x: f1(sp.x), y: f1(sp.y), r: own ? '3.5' : '2.5',
+                fill: own ? 'var(--tx)' : 'rgba(var(--atmc),.75)', now: now,
+                ring: now ? 'var(--blue)' : 'none', rw: now ? '1.4' : '0' }; });
+            const skyDots = gateDots.filter(g => g.now).map(g => ({ x: g.x, y: g.y }));
             const byCenter = {};
             shown.forEach(g => { (byCenter[this.hdCenterOf(g.gate)] = byCenter[this.hdCenterOf(g.gate)] || []).push(g); });
             const inChannel = new Set();
@@ -65757,7 +66290,7 @@ class Component extends DCLogic {
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',
                   go: this.hdOpen({ kind: 'gate', gate: g.gate, line: g.line }) })) };
             });
-            return { bgModes: modes, bgChannels: lines, bgGlows: glows, bgGates: gateDots, bgCenters: centers, hdCenterGates: centerGates,
+            return { bgModes: modes, bgChannels: lines, bgSky: skyDots, bgGates: gateDots, bgCenters: centers, hdCenterGates: centerGates,
               hdGateCount: shown.length + (mode === 'both' ? ' in total' : ' in the ' + mode + ' chart'),
               /* The gloss on first use. inCommon names the surface; the field's
                  own word is then used descriptively, which is how the two stay

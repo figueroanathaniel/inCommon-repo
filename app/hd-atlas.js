@@ -293,7 +293,7 @@
     27: ['Caring', 'Sacral', 'Responsibility for other people\u2019s wellbeing.', 'Care that will not let go.', 'Nourishment offered, not imposed.'],
     28: ['The Game Player', 'Spleen', 'Struggle in search of what is worth it.', 'Risk taken to feel alive.', 'Purpose found in the difficulty.'],
     29: ['Saying Yes', 'Sacral', 'Commitment with the whole body.', 'Yes said to avoid the discomfort of no.', 'Commitment that follows through.'],
-    30: ['Feelings', 'Solar Plexus', 'Desire that starts everything.', 'Wanting more than living.', 'Feeling used as fuel.'],
+    30: ['Feelings', 'Solar Plexus', 'Desire that starts everything.', 'Wanting more than living.', 'Letting the feeling fuel the living.'],
     31: ['Influence', 'Throat', 'Leading because you were asked.', 'Leading because nothing stopped you.', 'Influence held on loan.'],
     32: ['Continuity', 'Spleen', 'Instinct for what will endure.', 'Fear of failure that stops the start.', 'Judgment about what deserves to last.'],
     33: ['Privacy', 'Throat', 'Retelling experience after it is over.', 'Secrecy for status.', 'Witness that becomes something useful.'],
@@ -512,91 +512,86 @@
   var LESSONS = [
     /* ---------------- Bedrock ---------------- */
     { tier: 'bedrock', name: 'Type', epi: 'Five ways of meeting the world',
-      lead: 'Type is the first sort the system makes, and every other idea is read through it. It is not a temperament and it is not chosen. It falls out of the wiring: which centers are defined, and whether a motor reaches the Throat. The Sacral is the hinge. Defined, it makes a Generator of one kind or another. Undefined, a motor wired to the Throat makes a Manifestor, any other definition makes a Projector, and no definition at all makes a Reflector.',
+      lead: 'Type is the first sort the system makes, and every other idea is read through it. It is not a temperament and nobody chooses it. It comes from the wiring: which centers are defined, and whether a motor reaches the Throat. The Sacral is the hinge. Defined, it makes a Generator of one kind or another. Undefined, a motor wired to the Throat makes a Manifestor, any other definition makes a Projector, and no definition at all makes a Reflector. Perhaps there are five ways so that each one has something to bring the others.',
       parts: [
-        ['Manifestor', 'No defined Sacral, and one of the other three motors (Heart, Solar Plexus or Root) joined to the Throat. Read as built to initiate. Published figures put it near 9 percent of people.'],
-        ['Generator', 'A defined Sacral with no motor reaching the Throat. Read as built to respond, with sustainable energy for the work that is correct for it.'],
+        ['Manifestor', 'No defined Sacral, and one of the other three motors (Heart, Solar Plexus or Root) joined to the Throat. Read as built to initiate, to start what others can then join. Published figures put it near 9 percent of people.'],
+        ['Generator', 'A defined Sacral with no motor reaching the Throat. Read as built to respond, with lasting energy for the work that is right for it. Much of what there is to respond to arrives through other people.'],
         ['Manifesting Generator', 'A defined Sacral plus a motor joined to the Throat. The published convention counts four types and files it under Generator rather than as a fifth, with the same strategy, aura, signature and not-self theme. Many schools and some reference works treat it as a fifth type and add informing to its strategy. The two kinds of Generator chart together are given as roughly two thirds to seven tenths of all charts, about half of them Manifesting Generator charts.'],
-        ['Projector', 'No defined Sacral and no motor to the Throat, with at least one channel defined. Read as built to see and guide the energy of others. Just over 20 percent in published figures.'],
-        ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for its surroundings. About 1 percent.'],
-        ['Energy types and non-energy types', 'The Manifestor and both kinds of Generator are called energy types. The Projector and the Reflector are non-energy types: the tradition holds that neither carries consistent working energy of its own, and that both do best once they stop keeping pace with the energy types.'],
-        ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar, because the Moon’s monthly passage is what gives its decisions their shape.'],
+        ['Projector', 'No defined Sacral and no motor to the Throat, with at least one channel defined. Read as built to see and guide the energy of others, a gift that comes alive when someone asks for it. Just over 20 percent in published figures.'],
+        ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for the people around it. About 1 percent.'],
+        ['Energy types and non-energy types', 'The Manifestor and both kinds of Generator are called energy types. The Projector and the Reflector are non-energy types: the tradition holds that neither carries consistent working energy of its own, and that both do best once they stop keeping pace with the energy types. Seen another way, that is a body asking to lean on others rather than to match them, and leaning is not a smaller way to live.'],
+        ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar: the Moon’s monthly passage is what gives its decisions their shape.'],
         ['Kinds of Projector', 'A modern sorting, by what the chart defines. An energy Projector chart has the Heart, the Solar Plexus or the Root defined, none of them reaching the Throat; despite the name it is still a non-energy type. A classic Projector chart has no motor defined and some definition below the Throat, in the Spleen or the G. A mental Projector chart has definition only above and at the Throat, so it has no direct inner authority, a condition it shares with the Reflector. The founding teaching named the mental Projector and read a chart by its type and authority, an emotional Projector or a splenic one; the energy and classic names came later from other schools, and nearly every school now draws them the same way.'],
       ],
       see: [['types', 'Manifestor'], ['types', 'Generator'], ['types', 'Manifesting Generator'], ['types', 'Projector'], ['types', 'Reflector']],
       words: [['bedrock', 'Strategy'], ['bedrock', 'Aura'], ['weather', 'Centers']] },
 
     { tier: 'bedrock', name: 'Strategy', epi: 'How to meet the moment',
-      lead: 'Strategy is the practical instruction each type carries: a way of engaging with life so that decisions have something correct to work on. It is offered as an experiment to try in ordinary days rather than as a rule, and the tradition is candid that the mind will argue with it.',
+      lead: 'Strategy is the practical instruction each type carries: a way of meeting life so that decisions have something true to work on. Authority, two lessons on, says how to decide inside a moment, and the two always travel together. Strategy is offered as an experiment for ordinary days rather than as a rule. The mind will probably argue with it, and that is all right. It may be easier with someone beside you who knows about the experiment.',
       parts: [
-        ['To inform (Manifestor)', 'Tell the people an action will touch before you take it. Informing is not a request for permission. It is said to ease the resistance a closed aura otherwise meets.'],
-        ['To respond (Generator)', 'Wait for life to bring something, an offer, a question, a sound, and let the Sacral answer it before the mind does.'],
-        ['To respond, then inform (Manifesting Generator)', 'The published convention gives the Manifesting Generator the Generator\u2019s strategy. Many schools add a second step: once the response has come, tell the people the action will touch, as the Manifestor strategy does.'],
-        ['To wait for the invitation (Projector)', 'For the large things, love, work, home and close bonds, wait to be recognised and invited. Everyday exchanges need no formal invitation.'],
-        ['To wait a lunar cycle (Reflector)', 'Give a large decision about 28 days, one pass of the Moon through all 64 gates, and talk it over with people you trust along the way.'],
-        ['Strategy beside authority', 'Strategy says how to meet a moment. Authority says how to decide inside it. The tradition always presents the two together.']
+        ['Manifestor', 'To inform: tell the people an action will touch before you take it. It is not asking permission. It lets them make room, and it is said to ease the resistance a closed aura otherwise meets.'],
+        ['Generator', 'To respond: wait for life to bring something, an offer, a question, a sound, and let the Sacral answer it before the mind does. The waiting is not idle. It can be a quiet trust that the right things keep arriving.'],
+        ['Manifesting Generator', 'To respond, then inform: the published convention gives the Manifesting Generator the Generator’s strategy. Many schools add a second step: once the response has come, tell the people the action will touch, as the Manifestor does.'],
+        ['Projector', 'To wait for the invitation: for the large things, love, work, home and close bonds, wait to be recognised and invited. Everyday exchanges need no formal invitation. An invitation is two people meeting halfway, and that may be the whole point of it.'],
+        ['Reflector', 'To wait a lunar cycle: give a large decision about 28 days, one pass of the Moon through all 64 gates, and talk it over with people you trust along the way.']
       ],
       see: [['strategies', 'Informing'], ['strategies', 'Responding'], ['strategies', 'Waiting for the invitation'], ['strategies', 'Waiting a lunar cycle']],
       words: [['bedrock', 'Inner Authority'], ['bedrock', 'Signature']] },
 
     { tier: 'bedrock', name: 'Aura', epi: 'Met before a word is said',
-      lead: 'The aura is the field the tradition says every body carries, reaching about two metres in each direction, through which every meeting begins before anything is spoken. Its quality is set by type, which is why the system calls it mechanical rather than a matter of manners or mood.',
+      lead: 'The aura is the field the tradition says every body carries, reaching about two metres in each direction. Every meeting begins there, before anything is spoken. Its quality is set by type, so the way others first feel you is read as mechanical, never as a failing of manners or mood. Where two auras overlap, conditioning happens: whatever one chart defines is felt by the other wherever the other is open. Nobody passes through anyone untouched, and much of what we take from each other can be a gift.',
       parts: [
-        ['Closed and repelling (Manifestor)', 'Said to keep others at a distance and make a Manifestor chart hard to read from outside, which is part of why informing matters so much.'],
-        ['Open and enveloping (Generator)', 'Said to take in whatever is near, which is how so much reaches a Generator chart to respond to. The Manifesting Generator carries the same aura.'],
-        ['Focused and absorbing (Projector)', 'Aimed at one person at a time and said to take that person in deeply. Some schools call it focused and penetrating; both describe the same narrow beam.'],
-        ['Resistant and sampling (Reflector)', 'Said to taste everyone present without taking anyone in, which is what gives a Reflector chart its read on the health of a group.'],
-        ['Aura and conditioning', 'Two auras overlapping is where conditioning happens: whatever one chart defines is felt by the other wherever the other is open.']
+        ['Manifestor', 'Closed and repelling: said to keep others at a distance and make a Manifestor chart hard to read from outside. Informing is how the distance gets crossed.'],
+        ['Generator', 'Open and enveloping: said to take in whatever is near, so a great deal reaches a Generator chart ready to be answered. The Manifesting Generator carries the same aura.'],
+        ['Projector', 'Focused and absorbing: aimed at one person at a time and said to take that person in deeply. Some schools call it focused and penetrating; both describe the same narrow beam.'],
+        ['Reflector', 'Resistant and sampling: said to taste everyone present without taking anyone in, so a Reflector chart can feel how a whole group is doing.']
       ],
       see: [['terms', 'Aura']],
       words: [['horizon', 'Conditioning'], ['bedrock', 'Type']] },
 
     { tier: 'bedrock', name: 'Signature', epi: 'The feeling of being on course',
-      lead: 'The signature is the feeling the tradition says arrives with a life lived by your own strategy and authority. It is a check noticed afterwards rather than a target, since it cannot be produced by aiming at it.',
+      lead: 'The signature is the feeling the tradition says arrives with a life lived by your own strategy and authority. Aiming at it does not produce it. It is noticed afterwards, the way warmth is noticed only after stepping into it.',
       parts: [
-        ['Peace (Manifestor)', 'Ease after moving freely, with nobody blindsided.'],
-        ['Satisfaction (Generator)', 'The good tiredness at the end of work that was truly responded to. The published convention gives Manifesting Generators the same signature; some schools add peace, for the informing half.'],
-        ['Success (Projector)', 'Not status but the quiet recognition of having guided something well, after being invited to.'],
-        ['Surprise (Reflector)', 'Delight at a cycle that turned out differently than expected, in a place that suited it.']
+        ['Manifestor', 'Peace: ease after moving freely, with nobody blindsided.'],
+        ['Generator', 'Satisfaction: the good tiredness at the end of work that was truly responded to. The published convention gives Manifesting Generators the same signature; some schools add peace, for the informing half.'],
+        ['Projector', 'Success: not status but the quiet recognition of having guided something well, after being invited to. It is a success shared with whoever asked.'],
+        ['Reflector', 'Surprise: delight at a cycle that turned out differently than expected, in a place that suited it.']
       ],
       see: [['terms', 'Signature']],
       words: [['bedrock', 'Not-Self Theme']] },
 
     { tier: 'bedrock', name: 'Not-Self Theme', epi: 'The signal to come back',
-      lead: 'The not-self theme is the signature\u2019s counterpart: the feeling reported when your life runs on the mind\u2019s agenda or on borrowed pressure rather than on your design. The tradition treats it as early information, a nudge back toward strategy, and never as a verdict on you.',
+      lead: 'The not-self theme is the signature’s counterpart: the feeling that comes when life runs on the mind’s agenda or on borrowed pressure rather than on your design. It is early information, a nudge back toward strategy, and never a verdict on you. Underneath it, perhaps, is the tiredness of trying to carry everything alone.',
       parts: [
-        ['Anger (Manifestor)', 'Read as the sign of having been held back, or of having moved without informing.'],
-        ['Frustration (Generator)', 'Read as the sign of having initiated, or of having said yes without the energy for it. The published convention gives Manifesting Generators the same theme; some schools add anger.'],
-        ['Bitterness (Projector)', 'Read as the sign of having entered without an invitation, or of having gone unrecognised for too long.'],
-        ['Disappointment (Reflector)', 'Read as the sign of the wrong surroundings, or of having been hurried into a decision.'],
-        ['In the open centers', 'Each open center carries a habit the tradition names. The open Head chases questions that belong to others; the open Ajna performs certainty; the open Throat works for attention; the open G searches for love and direction; the open Heart sets out to prove its worth; the open Spleen holds on to what is not good for it; the open Sacral cannot tell when enough is enough; the open Solar Plexus dodges truth to dodge confrontation; the open Root hurries to be free of pressure.'],
-        ['The not-self mind', 'The tradition’s name for the mind trying to run decisions it is not built to make, usually by acting out the habits of the open centers.']
+        ['Manifestor', 'Anger: a sign of having been held back, or of having moved without informing.'],
+        ['Generator', 'Frustration: a sign of having initiated, or of having said yes without the energy for it. The published convention gives Manifesting Generators the same theme; some schools add anger.'],
+        ['Projector', 'Bitterness: a sign of having entered without an invitation, or of having gone unrecognised for too long. Going unseen hurts, and the hurt is not a flaw.'],
+        ['Reflector', 'Disappointment: a sign of the wrong surroundings, or of having been hurried into a decision.'],
+        ['In the open centers', 'Each open center carries a habit the tradition names, and each one, looked at kindly, may be a way of trying to earn a place among others. The open Head chases questions that belong to others; the open Ajna performs certainty; the open Throat works for attention; the open G searches for love and direction; the open Heart sets out to prove its worth; the open Spleen holds on to what is not good for it; the open Sacral cannot tell when enough is enough; the open Solar Plexus dodges truth to dodge confrontation; the open Root hurries to be free of pressure. Perhaps they ease most among people who never asked for them.'],
+        ['The not-self mind', 'The tradition’s name for the mind trying to run decisions it is not built to make, usually by acting out the habits of the open centers. It means well. It is only carrying too much.']
       ],
       see: [['terms', 'Not-Self Theme']],
       words: [['bedrock', 'Signature'], ['horizon', 'Conditioning']] },
 
     { tier: 'bedrock', name: 'Inner Authority', epi: 'Where a decision is made',
-      lead: 'Inner authority is where the tradition says a reliable decision comes from in a given chart, and it is never the mind. It is found by a fixed order of precedence: the first of the centers below that the chart defines is the authority, and the ones after it are not consulted.',
+      lead: 'Inner authority is where a reliable decision comes from in a given chart, and it is never the mind. It is found by a fixed order: the first of the centers below that the chart defines is the authority, and the ones after it are not consulted. Whichever it turns out to be, it can sit easily beside the people you ask for advice. They help you hear it; they do not have to replace it.',
       parts: [
-        ['1. Emotional', 'A defined Solar Plexus outranks everything else, and about half of all charts carry one. Clarity comes over time, across the wave. Possible for every type except the Reflector.'],
-        ['2. Sacral', 'A defined Sacral with the Solar Plexus open: a response in the body in the moment, often a sound before a sentence. Generators of both kinds only.'],
-        ['3. Splenic', 'A defined Spleen with the Solar Plexus and Sacral open: a quiet instinct in the present that speaks once. Manifestors and Projectors.'],
-        ['4. Ego manifested', 'A defined Heart joined to the Throat, with the three above open: decisions run through what the will truly wants and can commit to. Manifestors only.'],
-        ['5. Ego projected', 'A defined Heart joined to the G but not to the Throat. The will speaks through what you hear yourself say you want. Projectors only.'],
-        ['6. Self-projected', 'A defined G joined to the Throat, nothing else above it in the order. Direction becomes clear by talking and listening to your own voice. Projectors only.'],
-        ['7. Mental', 'Definition only in the Head, Ajna or Throat, which the published material calls no direct inner authority. Clarity comes from the right surroundings and from talking things over with trusted people. Projectors only. Ego, self-projected and mental together are sometimes called the minor authorities, a small share of people.'],
-        ['8. Lunar', 'No definition, the Reflector: a lunar cycle is given to the decision, and the decision takes shape across it.']
+        ['Emotional', 'A defined Solar Plexus outranks everything else, and about half of all charts carry one. Clarity comes over time, across the wave, so a decision can wait for it. Possible for every type except the Reflector.'],
+        ['Sacral', 'A defined Sacral with the Solar Plexus open: a response in the body in the moment, often a sound before a sentence. Generators of both kinds only.'],
+        ['Splenic', 'A defined Spleen with the Solar Plexus and Sacral open: a quiet instinct in the present that speaks once. Manifestors and Projectors.'],
+        ['Ego manifested', 'A defined Heart joined to the Throat, with the three above open: decisions run through what the will truly wants and can commit to. Manifestors only.'],
+        ['Ego projected', 'A defined Heart joined to the G but not to the Throat. The will speaks through what you hear yourself say you want. Projectors only.'],
+        ['Self-projected', 'A defined G joined to the Throat, nothing else above it in the order. Direction becomes clear by talking and listening to your own voice, which is easiest with someone to talk to. Projectors only.'],
+        ['Mental', 'Definition only in the Head, Ajna or Throat, which the published material calls no direct inner authority. Clarity comes from the right surroundings and from talking things over with trusted people. Projectors only. Ego, self-projected and mental together are sometimes called the minor authorities, a small share of people.'],
+        ['Lunar', 'No definition, the Reflector: a lunar cycle is given to the decision, and the decision takes shape across it.']
       ],
       see: [['authorities', 'Emotional (Solar Plexus)'], ['authorities', 'Sacral'], ['authorities', 'Splenic'], ['authorities', 'Ego (Heart)'], ['authorities', 'Self-projected (G)'], ['authorities', 'Mental (environmental)'], ['authorities', 'Lunar (Reflector)']],
       words: [['terms', 'Emotional Wave'], ['bedrock', 'Outer Authority']] },
 
     { tier: 'bedrock', name: 'Outer Authority', epi: 'What the mind is for',
-      lead: 'Outer authority is the tradition\u2019s name for the mind\u2019s proper work. Released from running your own decisions, the mind becomes a source of knowledge, perspective and insight for others, offered when it is asked for.',
+      lead: 'Outer authority is the name for the mind’s proper work. The mind can compare, research and describe, and the tradition holds that it cannot decide for the body it lives in; that belongs to inner authority. Released from that job, the mind becomes something to give: knowledge, perspective and insight for other people, offered when they ask. Inner authority decides for you, outer authority is what you can bring to others, and the two work side by side. It is not mental authority, which is one of the inner authorities; outer authority belongs to every chart.',
       parts: [
-        ['Not a decision maker', 'The mind can compare, research and describe. The tradition holds that it cannot decide for the body it lives in, which is inner authority’s work.'],
-        ['Inner and outer together', 'Inner authority decides for you. Outer authority is what you can give. The two are meant to work side by side rather than compete.'],
-        ['Outer authority is not mental authority', 'Mental authority is one of the inner authorities, the one that decides through surroundings and sounding boards. Outer authority belongs to every type and every chart.'],
-        ['Passenger', 'The tradition pictures the mind as a passenger in the vehicle of the body: free to look out of the window and describe the view, and happiest when it is not reaching for the wheel.']
+        ['Passenger', 'The mind pictured as a passenger in the vehicle of the body: free to look out of the window and describe the view, and happiest when it is not reaching for the wheel. Passengers keep each other company, and that may be the kindest thing a mind can do.']
       ],
       see: [],
       words: [['bedrock', 'Inner Authority'], ['weather', 'Rave Cosmology']] },

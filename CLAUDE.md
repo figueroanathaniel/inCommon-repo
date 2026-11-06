@@ -193,6 +193,47 @@ stood over the loading line is gone; the span carries `data-icon="oracle"` and
 in it, and the head sheet gives it a soft halo in `--atmc2` once it is live.
 `scan()` finds it by the same selector, so nothing in `oracle-glyph.js` knows
 it is there.
+The line under it is one sentence whatever the wait, "The Oracle is reading
+every point of your chart" (the owner, 6 November 2026): `orLoadingText` no
+longer changes with the depth, a pending row or a queue.
+
+**The orb is drawn in depth** (the owner, 6 November 2026: "Make the oracle on
+the loading screen more 3 dimensional and realistic", with a recording of a
+lobed torus in dense lit contour lines). At 132px now, the orb span gets a
+WebGL 2 canvas: the same three lobed ring raymarched as a solid, its contours
+the level lines of a slow field over the surface (so they close into eyes and
+cross at saddles as it tumbles), lit from above left, line colour running from
+a lightened `--atmc` above to a lightened `--atmc2` below. Each world keeps its
+weather: Cyberspace steps in time at half resolution with pixelated scaling,
+Nature's Roots is lumpier and slower, the Biome ripples. The contour density
+follows the canvas's pixel height so the lines resolve instead of greying.
+The span wears `data-glyph-3d` while it does. Without WebGL 2, or a shader
+that will not build, it falls back to the flat glyph on a fresh canvas. The
+context is released (`WEBGL_lose_context`) the moment the orb leaves the page
+or the contrast modifier comes on, because the 3D stages need their contexts.
+Reduced motion, a hidden page and the contrast modifier behave as for the nav
+symbol. The nav symbol itself is unchanged.
+
+**Each world throws its own weather off the orb** (the owner, 6 November
+2026). The orb's canvas is 1.6 times its span (`ORB_Z`), centred on it, so
+what each world draws has room, and the span carries `margin: 10px 0 34px`
+in both shells so none of it lands on the loading line beside it. Deep Field:
+cosmic radiation streaming out of the rim, sparks running along the contours
+and thrown off the edge, glints on the surface, and five stars on tilted
+orbits that pass in front of and behind it. Cyberspace: glitch bursts that
+shove bands sideways and swap the colour channels, scanlines, an abduction
+beam from a craft overhead that lifts the orb and lights its top, and every
+seven seconds a buzzsaw that crosses it, leaves a glowing cut and sprays
+sparks. Nature's Roots: two thumbs pressing the clay in and easing off (an
+SDF subtraction, so it is the form that dents), a hearth under it whose
+flicker lights the underside, embers, and leaves falling past on both
+sides. The Biome: water running down the surface in threads, drops pulled
+from the underside that stretch, fall and splash, drops falling onto it from
+above, a lighthouse beam turning round it that flashes when it faces the
+reader, and now and then a current that wraps it, a different size and tilt
+each time. All of it is in the one fragment shader and computes nothing
+about the chart. The colours are the identity's `--atmc` and `--atmc2`
+except the fire, the sparks and the leaves, which are the things' own.
 
 **All four are dark with light type, and that is forced.** `--ac` is fixed and
 written as text in over two hundred places, so a light identity fails the
@@ -4929,6 +4970,22 @@ waits behind the same press: it shows at once and costs nothing. Driven with
 the cloud faked, both shells: nothing is asked on open or on switching to In
 Depth, and one press asks once and shows the reading.
 
+**Written ahead, shown on the press** (the owner, 6 November 2026: "write the
+reading, but don't engage it until the reader asks for it! The standard reading
+kept auto-populating, I only wanted to do away with that"). What the law bars
+is a reading appearing on the screen unasked, not the writing. So
+`oraclePrepareAuto()` runs again (`ORACLE_PREPARE_AHEAD`): four seconds after
+the app is ready, for a signed in reader on their own chart who has agreed to
+the Oracle, it asks quietly for the current period's standard reading, then its
+in-depth reading for a reader who has asked for one before and has the add-ons
+open. One slot at a time, once a slot per session, never while another ask is
+in flight, and never the Cycle Audit. A quiet ask says nothing, draws no panel
+and no error, and is kept on the device; the screen still shows Consult the
+Oracle until it is pressed (`deepGate`, `orOpened`), and the press shows it at
+once. A press during the quiet write turns it into the reader's own, panel and
+all. `oracleWillAsk()` still answers false: nothing the screen would show is
+asked for on open.
+
 ## The Oracle speaks in the reader's study and world
 Asked for by the owner on 5 November 2026: "the Oracle voice should reflect the
 chart style and the theme as well. This is why it costs extra to run it when
@@ -5628,12 +5685,32 @@ in the text, the sources or the study notes. "You" is allowed in a subordinate
 clause and an imperative; the keynote fragments of gates and lines have no
 subject and were left as they were.
 
-**Every label says what it holds.** The kicker reads "Share of people", "Theme",
-"Function", "In the X centre", "Keynote" or "Strategy for the X"; the epigraph
-has its own label (Signature, Hexagram N, In short, Standing); facets are
-Weight, Fidelity and Origins on a study claim, Low and High expression on a
-gate, and the like. A bare word over a value ("Success", "How reliable") is the
-fault this removed.
+**Zero eyebrows** (the owner, 6 November 2026: "Remove the subheaders
+altogether, put the text under the title ... Zero eyebrows. Zero." and "If
+there's a title on the page, leave titling it at that"). In the Atlas and the
+Astropedia folios nothing sits over or above a title or a text: no chapter
+eyebrow, no "Your strategy" line, no label over the epigraph, no name over a
+facet card, no "Words here", "In your chart" or "Field study" heading. The line
+under a title is the value itself in the reading face, italic and in --tx
+(About 35 percent of people; Bedrock · 2 of 7), and a mark pill's label is
+reading type too. The field study's two questions are questions in the
+reading face. The epigraph is not a row between hairlines either ("No
+eyebrows, meaning no ---- How to meet the moment ----"): it sits in the title
+column under the kicker, italic 13px in the reading face, in gold with a soft glow
+(`[data-epi]` in the head sheet, plain under the contrast modifier). Do not put an
+uppercase label or a ruled line back on these pages.
+
+**The wiring is drawn one way in the Atlas and on My Charts** (same day):
+`hdWireGeom()` places each gate on the side of its centre that faces where its
+channel runs, keeps channels between one pair of centres parallel, and bows a
+channel round a centre it would cross (20-34 round the G). It is all one blue,
+as the owner's sample (the Atlas Reflector page) draws it: an open centre is a
+faint `--atmc` fill in a `--chl` outline, a defined centre the same blue a
+little fuller and a brighter `--atmc` outline, never a category colour and
+never warm; a defined channel is `--atmc` and thin, every other channel
+`--chl`; the reader's gates are white points and the sky's are ringed in
+`--blue`. The 3D and Wheel views keep their
+personality and design inks.
 
 **Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
 holds each Type's and each authority's theme words; `atlasRich()` bolds the
@@ -6593,6 +6670,15 @@ a sentence of its own (the composer no longer strips its full stop), and the
 dignity lines keep the body as subject, because `energy` is a compound phrase.
 New writing here keeps the voice: personal, gentle, no "you are" verdicts, no
 "X is Y, and Y is Z" catalogues.
+
+**A chapter lead moves in the energy and explains nothing** (the owner, 6
+November 2026: "we need to trust that the user will go with the message").
+`plLeads()` is the one source for the packet, the glance and the section list:
+the house as "A part of living where ... happens consistently, and your X lives
+here" (`living` on each house), the sign walking into the room as itself
+(`enters`), the body speaking as itself (`voice`), then the house's `cue` and
+the sign's `manner`. A point with no `voice` gets no lead, never a generic one.
+No lead says "begin", "now", or what the reader is about to read.
 
 ## A placement page is a packet
 Asked for by the owner on 4 November 2026 ("put the descriptions in a page-packet
