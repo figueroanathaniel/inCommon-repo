@@ -33293,9 +33293,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
                   <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};stroke:{{ c.stroke }};stroke-width:{{ c.sw }};stroke-linejoin:round"></polygon>
                 </sc-for>
-                <sc-for list="{{ bgSky }}" as="sk" hint-placeholder-count="0">
-                  <circle data-pl="breath" cx="{{ sk.x }}" cy="{{ sk.y }}" r="5" style="fill:none;stroke:var(--blue);stroke-opacity:.35;stroke-width:1.6"></circle>
-                </sc-for>
                 <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
                   <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
                 </sc-for>
@@ -33311,7 +33308,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:rgba(var(--atmc),.4);box-shadow:inset 0 0 0 1.5px rgba(var(--atmc),.95)"></span>Defined</span>
               <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Your gates</span>
               <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--mut)"></span>Open</span>
-              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--blue)"></span>In the sky now</span>
             </div>
           </div>
         </sc-if>
@@ -33323,7 +33319,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
           <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ hsVeilO }};visibility:{{ hsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
-          <button data-lift onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
           <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
             <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Personality</span>
             <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--hd-des)"></span>Design</span>
@@ -33362,38 +33357,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
     </div>
-    <sc-if value="{{ gnowHas }}" hint-placeholder-val="{{ false }}">
-      <div role="region" aria-label="Gates in the sky now" style="display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:11px 13px">
-        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px">
-          <span style="flex:1;font:400 15px var(--fd);color:var(--tx)">Gates in the sky now</span>
-          <span style="flex:none;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)">{{ gnowStamp }}</span>
-        </div>
-        <sc-if value="{{ gnowSplit }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="font:600 10px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
-            <sc-if value="{{ gnowInsideAny }}" hint-placeholder-val="{{ false }}">
-              <div role="list" aria-label="Gates in the sky now that are in your chart" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ gnowInside }}" as="c" hint-placeholder-count="3"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:6px;padding:3px 8px;border:1px solid var(--ac2);border-radius:999px"><span aria-hidden="true" style="font:500 10.5px var(--fu);color:var(--tx)">{{ c.label }}</span><span aria-hidden="true" style="font:700 11.5px var(--fm);color:var(--ac2-hi);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-            </sc-if>
-            <sc-if value="{{ gnowInsideEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
-            </sc-if>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="font:600 10px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--mut)">Not in your chart</div>
-            <sc-if value="{{ gnowOutsideAny }}" hint-placeholder-val="{{ false }}">
-              <div role="list" aria-label="Gates in the sky now that are not in your chart" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ gnowOutside }}" as="c" hint-placeholder-count="8"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:6px;padding:3px 8px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 10.5px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 12.5px var(--fm);color:var(--mut);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-            </sc-if>
-            <sc-if value="{{ gnowOutsideEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
-            </sc-if>
-          </div>
-        </sc-if>
-        <sc-if value="{{ gnowNoChart }}" hint-placeholder-val="{{ false }}">
-          <div role="list" aria-label="Gates in the sky now" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ gnowAll }}" as="c" hint-placeholder-count="13"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:6px;padding:3px 8px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 10.5px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 12.5px var(--fm);color:var(--tx);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-          <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">Enter your birth moment to see which of these your chart holds.</div>
-        </sc-if>
-      </div>
-    </sc-if>
     <sc-if value="{{ hdFocusToday }}" hint-placeholder-val="{{ false }}">
       <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(47,255,143,.42);border-left:3px solid var(--ac);border-radius:var(--rad);padding:15px 16px;animation:fadeUp .25s ease">
         <div style="display:flex;align-items:baseline;gap:9px">
@@ -33427,7 +33390,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-for>
       </div>
     </sc-if>
-    <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Natal</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div>
     <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
       <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:9px;width:100%;min-height:44px;text-align:left">
         <span style="flex:none;font:700 11px var(--fk);letter-spacing:.18em;text-transform:uppercase;padding:7px 13px;border-radius:8px;color:var(--ac);background:rgba(var(--atmc),.3);border:1px solid rgba(47,255,143,.32)">{{ hdType }}</span>
@@ -33442,6 +33404,73 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </button>
         </sc-for>
       </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Show gates, channels or centres" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+        <sc-for list="{{ hdListTabs }}" as="t" hint-placeholder-count="3">
+          <button data-lift onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};font:600 11.5px var(--fc);color:{{ t.c }}">{{ t.label }}<span style="font:600 10px var(--fu);color:var(--ac2-hi)">{{ t.n }}</span></button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hdListGates }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ hdCenterGates }}" as="cg" hint-placeholder-count="6">
+            <div data-lift="card" style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid {{ cg.bd }};border-radius:12px;padding:11px 13px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="flex:1;font:600 12px var(--fu);color:{{ cg.nameC }}">{{ cg.name }}</span>
+                <span style="flex:none;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ cg.tagC }};background:{{ cg.tagBg }}">{{ cg.tag }}</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px">
+                <sc-for list="{{ cg.gates }}" as="g" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ g.go }}" aria-label="Gate {{ g.n }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid {{ g.bd }};border-radius:10px;background:{{ g.bg }};padding:0 7px">
+                    <span style="font:600 13px var(--fu);color:{{ g.c }}">{{ g.n }}</span>
+                    <span style="font:400 10px var(--fu);color:var(--dim)">{{ g.line }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hdListChannels }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ hdChannels }}" as="ch" hint-placeholder-count="4">
+            <button data-lift onClick="{{ ch.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid rgba(139,92,246,.28);border-radius:12px;padding:12px 14px;width:100%">
+              <span style="flex:none;font:600 12px var(--fu);color:var(--ac2-hi)">{{ ch.pair }}</span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                <span style="font:400 15px var(--fd);color:var(--tx)">{{ ch.name }}</span>
+                <span style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ ch.route }}</span>
+              </span>
+              <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">&#8594;</span>
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hdNoChannels }}" hint-placeholder-val="{{ false }}">
+          <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">No defined channels in this chart.</div>
+        </sc-if>
+      </sc-if>
+      <sc-if value="{{ hdListCentres }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ hdDefined }}" as="c" hint-placeholder-count="4">
+            <button data-lift onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid rgba(89,179,125,.28);border-radius:10px;padding:12px 14px;width:100%">
+              <div style="display:flex;align-items:center;gap:8px;width:100%">
+                <span style="flex:1;font:400 15px var(--fd);text-align:left">{{ c.name }}</span>
+                <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.16)">DEFINED</span>
+              </div>
+              <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
+              <div style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi);text-align:left">{{ c.gates }}</div>
+            </button>
+          </sc-for>
+          <sc-for list="{{ hdUndefined }}" as="c" hint-placeholder-count="5">
+            <button data-lift onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:rgba(23,21,30,.5);border:1px dashed var(--bd);border-radius:10px;padding:12px 14px;width:100%">
+              <div style="display:flex;align-items:center;gap:8px;width:100%">
+                <span style="flex:1;font:400 15px var(--fd);color:var(--dim);text-align:left">{{ c.name }}</span>
+                <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--dim);background:rgba(238,240,248,.08)">UNDEFINED</span>
+              </div>
+              <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
     </div>
     <sc-if value="{{ hdTeachOn }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -33539,74 +33568,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-if>
       </div>
     </sc-if>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Show gates, channels or centres" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-        <sc-for list="{{ hdListTabs }}" as="t" hint-placeholder-count="3">
-          <button data-lift onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};font:600 11.5px var(--fc);color:{{ t.c }}">{{ t.label }}<span style="font:600 10px var(--fu);color:var(--ac2-hi)">{{ t.n }}</span></button>
-        </sc-for>
-      </div>
-      <sc-if value="{{ hdListGates }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <sc-for list="{{ hdCenterGates }}" as="cg" hint-placeholder-count="6">
-            <div data-lift="card" style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid {{ cg.bd }};border-radius:12px;padding:11px 13px">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="flex:1;font:600 12px var(--fu);color:{{ cg.nameC }}">{{ cg.name }}</span>
-                <span style="flex:none;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ cg.tagC }};background:{{ cg.tagBg }}">{{ cg.tag }}</span>
-              </div>
-              <div style="display:flex;flex-wrap:wrap;gap:7px">
-                <sc-for list="{{ cg.gates }}" as="g" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ g.go }}" aria-label="Gate {{ g.n }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid {{ g.bd }};border-radius:10px;background:{{ g.bg }};padding:0 7px">
-                    <span style="font:600 13px var(--fu);color:{{ g.c }}">{{ g.n }}</span>
-                    <span style="font:400 10px var(--fu);color:var(--dim)">{{ g.line }}</span>
-                  </button>
-                </sc-for>
-              </div>
-            </div>
-          </sc-for>
-        </div>
-      </sc-if>
-      <sc-if value="{{ hdListChannels }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <sc-for list="{{ hdChannels }}" as="ch" hint-placeholder-count="4">
-            <button data-lift onClick="{{ ch.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid rgba(139,92,246,.28);border-radius:12px;padding:12px 14px;width:100%">
-              <span style="flex:none;font:600 12px var(--fu);color:var(--ac2-hi)">{{ ch.pair }}</span>
-              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-                <span style="font:400 15px var(--fd);color:var(--tx)">{{ ch.name }}</span>
-                <span style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ ch.route }}</span>
-              </span>
-              <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">&#8594;</span>
-            </button>
-          </sc-for>
-        </div>
-        <sc-if value="{{ hdNoChannels }}" hint-placeholder-val="{{ false }}">
-          <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">No defined channels in this chart.</div>
-        </sc-if>
-      </sc-if>
-      <sc-if value="{{ hdListCentres }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <sc-for list="{{ hdDefined }}" as="c" hint-placeholder-count="4">
-            <button data-lift onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid rgba(89,179,125,.28);border-radius:10px;padding:12px 14px;width:100%">
-              <div style="display:flex;align-items:center;gap:8px;width:100%">
-                <span style="flex:1;font:400 15px var(--fd);text-align:left">{{ c.name }}</span>
-                <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.16)">DEFINED</span>
-              </div>
-              <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
-              <div style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi);text-align:left">{{ c.gates }}</div>
-            </button>
-          </sc-for>
-          <sc-for list="{{ hdUndefined }}" as="c" hint-placeholder-count="5">
-            <button data-lift onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:rgba(23,21,30,.5);border:1px dashed var(--bd);border-radius:10px;padding:12px 14px;width:100%">
-              <div style="display:flex;align-items:center;gap:8px;width:100%">
-                <span style="flex:1;font:400 15px var(--fd);color:var(--dim);text-align:left">{{ c.name }}</span>
-                <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--dim);background:rgba(238,240,248,.08)">UNDEFINED</span>
-              </div>
-              <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
-            </button>
-          </sc-for>
-        </div>
-      </sc-if>
-    </div>
-    <sc-if value="{{ hdwxOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Now" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Now</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div><sc-for list="{{ hdwx }}" as="wg" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:8px"><sc-if value="{{ wg.headOn }}" hint-placeholder-val="{{ true }}"><div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ wg.head }}</div></sc-if><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px"><sc-for list="{{ wg.tiles }}" as="wt" hint-placeholder-count="4"><button data-lift onClick="{{ wt.go }}" aria-label="{{ wt.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid {{ wt.bd }};border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ wt.body }}</span><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ wt.gl }}</span><sc-if value="{{ wt.tagOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fk);letter-spacing:.04em;color:var(--ac2-hi)">{{ wt.tag }}</span></sc-if></button></sc-for></div></div></sc-for></section></sc-if><sc-if value="{{ hdhzOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Ahead" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Ahead</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px"><sc-for list="{{ hdhz }}" as="hz" hint-placeholder-count="4"><button data-lift onClick="{{ hz.go }}" aria-label="{{ hz.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid rgba(var(--atmc2),.75);border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ hz.when }}</span><span style="display:flex;align-items:baseline;gap:8px"><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ hz.gl }}</span><span style="font:600 10.5px var(--fk);color:var(--mut)">{{ hz.body }}</span></span><span style="font:600 9.5px var(--fk);letter-spacing:.04em;color:var(--ac2-hi)">{{ hz.tag }}</span></button></sc-for></div></section></sc-if>
+    <sc-if value="{{ hdhzOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Ahead" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Ahead</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px"><sc-for list="{{ hdhz }}" as="hz" hint-placeholder-count="4"><button data-lift onClick="{{ hz.go }}" aria-label="{{ hz.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid rgba(var(--atmc2),.75);border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ hz.when }}</span><span style="display:flex;align-items:baseline;gap:8px"><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ hz.gl }}</span><span style="font:600 10.5px var(--fk);color:var(--mut)">{{ hz.body }}</span></span><span style="font:600 9.5px var(--fk);letter-spacing:.04em;color:var(--ac2-hi)">{{ hz.tag }}</span></button></sc-for></div></section></sc-if>
     <button data-lift onClick="{{ hdAtlasGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:11px;background:rgba(139,92,246,.09);border:1px solid rgba(139,92,246,.32);border-radius:12px;padding:12px 14px">
       <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
         <span style="font:600 12.5px var(--fu);color:var(--tx)">Human Design Atlas</span>
@@ -35302,7 +35264,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-for>
             </div>
           </sc-if>
-          <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+          <div role="group" aria-label="Your wiring" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
                 <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
@@ -41514,9 +41476,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
                   <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};stroke:{{ c.stroke }};stroke-width:{{ c.sw }};stroke-linejoin:round"></polygon>
                 </sc-for>
-                <sc-for list="{{ bgSky }}" as="sk" hint-placeholder-count="0">
-                  <circle data-pl="breath" cx="{{ sk.x }}" cy="{{ sk.y }}" r="5" style="fill:none;stroke:var(--blue);stroke-opacity:.35;stroke-width:1.6"></circle>
-                </sc-for>
                 <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
                   <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
                 </sc-for>
@@ -41532,7 +41491,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:rgba(var(--atmc),.4);box-shadow:inset 0 0 0 1.5px rgba(var(--atmc),.95)"></span>Defined</span>
               <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Your gates</span>
               <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--mut)"></span>Open</span>
-              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--blue)"></span>In the sky now</span>
             </div>
           </div>
         </sc-if>
@@ -41544,7 +41502,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 <span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
                 <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ hsVeilO }};visibility:{{ hsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
                 <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
-                <button data-lift onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fc);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
                 <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                   <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Personality</span>
                   <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--hd-des)"></span>Design</span>
@@ -41585,7 +41542,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </div>
         </div>
         <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
-          <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Natal</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div>
           <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px">
             <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:9px;width:100%;min-height:44px;text-align:left">
               <span style="flex:none;font:700 clamp(18px,1.6vw,26px) var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac);text-align:left">{{ hdType }}</span>
@@ -41668,7 +41624,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </sc-if>
           </div>
-          <sc-if value="{{ hdwxOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Now" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Now</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div><sc-for list="{{ hdwx }}" as="wg" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:8px"><sc-if value="{{ wg.headOn }}" hint-placeholder-val="{{ true }}"><div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ wg.head }}</div></sc-if><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px"><sc-for list="{{ wg.tiles }}" as="wt" hint-placeholder-count="4"><button data-lift onClick="{{ wt.go }}" aria-label="{{ wt.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid {{ wt.bd }};border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ wt.body }}</span><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ wt.gl }}</span><sc-if value="{{ wt.tagOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fk);letter-spacing:.04em;color:var(--ac2-hi)">{{ wt.tag }}</span></sc-if></button></sc-for></div></div></sc-for></section></sc-if><sc-if value="{{ hdhzOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Ahead" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Ahead</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px"><sc-for list="{{ hdhz }}" as="hz" hint-placeholder-count="4"><button data-lift onClick="{{ hz.go }}" aria-label="{{ hz.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid rgba(var(--atmc2),.75);border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ hz.when }}</span><span style="display:flex;align-items:baseline;gap:8px"><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ hz.gl }}</span><span style="font:600 10.5px var(--fk);color:var(--mut)">{{ hz.body }}</span></span><span style="font:600 9.5px var(--fk);letter-spacing:.04em;color:var(--ac2-hi)">{{ hz.tag }}</span></button></sc-for></div></section></sc-if>
+          <sc-if value="{{ hdhzOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Ahead" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:10px;padding:2px 2px 0;font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)"><span>Ahead</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:var(--bd)"></span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px"><sc-for list="{{ hdhz }}" as="hz" hint-placeholder-count="4"><button data-lift onClick="{{ hz.go }}" aria-label="{{ hz.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid rgba(var(--atmc2),.75);border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ hz.when }}</span><span style="display:flex;align-items:baseline;gap:8px"><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ hz.gl }}</span><span style="font:600 10.5px var(--fk);color:var(--mut)">{{ hz.body }}</span></span><span style="font:600 9.5px var(--fk);letter-spacing:.04em;color:var(--ac2-hi)">{{ hz.tag }}</span></button></sc-for></div></section></sc-if>
           <button data-lift onClick="{{ hdAtlasGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:11px;background:rgba(139,92,246,.09);border:1px solid rgba(139,92,246,.32);border-radius:12px;padding:12px 14px">
             <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
               <span style="font:600 12.5px var(--fu);color:var(--tx)">Human Design Atlas</span>
@@ -41677,38 +41633,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </button>
         </div>
       </div>
-      <sc-if value="{{ gnowHas }}" hint-placeholder-val="{{ false }}">
-        <div role="region" aria-label="Gates in the sky now" style="display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:12px 16px">
-          <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px">
-            <span style="flex:1;font:400 15px var(--fd);color:var(--tx)">Gates in the sky now</span>
-            <span style="flex:none;font:600 11px var(--fu);letter-spacing:.04em;color:var(--mut)">{{ gnowStamp }}</span>
-          </div>
-          <sc-if value="{{ gnowSplit }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:6px">
-              <div style="font:600 10px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
-              <sc-if value="{{ gnowInsideAny }}" hint-placeholder-val="{{ false }}">
-                <div role="list" aria-label="Gates in the sky now that are in your chart" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ gnowInside }}" as="c" hint-placeholder-count="3"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--ac2);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--tx)">{{ c.label }}</span><span aria-hidden="true" style="font:700 13px var(--fm);color:var(--ac2-hi);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-              </sc-if>
-              <sc-if value="{{ gnowInsideEmpty }}" hint-placeholder-val="{{ false }}">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
-              </sc-if>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px">
-              <div style="font:600 10px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--mut)">Not in your chart</div>
-              <sc-if value="{{ gnowOutsideAny }}" hint-placeholder-val="{{ false }}">
-                <div role="list" aria-label="Gates in the sky now that are not in your chart" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ gnowOutside }}" as="c" hint-placeholder-count="8"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 13px var(--fm);color:var(--mut);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-              </sc-if>
-              <sc-if value="{{ gnowOutsideEmpty }}" hint-placeholder-val="{{ false }}">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
-              </sc-if>
-            </div>
-          </sc-if>
-          <sc-if value="{{ gnowNoChart }}" hint-placeholder-val="{{ false }}">
-            <div role="list" aria-label="Gates in the sky now" style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ gnowAll }}" as="c" hint-placeholder-count="13"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 13px var(--fm);color:var(--tx);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-            <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">Enter your birth moment to see which of these your chart holds.</div>
-          </sc-if>
-        </div>
-      </sc-if>
         <sc-if value="{{ hdTeachOn }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:12px">
             <div style="display:flex;align-items:flex-start;gap:12px">
@@ -42917,7 +42841,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-for>
             </div>
           </sc-if>
-          <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+          <div role="group" aria-label="Your wiring" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
                 <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
@@ -56152,7 +56076,6 @@ class Component extends DCLogic {
         ['Awareness', 'hd:horizon:awareness', 'The three ways of knowing, and the fears, anxieties and nervousness each is said to carry. Show me lights the three centres.'],
         ['Variable', 'hd:horizon:variable', 'The four arrows and the finest layers of a position. Notice which side of the chart each arrow comes from.'],
         ['Left or Right', 'hd:horizon:left-or-right', 'The last Horizon lesson reads each arrow as left or right, sixteen combinations in all.'],
-        ['The sky now', 'hd:skysun', 'The Sun crosses a gate in about six days. The blue rings on the wiring are the gates the sky holds this minute, which is the transit field the Conditioning lesson describes.']
       ]
     },
     astropedia: {
@@ -56371,7 +56294,7 @@ class Component extends DCLogic {
       spTutIntroText: (room === 'hdatlas'
         ? { first: 'The seven Bedrock lessons, in order: type, strategy, aura, signature, not-self theme, inner and outer authority.',
             way: 'The seven Weather lessons: definition, profile, angle, centres, circuits, streams and rave cosmology, then a wiring to practise on.',
-            deep: 'The seven Horizon lessons: evolution, conditioning, cycles, mechanics, awareness, variable, left or right, then the sky now.' }
+            deep: 'The seven Horizon lessons: evolution, conditioning, cycles, mechanics, awareness, variable, and left or right.' }
         : room === 'astropedia'
         ? { first: 'A first walk through the sky: the wheel, the Sun and Moon signs, the houses, the bodies and the aspects.',
             way: 'The structure under the signs: elements, modalities, dignity, the kinds of house, orbs, and a chart to practise on.',
@@ -57418,7 +57341,7 @@ class Component extends DCLogic {
     const yourType = mine ? hd.type : null;
     const myGates = new Set(mine ? hd.gates.map(g => g.gate) : []);
     const myChan = new Set(mine ? hd.activeChannels.map(c => c[0] + '-' + c[1]) : []);
-    const sky = this.hdSkyNow(), skyGates = new Set(sky.map(a => a.gate));
+    const skyGates = new Set(); /* no sky now in Human Design (the owner, 6 November 2026) */
     const authOf = name => this.HD_AUTH_CENTRE[String(name || '').split(/[\s(:]/)[0].toLowerCase()];
     const myAuth = mine ? (A.AUTHORITIES.find(a => { const f = String(hd.authority).split(':')[0].trim().split(/\s+/)[0].toLowerCase(); return a.name.toLowerCase().indexOf(f) === 0; }) || null) : null;
     const myStrat = mine ? A.STRATEGIES.find(s => s.who.indexOf(hd.type) !== -1) : null;
@@ -57471,7 +57394,6 @@ class Component extends DCLogic {
     const facets = [], links = [], yours = [], terms = [];
     let kicker = '', lead = '', essay = [], dropcap = false, epi = '', now = '', bold = [];
     const hexName = n => { const IC = this.IC(), h = IC && IC.hexagram ? IC.hexagram(n) : null; return h ? h.name : ''; };
-    const skyLine = list => list.length ? 'In the sky now: ' + list.join(', ') : '';
     const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
     const term = (label, key) => { const x = find(key); if (x && x.key !== e.key && !terms.some(t => t.key === key)) terms.push({ label: label, key: key, g: '?', go: () => this.atlasBubGo(key) }); };
     const wiringGo = this.searchGo(this.searchSpirit('humanDesign', 0));
@@ -57502,8 +57424,7 @@ class Component extends DCLogic {
       link(d.center ? 'Open and defined, ' + C.label : C.label, '', (d.center ? 'open:' : 'centers:') + this.atlasSlug(k));
       Object.keys(A.GATES).map(Number).filter(n => this.hdCenterOf(n) === k).slice(0, 12).forEach(n => link('Gate ' + n, String(n), 'gates:g' + n));
       term('Defined Center', 'terms:defined-center'); term('Undefined Center', 'terms:undefined-center'); term('Conditioning', 'terms:conditioning');
-      if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held');
-      now = skyLine(sky.filter(a => this.hdCenterOf(a.gate) === k).map(a => a.body + ' in gate ' + a.gate)); }
+      if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held'); }
     if (d.gate) { const g = A.GATES[d.gate];
       kicker = 'In the ' + this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate);
       facets.push({ label: 'Low expression', text: g[3] }, { label: 'High expression', text: g[4] });
@@ -57512,11 +57433,9 @@ class Component extends DCLogic {
       links.push({ label: 'Hexagram ' + d.gate + ' in the Book of Changes', glyph: '☷', c: 'var(--ac2-hi)', aria: 'Hexagram ' + d.gate + ' in the Book of Changes',
         go: () => this.setState({ libSub: 'readings', libView: 'iching', icSec: null, icHex: d.gate, icQuery: String(d.gate), selId: null }) });
       term('Line', 'terms:line'); term('Hanging Gate', 'terms:hanging-gate');
-      if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line));
-      now = skyLine(sky.filter(a => a.gate === d.gate).map(a => a.body + ', line ' + a.line)); }
+      if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line)); }
     if (d.channel) { const c = A.CHANNELS[d.channel], p = d.channel.split('-').map(Number);
       kicker = c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · ');
-      now = skyLine(sky.filter(a => p.indexOf(a.gate) !== -1).map(a => a.body + ' in gate ' + a.gate));
       p.forEach(n => link('Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''), String(n), 'gates:g' + n));
       { const ci = A.circuitOf ? A.circuitOf(d.channel) : ''; if (ci) term(ci + ' Circuit', 'terms:' + this.atlasSlug(ci + ' circuit')); }
       term('Definition', 'definition:single-definition');
@@ -57610,10 +57529,9 @@ class Component extends DCLogic {
       hdwPeekGo: () => { if (st.atlasPeekAt) this.atlasPick(st.atlasPeekAt.key, false); },
       hdwKeyOn: lv !== 'deep',
       hdwKey: (mine ? [{ label: 'Defined', sw: 'rgba(var(--atmc),.4)', ring: 'inset 0 0 0 1.5px rgba(var(--atmc),.95)' }, { label: 'Your gates', sw: 'var(--tx)', ring: 'none' }] : [])
-        .concat([{ label: 'Open', sw: 'transparent', ring: 'inset 0 0 0 1.5px var(--mut)' }, { label: 'In the sky now', sw: 'transparent', ring: 'inset 0 0 0 2px var(--blue)' }]),
+        .concat([{ label: 'Open', sw: 'transparent', ring: 'inset 0 0 0 1.5px var(--mut)' }]),
       hdwMarks: [].concat(mine ? [['Your type', hd.type, 'types:' + this.atlasSlug(hd.type)], ['Your profile', pr.key, 'profiles:' + this.atlasSlug(pr.key)],
-          ['Your authority', String(hd.authority).split(':')[0], myAuth ? 'authorities:' + this.atlasSlug(myAuth.name) : null]] : [],
-        sky.filter(a => a.body === 'Sun').map(a => ['Sun now', 'gate ' + a.gate, 'gates:g' + a.gate]))
+          ['Your authority', String(hd.authority).split(':')[0], myAuth ? 'authorities:' + this.atlasSlug(myAuth.name) : null]] : [])
         .filter(m => m[2]).map(([label, val, key]) => ({ label: label, val: val, on: key === e.key, bd: key === e.key ? 'var(--ac2-hi)' : 'var(--bd)',
           aria: label + ', ' + val, go: () => this.atlasPick(key, true) })),
       hdAnim: (st.atlasFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
@@ -63281,10 +63199,9 @@ class Component extends DCLogic {
      card on Today reads, with the place on the wheel each body stands at. A
      Reflector's chart takes its shape from the sky, so for one it is on until
      the reader turns it off. */
-  hdSkyOn() {
-    const v = this.state.hsSky;
-    return v == null ? this.hdChart().type === 'Reflector' : !!v;
-  }
+  /* The sky now is gone from Human Design (the owner, 6 November 2026): the
+     3D and Wheel views draw the chart alone, Reflector or not. */
+  hdSkyOn() { return false; }
   hdSkyList() {
     const HT = window.HDTransit, W = this.HW();
     if (!HT || !W || !this.state.ready) return null;
@@ -65406,7 +65323,6 @@ class Component extends DCLogic {
           estFooter: 'Times are New York time (' + this.estZone() + '), refreshed on the minute. Every figure is redrawn with the clock.',
           ...this.angelVals(),
           ...this.todayVals(),
-          ...this.gnowVals(),
           ...this.hdPopVals(),
           ...this.hdTeachVals(),
           ...this.atlasVals(),
@@ -66034,7 +65950,6 @@ class Component extends DCLogic {
           hdType: hd.type, hdDesc: hd.desc, hdStrategy: hd.strategy, hdAuthority: hd.authority, hdDefinition: hd.definition,
           hdTypeGo: this.hdOpen({ kind: 'type' }), hdStrategyGo: this.hdOpen({ kind: 'strategy' }), hdAuthorityGo: this.hdOpen({ kind: 'authority' }),
           hdProfileGo: this.hdOpen({ kind: 'profile' }),
-          ...this.hdWeatherVals(),
           ...this.hdHorizonVals(),
           ...(() => {
             const A = this.A(), pr = this.hdProfile();
@@ -66084,7 +65999,7 @@ class Component extends DCLogic {
                 count: '',
                 go: this.hdOpen({ kind: 'center', name: name }) };
             });
-            const skyG = new Set(this.hdSkyNow().map(a => a.gate));
+            const skyG = new Set(); /* no sky now in Human Design (the owner, 6 November 2026) */
             const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], own = held.has(n), now = skyG.has(n);
               return { x: f1(sp.x), y: f1(sp.y), r: own ? '3.5' : '2.5',
                 fill: own ? 'var(--tx)' : 'rgba(var(--atmc),.75)', now: now,

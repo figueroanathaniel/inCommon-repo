@@ -3515,10 +3515,26 @@ the layer or detail switch and the expand button are a bar at the top of the
 wheel and wiring cards, and everything under the bar sits in a
 `position: relative` box, so the stage's absolute controls (Today's sky, Free
 look, the brackets, zoom) anchor to the drawing and not to the bar. The Human
-Design page opens on the wiring; Gates in the sky now is a smaller card under
-it, and Today's Alignment sits under the astrology chart. The titles are Your
+Design page opens on the wiring (and since 6 November 2026 carries no sky
+now: see "Human Design has no sky now"), and Today's Alignment sits under the astrology chart. The titles are Your
 Natal Chart, Your Wiring (the owner's pick over Your Bodygraph, for the mark)
 and Your Numerology.
+
+## Human Design has no sky now
+Decided by the owner on 6 November 2026: "Remove "in the sky now" completely
+from human design. Bring the gates channels and center directly beneath the
+natal and remove the "Natal" title." **This overrides every section that puts
+the sky on a Human Design surface**: the Gates in the sky now card, the HD
+Weather band (Meeting yours, Completing a channel, Passing through), the blue
+sky rings and their key on the 2D wiring and in the Atlas, the Atlas folio's
+"In the sky now" line and its Sun now mark, and the 3D and Wheel views' sky
+switch (`hdSkyOn()` answers false, the Reflector included). On the Human Design
+page the Natal label is gone and the Gates, Channels and Centres list sits
+directly under the type card, then the readings; Ahead stays, because it is a
+date to come and not the sky now. `gnowVals()` and `hdWeatherVals()` are no
+longer spread into any vals and draw nothing; `hd-transit.js` is untouched,
+because the forecast banner and the Timing Lexicon still read it. Do not bring
+a sky layer back to Human Design without the owner.
 
 ## The chart study is the reader's choice, and the Oracle reads through it
 Asked for by the owner on 4 November 2026: at least ten studies, Whole Sign,
