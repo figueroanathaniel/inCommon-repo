@@ -4199,7 +4199,7 @@ async function runCloudTests() {
   }, {
     cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,
     appOrderEachTime: appSrcK.split('href="./terms.html"').slice(1).every(function (chunk) { return chunk.indexOf('href="./privacy.html"') !== -1 && chunk.indexOf('href="./privacy.html"') < 900; }),
-    operator: /Nathaniel J\. Figueroa/.test(termsSrc) && /Nathaniel J\. Figueroa/.test(privSrc),
+    operator: /operated by Kin Common LLC/.test(termsSrc) && /operated by <strong>Kin Common LLC<\/strong>/.test(privSrc) && !/an individual based/.test(termsSrc + privSrc),
     florida: /State of Florida/.test(termsSrc), age16: /at least <strong>16 years old<\/strong>/.test(termsSrc) && /under 16/.test(privSrc),
     oracleSent: /first name on your profile/.test(privSrc) && /Moonshot AI/.test(privSrc),
     oracleNotSent: /birth date, birth time and birth place are not sent/.test(privSrc),
