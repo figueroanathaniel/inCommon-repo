@@ -17657,11 +17657,11 @@ class Component extends DCLogic {
       paras.push((ahead < 3 && name === 'Sun' ? 'It stands on the threshold now, and reaches ' : 'It reaches ') + to + ' ' + when(next) + ', ' + old(next).replace('the year you turned', 'the year you turn') + '. ' + this.HANDOFF_PAIR[si]);
     }
     const lead = ter ? (name === 'Sun'
-      ? 'Under that clock runs a quicker one, which counts each day after birth as one month of the Moon. Read that way, your Sun walks a sign in about two and a half years.'
-      : 'Under that clock runs a quicker one, which counts each day after birth as one month of the Moon. Read that way, your Moon crosses a sign every two or three months, the weather of a season rather than of an era.')
+      ? 'Your Sun keeps walking on a quicker clock, a sign in about two and a half years.'
+      : 'Your Moon keeps walking on a quicker clock, a new sign every two or three months, the weather of a season.')
       : name === 'Sun'
-      ? 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
-      : 'There is a second, slower clock under the chart: a day after birth for each year of life. Read that way, your Moon keeps walking, about a sign every two and a half years, and each crossing is a change of weather inside.';
+      ? 'Your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
+      : 'Your Moon keeps walking, a sign every two and a half years, and each crossing changes the weather inside.';
     void natalSi;
     return (memo[mk] = { heading: 'Your ' + name + (ter ? ', by the month' : ', progressed'), lead: lead, paras: paras, last: last, next: next, age: age, lonNow: lonNow });
   }
@@ -32608,21 +32608,31 @@ class Component extends DCLogic {
     if (r.retro) out.push('From the Earth it was retrograde. From the Sun nothing turns back: the backward walk belongs to the Earth overtaking it, or being overtaken.');
     return out;
   }
+  /* The lead over each chapter of a placement (the owner, 6 November 2026):
+     no instruction and no explaining. The house is said as a part of living,
+     the sign walks into the room as itself, the body speaks as itself, and the
+     reader is trusted to go with it. The words live in placement-content.js;
+     a point with no voice of its own gets no lead rather than a generic one. */
+  plLeads(r, name, ordH, dig) {
+    const PC = window.PlacementContent || {}, hs = PC.houses || [], ss = PC.signs || {}, bs = PC.bodies || {};
+    const hn = Number(String(ordH).replace(/\D/g, '')) || 0, h = hs[hn - 1] || {}, sg = ss[r.sign] || {};
+    const bk = PC.keyFor ? PC.keyFor(r.id || r.name) : r.name, bd = bs[bk] || bs[r.name] || {};
+    return [
+      h.living ? 'A part of living where ' + h.living + ' happens consistently, and your ' + name + ' lives here.' : '',
+      sg.enters || '',
+      bd.voice || '',
+      h.cue ? 'Your ' + name + ' comes alive when ' + h.cue + '.' : '',
+      sg.manner ? 'Your ' + name + ' moves ' + sg.manner + '.' : '',
+      dig ? (dig.strong ? name + ' is at home in ' + r.sign + ', a well lit room given rather than earned.'
+        : name + ' is a guest in ' + r.sign + ', and a guest who works for the welcome often becomes the best company.') : ''
+    ];
+  }
   plPacket(rk, name, r, c, ordH, dig, min, b) {
     const st = this.state, ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
-    const leads = [
-      'Begin with the room. A house is a part of living where a certain kind of thing keeps finding you, and your ' + name + ' does its work here, in the ' + ordH + '.',
-      r.sign + ' sits over this house and gives the room its accent. Nobody chooses an accent, and most of us can barely hear our own.',
-      'Now ' + name + ' itself, before it lands anywhere. It carries much the same longing in every chart ever drawn; what changes is where it lands, and how it is held there.',
-      'Bring the two together and you meet ' + name + ' at home in the ' + ordH + ' house, the part of the reading most people come looking for.',
-      'The same ' + name + ', dressed in ' + r.sign + '. The house gave it a room; the sign gives it a way of moving.'
-    ];
+    const leads = this.plLeads(r, name, ordH, dig);
     const parts = [['The Room', c.house], ['The Accent', c.signInHouse], ['The Nature', c.body],
       ['At Home', c.astralBodyInHouse], ['The Way It Moves', c.astralBodyInSign]].map((p, i) => ({ tab: p[0], sec: p[1], lead: leads[i] }));
-    if (dig) parts.push({ tab: 'The Welcome', sec: { heading: dig.heading, lines: dig.lines },
-      lead: 'Dignity is the old question of whether a celestial body is at home or a guest. ' + (dig.strong
-        ? 'Yours is at home here, which the tradition counts as ease rather than merit: a well lit room, not a virtue.'
-        : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') });
+    if (dig) parts.push({ tab: 'The Welcome', sec: { heading: dig.heading, lines: dig.lines }, lead: leads[5] });
     /* Under the Vedic study the packet reads the chart as Jyotish does: the
        nakshatra and, for the Moon, the dasha. The Western techniques
        (progressions, the solstice mirror, the profected year) are not part of
@@ -32789,28 +32799,26 @@ class Component extends DCLogic {
       plTransitNote: plTransits.length
         ? 'Transit orbs are held tighter than natal ones: 4\u00b0 conjunction and opposition, 3\u00b0 trine and square, 2\u00b0 sextile. A tightening contact usually reads louder than a separating one, though that is a tendency rather than a promise. Positions come from the offline ephemeris, so treat the final degree as approximate.'
         : 'No transiting body is within orb of this point today. Most days are like this for most placements, which is worth remembering before reading much into a quiet one.' };
+    const plL = this.plLeads(r, name, ordH, dig);
     return {
       spiritPlacement: true, ...nav, plComputed: true, plUncomputed: false,
       plName: name.toUpperCase(), plGlyph: r.glyph || c.glyph,
       plSummary: name + ' in ' + r.sign + ' at ' + Math.floor(r.deg) + '\u00b0' + min + '\u2032 \u00b7 ' + PC.ord(house) + ' House',
       plSections: [
-        [c.house, 'Begin with the room. A house is a part of living where a certain kind of thing keeps finding you, and your ' + name + ' does its work here, in the ' + ordH + '. Everything further down grows from this.'],
-        [c.signInHouse, r.sign + ' sits over this house and gives the room its accent. Nobody chooses an accent, and most of us can barely hear our own.'],
-        [c.body, 'Now ' + name + ' itself, before it lands anywhere. It carries much the same longing in every chart ever drawn; what changes is where it lands, and how it is held there.'],
-        [c.astralBodyInHouse, 'Bring the two together and you meet ' + name + ' at home in the ' + ordH + ' house, the part of the reading most people come looking for.'],
-        [c.astralBodyInSign, 'The same ' + name + ', dressed in ' + r.sign + '. The house gave it a room; the sign gives it a way of moving, one that tends to show up whether or not the moment asked for it.']
+        [c.house, plL[0]], [c.signInHouse, plL[1]], [c.body, plL[2]],
+        [c.astralBodyInHouse, plL[3]], [c.astralBodyInSign, plL[4]]
       ].map(x => sec(x[0], x[1])),
       plHasDignity: !!dig,
       plDignity: dig ? { heading: dig.heading, label: dig.label.toUpperCase(),
         c: dig.strong ? 'var(--ac2-hi)' : 'var(--blue)', bg: dig.strong ? 'rgba(var(--atmc2),.1)' : 'rgba(var(--atmc),.12)',
-        lines: [{ text: 'Dignity is the old question of whether a celestial body is at home or a guest. ' + (dig.strong ? 'Yours is at home here, which the tradition counts as ease rather than merit: a well lit room, not a virtue.' : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
+        lines: [{ text: plL[5] }]
           .concat(dig.lines.map(l => ({ text: l.text }))) } : null,
       ...plContacts,
-      plSynth: sec(c.synthesis, 'Everything above, held in one hand. A chart is one arrangement seen from several sides, and it speaks most clearly where the sides agree.'),
+      plSynth: sec(c.synthesis, 'Everything above, held in one hand.'),
       plWorking: [['Strengths', c.working.strengths], ['Challenges', c.working.challenges],
         ['Opportunities', c.working.opportunities], ['Obstacles', c.working.obstacles]]
         .map(([label, items]) => ({ label: label, items: items.map(t => ({ t: t })) })),
-      plDegree: (() => { const d = sec(c.degree, 'The last layer, and the one to hold most lightly. A single degree is a fine thread to pull on; sit with it as a prompt rather than a finding.');
+      plDegree: (() => { const d = sec(c.degree, 'One degree, a fine thread held lightly.');
         const dp = r.category === 'angle' ? null : this.decanPair(r.sign, r.deg); if (dp) d.lines.push({ text: dp.text }); return d; })(),
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),

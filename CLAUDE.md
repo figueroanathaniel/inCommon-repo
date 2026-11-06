@@ -6594,6 +6594,15 @@ dignity lines keep the body as subject, because `energy` is a compound phrase.
 New writing here keeps the voice: personal, gentle, no "you are" verdicts, no
 "X is Y, and Y is Z" catalogues.
 
+**A chapter lead moves in the energy and explains nothing** (the owner, 6
+November 2026: "we need to trust that the user will go with the message").
+`plLeads()` is the one source for the packet, the glance and the section list:
+the house as "A part of living where ... happens consistently, and your X lives
+here" (`living` on each house), the sign walking into the room as itself
+(`enters`), the body speaking as itself (`voice`), then the house's `cue` and
+the sign's `manner`. A point with no `voice` gets no lead, never a generic one.
+No lead says "begin", "now", or what the reader is about to read.
+
 ## A placement page is a packet
 Asked for by the owner on 4 November 2026 ("put the descriptions in a page-packet
 that has more beauty in its appeal instead of just a sectioned off dissertation").
