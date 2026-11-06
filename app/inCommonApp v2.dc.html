@@ -24274,11 +24274,23 @@ class Component extends DCLogic {
   apFirst(t, n) { const s = String(t || '').split(/(?<=[.!?])\s/)[0]; return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; }
   /* Every entry the room can open, once: a key, the chapter it belongs to,
      what the index and the wheel show for it, and the words a search reads. */
+  /* The study the reader chose in Settings brings its own chapter, first in
+     the room, when it is not a plain Western study (the owner, 5 November
+     2026: each study teaches its own field). The Western chapters stay. */
+  apStudyLessons() { const A = this.AP(); return A && A.studyLessons ? A.studyLessons(this.chartStudy()) : null; }
+  apSections() {
+    const A = this.AP(), L = this.apStudyLessons();
+    return A ? (L ? [['mystudy', 'Your study: ' + L.title]].concat(A.SECTIONS) : A.SECTIONS) : [];
+  }
   apEntries() {
-    if (this._apEnt) return this._apEnt;
+    const sk = this.chartStudy();
+    if (this._apEnt && this._apEntK === sk) return this._apEnt;
     const A = this.AP();
     if (!A) return [];
     const out = [], add = e => out.push({ ...e, hay: (e.name + ' ' + e.sub + ' ' + (e.text || '')).toLowerCase() });
+    const L = this.apStudyLessons();
+    if (L) L.lessons.forEach((x, i) => add({ key: 'lesson:' + sk + ':' + i, ch: 'mystudy', kind: 'lesson', li: i, name: x.name,
+      glyph: L.glyph + '\uFE0E', sub: 'Lesson ' + (i + 1) + ', ' + x.band, c: 'var(--ac2-hi)', slug: this.slug(x.name), text: x.term + ' ' + x.text }));
     A.SIGNS.forEach((s, i) => add({ key: 'sign:' + s.name, ch: 'signs', kind: 'sign', name: s.name, glyph: s.glyph + '︎',
       sub: s.modality + ' ' + s.element, c: this.AP_EL[s.element], idx: i, slug: this.slug(s.name),
       text: [s.text, s.key, s.sun, s.moon, s.asc, s.house, s.strengths, s.challenges].join(' ') }));
@@ -24301,7 +24313,7 @@ class Component extends DCLogic {
     A.SECTIONS.forEach(([k, title]) => { if (this.AP_ESSAY_GLYPH[k]) add({ key: 'essay:' + k, ch: k, kind: 'essay', ess: k, name: title,
       glyph: this.AP_ESSAY_GLYPH[k], sub: '', c: 'var(--ac2-hi)', slug: k,
       text: this.apBlocks(k).map(b => b.head + ' ' + b.rows.map(r => r.text).join(' ')).join(' ') }); });
-    this._apEnt = out;
+    this._apEnt = out; this._apEntK = sk;
     return out;
   }
   /* The sky this minute and the reader's own, once a minute per chart. The
@@ -24358,7 +24370,7 @@ class Component extends DCLogic {
     const signE = n => find('sign:' + n), bodyE = n => find('body:' + n);
     const natalSun = S.natal.find(r => r.name === 'Sun'), skySun = S.sky.find(r => r.name === 'Sun');
     const homeKey = 'sign:' + (natalSun ? natalSun.sign : skySun ? skySun.sign : 'Aries');
-    const chapters = A.SECTIONS.map(s => s[0]);
+    const sections = this.apSections(), chapters = sections.map(s => s[0]);
     const chap = chapters.indexOf(st.apSec) !== -1 ? st.apSec : 'signs';
     const e = find(st.apOpen) || (chap !== 'signs' ? all.find(x => x.ch === chap) : null) || find(homeKey);
     const pct = v => (v / 360 * 100).toFixed(3) + '%';
@@ -24467,6 +24479,10 @@ class Component extends DCLogic {
       link('The twelve houses', '', 'house:1');
     } else if (e.kind === 'concept' || e.kind === 'technique') {
       lead = (e.kind === 'concept' ? A.CONCEPTS : A.TECHNIQUES).find(c => c.name === e.name).text; dropcap = true;
+    } else if (e.kind === 'lesson') {
+      const L = this.apStudyLessons(), x = L.lessons[e.li];
+      kicker = 'Lesson ' + (e.li + 1) + ' of ' + L.lessons.length + ' · ' + x.band + ' · ' + x.pace;
+      epi = x.term; lead = x.text; dropcap = true;
     } else if (e.kind === 'essay') {
       essay = e.ess === 'orbs' ? [{ head: '', hasHead: false, rows: [A.ORBS.what, A.ORBS.how, A.ORBS.custom].map(t => ({ t: t })) }]
         : this.apBlocks(e.ess).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));
@@ -24538,7 +24554,7 @@ class Component extends DCLogic {
       /* The folio. */
       apAnim: (st.apFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
       apFolioLabel: e.name, apIcon: e.glyph, apIconC: e.c, apName: e.name,
-      apChapterName: (A.SECTIONS.find(s => s[0] === e.ch) || ['', ''])[1],
+      apChapterName: (sections.find(s => s[0] === e.ch) || ['', ''])[1],
       apKicker: kicker, apKickerOn: !!kicker, apEpi: epi, apEpiOn: !!epi,
       apLead: lead, apLeadOn: !!lead && !dropcap, apLeadCap: !!lead && dropcap,
       apNow: now, apNowOn: !!now,
@@ -24574,7 +24590,7 @@ class Component extends DCLogic {
         this.apPick(to.key, false);
       },
       /* The chapters, a search, and the open chapter's entries. */
-      apChapters: A.SECTIONS.map(([k, title]) => { const on = !q && k === chap, n = all.filter(x => x.ch === k).length;
+      apChapters: sections.map(([k, title]) => { const on = !q && k === chap, n = all.filter(x => x.ch === k).length;
         return { label: title, count: n > 1 ? String(n) : '', on: on,
           bd: on ? 'var(--ac2-hi)' : 'var(--bd)', bg: on ? 'rgba(var(--atmc),.24)' : 'var(--sf)', c: on ? 'var(--tx)' : 'var(--mut)',
           go: () => { const only = all.filter(x => x.ch === k);

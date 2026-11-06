@@ -1,4 +1,4 @@
-/* astropedia.js: inCommon astrological reference. V1.0.0
+/* astropedia.js: inCommon astrological reference. V1.1.0
    Pure reference. Nothing here reads or writes a profile, and nothing here knows
    anyone's birth moment. It is the language, not the reading: the twelve signs,
    the twelve houses, the celestial bodies, the points, the aspects, and how a chart is
@@ -10,7 +10,7 @@
   if (typeof module === 'object' && module.exports) { module.exports = factory(); }
   else { root.Astropedia = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   var SECTIONS = [
     ['signs', 'The Twelve Signs'],
@@ -324,6 +324,134 @@
     return null;
   }
 
+  /* ---------- the lessons of each chart study ----------
+     Asked for by the owner on 5 November 2026: every study that is not the
+     plain Western chart teaches its own field, in the order its own schools
+     teach it. Each list is ranked by how widely a topic is taught against how
+     hard it is to learn; the ranking and every source are in
+     docs/astro-upgrade/04-study-education-sources.md. A band names how widely
+     the topic is taught, a pace how much it asks of a beginner. Keyed by the
+     study keys in chart-traditions.js. */
+  var STUDY_LESSONS = {
+    vedic: { title: 'Jyotish', glyph: '☾',
+      lessons: [
+        { name: 'The Nine Grahas', band: 'taught almost everywhere', pace: 'gentle', term: 'Graha, the one who seizes',
+          text: "Jyotish reads nine grahas: the Sun, Surya; the Moon, Chandra; Mars, Mangala; Mercury, Budha; Jupiter, Guru; Venus, Shukra; Saturn, Shani; and Rahu and Ketu, the north and south lunar nodes, counted as grahas of shadow because they hold no light of their own. A graha is a seizer, something that takes hold of a life and moves it. The classical list stops at Saturn, the last body the eye can see, so most schools of Jyotish leave Uranus, Neptune and Pluto out of the reading altogether. Every later lesson is a lesson about where these nine stand and what they own." },
+        { name: 'The Twelve Rashis', band: 'taught almost everywhere', pace: 'gentle', term: 'Rashi, a heap or measure',
+          text: "The twelve signs are the rashis: Mesha, Vrishabha, Mithuna, Karka, Simha, Kanya, Tula, Vrishchika, Dhanu, Makara, Kumbha and Meena, the same twelve Aries to Pisces that Western astrology names, with the same rulers among the seven visible grahas. What differs is where they begin. A rashi is measured against the stars behind it rather than against the seasons, so most of the time a body that Western astrology places late in one sign stands in the sign before it here." },
+        { name: 'The Lagna and the Bhavas', band: 'taught almost everywhere', pace: 'gentle', term: 'Bhava, a state of being',
+          text: "The rashi rising in the east at birth is the lagna, and it is the first bhava. Each rashi after it is the next bhava, whole sign by whole sign, so a house and a sign are always the same room. The twelve bhavas are often read in four groups of three, by the four aims of a life: dharma, purpose, in the first, fifth and ninth; artha, livelihood, in the second, sixth and tenth; kama, desire, in the third, seventh and eleventh; and moksha, release, in the fourth, eighth and twelfth. The first, fourth, seventh and tenth are the kendras, the pillars of the chart, and the first, fifth and ninth are the trikonas, its blessings." },
+        { name: 'The Sidereal Zodiac and the Ayanamsa', band: 'taught almost everywhere', pace: 'steady', term: 'Ayanamsa, the portion of the precession',
+          text: "The Earth's axis wobbles slowly, so the point where the Sun crosses the equator each spring drifts backward against the stars by about a degree every seventy two years. Western astrology ties Aries to that crossing; Jyotish ties it to the stars. The gap between the two zodiacs is the ayanamsa, a little over twenty four degrees in our time and still growing. Schools differ on exactly where the starry zodiac begins, and each answer is its own ayanamsa. This chart uses Lahiri, the one India's Calendar Reform Committee adopted in the 1950s and the one most Indian almanacs follow." },
+        { name: 'The Nakshatras and Their Padas', band: 'taught almost everywhere', pace: 'steady', term: 'Nakshatra, a lunar mansion',
+          text: "Beneath the twelve rashis runs an older division: twenty seven nakshatras of 13 degrees 20 minutes each, about one day of the Moon's travel. Each is named for the stars that mark it, from Ashwini at the start of Mesha to Revati at the end of Meena, and each is divided into four padas of 3 degrees 20 minutes. Every nakshatra has a graha as its lord, in the order the Vimshottari dasha follows. The nakshatra holding the Moon at birth is the birth star, and it carries much of what Western astrology would say about the Moon's sign, only finer." },
+        { name: 'The Vimshottari Dasha', band: 'taught almost everywhere', pace: 'steady', term: 'Dasha, a condition or period',
+          text: "Jyotish times a life by periods, each ruled by one graha. The Vimshottari cycle lasts one hundred and twenty years and runs in a fixed order: Ketu seven years, Venus twenty, the Sun six, the Moon ten, Mars seven, Rahu eighteen, Jupiter sixteen, Saturn nineteen and Mercury seventeen. A life begins in the period of the lord of the Moon's nakshatra, with only as much of it left as the Moon had still to travel through that nakshatra. Each mahadasha holds nine smaller periods, the antardashas, in the same order, so a season of life always has a main voice and a second one." },
+        { name: 'The Panchanga', band: 'taught in most courses', pace: 'steady', term: 'Panchanga, the five limbs',
+          text: "The Indian almanac reads every day by five limbs: the tithi, the lunar day, one of thirty steps of twelve degrees between the Sun and the Moon; the vara, the weekday and its graha; the nakshatra the Moon stands in; the yoga, one of twenty seven made from the Sun and the Moon together; and the karana, half a tithi. Together they are the day's own quality, the ground the calendar of festivals and auspicious hours stands on, and the birth panchanga is read as the quality of the day a person arrived in." },
+        { name: 'Gochara, the Transits', band: 'taught in most courses', pace: 'steady', term: 'Gochara, the movement of the grahas',
+          text: "Transits in Jyotish are read above all from the Moon's rashi rather than from the lagna: the slow malefics passing the third, sixth or eleventh from the Moon are often welcome, and any graha passing the eighth is watched. The best known passage is Saturn's sade sati, the seven and a half years it takes to cross the rashi before the Moon's, the Moon's own and the one after it, read as a long season of maturing under weight. Transits are read together with the dasha running at the time, because the dasha says which grahas have the floor." },
+        { name: 'Yogas', band: 'taught in most courses', pace: 'demanding', term: 'Yoga, a joining',
+          text: "A yoga is a combination of grahas, bhavas and their lords that the texts read as a single signature. Raja yogas join the lords of a kendra and a trikona and are read for standing; dhana yogas join the lords of the houses of wealth; sanyasa yogas gather several grahas together and are read for renunciation. The classical books list hundreds, and most of the craft is weighing them: a yoga only speaks as loudly as the grahas that form it are strong, and only when a dasha gives them their turn." },
+        { name: 'Drishti, the Sight of the Grahas', band: 'taught in most courses', pace: 'steady', term: 'Drishti, a glance',
+          text: "In Jyotish a graha casts its sight on whole signs rather than on exact angles. Every graha looks at the seventh sign from itself. Mars looks also at the fourth and the eighth, Jupiter at the fifth and the ninth, and Saturn at the third and the tenth. Where a graha looks, it lends its nature: Jupiter's glance protects, Saturn's tests, Mars's stirs. Reading drishti is why two grahas in signs that never touch in Western terms can still be speaking to each other." },
+        { name: 'The Vargas and the Navamsa', band: 'taught later', pace: 'demanding', term: 'Varga, a division',
+          text: "Each rashi can be divided again into smaller parts, and each division makes a chart of its own, a varga. Parashara names sixteen of them, each for one area of life. The most used is the navamsa, which cuts every sign into nine parts of 3 degrees 20 minutes, the same span as a pada, and is read for marriage, for the deeper strength of each graha, and as the fruit of the birth chart. A graha that is strong in both the rashi chart and the navamsa is read as strong indeed." }
+      ] },
+    chinese: { title: 'The Four Pillars', glyph: '☯',
+      lessons: [
+        { name: 'The Ten Heavenly Stems', band: 'taught almost everywhere', pace: 'gentle', term: 'Tiangan',
+          text: "Ten stems run in a fixed order, two for each of the five phases, the first of each pair yang and the second yin: Jia and Yi are wood, Bing and Ding are fire, Wu and Ji are earth, Geng and Xin are metal, Ren and Gui are water. A stem is the heavenly half of a pillar, the quality that shows. Jia is often pictured as a tall tree and Yi as a vine; Bing as the Sun and Ding as a lamp; the pictures are a way into the stems rather than a rule about them." },
+        { name: 'The Twelve Earthly Branches', band: 'taught almost everywhere', pace: 'gentle', term: 'Dizhi',
+          text: "Twelve branches run beside the stems, each with its animal, its phase and its two hours of the day: Zi the Rat, water, from eleven at night to one; Chou the Ox, earth; Yin the Tiger and Mao the Rabbit, wood; Chen the Dragon, earth; Si the Snake and Wu the Horse, fire; Wei the Goat, earth; Shen the Monkey and You the Rooster, metal; Xu the Dog, earth; and Hai the Pig, water. A branch is the earthly half of a pillar, the ground a stem stands on." },
+        { name: 'The Four Pillars and the Sixty Cycle', band: 'taught almost everywhere', pace: 'gentle', term: 'Bazi, the eight characters',
+          text: "A birth is written as four pillars, the year, the month, the day and the hour, each a stem standing on a branch, eight characters in all. Stems and branches pair in step, yang with yang and yin with yin, so they make sixty pairs before the first comes round again, the sexagenary cycle that has counted days in China for three thousand years. The year pillar is read for ancestry and early life, the month for parents and youth, the day for the self and a partner, and the hour for children and later years." },
+        { name: 'The Day Master', band: 'taught almost everywhere', pace: 'gentle', term: 'Rizhu',
+          text: "Since the method Xu Ziping set out in the Song dynasty, the stem of the day pillar is read as the self, the Day Master. Everything else in the chart is read by what it does to that one stem: feeds it, drains it, controls it, is controlled by it or stands beside it. A Day Master of Geng metal reads the same fire in a chart quite differently from a Day Master of Jia wood, which is why two people born in the same year and month can read so unlike each other." },
+        { name: 'Yin, Yang and the Five Phases', band: 'taught almost everywhere', pace: 'gentle', term: 'Wuxing',
+          text: "Wood, fire, earth, metal and water are phases more than substances, and they move in two cycles. In the generating cycle wood feeds fire, fire leaves earth, earth bears metal, metal carries water and water nourishes wood. In the controlling cycle wood parts earth, earth dams water, water quenches fire, fire melts metal and metal cuts wood. Each phase comes as yang, outgoing and solid, or yin, yielding and inward. Counting the phases across the eight characters is the first picture of a chart: what is plentiful, what is scarce, what is missing." },
+        { name: 'The Ten Gods', band: 'taught in most courses', pace: 'steady', term: 'Shishen',
+          text: "The ten gods name each other stem by its relation to the Day Master. The same phase is the Friend when it shares the polarity and the Rob Wealth when it does not. The phase the Day Master produces is the Eating God or the Hurting Officer. The phase it controls is Indirect or Direct Wealth. The phase that controls it is the Seven Killings or the Direct Officer. The phase that produces it is the Indirect or Direct Resource. In each pair the first shares the Day Master's polarity and the second is its opposite, and the names carry a whole vocabulary of resources, expression, authority and support." },
+        { name: 'The Luck Pillars', band: 'taught in most courses', pace: 'steady', term: 'Dayun',
+          text: "Beside the four natal pillars runs a chain of luck pillars, each ruling about ten years. They are counted from the month pillar, forward through the sixty cycle or backward, by the polarity of the year and the sex of the person born: a yang year for a man or a yin year for a woman runs forward, the other two backward. Each luck pillar is a new stem and branch arriving to meet the eight characters, and the years inside it are read against both." },
+        { name: 'The Solar Terms', band: 'taught in most courses', pace: 'steady', term: 'Jieqi',
+          text: "The months of the Four Pillars are solar, not lunar. The Sun's year is divided into twenty four solar terms, fifteen degrees each, and a pillar month begins at every second one. So the year pillar does not turn at the lunar new year but at Lichun, the beginning of spring, when the Sun reaches 315 degrees, early in February. A birth in late January belongs to the year before, whatever the calendar says." },
+        { name: 'The Symbolic Stars', band: 'taught in some courses', pace: 'steady', term: 'Shensha',
+          text: "Beside the elements stand the symbolic stars, special branches found by rule from the day stem or from the year and day branches. The Nobleman marks help that arrives from others, the Travel Horse movement and change of place, and Peach Blossom charm and attraction. There are many more. Most teachers place them after the elements and the ten gods, as accents on a reading rather than its ground." },
+        { name: 'Clashes and Combinations', band: 'taught in some courses', pace: 'demanding', term: 'Chong and he',
+          text: "Branches meet and change one another. Branches six apart clash, the Rat with the Horse, the Ox with the Goat, and so on round the twelve, and a clash shakes whatever the two pillars hold. Some pairs combine, and some groups of three come together into a single phase, the three harmonies. Stems combine too. Clashes and combinations are where a still chart begins to move, above all when a luck pillar or a year brings the branch that sets them off." },
+        { name: 'The Strength of the Day Master', band: 'taught later', pace: 'demanding', term: 'Strong and weak',
+          text: "Before anything can be advised, the Day Master is weighed. Is it born in its own season, the month branch, or out of it? Do the other pillars support it with its own phase and with the phase that feeds it, or do they drain and control it? A strong Day Master and a weak one want different things from the same year, and most disagreements between readers come back to this weighing." },
+        { name: 'The Useful God', band: 'taught later', pace: 'demanding', term: 'Yongshen',
+          text: "The useful god is the phase that brings a chart toward balance: what a strong Day Master needs to spend itself on, or what a weak one needs to be held up by. Once it is found, the luck pillars and the years that bring it are read as easier seasons, and those that bring its opposite as harder ones. Finding it is the work the earlier lessons prepare for." },
+        { name: 'Structures', band: 'taught later', pace: 'demanding', term: 'Geju',
+          text: "Classical books sort charts into structures, named mostly from the ten god the month branch gives, such as a Direct Officer structure or an Eating God structure, along with special structures for charts so lopsided that the ordinary weighing does not apply. A structure is a whole chart's shape named at once, and it is usually the last thing a student learns to see." }
+      ] },
+    hellenistic: { title: 'Hellenistic Astrology', glyph: '☉',
+      lessons: [
+        { name: 'Sect, Day and Night', band: 'taught almost everywhere', pace: 'gentle', term: 'Hairesis, a party',
+          text: "The first question a Hellenistic astrologer asks is whether the chart is of the day or of the night, whether the Sun stood above the horizon or below it. The day has its own party, the Sun with Jupiter and Saturn; the night has the Moon with Venus and Mars. Mercury joins the day when it rises before the Sun and the night when it sets after it. A body in its own sect is read as better placed to do its work: Saturn is easier by day, Mars by night, and the benefic of the sect is the chart's best help." },
+        { name: 'The Seven Planets', band: 'taught almost everywhere', pace: 'gentle', term: 'Planetes, the wanderers',
+          text: "Hellenistic astrology reads the seven bodies the eye can see: the Sun and the Moon, the two lights, and Mercury, Venus, Mars, Jupiter and Saturn. Jupiter and Venus are the benefics, Mars and Saturn the malefics, and Mercury takes the nature of whatever it is with. None of these words is a verdict: a malefic in its own sect and well placed can build as much as a benefic, and the texts read every planet as both a giver and a taker by its condition." },
+        { name: 'The Signs and the Thema Mundi', band: 'taught almost everywhere', pace: 'gentle', term: 'Thema Mundi, the chart of the world',
+          text: "The tradition taught its rulerships through a teaching chart, the birth of the world: Cancer rising with the Moon in it, the Sun in Leo, then Mercury in Virgo, Venus in Libra, Mars in Scorpio, Jupiter in Sagittarius and Saturn in Capricorn, each planet in turn round the zodiac in the order of its speed. Read backward from Cancer the same order runs again, Gemini to Mercury, Taurus to Venus, Aries to Mars, Pisces to Jupiter and Aquarius to Saturn, which is why each planet but the lights rules two signs. The chart also shows the aspects: the lights see Saturn's signs by opposition and Jupiter's by trine." },
+        { name: 'Whole Sign Places and the Joys', band: 'taught almost everywhere', pace: 'gentle', term: 'Topos, a place',
+          text: "The houses were called places, and the oldest way to count them is by whole signs from the rising sign. Each planet has a place where it rejoices: Mercury in the first, the Moon in the third, Venus in the fifth, Mars in the sixth, the Sun in the ninth, Jupiter in the eleventh and Saturn in the twelfth. The joys explain much of what the places mean: the third, the Moon's, is the place of the goddess, and the ninth, the Sun's, the place of the god." },
+        { name: 'Annual Profections', band: 'taught almost everywhere', pace: 'gentle', term: 'Lord of the year',
+          text: "Each year of life the chart turns one sign forward. At birth the year belongs to the rising sign, at the first birthday to the second sign, and so on, back to the rising sign at twelve, twenty four, thirty six. The sign the year falls in names the topic of the year, and its ruler becomes the lord of the year, the planet whose condition and transits are watched most closely until the next birthday." },
+        { name: 'The Lots of Fortune and Spirit', band: 'taught in most courses', pace: 'steady', term: 'Kleros, a lot',
+          text: "A lot is a point found by measuring the distance between two planets and casting it from the Ascendant. The Lot of Fortune, by day, is the distance from the Sun to the Moon added to the Ascendant, and by night the reverse; the Lot of Spirit is its mirror, the Moon to the Sun by day. Fortune is read for the body and what happens to it, Spirit for the mind and what is chosen. Each lot becomes a first house of its own, from which the other signs can be counted again." },
+        { name: 'Zodiacal Releasing', band: 'taught in most courses', pace: 'demanding', term: 'Aphesis, a release',
+          text: "Vettius Valens describes a way of timing a life by releasing it from a lot through the signs. Starting from the sign of the Lot of Spirit, for career and direction, or of Fortune, for the body and its circumstances, each sign rules a period whose length comes from its ruler's period, and smaller periods run inside the larger ones. Students learn it for the peaks it marks, when the periods reach the signs angular to the lot, and for the turns between chapters of a life." },
+        { name: 'Aspects by Sign', band: 'taught in most courses', pace: 'steady', term: 'Witnessing',
+          text: "In the older tradition planets see each other by sign. A planet two signs away sees by sextile, three by square, four by trine and six by opposition, and a planet in the same sign is with it. Signs that stand one, five, seven or eleven signs apart are in aversion: they cannot see each other at all, and a planet in aversion to a place has no say over it. Close degrees still matter, as a contact being completed, but the sign is the door." },
+        { name: 'The Ruler of the Hour Marker', band: 'taught in most courses', pace: 'steady', term: 'Horoskopos',
+          text: "The rising sign was called the hour marker, horoskopos, from which the whole chart takes its name. Its ruler steers the chart: where it stands by place, sign and sect, and whether it can see the rising sign at all, is read as the course of the life. A ruler of the hour marker in aversion to the first place is a captain who cannot see the ship, and the tradition reads that as a life lived partly elsewhere." },
+        { name: 'Bonification and Maltreatment', band: 'taught later', pace: 'demanding', term: 'Help and harm',
+          text: "Later Hellenistic authors list the ways one planet improves or troubles another: being joined to it by a close aspect, being overcome by a planet in the tenth sign from it, being enclosed between two benefics or two malefics, receiving a ray from one. Learning the list is how a student moves from reading planets one at a time to reading them as a crowd that helps and harms itself." },
+        { name: 'Triplicity Lords of the Sect Light', band: 'taught later', pace: 'demanding', term: 'Trigon lords',
+          text: "Each element has three lords, one for the day, one for the night and one that shares. Dorotheus reads the course of a life from the lords of the element holding the sect light, the Sun by day and the Moon by night: the first lord for the first part of life, the second for the next, the third as a partner to both. Where those lords stand, and how well, is read as how the life is supported over its length." },
+        { name: 'The Revolution of the Year', band: 'taught later', pace: 'steady', term: 'Return',
+          text: "Hellenistic astrologers also cast a chart for the moment the Sun returns to its birth degree each year, and read it beside the profection. The return chart says how the year is set up; the profection says whose year it is. Read together they give a year its weather and its subject." }
+      ] },
+    sidereal: { title: 'The Sidereal Zodiac', glyph: '★',
+      lessons: [
+        { name: 'Why the Stars', band: 'taught almost everywhere', pace: 'gentle', term: 'Sidereal, of the stars',
+          text: "Western sidereal astrology keeps the Western way of reading a chart and moves the zodiac back onto the stars. Cyril Fagan argued that the zodiac of the Babylonians, the oldest one known, was measured against the constellations rather than the seasons, and that the tropical zodiac came later. Because the equinox drifts against the stars, the two zodiacs have slid apart since then, and in a sidereal chart most placements move back by a sign." },
+        { name: 'The Ayanamsa and Its Anchor', band: 'taught almost everywhere', pace: 'steady', term: 'Fagan-Bradley',
+          text: "The ayanamsa is how far the starry zodiac now stands from the seasonal one. The Fagan-Bradley ayanamsa is set so that Aldebaran, the eye of the Bull, falls at 15 degrees of Taurus and Spica at 29 degrees 06 minutes of Virgo, and at the start of 2000 it measured about 24 degrees 44 minutes. It grows by about a degree every seventy two years, so the gap is a little wider for every generation." },
+        { name: 'Fagan and Bradley', band: 'taught in most courses', pace: 'gentle', term: 'The founders',
+          text: "Cyril Fagan, an Irish astrologer born in Dublin in 1896, set out his case in Zodiacs Old and New in 1950. Donald Bradley, an American astrologer and statistician, tested the zodiac against data and refined its starting point, and later edited American Astrology. Their work is why Western sidereal astrology exists as a school of its own rather than as Jyotish's zodiac borrowed." },
+        { name: 'Learning One Ayanamsa First', band: 'taught in some courses', pace: 'gentle', term: 'One sky at a time',
+          text: "Sidereal astrologers do not agree on a single ayanamsa: Fagan-Bradley and Lahiri, the most used, stand less than a degree apart, and others differ by more. Teachers advise working with one long enough to learn how it reads before comparing it with another, because a body near the edge of a sign changes sign between them. This chart uses Fagan-Bradley throughout." }
+      ] },
+    draconic: { title: 'The Draconic Chart', glyph: '☊',
+      lessons: [
+        { name: 'The Dragon’s Chart', band: 'taught almost everywhere', pace: 'gentle', term: 'Draco, the dragon',
+          text: "A draconic chart is the birth chart turned until the North Node of the Moon stands at 0 degrees Aries. Every body and angle moves by the same amount, so the houses, the aspects and the shape of the chart are exactly as they were; only the signs change. The nodes were once pictured as the head and tail of a dragon that swallows the Sun and the Moon at an eclipse, which is where the chart takes its name." },
+        { name: 'The Sun, the Moon and the Rising Sign', band: 'taught almost everywhere', pace: 'gentle', term: 'The first comparison',
+          text: "Students begin by setting three placements beside their tropical ones: the draconic Sun, Moon and rising sign. Pamela Crane, whose books did most to spread the chart, read it as the deeper current under the familiar one, the purpose and the driving principles of a life, and teachers still describe it that way. A draconic Sun in a sign far from the tropical one is the first thing a student learns to sit with." },
+        { name: 'Laying It Over the Birth Chart', band: 'taught in most courses', pace: 'steady', term: 'The overlay',
+          text: "The chart is read most often laid over the tropical chart, as two rings. Close contacts between the two, above all conjunctions and oppositions within a degree or two, are read as places where the deeper current touches the everyday chart directly. Roy Olliver's Chasing the Dragons is built around reading those contacts." },
+        { name: 'Where It Came From', band: 'taught in some courses', pace: 'gentle', term: 'History',
+          text: "The draconic chart is a twentieth century technique. It is traced to the French astrologer Froger in the late 1950s, was brought to English astrology by Dennis Elwell in a lecture in 1977, and was set out at length by Pamela Crane in Draconic Astrology in 1987 and The Draconic Chart in 1999. It has always been read beside the birth chart, never in place of it." }
+      ] },
+    heliocentric: { title: 'From the Sun', glyph: '⊙',
+      lessons: [
+        { name: 'The Chart Seen From the Sun', band: 'taught almost everywhere', pace: 'gentle', term: 'Helios, the Sun',
+          text: "A heliocentric chart draws the planets where they stand as seen from the Sun rather than from the Earth. The Sun leaves the wheel, because it is the centre, and the Earth takes a place on it, opposite where the Sun appears from here. The planets keep their order and their signs mean what they always mean; it is the point of view that has moved." },
+        { name: 'What Drops Away', band: 'taught almost everywhere', pace: 'gentle', term: 'No horizon',
+          text: "From the Sun there is no horizon, so a heliocentric chart has no Ascendant, no Midheaven and no houses. The Moon goes too, since it circles the Earth rather than the Sun. Seen from the Sun a planet never appears to turn backward, so there is no retrograde motion either. What remains is the planets, their signs and the angles between them." },
+        { name: 'Reading the Aspects', band: 'taught in most courses', pace: 'steady', term: 'The pattern',
+          text: "With houses and angles gone, heliocentric astrologers read the aspects and the patterns they make: the planets' own geometry round the Sun, unbent by the Earth's motion. Mercury and Venus, which never stray far from the Sun as seen from here, can stand anywhere in a heliocentric chart, so they make aspects a geocentric chart can never show." },
+        { name: 'Beside the Birth Chart', band: 'taught in most courses', pace: 'gentle', term: 'Two views',
+          text: "Hardly anyone reads a heliocentric chart alone. It is read beside the geocentric chart, as the view from the centre of the system set next to the view from where a person actually stood, and the comparison of the two is most of the craft." },
+        { name: 'Where It Came From', band: 'taught in some courses', pace: 'gentle', term: 'History',
+          text: "Heliocentric charts are as old as the Sun centred system. Andreas Aurifaber in the sixteenth century and Joshua Childrey in the 1650s argued astrology should follow Copernicus; Holmes Merton revived the idea in 1899, and Philip Sedgwick's primer of 1990 brought it to astrologers working today." }
+      ] }
+  };
+  function studyLessons(k) { return STUDY_LESSONS[String(k || '')] || null; }
+
   /* ---------- the birth chart ---------- */
   var CHART = {
     what: 'A map of the sky at your first breath. Not a fate, but a field of possibilities.',
@@ -422,6 +550,7 @@
   }
 
   return { VERSION: VERSION, SECTIONS: SECTIONS, INTRO: INTRO, SIGNS: SIGNS, HOUSES: HOUSES, HOUSE_SYSTEMS: HOUSE_SYSTEMS, HOUSE_SYSTEMS_INTRO: HOUSE_SYSTEMS_INTRO,
+    STUDY_LESSONS: STUDY_LESSONS, studyLessons: studyLessons,
     ASTRAL_BODIES: ASTRAL_BODIES, POINTS: POINTS, ASPECTS: ASPECTS, ORBS: ORBS, CONCEPTS: CONCEPTS, CHART: CHART, SABIAN: SABIAN,
     STELLIUM: STELLIUM, TRANSITS: TRANSITS, TECHNIQUES: TECHNIQUES, SYNASTRY: SYNASTRY, EXAMPLE: EXAMPLE,
     sign: signByName, house: house, houseSystem: houseSystem, astralBody: astralBody, point: point, aspect: aspect };

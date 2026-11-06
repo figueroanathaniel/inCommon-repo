@@ -5752,6 +5752,21 @@ room: four identities, hardened and not, at 1440 and 375, with a sign, a body,
 an aspect and an essay open, 64 cases, 54 to 77 elements each, no pair under
 4.5:1 and no control under 44px.
 
+## Each chart study teaches its own field
+Asked for by the owner on 5 November 2026: the six studies that are not plain
+Western (Vedic, Chinese, Hellenistic, Western Sidereal, Draconic and
+Heliocentric) each carry lessons of their own, researched first and ordered by
+how widely the topic is taught against how hard it is. `STUDY_LESSONS` in
+`astropedia.js` holds them; `apSections()` puts a chapter, "Your study:
+<title>", at the head of the Astropedia only while that study is chosen, and
+the Western chapters are untouched. A lesson is `kind: 'lesson'`, keyed
+`lesson:<study>:<n>`, drawn like a concept with its band and pace as the
+kicker and its term as the epigraph. `apEntries()` is memoised per study
+(`_apEntK`), so changing the study rebuilds it. The ranking, its method and
+every source are `docs/astro-upgrade/04-study-education-sources.md`; the bands
+are a reading of course outlines, not a tally, and the doc says so. No lesson
+names a fact no source was read for (the hidden stems, the releasing periods).
+
 ## The reader chooses the house system, and Whole Sign is where it starts
 Decided by the owner on 4 November 2026: the Astropedia has a House Systems
 chapter where the reader picks the system they study, and the choice changes
