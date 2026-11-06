@@ -4929,6 +4929,22 @@ waits behind the same press: it shows at once and costs nothing. Driven with
 the cloud faked, both shells: nothing is asked on open or on switching to In
 Depth, and one press asks once and shows the reading.
 
+**Written ahead, shown on the press** (the owner, 6 November 2026: "write the
+reading, but don't engage it until the reader asks for it! The standard reading
+kept auto-populating, I only wanted to do away with that"). What the law bars
+is a reading appearing on the screen unasked, not the writing. So
+`oraclePrepareAuto()` runs again (`ORACLE_PREPARE_AHEAD`): four seconds after
+the app is ready, for a signed in reader on their own chart who has agreed to
+the Oracle, it asks quietly for the current period's standard reading, then its
+in-depth reading for a reader who has asked for one before and has the add-ons
+open. One slot at a time, once a slot per session, never while another ask is
+in flight, and never the Cycle Audit. A quiet ask says nothing, draws no panel
+and no error, and is kept on the device; the screen still shows Consult the
+Oracle until it is pressed (`deepGate`, `orOpened`), and the press shows it at
+once. A press during the quiet write turns it into the reader's own, panel and
+all. `oracleWillAsk()` still answers false: nothing the screen would show is
+asked for on open.
+
 ## The Oracle speaks in the reader's study and world
 Asked for by the owner on 5 November 2026: "the Oracle voice should reflect the
 chart style and the theme as well. This is why it costs extra to run it when

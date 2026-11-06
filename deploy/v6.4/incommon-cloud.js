@@ -1819,7 +1819,18 @@
      A server that still writes the whole reading in one call (it has no
      chapters to add) answers the first with them already in, and the second
      call is skipped. The page may pass onFirst, called with the first half as
-     soon as it arrives, so it can be shown while the second is written. */
+     soon as it arrives, so it can be shown while the second is written.
+
+     BOTH HALVES ARE ASKED AT ONCE (6 November 2026). The second half's prompt
+     is the dossier alone, never the first half's text, so it does not wait on
+     the first; one after the other, every in-depth reading took the first
+     half's minute on top of the second's. Two answers send the second back to
+     the old order, after the first: BAD_REQUEST, from a server that still
+     writes the second only once the first is kept, and busy, from Kimi when
+     its tier writes one reading at a time (a first half turned away as busy
+     is asked again once the second is answered). Either way nothing was
+     written or counted, so the reading costs what it did before and arrives
+     no later. */
   /* THE PROFILE THE DOSSIER WAS WRITTEN FROM travels with it, the active one
      unless the page names another (server/migrations/0006). The server
      stores it beside the reading so it can withdraw what was written from a
@@ -1837,15 +1848,26 @@
     delete body.onFirst;
     if (body.profileId == null) { var pid = activeProfileId(); if (pid) body.profileId = pid; else delete body.profileId; }
     if (body.depth !== 'deep') return oracleCall(body);
-    return oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
+    var askA = function () { return oracleCall(Object.assign({}, body, { part: 'a' })); };
+    var askB = function () { return oracleCall(Object.assign({}, body, { part: 'b' })); };
+    var pa = askA();
+    var pb = askB();
+    /* Kimi took the second half and turned the first away: the first is asked
+       again once the second is answered, so the slot is free. */
+    return pa.then(function (a) {
+      return (!a.ok && a.reason === 'busy') ? pb.then(askA) : a;
+    }).then(function (a) {
       if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
-      /* The first half is on its way to the page before the second is asked
-         for, so the reader has something to read while it is written. */
+      /* The first half goes to the page the moment it arrives, so the reader
+         has something to read while the second is still being written. */
       if (onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
-      /* The server joins the two halves when it kept the first. When it did
-         not (the birth is not saved to the account, so nothing of the reading
-         is kept there), the second comes back alone and is joined here. */
-      return oracleCall(Object.assign({}, body, { part: 'b' })).then(function (b) {
+      return pb.then(function (b) {
+        return (!b.ok && (b.code === 'BAD_REQUEST' || b.reason === 'busy')) ? askB() : b;
+      }).then(function (b) {
+        /* The server joins the two halves when it had the first kept. When it
+           did not (the first was still being written, or the birth is not
+           saved to the account so nothing of the reading is kept there), the
+           second comes back alone and is joined here. */
         if (b.ok && a.reading && b.reading) b.reading = Object.assign({}, a.reading, b.reading);
         return b;
       });
@@ -1881,6 +1903,10 @@
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
         if (st === 503) return { ok: false, reason: 'silent' };
         if (st === 409 || code === 'PENDING') return { ok: false, reason: 'pending' };
+        /* Only the second half of an in-depth reading is refused this way, by
+           a server that writes it only after the first is kept; oracleRead
+           asks again in that order. */
+        if (code === 'BAD_REQUEST') return { ok: false, reason: 'error', code: 'BAD_REQUEST' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
         return { ok: false, reason: 'error', error: (e && e.message) || 'no reading returned' };
       });

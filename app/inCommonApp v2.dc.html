@@ -29010,6 +29010,7 @@ class Component extends DCLogic {
      Today as a widget (18 October 2026). It is still asked of the Oracle as
      period 'cycle', from the widget's sheet, so the plumbing below keeps it. */
   ORACLE_ON_REQUEST_ONLY = true;
+  ORACLE_PREPARE_AHEAD = true;
   ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month']];
   orPeriodOf(v) { return ['daily', 'weekly', 'monthly'].indexOf(v) !== -1 ? v : 'daily'; }
   oracleLocalDate(d) {
@@ -29956,8 +29957,10 @@ class Component extends DCLogic {
     if (!this.readLS(this.oracleConsentKey(), false)) return false;
     /* NO READING UNTIL IT IS ASKED FOR (owner, 4 November 2026: "No readings
        until requested. That's universal law."). Nothing of any depth or
-       period is asked for on open, prepared ahead, or put on the screen
-       before the reader presses Consult the Oracle for that slot. */
+       period is put on the screen before the reader presses Consult the
+       Oracle for that slot. Since 6 November 2026 a reading may be written
+       ahead, quietly (oraclePrepareAuto), but this function, which asks for
+       a reading the screen then shows, never asks. */
     if (period || depth) return false;
     /* The Cycle Audit is asked for on open once it is open to this reader and
        there is a passage to read. */
@@ -30015,26 +30018,40 @@ class Component extends DCLogic {
      in-depth reading, for one whose subscription the server has not confirmed,
      or on the sample chart. */
   oraclePrepareAuto() {
-    /* Retired by the rule in oracleWillAsk: a reading prepared before it is
-       asked for is a reading the reader did not ask for. */
+    /* WRITTEN AHEAD, SHOWN ON THE PRESS (owner, 6 November 2026: "write the
+       reading, but don't engage it until the reader asks for it! The standard
+       reading kept auto-populating, I only wanted to do away with that"). So
+       the current period's standard reading, and its in-depth reading for a
+       Luminary who has asked for one before, are asked for quietly and kept on
+       the device, and the screen still shows Consult the Oracle until it is
+       pressed for that slot (deepGate in oracleVals, orOpened). Only a reader
+       who has agreed to the Oracle is prepared for, one slot at a time, once a
+       slot per session. The Cycle Audit is not prepared. */
     const st = this.state, cs = st.cloudStatus, C = this.cloud;
-    if (this.ORACLE_ON_REQUEST_ONLY || !st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
-    if (!this.readLS(this.oracleConsentKey(), false) || !this.readLS(this.oracleDeepKey(), false)) return;
-    if (!this.addonsOpen()) return;
-    /* The Cycle Audit has no in-depth form, so a reader looking at it has
-       today's in-depth reading prepared. */
-    const deepOf = x => this.orPeriodOf(x);
-    const period = deepOf(st.orPeriod), slot = this.oracleSlot(period, 'deep');
+    if (!this.ORACLE_PREPARE_AHEAD || !st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
+    if (!this.readLS(this.oracleConsentKey(), false)) return;
     this._orPrepTried = this._orPrepTried || {};
-    if (this._orPrepTried[slot] || this.oracleCached(period, 'deep')) return;
-    if (this.orNonQuietBusy().length || (this._orBusy && this._orBusy[slot]) || this._orPrepT) return;
+    const next = () => {
+      const s2 = this.state, p = this.orPeriodOf(s2.orPeriod);
+      const depths = ['standard'];
+      if (this.readLS(this.oracleDeepKey(), false) && this.addonsOpen()) depths.push('deep');
+      for (const d of depths) {
+        const sl = this.oracleSlot(p, d);
+        if (this._orPrepTried[sl] || this.oracleCached(p, d) || (this._orBusy && this._orBusy[sl])) continue;
+        return [p, d, sl];
+      }
+      return null;
+    };
+    if (!next() || this._orPrepT) return;
+    if (this.orNonQuietBusy().length || (this._orBusy && Object.keys(this._orBusy).some(k => this._orBusy[k]))) return;
     this._orPrepT = setTimeout(() => {
       this._orPrepT = null;
-      const s2 = this.state, p2 = deepOf(s2.orPeriod), sl2 = this.oracleSlot(p2, 'deep');
-      if (this._orPrepTried[sl2] || this.oracleCached(p2, 'deep') || this.orNonQuietBusy().length || (this._orBusy && this._orBusy[sl2])) return;
-      if (!this.addonsOpen() || !s2.ready) return;
-      this._orPrepTried[sl2] = true;
-      this.oracleAsk(p2, 'deep', false, true);
+      if (!this.state.ready || this.orNonQuietBusy().length) return;
+      if (this._orBusy && Object.keys(this._orBusy).some(k => this._orBusy[k])) return;
+      const n = next();
+      if (!n) return;
+      this._orPrepTried[n[2]] = true;
+      this.oracleAsk(n[0], n[1], false, true);
     }, 4000);
   }
   /* ---- The Cycle Audit ----------------------------------------------------

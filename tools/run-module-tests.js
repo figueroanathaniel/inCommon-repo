@@ -2240,11 +2240,50 @@ async function runCloudTests() {
   var halfFail = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: null, error: httpErr(504, 'TIMEOUT') } : { data: { reading: { title: 'T' } }, error: null }; });
   CO._setClientForTests(halfFail.client, { user: { id: 'u1' } });
   var rHalf = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
-  t('K29c', 'the first half is handed to the page before the second is asked for, without the callback in the request body', {
-    seen: [{ chapters: false, callsSoFar: 1 }], bodyClean: true
+  t('K29c', 'both halves are asked for at once and the first is handed to the page on its own before the whole reading, without the callback in the request body', {
+    seen: [{ chapters: false, callsSoFar: 2 }], bodyClean: true
   }, { seen: firstSeen, bodyClean: cbBodyClean });
-  t('K29b', 'an in-depth reading is asked in two calls, a then b, and comes back joined; a server that already wrote the whole reading is asked once; a failed second half is a reason, not a partial reading', {
-    parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
+  /* K29e: a second half refused because the first is not kept yet (a server
+     from before the halves were written together) or because Kimi writes one
+     at a time is asked again once the first is in, and the reading still
+     comes back whole. Any other failure of the second half is not retried. */
+  function halfThenRetry(errB) {
+    var nB = 0;
+    return oracleClient(function (n, o) {
+      if (o.body.part !== 'b') return { data: { reading: { title: 'T', overview: 'O' } }, error: null };
+      nB++;
+      return nB === 1 ? { data: null, error: errB } : { data: { reading: { chapters: [{ heading: 'h', body: 'b' }] } }, error: null };
+    });
+  }
+  var retryOut = {};
+  var retryCases = [['badRequest', httpErr(400, 'BAD_REQUEST')], ['busy', httpErr(429, 'RATE_LIMITED')], ['model', httpErr(500, 'MODEL')]];
+  for (var ri = 0; ri < retryCases.length; ri++) {
+    var rc = halfThenRetry(retryCases[ri][1]);
+    CO._setClientForTests(rc.client, { user: { id: 'u1' } });
+    var rr = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+    retryOut[retryCases[ri][0]] = { parts: rc.calls.map(function (c) { return c.body.part; }).join(''), ok: rr.ok, whole: !!(rr.reading && rr.reading.title && rr.reading.chapters) };
+  }
+  var aBusy = (function () {
+    var nA = 0;
+    return oracleClient(function (n, o) {
+      if (o.body.part === 'b') return { data: { reading: { chapters: [{ heading: 'h', body: 'b' }] } }, error: null };
+      nA++;
+      return nA === 1 ? { data: null, error: httpErr(429, 'RATE_LIMITED') } : { data: { reading: { title: 'T', overview: 'O' } }, error: null };
+    });
+  })();
+  CO._setClientForTests(aBusy.client, { user: { id: 'u1' } });
+  var rABusy = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  retryOut.firstBusy = { parts: aBusy.calls.map(function (c) { return c.body.part; }).join(''), ok: rABusy.ok, whole: !!(rABusy.reading && rABusy.reading.title && rABusy.reading.chapters) };
+  t('K29e', 'a second half refused as BAD_REQUEST or busy is asked again after the first arrives, a first half refused as busy is asked again after the second, and the reading comes back whole; other failures are not retried', {
+    badRequest: { parts: 'abb', ok: true, whole: true }, busy: { parts: 'abb', ok: true, whole: true }, model: { parts: 'ab', ok: false, whole: false },
+    firstBusy: { parts: 'aba', ok: true, whole: true }
+  }, retryOut);
+  /* legacyCalls is 2 since the halves are asked together: a server that writes
+     the whole reading in one call reads the second ask as the same reading,
+     which is already being written (PENDING) or kept, so nothing is written
+     twice, and its whole answer to the first is what comes back. */
+  t('K29b', 'an in-depth reading is asked in two calls, a and b, and comes back joined; from a server that already wrote the whole reading the first answer is the reading; a failed second half is a reason, not a partial reading', {
+    parts: ['a', 'b'], hasChapters: true, legacyCalls: 2, half: { ok: false, reason: 'timeout' }
   }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),
     legacyCalls: one.calls.length, half: { ok: rHalf.ok, reason: rHalf.reason } });
   /* ---- K29d: the follow-up review's findings 5 and 9. The active profile's

@@ -562,15 +562,19 @@ Deno.serve(async (req) => {
   // its unique index need no change.
   const same = { user_id: user.id, period, period_key: key, depth, chart_key: part === "b" ? chartKey + ".b" : chartKey };
 
-  // The second half is written to follow the first and is returned joined to
-  // it, so it can only be asked for once the first is done. A first half that
-  // was handed back and not kept ('served', see profileId above) has no
-  // content to join; the second comes back alone and the app joins the two.
+  // THE TWO HALVES ARE WRITTEN AT THE SAME TIME (6 November 2026). The
+  // second half's prompt never carried the first half's text, only the
+  // dossier, so nothing in it waits on the first; asking for them one after
+  // the other only added the first's minute or so to every in-depth reading.
+  // The app asks for both at once now, so the second may arrive before the
+  // first is written. When the first is already kept it is joined here, as
+  // before; when it is not (still being written, or handed back and not kept,
+  // 'served', see profileId above) the second comes back alone and the app
+  // joins the two. Each half is still counted on its own (the limit below).
   let first: Record<string, unknown> | null = null;
   if (part === "b") {
     const a = await mine().select("content").match({ ...same, chart_key: chartKey }).in("status", ["done", "served"]).limit(1).maybeSingle();
-    if (!a.data) return reply(400, { code: "BAD_REQUEST" });
-    first = (a.data.content as Record<string, unknown> | null) ?? null;
+    first = (a.data?.content as Record<string, unknown> | null) ?? null;
   }
 
   // Already written for this chart and period: hand it back, free.
