@@ -3277,7 +3277,7 @@ stays clear of the dock on a short phone.
 ## The credit line is the last thing on the Settings page
 "Created and maintained by Nathaniel J. Figueroa." sits at the bottom of the
 Settings page in both shells, centred, in the smallest type in the app (7px,
-below the 7.5px badges). It used to head the About card. It sits inside the
+below the 7.5px badges). It used to head the About card. Under it, in the same type, is "by Kin Common LLC" (the owner, 6 November 2026), and the About Us dialog carries the same two lines. It sits inside the
 page's `<footer>`, under the Terms and Privacy Policy links, and the footer
 carries `margin-top: auto` inside the column so it stays at the bottom whatever
 the content above it grows to.
@@ -7081,7 +7081,7 @@ with `aria-haspopup` and `aria-expanded`. On the desktop the list drops from the
 icon; on the phone it is a bottom sheet, because `[data-vt-modals]` makes every
 vertical dialog one and a dropdown there would be the one dialog that is not.
 
-**Profile opens the card**, which is the old profile sheet headed by who the
+**The profile in use stands alone** (the owner, 6 November 2026): the Settings profile list and the card's "Who are we reading for?" list name only the other profiles, and the heading is not drawn when there are none. Editing the profile in use is the Edit button on its own card in Settings. **Profile opens the card**, which is the old profile sheet headed by who the
 chart says the reader is: the big three, the Human Design type, the Life Path,
 and a motto. Under it sits what the sheet already held, the profiles on the
 device, Change your picture, Phone number and Delete this profile, less Log
@@ -7759,7 +7759,7 @@ branch deploys are other hosts and are not redirected. If the address moves, cha
 the three together, then submit the sitemap again in Search Console.
 Description copy follows the voice rules: no method, no fate, no dash.
 
-## About is in the profile menu
+## About Us is in the profile menu, and nowhere else
 Asked for by the owner on 5 November 2026: an About page that does not get in
 the way of the tabs, in the profile icon's menu, "dedicated and decorated
 according to the concept of gaining insight". The menu row sits after Settings
@@ -7769,7 +7769,7 @@ where they meet, faint rays, a twinkling field, `data-pl` so it breathes by
 opacity only and is still under reduced motion), then what inCommon is, insight
 rather than instruction, the name, and the four places it holds. It says what
 inCommon is and never how anything is worked out, by "No disclaimers", and it
-carries no legal link, so K55's counts are unchanged. **It has no subheaders and nothing on it is gray** (the owner, 5 November 2026: "No grayed subheaders", then "None of those gray-now-purple headers ... Regular paragraph format is fine"): the three sections are plain paragraphs with no label and no rule beside them, the company name stands alone without a "Kept by" label, and the tile lines and the credit line wear `--tx`. Only the "About" kicker over the title stays. **The company line is
+carries no legal link, so K55's counts are unchanged. **It is called About Us, and Settings has no About card** (the owner, 6 November 2026: "About page should be called About Us, remove it from settings since it's in the drop down icon"): the menu row, the dialog's name, its close control and its kicker say About Us, and the About inCommon card that headed Settings in both shells is gone. Do not put an About card back on Settings. **It has no subheaders and nothing on it is gray** (the owner, 5 November 2026: "No grayed subheaders", then "None of those gray-now-purple headers ... Regular paragraph format is fine"): the three sections are plain paragraphs with no label and no rule beside them, the company name stands alone without a "Kept by" label, and the tile lines and the credit line wear `--tx`. Only the "About" kicker over the title stays. **The company line is
 `ABOUT_COMPANY`**, empty until the owner confirms the legal name: while it is
 empty the "Kept by" line is not drawn and only the credit line shows. Measured
 with the harness's own `contrastFails()` and `tapTargets()` over the dialog,
