@@ -161,9 +161,17 @@ Set these as Edge Function secrets. Each is optional.
 
 **An in-depth reading is two calls.** One call for all of it ran past what the
 function may take, so the page asks for the first half (the standard fields,
-written deeper), then the second (chapters, timing, shadow work and journal
-prompts), and the second answers with both joined. Each call has the whole time
-limit to itself and the first is kept, so a failed second half is retried
+written deeper) and the second (chapters, timing, shadow work and journal
+prompts) at the same time (since 6 November 2026; before that the second waited
+for the first, which added the first half's minute to every reading). The
+second half's prompt is the dossier alone, so nothing in it depends on the
+first. The first is shown as soon as it arrives; the second answers with both
+joined when the first is already kept, and alone otherwise, and the page joins
+them. If Kimi turns one half away as busy (a tier that writes one reading at a
+time), or an older function refuses the second because the first is not kept
+yet, the page asks for that half again once the other is answered, so a reading
+never arrives later than it did one after the other. Each call has the whole
+time limit to itself and the first is kept, so a failed second half is retried
 alone. Nothing changes in the database: the second half is stored under the
 chart's hash with `.b` added. The daily limit counts a reading once, and the
 second halves are bounded by the same number on their own. Deploy the function
