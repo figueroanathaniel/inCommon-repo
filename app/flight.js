@@ -386,6 +386,9 @@
   function claimedElsewhere(e) {
     var t = e.target;
     if (!t || t === document.body) return false;
+    /* a room or a window drawn over the flight keeps its keys (the cabin,
+       a contact's window) */
+    if (t.closest && t.closest('[data-flight-off]')) return true;
     var tag = (t.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select' || t.isContentEditable) return true;
     var role = t.getAttribute && t.getAttribute('role');
