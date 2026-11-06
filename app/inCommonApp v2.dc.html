@@ -29263,7 +29263,7 @@ class Component extends DCLogic {
     if (!again) this._orQuiet[slot] = !!quiet;
     this._orFirst = this._orFirst || {};
     if (!again) { delete this._orTry[slot]; delete this._orFirst[slot]; this.setState({ orBusyMap: { ...held }, orErr: quiet ? this.state.orErr : null }); }
-    if (!again && !quiet) this.speak(period === 'cycle' ? 'The Oracle is reading the long passages across your chart.' : depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
+    if (!again && !quiet) this.speak(period === 'cycle' ? 'The Oracle is reading the long passages across your chart.' : 'The Oracle is reading every point of your chart.', 'polite');
     /* The first half of an in-depth reading is shown the moment it arrives,
        while the second is still being written. It lives in memory only: the
        kept reading is the whole one, so a half is never mistaken for it. */
@@ -31533,13 +31533,9 @@ class Component extends DCLogic {
       orAskGo: () => { this.orListenStop(); this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.birthEntryGo(),
-      orLoadingText: lumWait ? 'Checking your Codex Luminary…'
-        : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
-        : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
-        : otherBusy ? 'The Oracle is finishing another reading first. This one follows…'
-        : depth === 'deep'
-        ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
-        : 'The Oracle is reading the heavens for you…',
+      /* One line while a reading loads, whatever the wait (the owner,
+         6 November 2026): no second sentence and no line that changes. */
+      orLoadingText: 'The Oracle is reading every point of your chart',
       /* Who has Luminary, said once above the reading: a subscription from
          before the one time payment says when it ends and keeps Manage
          billing to cancel it; a payment says every add-on is open. */
