@@ -5594,6 +5594,20 @@ the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answer
 cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
 other row with either, and a cycle reading that says debt. U19 holds it.
 
+## A thing with no symbol wears the inCommon mark
+Decided by the owner on 6 November 2026: where something has no official
+symbol and a symbol slot stands for it, the slot shows the inCommon mark, never
+a letter. The mark is two 3D rings, one linked through the other, and the lens
+between them is not filled but lit by a thin layer of light (`--atmc2`). It is
+drawn in the slot's own colour, the colour a planet's symbol would take there,
+so it follows the world. The first use is the Atlas lexicon: all 124 terms
+used to show their first letter (the C on Cross of the Sleeping Phoenix).
+`MARK_G` is the glyph value that asks for it, and a slot draws the SVG where
+its vals say `mk` and the text where they say `tx`. The SVG is inline, in
+`style` properties rather than camelCase attributes, and carries no ids, so
+no gradient can take its colour from another copy. A new slot that may hold
+`MARK_G` needs both flags, or it shows the bare character.
+
 ## The Human Design Atlas is the wiring, a folio and fifteen chapters
 Asked for by the owner on 20 October 2026 ("Doing the same thing for human
 design"), after the Astropedia and the study paths. The room is the
