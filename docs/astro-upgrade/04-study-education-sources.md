@@ -94,9 +94,29 @@ Facts in the lessons:
 
 ## Not done
 
-- No lesson is tied to the reader's own chart yet (for example opening the
-  reader's nakshatra from the nakshatra lesson).
-- The navamsa lesson describes a chart the app does not draw; the navamsa
-  waits on the owner, as `02-derived-and-decans-sources.md` records.
-- Zodiacal releasing is described without its period lengths, because the
-  Capricorn period differs between sources and none was checked.
+- Lessons tied to the reader's own chart (6 November 2026): 24 of the 49
+  lessons show the rows of the study card that answer them (`LESSON_YOURS`),
+  each going to that card on the astrology page, and nothing under the
+  sample chart. The rest, the panchanga, yogas, drishti, the Ten Gods, the
+  luck pillars and the like, show nothing of the reader's own because the
+  app does not compute them.
+- The navamsa is computed for the Vedic study (6 November 2026): each
+  graha's D9 sign and vargottama, in the dossier and the study card, by the
+  rule HinduTone (hindutone.com/astrology/navamsa-chart-d9-explained/) and
+  DekhoPanchang (dekhopanchang.com/en/learn/navamsa-boundaries) teach. The
+  translation of BPHS 6.31 at enjoylearningsanskrit.com reads movable from
+  Aries, fixed from Leo and dual from Sagittarius, which disagrees, and was
+  not followed. No D9 wheel is drawn.
+- Zodiacal releasing is computed for the Hellenistic study (6 November
+  2026), levels 1 and 2 from the Lots of Spirit and Fortune, in the dossier
+  and the study card. Periods: Aries and Scorpio 15, Taurus and Libra 8,
+  Gemini and Virgo 20, Cancer 25, Leo 19, Sagittarius and Pisces 12,
+  Capricorn 27, Aquarius 30 (theastrologypodcast.com, 11 February 2019);
+  Capricorn 27 is the standard and 30 is rejected by Valens, years are 360
+  days, level 2 is a twelfth of its parent and its last subperiod is cut at
+  the parent's end, and the loosing of the bond jumps to the opposite sign
+  after twelve subperiods (stellium.readthedocs.io, methodology, zodiacal
+  releasing, whose Riley quotes are secondary). Lots by day: Fortune is
+  Ascendant plus Moon less Sun, Spirit the reverse; both reversed by night.
+  Not checked against another program's output for a real chart. Levels 3
+  and 4, peak periods and the lesson text are unchanged.

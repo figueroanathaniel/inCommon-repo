@@ -778,64 +778,64 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     name: 'Mercury Node',
     glyph: '☿N',
     category: 'node',
-    tooltip: 'mercury collective karma, communication evolution',
-    reference: 'shared speech, thought-form destiny'
+    tooltip: 'The node of thought, still learning.',
+    reference: 'thought becoming embodied'
   },
   {
     id: 'venusNode',
     name: 'Venus Node',
     glyph: '♀N',
     category: 'node',
-    tooltip: 'venus collective karma, relationship evolution',
-    reference: 'shared love, value-form destiny'
+    tooltip: 'Where Venus’s path crosses the Sun’s: the way love and value are still growing.',
+    reference: 'the growth of love and value'
   },
   {
     id: 'marsNode',
     name: 'Mars Node',
     glyph: '♂N',
     category: 'node',
-    tooltip: 'mars collective karma, action evolution',
-    reference: 'shared drive, will-form destiny'
+    tooltip: 'Effort and will, still growing.',
+    reference: 'effort becoming craft'
   },
   {
     id: 'jupiterNode',
     name: 'Jupiter Node',
     glyph: '♃N',
     category: 'node',
-    tooltip: 'jupiter collective karma, expansion evolution',
-    reference: 'shared growth, abundance-form destiny'
+    tooltip: 'Generosity, still widening.',
+    reference: 'generosity that begins at home'
   },
   {
     id: 'saturnNode',
     name: 'Saturn Node',
     glyph: '♄N',
     category: 'node',
-    tooltip: 'saturn collective karma, structure evolution',
-    reference: 'shared responsibility, form-building destiny'
+    tooltip: 'Strength, still ripening.',
+    reference: 'strength and tenderness as partners'
   },
   {
     id: 'uranusNode',
     name: 'Uranus Node',
     glyph: '♅N',
     category: 'node',
-    tooltip: 'uranus collective karma, freedom evolution',
-    reference: 'shared innovation, revolution destiny'
+    tooltip: 'Change, still finding its form.',
+    reference: 'conscious innovation'
   },
   {
     id: 'neptuneNode',
     name: 'Neptune Node',
     glyph: '♆N',
     category: 'node',
-    tooltip: 'neptune collective karma, transcendence evolution',
-    reference: 'shared spirituality, dissolution destiny'
+    tooltip: 'The longing for something larger, still deepening.',
+    reference: 'conscious compassion'
   },
   {
     id: 'plutoNode',
     name: 'Pluto Node',
     glyph: '♇N',
     category: 'node',
-    tooltip: 'pluto collective karma, transformation evolution',
-    reference: 'shared power, death-rebirth destiny'
+    tooltip: 'The power to change, still gathering.',
+    reference: 'conscious empowerment'
   },
 
   // ---- HYPOTHETICAL PLANETS (Hamburg School TNPs) ----

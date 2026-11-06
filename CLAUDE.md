@@ -3678,8 +3678,60 @@ the profection, so only readers of those studies get a new dossier. The 10th
 is never a turned frame, because the sources disagree on which parent it is.
 The tertiary progression is a chapter too, The Month, on the Sun's and the
 Moon's packet (`progressedHandoff(name, 'tertiary')`, a day for each tropical
-lunar month of 27.32158 days). The navamsa, the two relationship charts, a harmonic wheel and solar arc are
+lunar month of 27.32158 days). The navamsa is built for the Vedic study
+(`ChartTraditions.navamsa()`, CT7): each graha's and the Lagna's D9 sign,
+vargottama marked, in the dossier and the study card. It counts a movable
+sign from itself, a fixed sign from its 9th and a dual sign from its 5th,
+which HinduTone and DekhoPanchang both teach and which equals the element
+rule; one translation of BPHS 6.31 reads the verse otherwise and is not
+followed. Zodiacal releasing is built for the Hellenistic study
+(`ChartTraditions.zodiacalReleasing()`, CT8): levels 1 and 2 from Spirit and
+Fortune at the period's instant, Capricorn 27 years, years of 360 days, the
+loosing of the bond to the opposite sign after twelve subperiods. The two
+relationship charts, a harmonic wheel and solar arc are
 not built and wait on the owner.
+
+**The solar return is a chapter, The Return, on the Sun's packet** (`solarReturn()`,
+6 November 2026, the first of the Astropedia's techniques to be built in its order).
+The moment is bisected on the Sun's longitude in the study's own zodiac, so a
+sidereal study takes the sidereal return; it is cast at the birth place and read
+through the chosen house system (`ascAt()`, the horizon at any instant and place,
+which `ascendant()` now calls with the same arithmetic). Untimed, only the date is
+given and the return's horizon is withheld. Western studies only, like the other
+Western techniques. Checked once against swisseph-wasm for a 1985 San Juan birth:
+the 2026 return 24 seconds apart, the same rising sign, and the same whole sign
+houses for the Sun, the Moon, Saturn and Neptune.
+
+**Mercury, Venus and Mars progress too** (6 November 2026): The Hand-off chapter
+on their packets, secondary only, from the same `progressedHandoff()`. They are
+the three that can station, so a crossing can run backward (the sentence says
+so and does not borrow a forward `HANDOFF_PAIR` line) and the nearest progressed
+station behind and ahead is named. Checked against swisseph-wasm for two births:
+every crossing and station within a fifth of a year, including a backward
+crossing of Mercury from Scorpio into Libra.
+
+**The composite and the relationship chart are a card in Synastry** (6
+November 2026), "The charts you make", above The blend in both shells
+(`synMade()`, `synMade`, `synMadeOn`). Positions only, no reading. The
+composite is the nearer midpoint of each pair of bodies; its Midheaven is the
+midpoint of the two and its Ascendant is derived from that Midheaven at the
+mean latitude (Robert Hand's method), because a midpoint of two Ascendants is
+not a horizon. The relationship chart (Ronald Davison) is cast for the moment
+halfway between the births at the place halfway between them. Angles appear
+only when both births have a time and a place. `horizonFrom()` is the horizon
+arithmetic `ascAt()` now calls, so the derived Ascendant uses the same code.
+Checked against swisseph-wasm for a 1985 San Juan and 1981 New York pair: every
+body, both Midheavens and both Ascendants to the arcminute.
+
+**Harmonic charts are a card on the astrology page** (6 November 2026), "Your
+harmonics", under the chart study card in both shells (`harmonicVals()`,
+`HARM_SET`, state `hmN`, not kept). The 4th, 5th, 7th and 9th, the ones the
+sources read name as most used: each body's longitude in the study's own zodiac
+multiplied by the harmonic and folded into the circle, and the pairs that meet
+within `HARM_ORB`, 6 degrees in the harmonic chart, the orb
+`app/ephemeris/harmonic.ts` already used. No source read gives an orb, so the
+number was put to the owner. Not drawn for Vedic, Chinese or Heliocentric.
+Positions checked against swisseph-wasm to the arcminute.
 
 ## The sky weather, and the star clusters among the bodies
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
@@ -5715,6 +5767,14 @@ eyebrows, meaning no ---- How to meet the moment ----"): it sits in the title
 column under the kicker, italic 13px in the reading face, in gold with a soft glow
 (`[data-epi]` in the head sheet, plain under the contrast modifier). Do not put an
 uppercase label or a ruled line back on these pages.
+The wiring's detail sheet on My Charts (a type, centre, gate, channel,
+profile or authority) follows the same rule since 6 November 2026: the line
+under its title is italic reading type in `--tx`, a row's own heading is an
+italic lead-in at the start of its sentence rather than a label over it, the
+rows that only named their source (What the system holds, What your chart
+shows, What a channel is) carry no heading, and the sheet's edge is the one
+blue, `rgba(var(--atmc),.55)`, never the action green, the success green or
+the violet.
 
 **The wiring is drawn one way in the Atlas and on My Charts** (same day):
 `hdWireGeom()` places each gate on the side of its centre that faces where its
@@ -5725,8 +5785,8 @@ faint `--atmc` fill in a `--chl` outline, a defined centre the same blue a
 little fuller and a brighter `--atmc` outline, never a category colour and
 never warm; a defined channel is `--atmc` and thin, every other channel
 `--chl`; the reader's gates are white points and the sky's are ringed in
-`--blue`. The 3D and Wheel views keep their
-personality and design inks.
+`--blue`. The 3D and Wheel views speak the same blue (the owner, 6 November
+2026: "Start with the blue 3D Atlas chart views"): see "A channel is two halves".
 
 **Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
 holds each Type's and each authority's theme words; `atlasRich()` bolds the
@@ -5864,7 +5924,10 @@ the Western chapters are untouched. A lesson is `kind: 'lesson'`, keyed
 `lesson:<study>:<n>`, drawn like a concept with its band and pace as the
 kicker and its term as the epigraph. `apEntries()` is memoised per study
 (`_apEntK`), so changing the study rebuilds it. The ranking, its method and
-every source are `docs/astro-upgrade/04-study-education-sources.md`; the bands
+every source are `docs/astro-upgrade/04-study-education-sources.md`. A lesson
+whose subject the study card computes shows those rows as its own "In your
+chart" (`LESSON_YOURS`, keyed by lesson name, so a renamed lesson loses them),
+each going to the card; never under the sample. The bands
 are a reading of course outlines, not a tally, and the doc says so. No lesson
 names a fact no source was read for (the hidden stems, the releasing periods).
 
@@ -6220,21 +6283,26 @@ not drawn. `hdSceneSync()` runs from the one `componentDidUpdate`.
 
 **It draws the model, never its own chart.** `this._hsModel` is built in the
 wiring vals from the same `hdChart()` the SVG reads: the nine centres at the
-SVG's own `BG_POS` boxes, in the shapes the field draws them, coloured from the
-atlas as the SVG colours them; all thirty six channels; every activation with
+SVG's own `BG_POS` boxes, in the shapes the field draws them; all thirty six channels; every activation with
 its gate and line. Centres keep the chart's own definition in every layer, as
 the SVG does; gates and channel halves follow the layer. The one thing the scene
 is handed besides the model is the sky now (`setSky`), the same minute's
 hd-transit reading the gates card on Today reads.
 
-**A channel is two halves and a half lights from its own gate**: Personality in
-`--tx`, Design in `--hd-des`, a gate held by both as a braid of the two, and the
-sky now in `--blue`, dashed. That is how a hanging gate reads, as half a channel
-reaching for somebody else, and it is why the scene draws all thirty six rather
-than only the defined ones. `--hd-des` (`#df9a5f`) is a fixed hue declared in all
-three roots beside the ledger hues: the tradition's design red sits on
-`--crisis`, which nothing but safety may go near. It is a fill and a stroke,
-never text. Gates sit on the edge of their centre facing the centre their first
+**A channel is two halves and a half lights from its own gate**, in the one
+blue the 2D wiring and the Atlas draw (6 November 2026): a half the reader holds
+is `--atmc` whichever side holds it, and every other half is `--chl` (the
+scene's dashed `--blue` sky half is dormant: see "Human Design has no sky now"). A defined centre is `--atmc` with a brighter
+`--atmc` edge, an open one glass over a faint `--atmc` wash in a `--chl` edge,
+and the open glass still takes on the light of the defined centres it reaches.
+The reader's gates and activations are white (`--tx`); Personality and Design
+are told apart by their columns, their headings and the layer control, not by
+colour, so the stage carries no colour key. The Wheel's cells light in `--atmc`.
+That is how a hanging gate reads, as half a channel reaching for somebody else,
+and it is why the scene draws all thirty six rather than only the defined ones.
+`--hd-des` (`#df9a5f`) is still declared in all three roots, beside the ledger
+hues, for the activation sheet: the tradition's design red sits on `--crisis`,
+which nothing but safety may go near. Gates sit on the edge of their centre facing the centre their first
 channel runs to, with the channels between one pair of centres kept parallel
 (`layoutGates`), and a channel whose straight path would cross a third centre
 bows toward the reader to pass in front of it.
