@@ -4674,7 +4674,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(47,255,143,.36);border-radius:var(--rad);padding:16px;animation:fadeUp .22s ease">
             <div style="display:flex;align-items:center;gap:12px">
               <div style="font:400 38px/1 var(--fd);color:var(--ac)">{{ angelNumber }}</div>
-              <div style="flex:1;min-width:0;font:600 9.5px var(--fk);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ angelKind }}</div>
+              <div style="flex:1;min-width:0;font:italic 400 13px/1.45 var(--fb);color:var(--tx)">{{ angelKind }}</div>
             </div>
             <sc-for list="{{ angelLines }}" as="l" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:3px">
@@ -4685,7 +4685,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ angelSeenAt }}</div>
               <sc-if value="{{ angelUnsaved }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
-                  <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">Write it down while it is fresh.</div>
                   <sc-for list="{{ angelAsk }}" as="a" hint-placeholder-count="3">
                     <label style="display:flex;flex-direction:column;gap:6px">
                       <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
@@ -4740,19 +4740,16 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(125,155,255,.4);border-radius:var(--rad);padding:16px;animation:fadeUp .22s ease">
             <div style="display:flex;align-items:baseline;gap:12px">
               <div style="font:400 28px/1.1 var(--fd);color:var(--blue)">{{ animName }}</div>
-              <div style="flex:1;min-width:0;font:600 9.5px var(--fk);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">a repeated sighting</div>
+              <div style="flex:1;min-width:0;font:italic 400 13px/1.45 var(--fb);color:var(--tx)">a repeated sighting</div>
             </div>
             <sc-for list="{{ animLines }}" as="l" hint-placeholder-count="3">
-              <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">{{ l.head }}</div>
-                <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ l.text }}</div>
-              </div>
+              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)"><sc-if value="{{ l.hasHead }}"><span style="font-style:italic;font-weight:600">{{ l.head }}. </span></sc-if>{{ l.text }}</div>
             </sc-for>
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
-                  <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">Write it down while it is fresh.</div>
                   <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
                     <label style="display:flex;flex-direction:column;gap:6px">
                       <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
@@ -4785,13 +4782,12 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-if>
         <sc-if value="{{ animUnknown }}" hint-placeholder-val="{{ false }}">
           <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px;animation:fadeUp .22s ease">
-            <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Not in this list</div>
-            <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ animUnknownText }}</div>
+                        <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ animUnknownText }}</div>
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
-                  <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">Write it down while it is fresh.</div>
                   <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
                     <label style="display:flex;flex-direction:column;gap:6px">
                       <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
@@ -4866,7 +4862,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
     </sc-if>
 
     <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Recent sightings</div>
+      <div style="font:400 18px/1.3 var(--fd);color:var(--tx)">Recent sightings</div>
       <sc-for list="{{ sightPast }}" as="p" hint-placeholder-count="2">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 14px">
           <button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px">
@@ -12373,7 +12369,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(47,255,143,.36);border-radius:var(--rad);padding:16px;animation:fadeUp .22s ease">
             <div style="display:flex;align-items:center;gap:12px">
               <div style="font:400 38px/1 var(--fd);color:var(--ac)">{{ angelNumber }}</div>
-              <div style="flex:1;min-width:0;font:600 9.5px var(--fk);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ angelKind }}</div>
+              <div style="flex:1;min-width:0;font:italic 400 13px/1.45 var(--fb);color:var(--tx)">{{ angelKind }}</div>
             </div>
             <sc-for list="{{ angelLines }}" as="l" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:3px">
@@ -12384,7 +12380,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ angelSeenAt }}</div>
               <sc-if value="{{ angelUnsaved }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
-                  <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">Write it down while it is fresh.</div>
                   <sc-for list="{{ angelAsk }}" as="a" hint-placeholder-count="3">
                     <label style="display:flex;flex-direction:column;gap:6px">
                       <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
@@ -12439,19 +12435,16 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(125,155,255,.4);border-radius:var(--rad);padding:16px;animation:fadeUp .22s ease">
             <div style="display:flex;align-items:baseline;gap:12px">
               <div style="font:400 28px/1.1 var(--fd);color:var(--blue)">{{ animName }}</div>
-              <div style="flex:1;min-width:0;font:600 9.5px var(--fk);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">a repeated sighting</div>
+              <div style="flex:1;min-width:0;font:italic 400 13px/1.45 var(--fb);color:var(--tx)">a repeated sighting</div>
             </div>
             <sc-for list="{{ animLines }}" as="l" hint-placeholder-count="3">
-              <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">{{ l.head }}</div>
-                <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ l.text }}</div>
-              </div>
+              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)"><sc-if value="{{ l.hasHead }}"><span style="font-style:italic;font-weight:600">{{ l.head }}. </span></sc-if>{{ l.text }}</div>
             </sc-for>
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
-                  <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">Write it down while it is fresh.</div>
                   <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
                     <label style="display:flex;flex-direction:column;gap:6px">
                       <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
@@ -12484,13 +12477,12 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </sc-if>
         <sc-if value="{{ animUnknown }}" hint-placeholder-val="{{ false }}">
           <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px;animation:fadeUp .22s ease">
-            <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Not in this list</div>
-            <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ animUnknownText }}</div>
+                        <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ animUnknownText }}</div>
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;flex-direction:column;gap:12px">
-                  <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx)">Write it down while it is fresh.</div>
                   <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
                     <label style="display:flex;flex-direction:column;gap:6px">
                       <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
@@ -12565,7 +12557,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
     </sc-if>
 
     <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Recent sightings</div>
+      <div style="font:400 18px/1.3 var(--fd);color:var(--tx)">Recent sightings</div>
       <sc-for list="{{ sightPast }}" as="p" hint-placeholder-count="2">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 14px">
           <button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px">
