@@ -1109,15 +1109,14 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
               <div aria-hidden="true" style="position:absolute;inset:-4% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 52%,rgba(var(--atmc2),.12),rgba(var(--atmc),.16) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
               <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="position:relative;display:block;width:100%;height:auto;overflow:visible">
-                <sc-for list="{{ bgGlows }}" as="gl" hint-placeholder-count="2">
-                  <line data-pl="breath" x1="{{ gl.x1 }}" y1="{{ gl.y1 }}" x2="{{ gl.x2 }}" y2="{{ gl.y2 }}" style="stroke:rgba(var(--atmc2),.26);stroke-width:9;stroke-linecap:round"></line>
-                </sc-for>
-                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="72">
-                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></line>
+                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="36">
+                  <path d="{{ ln.d }}" style="fill:none;stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></path>
                 </sc-for>
                 <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                  <polygon points="{{ c.pts }}" style="fill:none;stroke:{{ c.halo }};stroke-opacity:.3;stroke-width:9;stroke-linejoin:round"></polygon>
-                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};fill-opacity:{{ c.fo }};stroke:{{ c.stroke }};stroke-width:1.6;stroke-linejoin:round"></polygon>
+                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};stroke:{{ c.stroke }};stroke-width:{{ c.sw }};stroke-linejoin:round"></polygon>
+                </sc-for>
+                <sc-for list="{{ bgSky }}" as="sk" hint-placeholder-count="0">
+                  <circle data-pl="breath" cx="{{ sk.x }}" cy="{{ sk.y }}" r="5" style="fill:none;stroke:var(--blue);stroke-opacity:.35;stroke-width:1.6"></circle>
                 </sc-for>
                 <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
                   <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
@@ -1130,10 +1129,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </button>
               </sc-for>
             </div>
-            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center">
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--tx)"></span>Personality</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--hd-des)"></span>Design</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:5px;border-radius:3px;background:linear-gradient(var(--hd-des) 0 30%,var(--tx) 30% 70%,var(--hd-des) 70%)"></span>Both</span>
+            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:rgba(var(--atmc2),.35);box-shadow:inset 0 0 0 1.5px rgba(var(--atmc2),.85)"></span>Defined</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Your gates</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--mut)"></span>Open</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--blue)"></span>In the sky now</span>
             </div>
           </div>
         </sc-if>
@@ -3101,7 +3101,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
             <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
-                <line data-lit="{{ ch.lit }}" x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+                <path data-lit="{{ ch.lit }}" d="{{ ch.d }}" style="fill:none;stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></path>
               </sc-for>
               <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
                 <polygon data-lit="{{ ce.lit }}" points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
@@ -3127,7 +3127,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.val }}</span>
               </button>
             </sc-for>
@@ -3163,7 +3163,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
                 <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
                 </sc-if>
               </div>
             </div>
@@ -3201,7 +3201,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ fc.seg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
                   </div>
                 </sc-for>
@@ -3210,7 +3209,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
               <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -3229,7 +3227,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ hdYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -3253,11 +3250,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ fsOn }}" hint-placeholder-val="{{ false }}">
               <div data-lift="box" style="display:flex;flex-direction:column;gap:12px;border:1px dashed rgba(var(--atmc),.8);border-radius:16px;padding:14px 15px;background:rgba(var(--atmc),.08)">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">&#10036; Field study</div>
                 <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fsAsk }}</div>
                 <sc-if value="{{ fsHoldsOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsHolds }}</div></sc-if>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How well did it fit what happened" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How well did it fit what happened</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How well did it fit what happened?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsFit }}" as="ff" hint-placeholder-count="3">
                       <button data-lift onClick="{{ ff.go }}" role="radio" aria-checked="{{ ff.on }}" tabindex="{{ ff.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ ff.bd }};border-radius:999px;background:{{ ff.bg }};font:600 11.5px var(--fc);color:{{ ff.c }}">{{ ff.label }}</button>
@@ -3265,7 +3261,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   </div>
                 </div>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How charged was the moment" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How charged was the moment</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How charged was the moment?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsCharge }}" as="fc2" hint-placeholder-count="3">
                       <button data-lift onClick="{{ fc2.go }}" role="radio" aria-checked="{{ fc2.on }}" tabindex="{{ fc2.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ fc2.bd }};border-radius:999px;background:{{ fc2.bg }};font:600 11.5px var(--fc);color:{{ fc2.c }}">{{ fc2.label }}</button>
@@ -3477,7 +3473,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your sky, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ apMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 16px/1 var(--fb);color:{{ m.c }}">{{ m.g }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.sign }}</span>
               </button>
@@ -3506,13 +3502,12 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ apChapterName }}</div>
             <div style="display:flex;align-items:center;gap:16px">
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ apKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
                 </sc-if>
               </div>
             </div>
@@ -3550,7 +3545,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ apFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
                   </div>
                 </sc-for>
@@ -3558,7 +3552,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ apTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -3582,7 +3575,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ apYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -3760,7 +3752,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 18px/1 var(--fd);color:{{ m.c }}">{{ m.n }}</span>
               </button>
             </sc-for>
@@ -3805,7 +3797,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
             <sc-if value="{{ bnTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ bnTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -9347,15 +9338,14 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
               <div aria-hidden="true" style="position:absolute;inset:-4% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 52%,rgba(var(--atmc2),.12),rgba(var(--atmc),.16) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
               <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="position:relative;display:block;width:100%;height:auto;overflow:visible">
-                <sc-for list="{{ bgGlows }}" as="gl" hint-placeholder-count="2">
-                  <line data-pl="breath" x1="{{ gl.x1 }}" y1="{{ gl.y1 }}" x2="{{ gl.x2 }}" y2="{{ gl.y2 }}" style="stroke:rgba(var(--atmc2),.26);stroke-width:9;stroke-linecap:round"></line>
-                </sc-for>
-                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="72">
-                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></line>
+                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="36">
+                  <path d="{{ ln.d }}" style="fill:none;stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></path>
                 </sc-for>
                 <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                  <polygon points="{{ c.pts }}" style="fill:none;stroke:{{ c.halo }};stroke-opacity:.3;stroke-width:9;stroke-linejoin:round"></polygon>
-                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};fill-opacity:{{ c.fo }};stroke:{{ c.stroke }};stroke-width:1.6;stroke-linejoin:round"></polygon>
+                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};stroke:{{ c.stroke }};stroke-width:{{ c.sw }};stroke-linejoin:round"></polygon>
+                </sc-for>
+                <sc-for list="{{ bgSky }}" as="sk" hint-placeholder-count="0">
+                  <circle data-pl="breath" cx="{{ sk.x }}" cy="{{ sk.y }}" r="5" style="fill:none;stroke:var(--blue);stroke-opacity:.35;stroke-width:1.6"></circle>
                 </sc-for>
                 <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
                   <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
@@ -9368,10 +9358,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </button>
               </sc-for>
             </div>
-            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center">
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--tx)"></span>Personality</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--hd-des)"></span>Design</span>
-              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:5px;border-radius:3px;background:linear-gradient(var(--hd-des) 0 30%,var(--tx) 30% 70%,var(--hd-des) 70%)"></span>Both</span>
+            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:rgba(var(--atmc2),.35);box-shadow:inset 0 0 0 1.5px rgba(var(--atmc2),.85)"></span>Defined</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Your gates</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--mut)"></span>Open</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--blue)"></span>In the sky now</span>
             </div>
           </div>
         </sc-if>
@@ -10733,7 +10724,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
             <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
-                <line data-lit="{{ ch.lit }}" x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+                <path data-lit="{{ ch.lit }}" d="{{ ch.d }}" style="fill:none;stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></path>
               </sc-for>
               <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
                 <polygon data-lit="{{ ce.lit }}" points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
@@ -10759,7 +10750,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.val }}</span>
               </button>
             </sc-for>
@@ -10795,7 +10786,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
                 <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
                 </sc-if>
               </div>
             </div>
@@ -10833,7 +10824,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty"><sc-for list="{{ fc.seg }}" as="sg" hint-placeholder-count="1"><span style="font-weight:{{ sg.fw }};font-style:{{ sg.fs }}">{{ sg.t }}</span></sc-for></div>
                   </div>
                 </sc-for>
@@ -10842,7 +10832,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
               <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -10861,7 +10850,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ hdYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -10885,11 +10873,10 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ fsOn }}" hint-placeholder-val="{{ false }}">
               <div data-lift="box" style="display:flex;flex-direction:column;gap:12px;border:1px dashed rgba(var(--atmc),.8);border-radius:16px;padding:14px 15px;background:rgba(var(--atmc),.08)">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">&#10036; Field study</div>
                 <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fsAsk }}</div>
                 <sc-if value="{{ fsHoldsOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px var(--fu);color:var(--mut)">{{ fsHolds }}</div></sc-if>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How well did it fit what happened" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How well did it fit what happened</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How well did it fit what happened?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsFit }}" as="ff" hint-placeholder-count="3">
                       <button data-lift onClick="{{ ff.go }}" role="radio" aria-checked="{{ ff.on }}" tabindex="{{ ff.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ ff.bd }};border-radius:999px;background:{{ ff.bg }};font:600 11.5px var(--fc);color:{{ ff.c }}">{{ ff.label }}</button>
@@ -10897,7 +10884,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   </div>
                 </div>
                 <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How charged was the moment" style="display:flex;flex-direction:column;gap:6px">
-                  <span aria-hidden="true" style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">How charged was the moment</span>
+                  <span aria-hidden="true" style="font:400 14px/1.4 var(--fb);color:var(--tx)">How charged was the moment?</span>
                   <div style="display:flex;flex-wrap:wrap;gap:6px">
                     <sc-for list="{{ fsCharge }}" as="fc2" hint-placeholder-count="3">
                       <button data-lift onClick="{{ fc2.go }}" role="radio" aria-checked="{{ fc2.on }}" tabindex="{{ fc2.tab }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ fc2.bd }};border-radius:999px;background:{{ fc2.bg }};font:600 11.5px var(--fc);color:{{ fc2.c }}">{{ fc2.label }}</button>
@@ -11109,7 +11096,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Your sky, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ apMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 16px/1 var(--fb);color:{{ m.c }}">{{ m.g }}</span>
                 <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.sign }}</span>
               </button>
@@ -11138,13 +11125,12 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ apChapterName }}</div>
             <div style="display:flex;align-items:center;gap:16px">
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fk);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ apKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
                 </sc-if>
               </div>
             </div>
@@ -11182,7 +11168,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
                 <sc-for list="{{ apFacets }}" as="fc" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
                   </div>
                 </sc-for>
@@ -11190,7 +11175,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ apTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -11214,7 +11198,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <sc-for list="{{ apYours }}" as="yo" hint-placeholder-count="2">
                     <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
@@ -11392,7 +11375,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
-                <span style="font:700 8.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:italic 400 13px var(--fb);color:var(--tx)">{{ m.label }}</span>
                 <span style="font:400 18px/1 var(--fd);color:{{ m.c }}">{{ m.n }}</span>
               </button>
             </sc-for>
@@ -11437,7 +11420,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
             <sc-if value="{{ bnTermsOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ bnTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fc);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
@@ -24550,7 +24532,6 @@ class Component extends DCLogic {
       /* The folio. */
       apAnim: (st.apFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
       apFolioLabel: e.name, apIcon: e.glyph, apIconC: e.c, apName: e.name,
-      apChapterName: (sections.find(s => s[0] === e.ch) || ['', ''])[1],
       apKicker: kicker, apKickerOn: !!kicker, apEpi: epi, apEpiOn: !!epi,
       apLead: lead, apLeadOn: !!lead && !dropcap, apLeadCap: !!lead && dropcap,
       apNow: now, apNowOn: !!now,
@@ -24870,26 +24851,81 @@ class Component extends DCLogic {
     if (name === 'Solar Plexus') return [[x + w, y], [x, cy], [x + w, y + h]];
     return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
   }
-  /* Each gate's place on the wiring: spread evenly round its centre's own
-     outline, drawn a little inside it. Memoised, because it never changes. */
-  hdGateSpots() {
-    if (this._hdSpots) return this._hdSpots;
-    const by = {}, out = {};
-    for (let n = 1; n <= 64; n++) { const c = this.hdCenterOf(n); if (this.BG_POS[c]) (by[c] = by[c] || []).push(n); }
-    Object.keys(by).forEach(c => {
-      const P = this.hdShape(c), cx = P.reduce((a, p) => a + p[0], 0) / P.length, cy = P.reduce((a, p) => a + p[1], 0) / P.length;
-      const seg = P.map((p, i) => { const q = P[(i + 1) % P.length]; return { p: p, q: q, len: Math.hypot(q[0] - p[0], q[1] - p[1]) }; });
-      const per = seg.reduce((a, s) => a + s.len, 0), list = by[c].sort((a, b) => a - b);
-      list.forEach((n, i) => {
-        let d = (i + .5) / list.length * per, k = 0;
-        while (k < seg.length - 1 && d > seg[k].len) { d -= seg[k].len; k++; }
-        const s = seg[k], f = d / s.len, px = s.p[0] + (s.q[0] - s.p[0]) * f, py = s.p[1] + (s.q[1] - s.p[1]) * f;
-        out[n] = { x: px + (cx - px) * .2, y: py + (cy - py) * .2, c: c };
+  /* The wiring's geometry, shared by the Atlas and My Charts (owner, 6 November
+     2026: "organise the lines better on the bodygraph"). Each gate sits on the
+     side of its centre that faces the centre its channel runs to, so a channel
+     leaves its centre toward where it is going; channels between one pair of
+     centres run parallel; and a channel whose straight path would cross a third
+     centre bows round it. Memoised, because it never changes. */
+  hdWireGeom() {
+    if (this._hdGeom) return this._hdGeom;
+    const T = window.HDTopology, names = Object.keys(this.BG_POS);
+    const poly = {}, cen = {};
+    names.forEach(c => { const P = this.hdShape(c); poly[c] = P; cen[c] = [P.reduce((a, q) => a + q[0], 0) / P.length, P.reduce((a, q) => a + q[1], 0) / P.length]; });
+    const inPoly = (x, y, P) => { let o = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const a = P[i], b = P[j];
+      if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) o = !o; } return o; };
+    const rayOut = (sx, sy, dx, dy, P) => { let best = Infinity;
+      for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length], ex = b[0] - a[0], ey = b[1] - a[1], den = dx * ey - dy * ex;
+        if (Math.abs(den) < 1e-9) continue;
+        const t = ((a[0] - sx) * ey - (a[1] - sy) * ex) / den, u = ((a[0] - sx) * dy - (a[1] - sy) * dx) / den;
+        if (t > 0 && u >= 0 && u <= 1 && t < best) best = t; }
+      return best === Infinity ? 0 : best; };
+    const pairs = T && T.pairs ? T.pairs() : [];
+    const cOf = g => this.hdCenterOf(g);
+    const groups = {};
+    pairs.forEach(ch => { const ca = cOf(ch.a), cb = cOf(ch.b); if (!poly[ca] || !poly[cb]) return;
+      const k = ca < cb ? ca + '|' + cb : cb + '|' + ca; (groups[k] = groups[k] || []).push(ch); });
+    const spots = {};
+    Object.keys(groups).forEach(k => { const list = groups[k], n = list.length;
+      list.forEach((ch, idx) => {
+        const ca = cOf(ch.a), cb = cOf(ch.b), first = ca < cb ? ca : cb, A0 = cen[first], B0 = cen[first === ca ? cb : ca];
+        let ux = B0[0] - A0[0], uy = B0[1] - A0[1]; const L = Math.hypot(ux, uy) || 1; ux /= L; uy /= L;
+        const px = -uy, py = ux, off = (idx - (n - 1) / 2) * 9;
+        [[ch.a, ca], [ch.b, cb]].forEach(([g, c]) => {
+          if (spots[g]) return;
+          const C = cen[c], P = poly[c], sx = c === first ? ux : -ux, sy = c === first ? uy : -uy;
+          let ox = px * off, oy = py * off, k2 = 0;
+          while (!inPoly(C[0] + ox, C[1] + oy, P) && k2++ < 8) { ox *= .6; oy *= .6; }
+          const t = rayOut(C[0] + ox, C[1] + oy, sx, sy, P), ins = Math.min(5.5, t * .45);
+          spots[g] = { x: C[0] + ox + sx * (t - ins), y: C[1] + oy + sy * (t - ins), c: c };
+        });
       });
     });
-    this._hdSpots = out;
-    return out;
+    /* Gates of one centre that land on each other are eased apart, inside the shape. */
+    for (let it = 0; it < 40; it++) names.forEach(c => {
+      const gs = Object.keys(spots).filter(g => spots[g].c === c), C = cen[c];
+      for (let i = 0; i < gs.length; i++) for (let j = i + 1; j < gs.length; j++) {
+        const a = spots[gs[i]], b = spots[gs[j]], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+        if (d < 7.5) { const m = (7.5 - d) / 2 + .01, ux = d > 1e-6 ? dx / d : 1, uy = d > 1e-6 ? dy / d : 0; a.x -= ux * m; a.y -= uy * m; b.x += ux * m; b.y += uy * m; }
+      }
+      gs.forEach(g => { const q = spots[g]; let k = 0; while (!inPoly(q.x, q.y, poly[c]) && k++ < 12) { q.x = C[0] + (q.x - C[0]) * .9; q.y = C[1] + (q.y - C[1]) * .9; } });
+    });
+    /* Any gate the topology did not place falls back to its centre's middle. */
+    for (let n = 1; n <= 64; n++) if (!spots[n]) { const c = cOf(n); if (cen[c]) spots[n] = { x: cen[c][0], y: cen[c][1], c: c }; }
+    const f1 = v => v.toFixed(1);
+    const paths = {};
+    pairs.forEach(ch => { const a = spots[ch.a], b = spots[ch.b]; if (!a || !b) return;
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      let hit = null;
+      names.forEach(c => { if (hit || c === a.c || c === b.c) return;
+        for (let s = 1; s < 20; s++) { const f = s / 20; if (inPoly(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f, poly[c])) { hit = c; break; } } });
+      let d = 'M' + f1(a.x) + ' ' + f1(a.y) + ' L' + f1(b.x) + ' ' + f1(b.y), via = null;
+      if (hit) {
+        let ux = b.x - a.x, uy = b.y - a.y; const L = Math.hypot(ux, uy) || 1; ux /= L; uy /= L;
+        let px = -uy, py = ux; const O = cen[hit];
+        if ((O[0] - mx) * px + (O[1] - my) * py > 0) { px = -px; py = -py; }
+        const P = poly[hit], reach = Math.max(...P.map(q => (q[0] - mx) * px + (q[1] - my) * py)) + 9;
+        via = { x: mx + px * reach, y: my + py * reach };
+        const cx = 2 * via.x - mx, cy = 2 * via.y - my;
+        d = 'M' + f1(a.x) + ' ' + f1(a.y) + ' Q' + f1(cx) + ' ' + f1(cy) + ' ' + f1(b.x) + ' ' + f1(b.y);
+      }
+      paths[ch.key] = { d: d, a: a, b: b, via: via };
+    });
+    const geom = { spots: spots, paths: paths };
+    if (pairs.length) this._hdGeom = geom;
+    return geom;
   }
+  hdGateSpots() { return this.hdWireGeom().spots; }
   /* Every entry the Atlas can open, once, keyed chapter:slug where the slug is
      the one atlasItem has always stored. */
   atlasEntries() {
@@ -25132,21 +25168,20 @@ class Component extends DCLogic {
       (L.see || []).forEach(([c, id]) => { const x = find(c + ':' + this.atlasSlug(id)); if (!x) return;
         if (x.d.center) litC.add(x.d.center); if (x.d.type) (this.HD_TYPE_LIGHT[x.d.type] || []).forEach(z => litC.add(z)); }); }
     if (d.essay === 'example') { (A.EXAMPLE.definedCenters || []).forEach(c => litC.add(c)); (A.EXAMPLE.channels || []).forEach(k => litK.add(k)); (A.EXAMPLE.gates || []).forEach(g => litG.add(g)); }
-    const spots = this.hdGateSpots();
-    const chans = Object.keys(A.CHANNELS).map(k => { const p = k.split('-').map(Number), a = spots[p[0]], b = spots[p[1]];
+    const geo = this.hdWireGeom(), spots = geo.spots;
+    const chans = Object.keys(A.CHANNELS).map(k => { const g = geo.paths[k];
       const lit = litK.has(k), own = myChan.has(k);
-      return a && b ? { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1), lit: lit ? '1' : '0',
+      return g ? { d: g.d, lit: lit ? '1' : '0',
         c: lit ? 'var(--ac2-hi)' : own ? 'rgba(var(--atmc2),.75)' : 'var(--chl)', w: lit ? '3' : own ? '2.4' : '1.3', o: lit || own ? '1' : '.9' } : null; }).filter(Boolean);
     const centres = Object.keys(this.BG_POS).map(name => {
       const P = this.hdShape(name), defined = mine && hd.defined.has(name), lit = litC.has(name);
-      const col = A.CENTERS[name] ? A.CENTERS[name].color : '';
       const q = this.BG_POS[name];
       return { pts: P.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), lit: lit ? '1' : '0',
-        fill: defined ? col : 'rgba(var(--atmc),.07)', fo: defined ? '.82' : '1',
-        stroke: lit ? 'var(--ac2-hi)' : defined ? col : 'var(--chl)', sw: lit ? '3' : '1.5',
+        fill: defined ? 'rgba(var(--atmc2),.2)' : 'rgba(var(--atmc),.07)', fo: '1',
+        stroke: lit ? 'var(--ac2-hi)' : defined ? 'rgba(var(--atmc2),.85)' : 'var(--chl)', sw: lit ? '3' : defined ? '1.8' : '1.5',
         glow: lit ? 'drop-shadow(0 0 8px rgba(var(--atmc2),.75))' : 'none',
         l: pct(q[0] + q[2] / 2, 300), t: pct(q[1] + q[3] / 2 + (name === 'Head' || name === 'Heart' ? q[3] * .16 : name === 'Ajna' ? -q[3] * .16 : 0), 520),
-        label: this.BG_SHORT[name], lc: defined ? 'rgba(5,6,10,.85)' : lit ? 'var(--tx)' : 'var(--mut)',
+        label: this.BG_SHORT[name], lc: defined || lit ? 'var(--tx)' : 'var(--mut)',
         go: peek('c:' + name, { l: pct(q[0] + q[2] / 2, 300), t: pct(q[1], 520) }, A.CENTERS[name] ? A.CENTERS[name].label : name, 'centers:' + this.atlasSlug(name)) };
     });
     const gates = Object.keys(spots).map(Number).map(n => { const s = spots[n], lit = litG.has(n), own = myGates.has(n), now = skyGates.has(n);
@@ -25298,7 +25333,7 @@ class Component extends DCLogic {
       hdwPeekL: st.atlasPeekAt ? st.atlasPeekAt.l : '0%', hdwPeekT: st.atlasPeekAt ? st.atlasPeekAt.t : '0%', hdwPeekText: st.atlasPeekAt ? st.atlasPeekAt.text : '',
       hdwPeekGo: () => { if (st.atlasPeekAt) this.atlasPick(st.atlasPeekAt.key, false); },
       hdwKeyOn: lv !== 'deep',
-      hdwKey: (mine ? [{ label: 'Defined', sw: 'conic-gradient(' + Object.keys(A.CENTERS).map(k => A.CENTERS[k].color).filter(Boolean).join(',') + ')', ring: 'none' }, { label: 'Your gates', sw: 'var(--tx)', ring: 'none' }] : [])
+      hdwKey: (mine ? [{ label: 'Defined', sw: 'rgba(var(--atmc2),.35)', ring: 'inset 0 0 0 1.5px rgba(var(--atmc2),.85)' }, { label: 'Your gates', sw: 'var(--tx)', ring: 'none' }] : [])
         .concat([{ label: 'Open', sw: 'transparent', ring: 'inset 0 0 0 1.5px var(--mut)' }, { label: 'In the sky now', sw: 'transparent', ring: 'inset 0 0 0 2px var(--blue)' }]),
       hdwMarks: [].concat(mine ? [['Your type', hd.type, 'types:' + this.atlasSlug(hd.type)], ['Your profile', pr.key, 'profiles:' + this.atlasSlug(pr.key)],
           ['Your authority', String(hd.authority).split(':')[0], myAuth ? 'authorities:' + this.atlasSlug(myAuth.name) : null]] : [],
@@ -25310,7 +25345,7 @@ class Component extends DCLogic {
       hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi,
       hdNow: now, hdNowOn: !!now,
       hdLeadOn: !!lead && !dropcap, hdLeadCap: !!lead && dropcap, hdLead: lead, hdLeadSeg: this.atlasRich(lead, bold, terms.map(t => t.label)),
-      hdFamOn: lv === 'first' && where.length > 0, hdFam: where.slice(0, 2).join(' · '),
+      hdFamOn: false, hdFam: where.slice(0, 2).join(' · '),
       hdEssay: essay, hdEssayOn: essay.length > 0,
       hdFacets: facets, hdFacetsOn: facets.length > 0,
       hdYours: yours, hdYoursOn: yours.length > 0,
@@ -33732,52 +33767,40 @@ class Component extends DCLogic {
             const shown = hd.gates.filter(g => sideLines(g).length > 0);
             const shownSet = new Set(shown.map(g => g.gate));
             const A = this.A();
-            /* The 2D wiring is drawn as the Atlas draws it: the centres in their
-               own shapes, every channel as two halves that each light from their
-               own gate, and the gates round each centre. A half lights in --tx for
-               personality and --hd-des for design, both when both hold it, the
-               same language the 3D scene speaks. */
-            const spots = this.hdGateSpots();
-            const layer = {};
-            shown.forEach(g => { layer[g.gate] = layer[g.gate] && layer[g.gate] !== g.kind ? 'both' : g.kind; });
-            const ink = { personality: 'var(--tx)', design: 'var(--hd-des)' };
+            /* The 2D wiring is drawn exactly as the Atlas draws it (owner, 6
+               November 2026): the centres outlined in their own shapes, a defined
+               centre lit warm rather than filled with a category colour, every
+               channel thin and whole along the shared geometry, the reader's gates
+               as white points and the gates the sky holds this minute ringed in
+               --blue. The layer control decides which side's gates count. */
+            const geo = this.hdWireGeom(), spots = geo.spots;
+            const held = new Set(shown.map(g => g.gate));
             const keys = A ? Object.keys(A.CHANNELS) : hd.activeChannels.map(ch => ch[0] + '-' + ch[1]);
-            const lines = [], glows = [];
             const f1 = v => v.toFixed(1);
-            keys.forEach(k => {
-              const pq = k.split('-').map(Number), a = spots[pq[0]], b = spots[pq[1]];
-              if (!a || !b) return;
-              const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-              if (layer[pq[0]] && layer[pq[1]]) glows.push({ x1: f1(a.x), y1: f1(a.y), x2: f1(b.x), y2: f1(b.y) });
-              [[a, pq[0]], [b, pq[1]]].forEach(([e, n]) => {
-                const L = layer[n], seg = { x1: f1(e.x), y1: f1(e.y), x2: f1(m.x), y2: f1(m.y) };
-                if (!L) lines.push(Object.assign({ c: 'var(--chl)', w: '1.4', o: '1' }, seg));
-                else if (L === 'both') lines.push(Object.assign({ c: ink.design, w: '4', o: '1' }, seg), Object.assign({ c: ink.personality, w: '1.6', o: '1' }, seg));
-                else lines.push(Object.assign({ c: ink[L], w: '2.6', o: '1' }, seg));
-              });
-            });
+            const ownK = new Set(keys.filter(k => k.split('-').map(Number).every(n => held.has(n))));
+            const lines = keys.map(k => { const g = geo.paths[k]; if (!g) return null; const own = ownK.has(k);
+              return { d: g.d, c: own ? 'rgba(var(--atmc2),.75)' : 'var(--chl)', w: own ? '2.4' : '1.3', o: own ? '1' : '.9' }; }).filter(Boolean);
             const centers = Object.keys(this.BG_POS).map(name => {
               const q = this.BG_POS[name], defined = hd.defined.has(name);
-              const col = A && A.CENTERS[name] ? A.CENTERS[name].color : 'var(--ac2-hi)';
-              const n = shown.filter(g => this.hdCenterOf(g.gate) === name).length;
               const P = this.hdShape(name);
               return { pts: P.map(pt => f1(pt[0]) + ',' + f1(pt[1])).join(' '),
-                fill: defined ? col : 'rgba(var(--atmc),.08)', fo: defined ? '.9' : '1',
-                stroke: defined ? col : 'rgba(var(--atmc),.6)', halo: defined ? col : 'transparent',
+                fill: defined ? 'rgba(var(--atmc2),.2)' : 'rgba(var(--atmc),.07)',
+                stroke: defined ? 'rgba(var(--atmc2),.85)' : 'rgba(var(--atmc),.55)', sw: defined ? '1.8' : '1.4',
                 lp: (q[0] / 300 * 100).toFixed(2) + '%', tp: (q[1] / 520 * 100).toFixed(2) + '%',
                 wp: (q[2] / 300 * 100).toFixed(2) + '%', hp: (q[3] / 520 * 100).toFixed(2) + '%',
                 jc: name === 'Head' || name === 'Heart' ? 'flex-end' : name === 'Ajna' ? 'flex-start' : 'center',
                 pad: name === 'Head' || name === 'Heart' ? '0 0 4px' : name === 'Ajna' ? '3px 0 0' : '0',
                 name: name, short: this.BG_SHORT[name],
-                labelC: defined ? 'rgba(5,6,10,.88)' : 'var(--mut)',
-                subC: defined ? 'rgba(5,6,10,.7)' : 'var(--mut)',
-                count: n ? n + (n === 1 ? ' gate' : ' gates') : '',
+                labelC: defined ? 'var(--tx)' : 'var(--mut)', subC: 'var(--mut)',
+                count: '',
                 go: this.hdOpen({ kind: 'center', name: name }) };
             });
-            const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], L = layer[n];
-              return { x: f1(sp.x), y: f1(sp.y), r: L ? '3.3' : '1.7',
-                fill: L === 'design' ? ink.design : L ? ink.personality : 'rgba(var(--atmc),.75)',
-                ring: L === 'both' ? ink.design : 'none', rw: L === 'both' ? '1.8' : '0' }; });
+            const skyG = new Set(this.hdSkyNow().map(a => a.gate));
+            const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], own = held.has(n), now = skyG.has(n);
+              return { x: f1(sp.x), y: f1(sp.y), r: own ? '3.5' : '2.5',
+                fill: own ? 'var(--tx)' : 'rgba(var(--atmc),.75)', now: now,
+                ring: now ? 'var(--blue)' : 'none', rw: now ? '1.4' : '0' }; });
+            const skyDots = gateDots.filter(g => g.now).map(g => ({ x: g.x, y: g.y }));
             const byCenter = {};
             shown.forEach(g => { (byCenter[this.hdCenterOf(g.gate)] = byCenter[this.hdCenterOf(g.gate)] || []).push(g); });
             const inChannel = new Set();
@@ -33795,7 +33818,7 @@ class Component extends DCLogic {
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',
                   go: this.hdOpen({ kind: 'gate', gate: g.gate, line: g.line }) })) };
             });
-            return { bgModes: modes, bgChannels: lines, bgGlows: glows, bgGates: gateDots, bgCenters: centers, hdCenterGates: centerGates,
+            return { bgModes: modes, bgChannels: lines, bgSky: skyDots, bgGates: gateDots, bgCenters: centers, hdCenterGates: centerGates,
               hdGateCount: shown.length + (mode === 'both' ? ' in total' : ' in the ' + mode + ' chart'),
               /* The gloss on first use. inCommon names the surface; the field's
                  own word is then used descriptively, which is how the two stay
