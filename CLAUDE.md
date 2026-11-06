@@ -6705,8 +6705,9 @@ No lead says "begin", "now", or what the reader is about to read.
 Asked for by the owner on 4 November 2026 ("put the descriptions in a page-packet
 that has more beauty in its appeal instead of just a sectioned off dissertation").
 `plPacket()` arranges the composer's words and writes none of its own: a cover
-(the glyph in a lit medallion, the kind of point, the name, the body's role as
-an epigraph, sign, degree and house, and the dignity as a seal), then the
+(the glyph in a lit medallion, the name, the body's role as
+an epigraph in gold under it with no rules beside it and no label over the
+name (the owner's zero eyebrows, 6 November 2026), sign, degree and house, and the dignity as a seal), then the
 chapters (The Room, The Accent, The Nature, At Home, The Way It Moves, and The
 Welcome when there is a dignity) turned one at a time with "Read every page"
 beside them, then Held together, the four practice cards, Conversations, The sky
