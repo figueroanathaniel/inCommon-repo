@@ -700,7 +700,7 @@
         ['Mutation', 'In the wiring, change enters through the individual circuitry, which is why individual channels are read as arriving unasked. What one person carries in first, others can take up after.']
       ],
       see: [['circuitry', 'Individual Circuitry']],
-      words: [['horizon', 'Cycles'], ['horizon', 'Awareness']] },
+      words: [['horizon', 'Cycles'], ['horizon', 'Awareness'], ['terms', 'Cross of the Sleeping Phoenix']] },
 
     { tier: 'horizon', name: 'Conditioning', epi: 'What is borrowed',
       lead: 'Conditioning is what happens wherever a chart is open: the openness takes in other people’s definition and the day’s transits, and the mind mistakes the borrowed consistency for its own. It is not harm. It is the ordinary mechanics of being open to one another, and the place where both confusion and wisdom are found. Much of what was borrowed may have been given with love.',
@@ -825,8 +825,8 @@
     { name: 'Collective Circuit Group', text: 'The understanding and sensing circuits, whose keynote is sharing: experience and pattern passed on for everyone’s use.', see: ['circuitry', 'Collective Circuitry'] },
     { name: 'Color', text: 'The layer of a position beneath the line. Six colors to a line; the color of the Sun and Node activations gives the four Variables.', see: ['horizon', 'Variable'] },
     { name: 'Completely Open Center', text: 'A center with no gates activated at all. Schools read it as the widest openness, with no theme of its own to lean on.', see: ['weather', 'Definition'] },
-    { name: 'Cross of Planning', text: 'The theme the tradition gives the present era of history, dated from 1615 to 2027.', see: ['horizon', 'Evolution'] },
-    { name: 'Cross of the Sleeping Phoenix', text: 'The theme the tradition gives the era it expects to follow 2027.', see: ['horizon', 'Evolution'] },
+    { name: 'Cross of Planning', text: 'The theme the tradition gives the present era of history, dated from 1615 to 2027: tribal support, community and shared structure, anchored in the Channel of Community, 40-37.', see: ['horizon', 'Evolution'] },
+    { name: 'Cross of the Sleeping Phoenix', text: 'The era the tradition expects to begin in 2027, when the Cross of Planning gives way. History is read in Global Cycles of about four hundred years, each carrying the theme of one Incarnation Cross. Since 1615 that theme has been the Cross of Planning: tribal support, community, the bargains people strike and the structures they build to hold one another up, anchored in the Channel of Community, 40-37, which joins the Heart to the Solar Plexus. The Sleeping Phoenix is described as individual at its root, an era of individual empowerment rather than tribal support, in which the old bargains stop being the dominant frequency and the familiar safety nets no longer work the way they did. The tradition is plain that this does not mean people fall apart, and read that way the change is less a loss than a widening: what was held for you starts to be held by you, among others doing the same. It places the Solar Plexus at a critical point in a mutation centuries long, becoming a new centre of awareness. What it asks of anyone through the turn is nothing heroic: to live by your own Strategy and Authority, and to align with what is arriving rather than try to control it.', see: ['horizon', 'Evolution'] },
     { name: 'Defense Circuit', text: 'The smaller tribal circuit, of nurture, intimacy and care for the young: channels 6-59 and 27-50.', see: ['weather', 'Circuits'] },
     { name: 'Defined Center', text: 'A center joined to another by at least one defined channel. It works the same way every day and is what you broadcast to others.', see: ['open', 'Sacral'] },
     { name: 'Design', text: 'The red side of a chart, cast for the moment the Sun stood 88 degrees of solar arc before birth. Read as the body and its inheritance, running below conscious awareness.', see: ['horizon', 'Mechanics'] },
