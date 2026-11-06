@@ -193,6 +193,9 @@ stood over the loading line is gone; the span carries `data-icon="oracle"` and
 in it, and the head sheet gives it a soft halo in `--atmc2` once it is live.
 `scan()` finds it by the same selector, so nothing in `oracle-glyph.js` knows
 it is there.
+The line under it is one sentence whatever the wait, "The Oracle is reading
+every point of your chart" (the owner, 6 November 2026): `orLoadingText` no
+longer changes with the depth, a pending row or a queue.
 
 **The orb is drawn in depth** (the owner, 6 November 2026: "Make the oracle on
 the loading screen more 3 dimensional and realistic", with a recording of a
