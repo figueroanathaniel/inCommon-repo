@@ -128,8 +128,147 @@
     ctx.closePath();
   }
 
+
+  /* THE LOADING ORB IN DEPTH. The owner, 6 November 2026: "Make the oracle on
+     the loading screen more 3 dimensional and realistic", with a recording of
+     a lobed torus drawn in dense contour lines, lit, cool above and warm
+     below, turning slowly. The orb span (data-glyph-orb) is drawn that way:
+     the same three lobed ring as the nav symbol, raymarched as a solid, and
+     its contours are the level lines of a slow field over the surface, so
+     they crowd, close into eyes and cross at saddles as the form turns. Lit
+     from above left; the line colour runs from the identity's --atmc above
+     to its --atmc2 below, lightened, so each world tints it. Each world keeps
+     its weather: Cyberspace steps in time and is drawn in coarse pixels,
+     Nature's Roots is lumpier and slower, the Biome ripples. Without WebGL 2,
+     or if the shader will not build, the orb falls back to the flat glyph. */
+  const VS = '#version 300 es\nin vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  const FS = `#version 300 es
+precision highp float;
+uniform vec2 uRes; uniform float uT; uniform int uW; uniform mat3 uRot;
+uniform vec3 uTop; uniform vec3 uBot;
+out vec4 o;
+float lobe(float a){ return cos(3.0*a + 0.5*sin(uT*0.31)) + 0.18*sin(2.0*a - uT*0.23); }
+float sdf(vec3 p){
+  p = uRot*p;
+  float a = atan(p.z, p.x);
+  float l = lobe(a);
+  float R = 0.57 + 0.14*l;
+  float r = 0.285 + 0.06*l;
+  float y = p.y - 0.10*sin(2.0*a + uT*0.27) - 0.06*cos(3.0*a - uT*0.19);
+  if (uW == 2) { R += 0.035*sin(5.0*a + uT*0.21) ; r += 0.025*sin(7.0*a - uT*0.17 + p.y*6.0); }
+  if (uW == 3) { R += 0.022*sin(9.0*a - uT*2.2); y += 0.02*sin(6.0*a + uT*1.7); }
+  vec2 q = vec2(length(p.xz) - R, y*1.12);
+  return (length(q) - r)*0.62;
+}
+vec3 nrm(vec3 p){
+  vec2 e = vec2(0.0015, 0.0);
+  return normalize(vec3(sdf(p+e.xyy)-sdf(p-e.xyy), sdf(p+e.yxy)-sdf(p-e.yxy), sdf(p+e.yyx)-sdf(p-e.yyx)));
+}
+float field(vec3 p){
+  vec3 q = uRot*p;
+  float s = uW == 3 ? uT*0.25 : uT*0.06;
+  return sin(q.x*2.3 + s) * cos(q.z*2.1 - s*0.7)
+       + 0.65*sin(q.y*3.1 + q.x*1.3 + s*1.3)
+       + 0.45*cos(length(q.xz)*4.2 - s);
+}
+void main(){
+  vec2 uv = (gl_FragCoord.xy*2.0 - uRes)/uRes.y;
+  vec3 ro = vec3(0.0, 0.0, 3.1), rd = normalize(vec3(uv*0.4, -1.0));
+  float t = 1.6, d = 1.0, md = 1e9;
+  for (int i = 0; i < 80; i++) {
+    d = sdf(ro + rd*t);
+    md = min(md, d);
+    if (d < 0.0008 || t > 4.6) break;
+    t += d;
+  }
+  float px = 2.6/uRes.y;
+  if (d > 0.002) { float c = 1.0 - smoothstep(0.0, px*0.6, md); o = vec4(uBot*0.15*c, c*0.5); return; }
+  vec3 p = ro + rd*t, n = nrm(p);
+  vec3 L = normalize(vec3(-0.55, 0.7, 0.6));
+  float dif = max(dot(n, L), 0.0);
+  float rim = pow(1.0 - max(dot(n, -rd), 0.0), 2.5);
+  float spec = pow(max(dot(reflect(-L, n), -rd), 0.0), 28.0);
+  float h = smoothstep(-0.7, 0.7, p.y + 0.25*p.x);
+  vec3 col = mix(uBot, uTop, h);
+  float v = field(p)*clamp(uRes.y*0.072, 7.0, 20.0)*(uW == 1 ? 0.75 : 1.0);
+  float fw = fwidth(v);
+  float k = abs(fract(v) - 0.5);
+  float w = uW == 2 ? 0.13 + 0.07*sin(v*0.7) : (uW == 1 ? 0.16 : 0.11);
+  float line = smoothstep(w + fw, w - fw*0.5, 0.5 - k);
+  line = mix(line, 0.22, smoothstep(0.32, 0.8, fw));
+  vec3 lit = col*(0.16 + 1.0*dif) + vec3(spec*0.5) + col*rim*0.5;
+  vec3 body = col*(0.015 + 0.05*dif) + col*rim*0.06;
+  vec3 c = mix(body, lit, line);
+  o = vec4(c, 1.0);
+}`;
+  function rot3(T, world) {
+    /* a slow tumble that never repeats: the ring's axis leans toward the
+       viewer and sways, and the ring turns about it */
+    const S = world === 'dawn' ? 0.6 : world === 'gold' ? 1.1 : 1;
+    const ax = -1.05 + 0.32 * Math.sin(T * 0.21 * S), ay = 0.45 * Math.sin(T * 0.17 * S + 1.0), az = T * 0.12 * S;
+    const cx = Math.cos(ax), sx = Math.sin(ax), cy = Math.cos(ay), sy = Math.sin(ay), cz = Math.cos(az), sz = Math.sin(az);
+    /* R = Ry(ay) * Rx(ax) * Ry(az), column major for GLSL */
+    const Ry1 = [cz, 0, -sz, 0, 1, 0, sz, 0, cz];
+    const Rx = [1, 0, 0, 0, cx, sx, 0, -sx, cx];
+    const Ry2 = [cy, 0, -sy, 0, 1, 0, sy, 0, cy];
+    const mul = (A, B) => { const C = new Array(9); for (let c = 0; c < 3; c++) for (let r = 0; r < 3; r++) { let s2 = 0; for (let k = 0; k < 3; k++) s2 += A[k * 3 + r] * B[c * 3 + k]; C[c * 3 + r] = s2; } return C; };
+    return mul(Ry2, mul(Rx, Ry1));
+  }
+  function triplet(name, fb) {
+    const v = (rgbVar(name, fb) || fb).split(',').map(x => parseFloat(x) / 255);
+    return v.length === 3 && v.every(x => isFinite(x)) ? v : fb.split(',').map(x => parseFloat(x) / 255);
+  }
+  function lighten(c, k) { return c.map(x => x + (0.86 - x) * k); }
+  function glInit(cv) {
+    let gl = null;
+    try { gl = cv.getContext('webgl2', { alpha: true, premultipliedAlpha: false, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' }); } catch (e) { gl = null; }
+    if (!gl) return null;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null; };
+    const v = sh(gl.VERTEX_SHADER, VS), f = sh(gl.FRAGMENT_SHADER, FS);
+    if (!v || !f) return null;
+    const pr = gl.createProgram();
+    gl.attachShader(pr, v); gl.attachShader(pr, f); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+    gl.useProgram(pr);
+    const b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.enable(gl.BLEND);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    const u = {};
+    for (const n of ['uRes', 'uT', 'uW', 'uRot', 'uTop', 'uBot']) u[n] = gl.getUniformLocation(pr, n);
+    return { gl, u };
+  }
+  function glFree(g) {
+    if (!g.gl) return;
+    try { const x = g.gl.gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); } catch (e) { /* gone already */ }
+    g.gl = null;
+  }
+  const WORLD_ID = { deepfield: 0, midnight: 1, dawn: 2, gold: 3 };
+  function drawGL(g, T, world) {
+    const { gl, u } = g.gl, cv = g.cv;
+    const coarse = world === 'midnight';
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const px = Math.max(16, Math.round(g.size * (coarse ? 0.5 : dpr)));
+    if (cv.width !== px) { cv.width = px; cv.height = px; cv.style.imageRendering = coarse ? 'pixelated' : ''; }
+    gl.viewport(0, 0, px, px);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    const Tq = coarse ? Math.floor(T * 6) / 6 : T;
+    gl.uniform2f(u.uRes, px, px);
+    gl.uniform1f(u.uT, Tq);
+    gl.uniform1i(u.uW, WORLD_ID[world] || 0);
+    gl.uniformMatrix3fv(u.uRot, false, rot3(Tq, world));
+    gl.uniform3fv(u.uTop, lighten(triplet('--atmc', '47,79,214'), 0.7));
+    gl.uniform3fv(u.uBot, lighten(triplet('--atmc2', '242,214,158'), 0.45));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
   function draw(g, T) {
     const world = worldOf();
+    if (g.gl) { drawGL(g, T, world); return; }
     const cv = g.cv, ctx = g.ctx;
     const css = g.size, dpr = Math.min(3, window.devicePixelRatio || 1);
     const px = Math.round(css * dpr);
@@ -255,9 +394,21 @@
       cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block';
       span.appendChild(cv);
     }
-    const ctx = cv.getContext('2d');
-    if (!ctx) { cv.remove(); return; }
-    const g = { span, cv, ctx, size: span.getBoundingClientRect().width || 21, ink: '', tok: '', seen: true };
+    let glx = null;
+    if (span.hasAttribute('data-glyph-orb') && !cv.hasAttribute('data-glyph-flat')) {
+      glx = glInit(cv);
+      if (!glx) {
+        /* a canvas that has handed out a WebGL context cannot give a 2D one,
+           so the flat fallback gets a fresh canvas */
+        const flat = cv.cloneNode(false);
+        flat.setAttribute('data-glyph-flat', '');
+        cv.replaceWith(flat); cv = flat;
+      }
+    }
+    const ctx = glx ? null : cv.getContext('2d');
+    if (!glx && !ctx) { cv.remove(); return; }
+    const g = { span, cv, ctx, gl: glx, size: span.getBoundingClientRect().width || 21, ink: '', tok: '', seen: true };
+    if (glx) span.setAttribute('data-glyph-3d', '');
     g.ink = inkOf(g);
     glyphs.add(g);
     observers();
@@ -270,14 +421,15 @@
     if (!root) return;
     for (const g of [...glyphs]) {
       if (!g.span.isConnected || !g.cv.isConnected) {
+        glFree(g);
         glyphs.delete(g);
         if (sizeObs) sizeObs.unobserve(g.span);
         if (seeObs) seeObs.unobserve(g.span);
-        if (g.span.isConnected) g.span.removeAttribute('data-glyph-live');
+        if (g.span.isConnected) { g.span.removeAttribute('data-glyph-live'); g.span.removeAttribute('data-glyph-3d'); }
       }
     }
     if (worldOf() === 'hc') {
-      for (const g of glyphs) { g.span.removeAttribute('data-glyph-live'); g.cv.remove(); }
+      for (const g of glyphs) { glFree(g); g.span.removeAttribute('data-glyph-live'); g.span.removeAttribute('data-glyph-3d'); g.cv.remove(); }
       glyphs.clear();
       return;
     }
@@ -296,7 +448,7 @@
       if (world !== lastWorld) { lastWorld = world; drops = []; scan(); }
       for (const g of glyphs) {
         if (!g.seen || !g.size) continue;
-        inkOf(g);
+        if (!g.gl) inkOf(g);
         draw(g, T);
       }
     }
@@ -308,7 +460,7 @@
   function still() {
     held = true;
     const T = 3.0;
-    for (const g of glyphs) { inkOf(g); if (g.size) draw(g, T); }
+    for (const g of glyphs) { if (!g.gl) inkOf(g); if (g.size) draw(g, T); }
   }
 
   function kick() {
@@ -345,7 +497,7 @@
       if (obs) obs.disconnect();
       obs = null;
       document.removeEventListener('visibilitychange', onVis);
-      for (const g of glyphs) { g.span.removeAttribute('data-glyph-live'); g.cv.remove(); }
+      for (const g of glyphs) { glFree(g); g.span.removeAttribute('data-glyph-live'); g.span.removeAttribute('data-glyph-3d'); g.cv.remove(); }
       glyphs.clear();
       if (sizeObs) sizeObs.disconnect();
       if (seeObs) seeObs.disconnect();

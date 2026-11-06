@@ -194,6 +194,23 @@ in it, and the head sheet gives it a soft halo in `--atmc2` once it is live.
 `scan()` finds it by the same selector, so nothing in `oracle-glyph.js` knows
 it is there.
 
+**The orb is drawn in depth** (the owner, 6 November 2026: "Make the oracle on
+the loading screen more 3 dimensional and realistic", with a recording of a
+lobed torus in dense lit contour lines). At 132px now, the orb span gets a
+WebGL 2 canvas: the same three lobed ring raymarched as a solid, its contours
+the level lines of a slow field over the surface (so they close into eyes and
+cross at saddles as it tumbles), lit from above left, line colour running from
+a lightened `--atmc` above to a lightened `--atmc2` below. Each world keeps its
+weather: Cyberspace steps in time at half resolution with pixelated scaling,
+Nature's Roots is lumpier and slower, the Biome ripples. The contour density
+follows the canvas's pixel height so the lines resolve instead of greying.
+The span wears `data-glyph-3d` while it does. Without WebGL 2, or a shader
+that will not build, it falls back to the flat glyph on a fresh canvas. The
+context is released (`WEBGL_lose_context`) the moment the orb leaves the page
+or the contrast modifier comes on, because the 3D stages need their contexts.
+Reduced motion, a hidden page and the contrast modifier behave as for the nav
+symbol. The nav symbol itself is unchanged.
+
 **All four are dark with light type, and that is forced.** `--ac` is fixed and
 written as text in over two hundred places, so a light identity fails the
 contrast gate wherever the action green is a word. The concept's light gray
