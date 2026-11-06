@@ -33603,7 +33603,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-for>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
-              <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">Working With This</div>
               <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
                 <sc-for list="{{ hdQuads }}" as="q" hint-placeholder-count="4">
                   <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 14px">
@@ -34834,7 +34833,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
          about contacts rather than a mark out of anything, and nothing here can
          be sorted, compared against another pair, or screenshotted as a verdict. -->
     <div data-chart="synastry" style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:13px">
-      <div style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">What the two charts actually do</div>
       <div style="font:400 19px/1.35 var(--fd);color:var(--tx)">{{ synCountLine }}</div>
     </div>
     <sc-if value="{{ synCanShareCard }}" hint-placeholder-val="{{ false }}">
@@ -35031,9 +35029,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 <button data-lift onClick="{{ r.go }}" aria-expanded="{{ r.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fc);color:var(--tx)">{{ r.label }}</button>
                 <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:9px">
-                    <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">What the tradition holds</div>
                     <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ r.tradition }}</div>
-                    <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">Only the two of you can answer this</div>
                     <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ r.possibility }}</div>
                   </div>
                 </sc-if>
@@ -36047,7 +36043,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ bnOppOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:4px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">An opening</div>
                 <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnOpp }}</div>
               </div>
             </sc-if>
@@ -36186,16 +36181,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-for>
             </div>
             <div style="display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--bd);padding-top:10px">
-              <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">What the hexagram holds</div>
               <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ icJudgment }}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:3px">
-              <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">The image</div>
               <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--mut);text-wrap:pretty">{{ icImage }}</div>
             </div>
             <sc-if value="{{ icHasChanging }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac)">Where the movement is</div>
                 <sc-for list="{{ icChanging }}" as="ch" hint-placeholder-count="2">
                   <div style="display:flex;flex-direction:column;gap:1px;border-left:2px solid var(--ac);padding-left:10px">
                     <div style="font:600 10.5px var(--fu);color:var(--ac)">{{ ch.n }} &#183; {{ ch.kind }}</div>
@@ -36214,7 +36206,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </sc-if>
             <div style="display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--bd);padding-top:10px">
-              <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">Only you can answer this</div>
               <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ icMovement }}</div>
             </div>
             <div style="font:400 10.5px/1.6 var(--fu);color:var(--dim)">{{ icGateLine }} {{ icMethodUsed }}</div>
@@ -36375,11 +36366,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         </div>
                       </sc-if>
                       <div style="display:flex;flex-direction:column;gap:2px">
-                        <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Where it came from</div>
                         <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--mut);text-wrap:pretty">{{ d.origin }}</div>
                       </div>
                       <div style="display:flex;flex-direction:column;gap:2px">
-                        <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Worth asking</div>
                         <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ d.possibility }}</div>
                       </div>
                     </div>
@@ -36596,7 +36585,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
             <div style="display:flex;flex-direction:column;gap:13px;background:rgba(47,255,143,.07);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:12px;padding:15px 16px">
-              <div style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">The reading</div>
               <sc-for list="{{ tarotPassages }}" as="pg" hint-placeholder-count="5">
                 <div style="display:flex;flex-direction:column;gap:4px">
                   <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ pg.tc }};background:{{ pg.tb }}">{{ pg.tag }}</span>
@@ -36686,7 +36674,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </sc-if>
                 <div style="display:flex;flex-direction:column;gap:7px">
                   <div style="display:flex;flex-direction:column;gap:2px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What the reading holds</div>
                     <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ s.meaning }}</div>
                   </div>
                   <!-- THE SAME IMAGE, SEEN SEVERAL WAYS. A tornado watched from
@@ -36707,11 +36694,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                     </div>
                   </sc-if>
                   <div style="display:flex;flex-direction:column;gap:2px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Where it came from</div>
                     <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">{{ s.origin }}</div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:2px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Worth asking</div>
                     <div style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ s.possibility }}</div>
                   </div>
                 </div>
@@ -36775,14 +36760,12 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 
         <sc-if value="{{ dreamHasText }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:14px 15px">
-            <div style="font:600 10.5px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">The feeling in it</div>
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ dreamToneLine }}</div>
           </div>
         </sc-if>
 
         <sc-if value="{{ dreamBigOn }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:5px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(139,92,246,.42);border-radius:var(--rad);padding:15px 16px">
-            <div style="font:600 10.5px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--ac2-hi)">Worth coming back to</div>
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ dreamBigLine }}</div>
           </div>
         </sc-if>
@@ -38252,7 +38235,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-for>
       <sc-if value="{{ dpHasSoco }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
-          <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working with it</div>
           <sc-for list="{{ dpSoco }}" as="s" hint-placeholder-count="4">
             <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ s.edge }};border-radius:0 12px 12px 0;padding:11px 13px">
               <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:{{ s.edge }}">{{ s.label }}</div>
@@ -39500,7 +39482,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
           <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-              <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
               <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
             </div>
           </sc-if>
@@ -40164,7 +40145,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-for>
       <sc-if value="{{ hdPopHasSoco }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
-          <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working with it</div>
           <sc-for list="{{ hdPopSoco }}" as="s" hint-placeholder-count="4">
             <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ s.edge }};border-radius:0 12px 12px 0;padding:11px 13px">
               <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:{{ s.edge }}">{{ s.label }}</div>
@@ -41813,7 +41793,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   </sc-for>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
-                  <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">Working With This</div>
                   <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
                     <sc-for list="{{ hdQuads }}" as="q" hint-placeholder-count="4">
                       <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 14px">
@@ -42429,7 +42408,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
          about contacts rather than a mark out of anything, and nothing here can
          be sorted, compared against another pair, or screenshotted as a verdict. -->
     <div data-chart="synastry" style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:13px">
-      <div style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">What the two charts actually do</div>
       <div style="font:400 19px/1.35 var(--fd);color:var(--tx)">{{ synCountLine }}</div>
     </div>
     <sc-if value="{{ synCanShareCard }}" hint-placeholder-val="{{ false }}">
@@ -42626,9 +42604,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 <button data-lift onClick="{{ r.go }}" aria-expanded="{{ r.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fc);color:var(--tx)">{{ r.label }}</button>
                 <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:9px">
-                    <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">What the tradition holds</div>
                     <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ r.tradition }}</div>
-                    <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">Only the two of you can answer this</div>
                     <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ r.possibility }}</div>
                   </div>
                 </sc-if>
@@ -43651,7 +43627,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-if>
             <sc-if value="{{ bnOppOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:4px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">An opening</div>
                 <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnOpp }}</div>
               </div>
             </sc-if>
@@ -43900,7 +43875,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
             <div style="display:flex;flex-direction:column;gap:13px;background:rgba(47,255,143,.07);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:12px;padding:15px 16px">
-              <div style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">The reading</div>
               <sc-for list="{{ tarotPassages }}" as="pg" hint-placeholder-count="5">
                 <div style="display:flex;flex-direction:column;gap:4px">
                   <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ pg.tc }};background:{{ pg.tb }}">{{ pg.tag }}</span>
@@ -43991,7 +43965,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </sc-if>
                 <div style="display:flex;flex-direction:column;gap:7px">
                   <div style="display:flex;flex-direction:column;gap:2px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What the reading holds</div>
                     <div style="font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx)">{{ s.meaning }}</div>
                   </div>
                   <!-- THE SAME IMAGE, SEEN SEVERAL WAYS. A tornado watched from
@@ -44012,11 +43985,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                     </div>
                   </sc-if>
                   <div style="display:flex;flex-direction:column;gap:2px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Where it came from</div>
                     <div style="font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--mut)">{{ s.origin }}</div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:2px">
-                    <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Worth asking</div>
                     <div style="font:italic 400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx)">{{ s.possibility }}</div>
                   </div>
                 </div>
@@ -44080,14 +44051,12 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 
         <sc-if value="{{ dreamHasText }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:14px 15px">
-            <div style="font:600 10.5px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">The feeling in it</div>
             <div style="font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ dreamToneLine }}</div>
           </div>
         </sc-if>
 
         <sc-if value="{{ dreamBigOn }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:5px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(139,92,246,.42);border-radius:var(--rad);padding:15px 16px">
-            <div style="font:600 10.5px var(--fk);letter-spacing:.13em;text-transform:uppercase;color:var(--ac2-hi)">Worth coming back to</div>
             <div style="font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ dreamBigLine }}</div>
           </div>
         </sc-if>
@@ -44239,16 +44208,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-for>
             </div>
             <div style="display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--bd);padding-top:10px">
-              <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">What the hexagram holds</div>
               <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ icJudgment }}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:3px">
-              <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">The image</div>
               <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--mut);text-wrap:pretty">{{ icImage }}</div>
             </div>
             <sc-if value="{{ icHasChanging }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
-                <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac)">Where the movement is</div>
                 <sc-for list="{{ icChanging }}" as="ch" hint-placeholder-count="2">
                   <div style="display:flex;flex-direction:column;gap:1px;border-left:2px solid var(--ac);padding-left:10px">
                     <div style="font:600 10.5px var(--fu);color:var(--ac)">{{ ch.n }} &#183; {{ ch.kind }}</div>
@@ -44267,7 +44233,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </sc-if>
             <div style="display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--bd);padding-top:10px">
-              <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">Only you can answer this</div>
               <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ icMovement }}</div>
             </div>
             <div style="font:400 10.5px/1.6 var(--fu);color:var(--dim)">{{ icGateLine }} {{ icMethodUsed }}</div>
@@ -44428,11 +44393,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                         </div>
                       </sc-if>
                       <div style="display:flex;flex-direction:column;gap:2px">
-                        <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Where it came from</div>
                         <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--mut);text-wrap:pretty">{{ d.origin }}</div>
                       </div>
                       <div style="display:flex;flex-direction:column;gap:2px">
-                        <div style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Worth asking</div>
                         <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ d.possibility }}</div>
                       </div>
                     </div>
@@ -46591,7 +46554,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
           <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-              <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
               <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
             </div>
           </sc-if>
@@ -47153,7 +47115,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-for>
       <sc-if value="{{ dpHasSoco }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
-          <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working with it</div>
           <sc-for list="{{ dpSoco }}" as="s" hint-placeholder-count="4">
             <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ s.edge }};border-radius:0 12px 12px 0;padding:11px 13px">
               <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:{{ s.edge }}">{{ s.label }}</div>
@@ -47440,7 +47401,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </sc-for>
       <sc-if value="{{ hdPopHasSoco }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
-          <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working with it</div>
           <sc-for list="{{ hdPopSoco }}" as="s" hint-placeholder-count="4">
             <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ s.edge }};border-radius:0 12px 12px 0;padding:11px 13px">
               <div style="font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:{{ s.edge }}">{{ s.label }}</div>
