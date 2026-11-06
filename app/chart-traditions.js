@@ -129,6 +129,24 @@
     return null;
   }
 
+  /* Navamsa (D9): each sign in nine parts of 3 degrees 20 minutes, counted
+     from the sign itself when it is movable, from its 9th when fixed and from
+     its 5th when dual. That is the rule HinduTone and DekhoPanchang both
+     teach, and it is the same as counting fire from Aries, earth from
+     Capricorn, air from Libra and water from Cancer, and the same as the
+     continuous count floor(longitude * 9 / 30) mod 12 (CT7 holds all three
+     equal). One translation of BPHS 6.31 reads the verse as movable from
+     Aries, fixed from Leo and dual from Sagittarius; that reading is not
+     followed here. Vargottama: the same sign in the rashi and the navamsa. */
+  const NAV = 30 / 9;
+  function navamsa(sid) {
+    if (sid == null) return null;
+    const l = norm(sid), s = Math.floor(l / 30), part = Math.min(8, Math.floor((l - s * 30) / NAV));
+    const start = s % 3 === 0 ? s : s % 3 === 1 ? (s + 8) % 12 : (s + 4) % 12;
+    const sign = (start + part) % 12;
+    return { sign: sign, rashi: RASHI[sign], part: part + 1, vargottama: sign === s };
+  }
+
   /* ---- Chinese calendar ---- */
   const STEMS = ['Jia', 'Yi', 'Bing', 'Ding', 'Wu', 'Ji', 'Geng', 'Xin', 'Ren', 'Gui'];
   const BRANCHES = ['Zi', 'Chou', 'Yin', 'Mao', 'Chen', 'Si', 'Wu', 'Wei', 'Shen', 'You', 'Xu', 'Hai'];
@@ -233,8 +251,8 @@
     { key: 'heliocentric', name: 'Heliocentric', zodiac: 'tropical', houses: null, frame: 'helio' }
   ];
 
-  const api = { VERSION: '1.0.0', AYANAMSAS, ayanamsa, dpsi, sidereal, RASHI, NAKSHATRAS, DASHA, DASHA_YEAR, nakshatra, vimshottari,
-    dignity, STEMS, BRANCHES, ANIMALS, ELEMENTS, dayIndex, cstDay, lunarNewYear, animalYear, fourPillars, helio, STUDIES, DEFAULT: 'western' };
+  const api = { VERSION: '1.1.0', AYANAMSAS, ayanamsa, dpsi, sidereal, RASHI, NAKSHATRAS, DASHA, DASHA_YEAR, nakshatra, vimshottari,
+    dignity, navamsa, STEMS, BRANCHES, ANIMALS, ELEMENTS, dayIndex, cstDay, lunarNewYear, animalYear, fourPillars, helio, STUDIES, DEFAULT: 'western' };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.ChartTraditions = api;
 })(typeof window !== 'undefined' ? window : this);

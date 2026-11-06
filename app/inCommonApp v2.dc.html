@@ -18923,6 +18923,12 @@ class Component extends DCLogic {
         if (nn) { const k = this.norm360(sid(nn.lon) + 180), n = T.nakshatra(k); rows.push('Ketu ' + dm(k) + ' ' + T.RASHI[Math.floor(k / 30)] + (lagnaSign == null ? '' : ' (bhava ' + (((Math.floor(k / 30) - lagnaSign + 12) % 12) + 1) + ')') + ', ' + n.name + ' pada ' + n.pada); }
         out.push('VEDIC SIDEREAL CHART (Lahiri ayanamsa ' + ay.toFixed(4) + '\u00b0, whole sign bhavas, mean Rahu): ' + (lagna == null ? 'Lagna unknown (no birth time); ' : 'Lagna ' + dm(lagna) + ' ' + T.RASHI[lagnaSign] + ', ' + T.nakshatra(lagna).name + '; ') + rows.join('; '));
         out.push('DREKKANA (D3, Parashara: the sign, its 5th, its 9th): ' + gr.map(r => { const s = sid(r.lon), si = Math.floor(s / 30), d = Math.floor((s % 30) / 10); return nm(r) + ' in ' + T.RASHI[(si + 4 * d) % 12]; }).join('; '));
+        if (T.navamsa) {
+          const nv = l => { const q = T.navamsa(l); return q.rashi + (q.vargottama ? ' (vargottama)' : ''); };
+          out.push('NAVAMSA (D9, nine parts of 3\u00b020\u2032, counted from a movable sign itself, a fixed sign\u2019s 9th, a dual sign\u2019s 5th): ' +
+            (lagna == null ? '' : 'Lagna in ' + nv(lagna) + '; ') + gr.map(r => nm(r) + ' in ' + nv(sid(r.lon))).join('; ') +
+            (nn ? '; Ketu in ' + nv(this.norm360(sid(nn.lon) + 180)) : ''));
+        }
         const moon = gr.find(r => r.name === 'Moon');
         if (moon) {
           const ms = sid(moon.lon), dashas = T.vimshottari(ms, jd, 18), now = jdAt;

@@ -96,7 +96,12 @@ Facts in the lessons:
 
 - No lesson is tied to the reader's own chart yet (for example opening the
   reader's nakshatra from the nakshatra lesson).
-- The navamsa lesson describes a chart the app does not draw; the navamsa
-  waits on the owner, as `02-derived-and-decans-sources.md` records.
+- The navamsa is computed for the Vedic study (6 November 2026): each
+  graha's D9 sign and vargottama, in the dossier and the study card, by the
+  rule HinduTone (hindutone.com/astrology/navamsa-chart-d9-explained/) and
+  DekhoPanchang (dekhopanchang.com/en/learn/navamsa-boundaries) teach. The
+  translation of BPHS 6.31 at enjoylearningsanskrit.com reads movable from
+  Aries, fixed from Leo and dual from Sagittarius, which disagrees, and was
+  not followed. No D9 wheel is drawn.
 - Zodiacal releasing is described without its period lengths, because the
   Capricorn period differs between sources and none was checked.

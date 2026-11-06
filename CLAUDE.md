@@ -3678,7 +3678,13 @@ the profection, so only readers of those studies get a new dossier. The 10th
 is never a turned frame, because the sources disagree on which parent it is.
 The tertiary progression is a chapter too, The Month, on the Sun's and the
 Moon's packet (`progressedHandoff(name, 'tertiary')`, a day for each tropical
-lunar month of 27.32158 days). The navamsa, the two relationship charts, a harmonic wheel and solar arc are
+lunar month of 27.32158 days). The navamsa is built for the Vedic study
+(`ChartTraditions.navamsa()`, CT7): each graha's and the Lagna's D9 sign,
+vargottama marked, in the dossier and the study card. It counts a movable
+sign from itself, a fixed sign from its 9th and a dual sign from its 5th,
+which HinduTone and DekhoPanchang both teach and which equals the element
+rule; one translation of BPHS 6.31 reads the verse otherwise and is not
+followed. The two relationship charts, a harmonic wheel and solar arc are
 not built and wait on the owner.
 
 **The solar return is a chapter, The Return, on the Sun's packet** (`solarReturn()`,
