@@ -229,6 +229,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 [data-world="midnight"]:not([data-world-hc]) [data-greet]{background:linear-gradient(180deg,#fff 0,#c9d2e6 45%,#8d98b4 52%,#e8eefc 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 [data-world="dawn"]:not([data-world-hc]) [data-greet]{-webkit-text-fill-color:#e8b45a;text-shadow:0 0 14px rgba(232,140,60,.55)}
 [data-world="gold"]:not([data-world-hc]) [data-greet]{font-weight:800!important;background:linear-gradient(90deg,#5ff7ff,#c58bff,#ff7ad9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 6px rgba(95,247,255,.45))}
+[data-app-root]:not([data-world-hc]) [data-epi]{color:#f2d69e!important;text-shadow:0 0 10px rgba(242,214,158,.38),0 0 2px rgba(242,214,158,.25)}
 [data-world="midnight"]:not([data-world-hc]) [data-lift]{border-radius:0!important}
 [data-world="midnight"]:not([data-world-hc]) [data-lift="card"]{box-shadow:inset 0 5px 0 rgb(var(--atmc)),var(--lift)!important}
 [data-world="dawn"]:not([data-world-hc]) :is([data-lift="card"],[data-lift="box"]){border-radius:30px 12px 26px 14px / 14px 28px 12px 24px!important}
@@ -3162,11 +3163,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 {{ hdIconFs }}/1 var(--fd);color:var(--ac2-hi);text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ hdIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
-                <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdEpi }}</div>
-                </sc-if>
                 <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 11.5px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdEpi }}</div>
                 </sc-if>
               </div>
             </div>
@@ -3502,11 +3503,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
-                <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ apEpi }}</div>
-                </sc-if>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 11.5px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ apEpi }}</div>
                 </sc-if>
               </div>
             </div>
@@ -10777,11 +10778,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 {{ hdIconFs }}/1 var(--fd);color:var(--ac2-hi);text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ hdIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
-                <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdEpi }}</div>
-                </sc-if>
                 <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 11.5px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ hdKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdEpi }}</div>
                 </sc-if>
               </div>
             </div>
@@ -11117,11 +11118,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
-                <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ apEpi }}</div>
-                </sc-if>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:italic 400 11.5px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
+                  <div style="font:italic 400 16px/1.4 var(--fb);color:var(--tx)">{{ apKicker }}</div>
+                </sc-if>
+                <sc-if value="{{ apEpiOn }}" hint-placeholder-val="{{ false }}">
+                  <div data-epi="1" style="font:italic 400 13px/1.45 var(--fb);color:var(--tx);text-wrap:pretty">{{ apEpi }}</div>
                 </sc-if>
               </div>
             </div>
