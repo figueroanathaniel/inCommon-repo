@@ -2805,8 +2805,9 @@ one line footer there, because Apple requires it (owner, 12 October 2026; see
 Asked for by the owner on 11 October 2026: the Oracle's disclosure in a privacy
 policy, a generic and accurate About that discloses no method, folded into
 Terms & Conditions, and the Terms "right above the privacy policy". The owner's
-answers decide four facts written into both pages: **Nathaniel J. Figueroa, an
-individual in Florida**, until an LLC is formed; **Florida law and courts**;
+answers decide four facts written into both pages: **Kin Common LLC, based in
+Florida**, the registered business (the owner, 6 November 2026; until then both
+pages named Nathaniel J. Figueroa as an individual); **Florida law and courts**;
 **16** as the minimum age (a parent's permission to subscribe under 18); and
 **Contact Support** as the contact route, because there is no domain for an
 email address yet. `docs/LEGAL-SETUP.md` is the owner's half, including what a
@@ -3326,7 +3327,7 @@ stays clear of the dock on a short phone.
 ## The credit line is the last thing on the Settings page
 "Created and maintained by Nathaniel J. Figueroa." sits at the bottom of the
 Settings page in both shells, centred, in the smallest type in the app (7px,
-below the 7.5px badges). It used to head the About card. It sits inside the
+below the 7.5px badges). It used to head the About card. Under it, in the same type, is "by Kin Common LLC" (the owner, 6 November 2026), and the About Us dialog carries the same two lines. It sits inside the
 page's `<footer>`, under the Terms and Privacy Policy links, and the footer
 carries `margin-top: auto` inside the column so it stays at the bottom whatever
 the content above it grows to.
@@ -3510,6 +3511,14 @@ held (the sky, the casts, the retrogrades, the next two days). The Cycle Audit's
 line left Today too and sits under the wheel in the astrology panel, opening the
 same sheet.
 
+**Each retrograde body is a plain button under the horoscope** (the owner, 6
+November 2026: buttons, no pills). `horoRxBtns` lists the bodies retrograde on
+the day the horoscope reads, in both shells, as text in `--ac2-hi` with the Rx
+glyph, no fill and no border, each 44px tall. A press opens the astrology page
+with Current Retrogrades open on that body (`featOpen: 'retro'`, `retroSel`),
+and `featLand()` scrolls the strip tile (`data-feat-key`) into view in the
+nearest vertical scroller, never the section column, stopping once it lands.
+
 **The chart's own controls live inside its card** (same day): the view switch,
 the layer or detail switch and the expand button are a bar at the top of the
 wheel and wiring cards, and everything under the bar sits in a
@@ -3678,8 +3687,60 @@ the profection, so only readers of those studies get a new dossier. The 10th
 is never a turned frame, because the sources disagree on which parent it is.
 The tertiary progression is a chapter too, The Month, on the Sun's and the
 Moon's packet (`progressedHandoff(name, 'tertiary')`, a day for each tropical
-lunar month of 27.32158 days). The navamsa, the two relationship charts, a harmonic wheel and solar arc are
+lunar month of 27.32158 days). The navamsa is built for the Vedic study
+(`ChartTraditions.navamsa()`, CT7): each graha's and the Lagna's D9 sign,
+vargottama marked, in the dossier and the study card. It counts a movable
+sign from itself, a fixed sign from its 9th and a dual sign from its 5th,
+which HinduTone and DekhoPanchang both teach and which equals the element
+rule; one translation of BPHS 6.31 reads the verse otherwise and is not
+followed. Zodiacal releasing is built for the Hellenistic study
+(`ChartTraditions.zodiacalReleasing()`, CT8): levels 1 and 2 from Spirit and
+Fortune at the period's instant, Capricorn 27 years, years of 360 days, the
+loosing of the bond to the opposite sign after twelve subperiods. The two
+relationship charts, a harmonic wheel and solar arc are
 not built and wait on the owner.
+
+**The solar return is a chapter, The Return, on the Sun's packet** (`solarReturn()`,
+6 November 2026, the first of the Astropedia's techniques to be built in its order).
+The moment is bisected on the Sun's longitude in the study's own zodiac, so a
+sidereal study takes the sidereal return; it is cast at the birth place and read
+through the chosen house system (`ascAt()`, the horizon at any instant and place,
+which `ascendant()` now calls with the same arithmetic). Untimed, only the date is
+given and the return's horizon is withheld. Western studies only, like the other
+Western techniques. Checked once against swisseph-wasm for a 1985 San Juan birth:
+the 2026 return 24 seconds apart, the same rising sign, and the same whole sign
+houses for the Sun, the Moon, Saturn and Neptune.
+
+**Mercury, Venus and Mars progress too** (6 November 2026): The Hand-off chapter
+on their packets, secondary only, from the same `progressedHandoff()`. They are
+the three that can station, so a crossing can run backward (the sentence says
+so and does not borrow a forward `HANDOFF_PAIR` line) and the nearest progressed
+station behind and ahead is named. Checked against swisseph-wasm for two births:
+every crossing and station within a fifth of a year, including a backward
+crossing of Mercury from Scorpio into Libra.
+
+**The composite and the relationship chart are a card in Synastry** (6
+November 2026), "The charts you make", above The blend in both shells
+(`synMade()`, `synMade`, `synMadeOn`). Positions only, no reading. The
+composite is the nearer midpoint of each pair of bodies; its Midheaven is the
+midpoint of the two and its Ascendant is derived from that Midheaven at the
+mean latitude (Robert Hand's method), because a midpoint of two Ascendants is
+not a horizon. The relationship chart (Ronald Davison) is cast for the moment
+halfway between the births at the place halfway between them. Angles appear
+only when both births have a time and a place. `horizonFrom()` is the horizon
+arithmetic `ascAt()` now calls, so the derived Ascendant uses the same code.
+Checked against swisseph-wasm for a 1985 San Juan and 1981 New York pair: every
+body, both Midheavens and both Ascendants to the arcminute.
+
+**Harmonic charts are a card on the astrology page** (6 November 2026), "Your
+harmonics", under the chart study card in both shells (`harmonicVals()`,
+`HARM_SET`, state `hmN`, not kept). The 4th, 5th, 7th and 9th, the ones the
+sources read name as most used: each body's longitude in the study's own zodiac
+multiplied by the harmonic and folded into the circle, and the pairs that meet
+within `HARM_ORB`, 6 degrees in the harmonic chart, the orb
+`app/ephemeris/harmonic.ts` already used. No source read gives an orb, so the
+number was put to the owner. Not drawn for Vedic, Chinese or Heliocentric.
+Positions checked against swisseph-wasm to the arcminute.
 
 ## The sky weather, and the star clusters among the bodies
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
@@ -5729,6 +5790,14 @@ eyebrows, meaning no ---- How to meet the moment ----"): it sits in the title
 column under the kicker, italic 13px in the reading face, in gold with a soft glow
 (`[data-epi]` in the head sheet, plain under the contrast modifier). Do not put an
 uppercase label or a ruled line back on these pages.
+The wiring's detail sheet on My Charts (a type, centre, gate, channel,
+profile or authority) follows the same rule since 6 November 2026: the line
+under its title is italic reading type in `--tx`, a row's own heading is an
+italic lead-in at the start of its sentence rather than a label over it, the
+rows that only named their source (What the system holds, What your chart
+shows, What a channel is) carry no heading, and the sheet's edge is the one
+blue, `rgba(var(--atmc),.55)`, never the action green, the success green or
+the violet.
 
 **The wiring is drawn one way in the Atlas and on My Charts** (same day):
 `hdWireGeom()` places each gate on the side of its centre that faces where its
@@ -5739,8 +5808,8 @@ faint `--atmc` fill in a `--chl` outline, a defined centre the same blue a
 little fuller and a brighter `--atmc` outline, never a category colour and
 never warm; a defined channel is `--atmc` and thin, every other channel
 `--chl`; the reader's gates are white points and the sky's are ringed in
-`--blue`. The 3D and Wheel views keep their
-personality and design inks.
+`--blue`. The 3D and Wheel views speak the same blue (the owner, 6 November
+2026: "Start with the blue 3D Atlas chart views"): see "A channel is two halves".
 
 **Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
 holds each Type's and each authority's theme words; `atlasRich()` bolds the
@@ -5878,9 +5947,38 @@ the Western chapters are untouched. A lesson is `kind: 'lesson'`, keyed
 `lesson:<study>:<n>`, drawn like a concept with its band and pace as the
 kicker and its term as the epigraph. `apEntries()` is memoised per study
 (`_apEntK`), so changing the study rebuilds it. The ranking, its method and
-every source are `docs/astro-upgrade/04-study-education-sources.md`; the bands
+every source are `docs/astro-upgrade/04-study-education-sources.md`. A lesson
+whose subject the study card computes shows those rows as its own "In your
+chart" (`LESSON_YOURS`, keyed by lesson name, so a renamed lesson loses them),
+each going to the card; never under the sample. The bands
 are a reading of course outlines, not a tally, and the doc says so. No lesson
 names a fact no source was read for (the hidden stems, the releasing periods).
+
+**Every study has a course now, in units, with a glossary** (the owner, 6
+November 2026: "Jyotish, sidereal, Placidus, etc should all have a tailored
+curriculum around them in the Astropedia. Definitions should be in the
+Astropedia."). Placidus, Koch, Equal and Whole Sign are house systems inside
+the Western chart, so `STUDY_COURSES` gives each the Western course taught
+through its own division (13 or 14 lessons, built from shared lesson
+functions), and they sit in `STUDY_LESSONS` beside the six others.
+`STUDY_UNITS` groups the six others' lessons into units; a lesson's kicker
+names its unit, and its `see` list links the Astropedia entries it rests on.
+`STUDY_WORDS` is each study's glossary, drawn as a second chapter ("Words of
+<study>", entries `term:<study>:<i>`); a lesson shows chips for the study
+words it uses (`apWordRe()`), and a word links back to its lessons. Sources
+and what they leave open: `docs/astro-upgrade/05-study-courses-sources.md`.
+
+**The Charts tab speaks the chosen study** (`STUDY_TALK`, `studyTalk()`, the
+same day: "Verbiage specific to the study should exist in the charts tab once
+selected"). The title (`astroTitle`: Your Janma Kundali, Your Four Pillars,
+Your Nativity, Your Sidereal Chart, Your Draconic Chart, Your Chart from the
+Sun; Your Natal Chart otherwise), the houses heading (Bhavas, Places, or the
+drawn system's name with Houses), the house rows (Bhava 1, with the rashi;
+Place 1), the body category under Vedic (Grahas & Outer Planets), and the
+names through `studyName()`: Surya, Chandra, Mangala, Budha, Guru, Shukra,
+Shani, Rahu, Ketu and Lagna under Vedic, the Hour Marker under Hellenistic.
+**Display only**: every key, lookup, reading and Oracle dossier still goes by
+the Western name, so `studyName()` must never be used as a key.
 
 ## The reader chooses the house system, and Whole Sign is where it starts
 Decided by the owner on 4 November 2026: the Astropedia has a House Systems
@@ -6234,21 +6332,26 @@ not drawn. `hdSceneSync()` runs from the one `componentDidUpdate`.
 
 **It draws the model, never its own chart.** `this._hsModel` is built in the
 wiring vals from the same `hdChart()` the SVG reads: the nine centres at the
-SVG's own `BG_POS` boxes, in the shapes the field draws them, coloured from the
-atlas as the SVG colours them; all thirty six channels; every activation with
+SVG's own `BG_POS` boxes, in the shapes the field draws them; all thirty six channels; every activation with
 its gate and line. Centres keep the chart's own definition in every layer, as
 the SVG does; gates and channel halves follow the layer. The one thing the scene
 is handed besides the model is the sky now (`setSky`), the same minute's
 hd-transit reading the gates card on Today reads.
 
-**A channel is two halves and a half lights from its own gate**: Personality in
-`--tx`, Design in `--hd-des`, a gate held by both as a braid of the two, and the
-sky now in `--blue`, dashed. That is how a hanging gate reads, as half a channel
-reaching for somebody else, and it is why the scene draws all thirty six rather
-than only the defined ones. `--hd-des` (`#df9a5f`) is a fixed hue declared in all
-three roots beside the ledger hues: the tradition's design red sits on
-`--crisis`, which nothing but safety may go near. It is a fill and a stroke,
-never text. Gates sit on the edge of their centre facing the centre their first
+**A channel is two halves and a half lights from its own gate**, in the one
+blue the 2D wiring and the Atlas draw (6 November 2026): a half the reader holds
+is `--atmc` whichever side holds it, and every other half is `--chl` (the
+scene's dashed `--blue` sky half is dormant: see "Human Design has no sky now"). A defined centre is `--atmc` with a brighter
+`--atmc` edge, an open one glass over a faint `--atmc` wash in a `--chl` edge,
+and the open glass still takes on the light of the defined centres it reaches.
+The reader's gates and activations are white (`--tx`); Personality and Design
+are told apart by their columns, their headings and the layer control, not by
+colour, so the stage carries no colour key. The Wheel's cells light in `--atmc`.
+That is how a hanging gate reads, as half a channel reaching for somebody else,
+and it is why the scene draws all thirty six rather than only the defined ones.
+`--hd-des` (`#df9a5f`) is still declared in all three roots, beside the ledger
+hues, for the activation sheet: the tradition's design red sits on `--crisis`,
+which nothing but safety may go near. Gates sit on the edge of their centre facing the centre their first
 channel runs to, with the channels between one pair of centres kept parallel
 (`layoutGates`), and a channel whose straight path would cross a third centre
 bows toward the reader to pass in front of it.
@@ -6665,15 +6768,19 @@ glow in `--atmc2`, so the glow is the identity's own; under reduced motion
 they simply appear. The dialog's two buttons read Advanced and Expert, and the
 dialog and the Observatory still place every point.
 
-**The view switch and the lock live in a rail inside the chart**
-(`data-chart-rail`, top right of the drawing, both charts, both shells): the
-views as a small vertical radiogroup (2D, Orbital, 3D, and the study's own
-first view, named Rashi, Pillars or Sun), and under it a lock that holds the
-page still so a finger turns the chart freely (`csFree`/`hsFree`, the same
+**The view switch and the lock sit in the card's bar, never on the drawing**
+(the owner, 6 November 2026: "Make sure the vertical menu and lock screen
+button do not lay over the chart itself"). `data-chart-rail` was a vertical
+column over the top right of the chart for one day; it is now a row at the
+right end of the bar above the drawing, both charts, both shells: the views as
+a small horizontal radiogroup (2D, Orbital, 3D, and the study's own first
+view, named Rashi, Pillars or Sun), and beside it a lock that holds the page
+still so a finger turns the chart freely (`csFree`/`hsFree`, the same
 `setExplore()` Free look used; offered in the deep views on every device).
-The Human Design card keeps only Design / Personality / Both above its
-drawing. A native view pads its right edge (`railPad`) so the rail sits
-beside the square, not on it. **3D turns a full circle in every direction**:
+The bar wraps, so on a phone the views take their own line under the detail
+switch. `railPad` is 0 now and kept only so the markup hole still resolves.
+The Expanded Chart dialog keeps its own rail in the wheel square's corner.
+**3D turns a full circle in every direction**:
 pitch is not clamped, the camera's up vector turns with it, and the reset
 homes the short way round.
 
@@ -7205,7 +7312,7 @@ with `aria-haspopup` and `aria-expanded`. On the desktop the list drops from the
 icon; on the phone it is a bottom sheet, because `[data-vt-modals]` makes every
 vertical dialog one and a dropdown there would be the one dialog that is not.
 
-**Profile opens the card**, which is the old profile sheet headed by who the
+**The profile in use stands alone** (the owner, 6 November 2026): the Settings profile list and the card's "Who are we reading for?" list name only the other profiles, and the heading is not drawn when there are none. Editing the profile in use is the Edit button on its own card in Settings. **Profile opens the card**, which is the old profile sheet headed by who the
 chart says the reader is: the big three, the Human Design type, the Life Path,
 and a motto. Under it sits what the sheet already held, the profiles on the
 device, Change your picture, Phone number and Delete this profile, less Log
@@ -7830,7 +7937,7 @@ home page was the wordmark, "enter here" and, from the markup, the SIGNAL LOST
 line. Its head now carries a title, a description, a canonical address, Open
 Graph and Twitter tags with `og-image.jpg` (cut from the horizontal lockup in
 `inCommon Logo/identity/`, 1200x630), icon links, and JSON-LD naming the
-WebSite and INCOMMON LLC. The SIGNAL LOST text is written by the 9 second
+WebSite and Kin Common LLC. The SIGNAL LOST text is written by the 9 second
 timer rather than sitting in the markup.
 
 **The cover links them, once, under the legal links** (`.learn`, the owner,
@@ -7883,7 +7990,7 @@ branch deploys are other hosts and are not redirected. If the address moves, cha
 the three together, then submit the sitemap again in Search Console.
 Description copy follows the voice rules: no method, no fate, no dash.
 
-## About is in the profile menu
+## About Us is in the profile menu, and nowhere else
 Asked for by the owner on 5 November 2026: an About page that does not get in
 the way of the tabs, in the profile icon's menu, "dedicated and decorated
 according to the concept of gaining insight". The menu row sits after Settings
@@ -7893,7 +8000,7 @@ where they meet, faint rays, a twinkling field, `data-pl` so it breathes by
 opacity only and is still under reduced motion), then what inCommon is, insight
 rather than instruction, the name, and the four places it holds. It says what
 inCommon is and never how anything is worked out, by "No disclaimers", and it
-carries no legal link, so K55's counts are unchanged. **It has no subheaders and nothing on it is gray** (the owner, 5 November 2026: "No grayed subheaders", then "None of those gray-now-purple headers ... Regular paragraph format is fine"): the three sections are plain paragraphs with no label and no rule beside them, the company name stands alone without a "Kept by" label, and the tile lines and the credit line wear `--tx`. Only the "About" kicker over the title stays. **The company line is
+carries no legal link, so K55's counts are unchanged. **It is called About Us, and Settings has no About card** (the owner, 6 November 2026: "About page should be called About Us, remove it from settings since it's in the drop down icon"): the menu row, the dialog's name, its close control and its kicker say About Us, and the About inCommon card that headed Settings in both shells is gone. Do not put an About card back on Settings. **It has no subheaders and nothing on it is gray** (the owner, 5 November 2026: "No grayed subheaders", then "None of those gray-now-purple headers ... Regular paragraph format is fine"): the three sections are plain paragraphs with no label and no rule beside them, the company name stands alone without a "Kept by" label, and the tile lines and the credit line wear `--tx`. Only the "About" kicker over the title stays. **The company line is
 `ABOUT_COMPANY`**, empty until the owner confirms the legal name: while it is
 empty the "Kept by" line is not drawn and only the credit line shows. Measured
 with the harness's own `contrastFails()` and `tapTargets()` over the dialog,
@@ -7926,3 +8033,57 @@ aspect sheet fall back to; `ASP_CLOSE` is untouched. Anything drawn over the
 flight carries `data-flight-off`, which `Flight.claimedElsewhere()` honours,
 or W in the cabin would fly the camera behind it. Escape closes the book, a
 glance, then the window, then the Observatory.
+
+## The reader's place is kept between the Library and My Charts
+Asked for by the owner on 6 November 2026: "let the user ping pong back and
+forth between a section of the library and their chart without losing their
+place", and a lesson that names a gate the reader holds opens a window on that
+gate that returns them where they left off.
+
+**A first press on the Library or My Charts resumes** (`TAB_RESUME`,
+`tabResume()`): the room, the entry and the scroll the reader left, with only
+what floats over a screen closed. Every other tab still opens at its root on a
+first press, and a second press on any tab is still the fresh start
+(`navAgain()`, which also drops the pill). This reverses "Tapping a tab returns
+to the root of that tab" for these two tabs only.
+
+**The scroll is kept by template id** (`placeSync()`, `placeRecord()`,
+`placeRestore()`, from the one `componentDidUpdate`). A capture listener records
+each scroller's `scrollTop` against `placeKey()` (the section, the room and the
+entry open in it) by its `data-dc-tpl`, which is the same each time the markup
+is drawn. On a crossing between sections every remembered scroller is put back,
+four tries over about a second, and a press, wheel or key after the arrival
+cancels them. The phone's section column (`[data-vt-scroll]`) and anything
+sideways are never touched. On the phone a scroll is recorded only inside the
+section on screen, because the section left behind shrinks as its room closes
+and that clamp is not the reader. `hdAtlasTo()` sets `_placeSkip`, because it
+lands on an entry of its own.
+
+**The place pill** (`pingBack`, `pingVals()`): a crossing between the Library
+and My Charts, by any route, leaves a pill in the section arrived at naming
+where the reader came from, "Back to Inadequacy, intimacy and fate" or "Back to
+your wiring". Pressing it restores that section's own keys only (the chart's
+bag never closes the Library's room, nor the other way) and leaves the pill
+pointing back, so it ping pongs. Any other crossing drops it. It sits in the
+desktop header beside the title, and on the phone above the dock, centred, clear
+of the help square.
+
+**A line about the reader's own wiring opens a window** (`atlasRec`,
+`atlasRecVals()`, the `arw*` vals; `rec*` belongs to the voice recorder). Under
+In your chart, a line naming a gate (a held gate of a study claim, a hanging
+gate of a channel, an activation, a Cross gate) or a centre opens it; the rest
+still go to the wiring, and the pill brings the reader back. A study claim gives
+each held gate its own line. The window says what it is, how it sits in your
+chart (each activation and its line, the centre defined or open, each channel
+complete or hanging) and what you might meet (the gate's low and high
+expressions), then the sky now when the sky is on it. **Every word is the
+Atlas's own or the reader's chart**: it makes no Human Design claim
+`hd-atlas.js` does not. Back to where you were closes it and changes nothing
+underneath, so the folio is where it was and focus returns to the line
+(`trapRelease`); See gate N in your wiring goes to the chart with that gate's
+own panel open (`hdSel`).
+
+`tools/drive-place.js` (PL1 to PL6) drives all of it at a desktop's size and an
+iPhone's, and measures the window and the pill with the harness's own
+`contrastFails()` and `tapTargets()` over four identities, hardened and not, at
+1440 and 375: 32 cases, clean on 6 November 2026.

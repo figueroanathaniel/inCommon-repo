@@ -149,7 +149,7 @@
        'Sincerity clears the blood and the fear goes with it.',
        'Held by loyalty rather than by arrangement, and better off for what the neighbour has.',
        'The rain has come and it stops. Push now and it turns.']],
-    10: ['Treading', 'Lu', 'lake', 'heaven',
+    10: ['Treading', 'L\u00fc', 'lake', 'heaven',
       'Conduct in a dangerous position: treading on the tiger\'s tail. The tradition says the tiger does not bite, and the reason is manner, not luck.',
       'Heaven above the lake, a difference in height that cannot be argued with. The reading is that a person acts by knowing where they actually stand.',
       'Where are you standing, and are you behaving as though you know it?',
@@ -609,7 +609,7 @@
        'Stars at noon again, and this time meeting an equal. Good fortune.',
        'What is coming brings recognition with it. Good fortune, and it arrives rather than being taken.',
        'The house at its fullest and screened off. Three years and nobody seen. Abundance turned into a wall.']],
-    56: ['The Wanderer', 'Lu', 'mountain', 'fire',
+    56: ['The Wanderer', 'L\u00fc', 'mountain', 'fire',
       'A stranger passing through, with no standing and no claim on anyone. The tradition says success in small things only, and that the wanderer\'s safety is made entirely of their own conduct.',
       'Fire on the mountain, burning through and moving on. The reading is that a person is clear-minded and cautious in imposing penalties, and does not protract lawsuits.',
       'Where are you a stranger, and are you behaving like one?',
@@ -804,12 +804,14 @@
     return null;
   }
   function search(raw, limit) {
-    var q = String(raw || '').trim().toLowerCase();
+    /* Pinyin carries a diaeresis (Lü), and a reader types lu: fold marks off both sides. */
+    var fold = function (x) { return String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); };
+    var q = fold(String(raw || '').trim());
     if (!q) return [];
     var out = [];
     for (var n = 1; n <= 64; n++) {
       var h = HEX[n];
-      if (String(n) === q || h[0].toLowerCase().indexOf(q) > -1 || h[1].toLowerCase().indexOf(q) > -1) out.push(hexagram(n));
+      if (String(n) === q || fold(h[0]).indexOf(q) > -1 || fold(h[1]).indexOf(q) > -1) out.push(hexagram(n));
     }
     return limit ? out.slice(0, limit) : out;
   }

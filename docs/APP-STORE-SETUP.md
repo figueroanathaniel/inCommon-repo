@@ -118,13 +118,15 @@ resources, which no single app in that category combines.
 |---|---|---|
 | Developer account | US$99 a year | US$25 once |
 | As a person | Your own name shows as the seller | Your name, and your address if the app sells anything |
-| As a company | Needs the LLC and a D-U-N-S number (free from Dun & Bradstreet, takes days) | Needs the LLC and a D-U-N-S number |
+| As a company | Needs Kin Common LLC's D-U-N-S number (free from Dun & Bradstreet, takes days) | Needs Kin Common LLC's D-U-N-S number |
 | Before release | App Review | A new personal account must run a closed test with at least 12 testers for 14 days before it can publish |
 | Must provide | Privacy policy URL, support URL, privacy "nutrition label", age rating answers | Privacy policy URL, developer contact email (public), Data safety form, account deletion web link, content rating |
 
 The support URL and the public contact email both want the **domain** to be live
-(`docs/LEGAL-SETUP.md`, section 5). Publishing as the LLC keeps your own name and
-home address off both stores (`docs/BUSINESS-SETUP.md`).
+(`docs/LEGAL-SETUP.md`, section 5). Publishing as Kin Common LLC keeps your own name and
+home address off both stores (`docs/BUSINESS-SETUP.md`). Ask for the D-U-N-S
+number under the company's exact registered name: Apple checks the name you
+enroll under against the D-U-N-S record.
 
 **The EU.** Apple and Google both ask whether you are a "trader" under the EU's
 Digital Services Act before an app can be listed in EU storefronts. Anyone who

@@ -65,27 +65,40 @@ home and would rather it were not your home address, ask an accountant or lawyer
 whether a business address (a virtual office or registered agent) can serve as
 the principal place of business for your situation before the notice runs.
 
-## If the LLC is coming soon
+## The LLC is Kin Common LLC
 
-`docs/LEGAL-SETUP.md` plans for inCommon to move into an LLC. An LLC is
-registered on Sunbiz too (Articles of Organization), and a registered LLC
-trading under its exact registered name needs no fictitious name. It does need
-one to trade as plain "inCommon" if its registered name is, say, "inCommon
-LLC", so the newspaper step comes back either way.
+inCommon belongs to **Kin Common LLC**, a Florida LLC registered on Sunbiz.
+The application was first made as "INCOMMON LLC", and Sunbiz asked for a
+different name, so no company of that name exists. Three things follow from
+that and are worth doing in this order:
 
-If the LLC is only weeks away, it may be simpler to form it first and register
-the fictitious name once, under the LLC. An LLC is also what lets the iPhone app
-be published under the company's name instead of yours: Apple asks an
-organisation for a D-U-N-S number (`docs/APP-STORE-SETUP.md`).
+1. **Correct the EIN.** The IRS notice was issued to "INCOMMON LLC", with the
+   owner's first name misspelled. Ask the IRS to change the business name to
+   Kin Common LLC and fix the spelling, then ask for a 147C letter, which
+   confirms the EIN against the corrected name. A bank and Stripe both match
+   the business name and EIN against the IRS record, so open neither until
+   the letter is in hand.
+2. **Register "inCommon" as a fictitious name of Kin Common LLC.** A company
+   trading under anything but its exact registered name needs one, so the
+   newspaper notice and the Sunbiz filing above are made in the company's name
+   rather than yours.
+3. **Move the work into the company.** A written IP assignment from you to Kin
+   Common LLC, so the company owns the code, the writing and the mark, and is
+   the claimant on copyright registrations and the applicant on any trademark
+   filing.
+
+The company is also what lets the iPhone app be published under its name
+instead of yours: Apple asks an organisation for a D-U-N-S number
+(`docs/APP-STORE-SETUP.md`).
 
 ## The rest of the paperwork, briefly
 
 - **A local business tax receipt.** Most Florida counties, and many cities,
   require one for a business run from home. Search your county's name with "local
   business tax receipt". It is usually a small annual fee.
-- **An EIN** from the IRS (free, at irs.gov). Not required for a sole
-  proprietor without employees, but it lets you give Stripe, Apple and Google a
-  business number instead of your Social Security number.
+- **An EIN.** Kin Common LLC has one; correct its name first (above). It is the
+  number Stripe, Apple and Google are given instead of your Social Security
+  number.
 - **Income tax.** Luminary income goes on Schedule C, with self employment tax,
   and quarterly estimated payments once you owe more than a small amount. Stripe
   sends a 1099-K. An accountant is worth an hour here.

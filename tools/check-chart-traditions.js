@@ -5,7 +5,15 @@
    CT2 the lunar new year against tools/fixtures/chinese-new-year.json, every
    year from 1900 to 2100. CT3 the sexagenary day (1949-10-01 Jia-Zi,
    2000-01-01 Wu-Wu). CT4 the Four Pillars month by the Five Tigers rule.
-   CT5 nakshatras and Vimshottari sum to 120 years. CT6 ten studies, unique keys. */
+   CT5 nakshatras and Vimshottari sum to 120 years. CT6 ten studies, unique keys.
+   CT7 the navamsa: the modality rule equals the element rule and the
+   continuous count at every 0.001 degree, DekhoPanchang's worked example
+   (Aries 16 43 is part 6, Virgo), HinduTone's table (Taurus 0 is Capricorn),
+   and vargottama where the two signs agree.
+   CT8 zodiacal releasing: the twelve periods sum to 211 years of 360 days,
+   Cancer's level 2 Cancer is 25 months, the loosing of the bond comes 211
+   months into a long period and jumps to the opposite sign, a period under
+   17.6 years has none, and the last subperiod is cut at the parent's end. */
 'use strict';
 const path = require('path');
 const A = require(path.join(__dirname, '../app/astronomy-engine-2.1.19.min.js'));
@@ -27,5 +35,24 @@ row('CT4', fp.year.stem + fp.year.branch === 'JiaZi' && fp.month.stem + fp.month
 const n = T.nakshatra(0.1), v = T.vimshottari(0.1, 2451545, 9), yrs = T.DASHA.reduce((a, d) => a + d[1], 0);
 row('CT5', n.name === 'Ashwini' && n.pada === 1 && n.lord === 'Ketu' && yrs === 120 && v.length === 9 && T.nakshatra(359.9).name === 'Revati');
 row('CT6', T.STUDIES.length === 10 && new Set(T.STUDIES.map(s => s.key)).size === 10);
+{
+  const EL = [0, 9, 6, 3], bad7 = [];
+  for (let i = 0; i < 360000; i++) {
+    const l = i / 1000 + 0.0004, nv = T.navamsa(l), s = Math.floor(l / 30), part = Math.floor((l - s * 30) * 9 / 30);
+    const byEl = (EL[s % 4] + part) % 12, cont = Math.floor(l * 9 / 30) % 12;
+    if (nv.sign !== byEl || nv.sign !== cont || nv.vargottama !== (nv.sign === s)) { bad7.push(l.toFixed(4)); if (bad7.length > 5) break; }
+  }
+  const ex = T.navamsa(16 + 43 / 60), tau = T.navamsa(30.5), ar = T.navamsa(1), le = T.navamsa(120 + 13.5), cnt = (() => { let k = 0; for (let s = 0; s < 12; s++) for (let p = 0; p < 9; p++) if (T.navamsa(s * 30 + p * 30 / 9 + 0.1).vargottama) k++; return k; })();
+  row('CT7', bad7.length === 0 && ex.part === 6 && ex.rashi === T.RASHI[5] && tau.rashi === T.RASHI[9] && ar.vargottama && le.vargottama && cnt === 12,
+    (bad7.length ? 'differ at ' + bad7.join(' ') + '; ' : '') + 'example ' + ex.part + ' ' + ex.rashi + ', taurus0 ' + tau.rashi + ', vargottama ' + cnt);
+}
+{
+  const b = 2451545, Y = T.ZR_YEARS, sum = Y.reduce((a, x) => a + x, 0);
+  const c0 = T.zodiacalReleasing(3, b, b + 1), cl = T.zodiacalReleasing(3, b, b + 211 * 30 + 1), tau = T.zodiacalReleasing(1, b, b + 1);
+  const cap = T.zodiacalReleasing(9, b, b + 27 * 360 - 1), next = T.zodiacalReleasing(3, b, b + 25 * 360 + 1);
+  row('CT8', sum === 211 && Y[9] === 27 && Y[10] === 30 && c0.l2.end - c0.l2.start === 750 && cl.l2.sign === 9 && cl.l2.loosed && cl.loosing === b + 211 * 30 &&
+    tau.loosing === null && cap.l2.end === cap.l1.end && next.l1.sign === 4 && next.l1.start === b + 9000,
+    'sum ' + sum + ', loosing at ' + (cl.loosing - b) + ' days into ' + T.RASHI[cl.l2.sign]);
+}
 console.log(fails ? fails + ' failed' : 'all passed');
 process.exit(fails ? 1 : 0);

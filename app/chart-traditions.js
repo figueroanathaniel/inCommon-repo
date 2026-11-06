@@ -129,6 +129,60 @@
     return null;
   }
 
+  /* Navamsa (D9): each sign in nine parts of 3 degrees 20 minutes, counted
+     from the sign itself when it is movable, from its 9th when fixed and from
+     its 5th when dual. That is the rule HinduTone and DekhoPanchang both
+     teach, and it is the same as counting fire from Aries, earth from
+     Capricorn, air from Libra and water from Cancer, and the same as the
+     continuous count floor(longitude * 9 / 30) mod 12 (CT7 holds all three
+     equal). One translation of BPHS 6.31 reads the verse as movable from
+     Aries, fixed from Leo and dual from Sagittarius; that reading is not
+     followed here. Vargottama: the same sign in the rashi and the navamsa. */
+  const NAV = 30 / 9;
+  function navamsa(sid) {
+    if (sid == null) return null;
+    const l = norm(sid), s = Math.floor(l / 30), part = Math.min(8, Math.floor((l - s * 30) / NAV));
+    const start = s % 3 === 0 ? s : s % 3 === 1 ? (s + 8) % 12 : (s + 4) % 12;
+    const sign = (start + part) % 12;
+    return { sign: sign, rashi: RASHI[sign], part: part + 1, vargottama: sign === s };
+  }
+
+  /* Zodiacal releasing (Vettius Valens, Anthology IV), as Chris Brennan
+     teaches it (theastrologypodcast.com, 11 February 2019) and Stellium
+     documents it: from the sign of a lot, each sign rules a level 1 period
+     of its ruler's minor years (Capricorn 27 and Aquarius 30, the standard;
+     a few tools give Capricorn 30, which Valens does not), in years of 360
+     days. Level 2 starts in the level 1 sign and runs the same numbers in
+     months of 30 days, one twelfth of the parent; the last subperiod is cut
+     at the parent's end. After twelve subperiods the next one starts in the
+     sign opposite the level 1 sign instead, the loosing of the bond, which
+     only a period over 211 months (17.6 years) is long enough to reach.
+     zrYears is indexed Aries = 0. Dates are JD. */
+  const ZR_YEARS = [15, 8, 20, 25, 19, 20, 8, 15, 12, 27, 30, 12];
+  function zodiacalReleasing(lotSign, birthJd, atJd) {
+    if (lotSign == null || birthJd == null || atJd == null || atJd < birthJd) return null;
+    let s1 = ((lotSign % 12) + 12) % 12, start = birthJd, end;
+    for (let guard = 0; guard < 48; guard++) {
+      end = start + ZR_YEARS[s1] * 360;
+      if (atJd < end) break;
+      start = end; s1 = (s1 + 1) % 12;
+    }
+    const l1 = { sign: s1, start: start, end: end };
+    let s2 = s1, t = start, n = 0, loosed = false, l2 = null, lb = null;
+    while (t < end) {
+      if (n === 12) { s2 = (s1 + 6) % 12; loosed = true; lb = t; }
+      const e2 = Math.min(end, t + ZR_YEARS[s2] * 30);
+      if (atJd < e2) { l2 = { sign: s2, start: t, end: e2, loosed: loosed }; break; }
+      t = e2; s2 = (s2 + 1) % 12; n++;
+    }
+    if (lb == null && n < 12) {
+      let tt = start, k = 0, ss = s1;
+      while (k < 12 && tt < end) { tt += ZR_YEARS[ss] * 30; ss = (ss + 1) % 12; k++; }
+      if (k === 12 && tt < end) lb = tt;
+    }
+    return { l1: l1, l2: l2, loosing: lb };
+  }
+
   /* ---- Chinese calendar ---- */
   const STEMS = ['Jia', 'Yi', 'Bing', 'Ding', 'Wu', 'Ji', 'Geng', 'Xin', 'Ren', 'Gui'];
   const BRANCHES = ['Zi', 'Chou', 'Yin', 'Mao', 'Chen', 'Si', 'Wu', 'Wei', 'Shen', 'You', 'Xu', 'Hai'];
@@ -233,8 +287,8 @@
     { key: 'heliocentric', name: 'Heliocentric', zodiac: 'tropical', houses: null, frame: 'helio' }
   ];
 
-  const api = { VERSION: '1.0.0', AYANAMSAS, ayanamsa, dpsi, sidereal, RASHI, NAKSHATRAS, DASHA, DASHA_YEAR, nakshatra, vimshottari,
-    dignity, STEMS, BRANCHES, ANIMALS, ELEMENTS, dayIndex, cstDay, lunarNewYear, animalYear, fourPillars, helio, STUDIES, DEFAULT: 'western' };
+  const api = { VERSION: '1.2.0', AYANAMSAS, ayanamsa, dpsi, sidereal, RASHI, NAKSHATRAS, DASHA, DASHA_YEAR, nakshatra, vimshottari,
+    dignity, navamsa, ZR_YEARS, zodiacalReleasing, STEMS, BRANCHES, ANIMALS, ELEMENTS, dayIndex, cstDay, lunarNewYear, animalYear, fourPillars, helio, STUDIES, DEFAULT: 'western' };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.ChartTraditions = api;
 })(typeof window !== 'undefined' ? window : this);

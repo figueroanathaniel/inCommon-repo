@@ -57,7 +57,7 @@ The registry holds **97 points** in total: the **17** basic points every chart a
 | Echeclus | Ech | erupting secrets, broken silence, revelation |
 | Damocles | Dam | sword overhead, collapse under privilege |
 
-## TNOs & Dwarf Astral Bodies (10)
+## TNOs & Dwarf Planets (10)
 
 | Point | Glyph | Symbolism |
 |---|---|---|
@@ -79,14 +79,14 @@ The registry holds **97 points** in total: the **17** basic points every chart a
 | Lilith (Mean) | ⚸ | black moon, repressed rage, raw feminine power |
 | Lilith (Osculating) | ⚸✦ | black moon, repressed rage (osculating) |
 | Selena | Sel | white moon, purity, spiritual protection |
-| Mercury Node | ☿N | mercury collective karma, communication evolution |
-| Venus Node | ♀N | venus collective karma, relationship evolution |
-| Mars Node | ♂N | mars collective karma, action evolution |
-| Jupiter Node | ♃N | jupiter collective karma, expansion evolution |
-| Saturn Node | ♄N | saturn collective karma, structure evolution |
-| Uranus Node | ♅N | uranus collective karma, freedom evolution |
-| Neptune Node | ♆N | neptune collective karma, transcendence evolution |
-| Pluto Node | ♇N | pluto collective karma, transformation evolution |
+| Mercury Node | ☿N | The node of thought, still learning. |
+| Venus Node | ♀N | Where Venus’s path crosses the Sun’s: the way love and value are still growing. |
+| Mars Node | ♂N | Effort and will, still growing. |
+| Jupiter Node | ♃N | Generosity, still widening. |
+| Saturn Node | ♄N | Strength, still ripening. |
+| Uranus Node | ♅N | Change, still finding its form. |
+| Neptune Node | ♆N | The longing for something larger, still deepening. |
+| Pluto Node | ♇N | The power to change, still gathering. |
 
 ## Comets (Mundane) (3)
 
