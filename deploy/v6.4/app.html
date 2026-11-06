@@ -51159,7 +51159,7 @@ class Component extends DCLogic {
         const nn = gr.find(r => r.name === 'North Node');
         if (nn) { const k = this.norm360(sid(nn.lon) + 180), n = T.nakshatra(k); rows.push('Ketu ' + dm(k) + ' ' + T.RASHI[Math.floor(k / 30)] + (lagnaSign == null ? '' : ' (bhava ' + (((Math.floor(k / 30) - lagnaSign + 12) % 12) + 1) + ')') + ', ' + n.name + ' pada ' + n.pada); }
         out.push('VEDIC SIDEREAL CHART (Lahiri ayanamsa ' + ay.toFixed(4) + '\u00b0, whole sign bhavas, mean Rahu): ' + (lagna == null ? 'Lagna unknown (no birth time); ' : 'Lagna ' + dm(lagna) + ' ' + T.RASHI[lagnaSign] + ', ' + T.nakshatra(lagna).name + '; ') + rows.join('; '));
-        out.push('DREKKANA (D3, Parashara: the sign, its 5th, its 9th): ' + gr.map(r => { const s = sid(r.lon), si = Math.floor(s / 30), d = Math.floor((s % 30) / 10); return nm(r) + ' in ' + T.RASHI[(si + 4 * d) % 12]; }).join('; '));
+        out.push('DREKKANA (D3, Parashara, the sign, its 5th, its 9th): ' + gr.map(r => { const s = sid(r.lon), si = Math.floor(s / 30), d = Math.floor((s % 30) / 10); return nm(r) + ' in ' + T.RASHI[(si + 4 * d) % 12]; }).join('; '));
         if (T.navamsa) {
           const nv = l => { const q = T.navamsa(l); return q.rashi + (q.vargottama ? ' (vargottama)' : ''); };
           out.push('NAVAMSA (D9, nine parts of 3\u00b020\u2032, counted from a movable sign itself, a fixed sign\u2019s 9th, a dual sign\u2019s 5th): ' +
@@ -51277,6 +51277,21 @@ class Component extends DCLogic {
       hmLine: pick.line, hmPairs: v.pairs, hmPairsOn: v.pairs.length > 0, hmPairsOff: !v.pairs.length,
       hmRows: v.rows };
   }
+  /* Which rows of the study card each lesson opens onto. A lesson with no
+     entry here shows nothing of the reader's own, because nothing the app
+     computes answers it yet. */
+  LESSON_YOURS = {
+    'The Nine Grahas': /^Vedic Sidereal Chart/, 'The Twelve Rashis': /^Vedic Sidereal Chart/, 'The Lagna and the Bhavas': /^Vedic Sidereal Chart/,
+    'The Sidereal Zodiac and the Ayanamsa': /^Vedic Sidereal Chart/, 'The Nakshatras and Their Padas': /^Janma Nakshatra/,
+    'The Vimshottari Dasha': /^Janma Nakshatra/, 'Gochara, the Transits': /^Current Sky/, 'The Vargas and the Navamsa': /^(Navamsa|Drekkana)/,
+    'The Ten Heavenly Stems': /^Chinese Four Pillars/, 'The Twelve Earthly Branches': /^Chinese (Four Pillars|Zodiac)/,
+    'The Four Pillars and the Sixty Cycle': /^Chinese Four Pillars/, 'The Day Master': /^Chinese Four Pillars/,
+    'Sect, Day and Night': /^Hellenistic/, 'The Ruler of the Hour Marker': /^Hellenistic/, 'Annual Profections': /^Annual Profection/,
+    'The Lots of Fortune and Spirit': /^Zodiacal Releasing/, 'Zodiacal Releasing': /^Zodiacal Releasing/,
+    'Why the Stars': /^Western Sidereal Chart/, 'The Ayanamsa and Its Anchor': /^Western Sidereal Chart/,
+    'The Dragon\u2019s Chart': /^Draconic Chart/, 'The Sun, the Moon and the Rising Sign': /^Draconic Chart/, 'Laying It Over the Birth Chart': /^Draconic Chart/,
+    'The Chart Seen From the Sun': /^Heliocentric Chart/, 'What Drops Away': /^Heliocentric Chart/
+  };
   studyPanelVals() {
     const off = { stOn: false, stTitle: '', stGroups: [] }, x = this.chartStudyOf();
     if (!x || ['western', 'placidus', 'koch', 'equal'].indexOf(x.key) !== -1) return off;
@@ -56841,6 +56856,17 @@ class Component extends DCLogic {
       const L = this.apStudyLessons(), x = L.lessons[e.li];
       kicker = 'Lesson ' + (e.li + 1) + ' of ' + L.lessons.length + ' · ' + x.band + ' · ' + x.pace;
       epi = x.term; lead = x.text; dropcap = true;
+      /* The lesson opens onto the reader's own chart as the study casts it:
+         the rows the study card on the astrology page draws, matched to the
+         lesson by what it teaches, each going to that card. */
+      const pat = this.LESSON_YOURS[x.name];
+      if (pat && !this.usingSampleBirth()) {
+        const toCard = this.searchGo(this.searchSpirit('astrology', 1));
+        (this.studyPanelVals().stGroups || []).filter(g => pat.test(g.title)).forEach(g => g.items.slice(0, 4).forEach(it => {
+          const t = it.t.replace(/\.$/, ''), c = t.indexOf(': ');
+          yours.push({ label: c > 0 && c < 40 ? t.slice(0, c) : g.title, text: c > 0 && c < 40 ? t.slice(c + 2) : t, go: toCard });
+        }));
+      }
     } else if (e.kind === 'essay') {
       essay = e.ess === 'orbs' ? [{ head: '', hasHead: false, rows: [A.ORBS.what, A.ORBS.how, A.ORBS.custom].map(t => ({ t: t })) }]
         : this.apBlocks(e.ess).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));

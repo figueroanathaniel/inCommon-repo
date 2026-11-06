@@ -5924,7 +5924,10 @@ the Western chapters are untouched. A lesson is `kind: 'lesson'`, keyed
 `lesson:<study>:<n>`, drawn like a concept with its band and pace as the
 kicker and its term as the epigraph. `apEntries()` is memoised per study
 (`_apEntK`), so changing the study rebuilds it. The ranking, its method and
-every source are `docs/astro-upgrade/04-study-education-sources.md`; the bands
+every source are `docs/astro-upgrade/04-study-education-sources.md`. A lesson
+whose subject the study card computes shows those rows as its own "In your
+chart" (`LESSON_YOURS`, keyed by lesson name, so a renamed lesson loses them),
+each going to the card; never under the sample. The bands
 are a reading of course outlines, not a tally, and the doc says so. No lesson
 names a fact no source was read for (the hidden stems, the releasing periods).
 

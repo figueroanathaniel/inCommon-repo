@@ -94,8 +94,12 @@ Facts in the lessons:
 
 ## Not done
 
-- No lesson is tied to the reader's own chart yet (for example opening the
-  reader's nakshatra from the nakshatra lesson).
+- Lessons tied to the reader's own chart (6 November 2026): 24 of the 49
+  lessons show the rows of the study card that answer them (`LESSON_YOURS`),
+  each going to that card on the astrology page, and nothing under the
+  sample chart. The rest, the panchanga, yogas, drishti, the Ten Gods, the
+  luck pillars and the like, show nothing of the reader's own because the
+  app does not compute them.
 - The navamsa is computed for the Vedic study (6 November 2026): each
   graha's D9 sign and vargottama, in the dossier and the study card, by the
   rule HinduTone (hindutone.com/astrology/navamsa-chart-d9-explained/) and
