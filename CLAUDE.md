@@ -5639,7 +5639,7 @@ under a title is the value itself in the reading face, italic and in --tx
 reading type too. The field study's two questions are questions in the
 reading face. The epigraph is not a row between hairlines either ("No
 eyebrows, meaning no ---- How to meet the moment ----"): it sits in the title
-column under the kicker, italic 13px in the reading face. Do not put an
+column between the title and the kicker, italic 13px in the reading face, and the kicker under it is 11.5px. Do not put an
 uppercase label or a ruled line back on these pages.
 
 **The wiring is drawn one way in the Atlas and on My Charts** (same day):
