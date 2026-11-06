@@ -1729,6 +1729,29 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
         </section>
       </sc-if>
+      <!-- HARMONIC CHARTS (6 November 2026). -->
+      <sc-if value="{{ hmOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="{{ hmTitle }}" data-lift="box" style="display:flex;flex-direction:column;gap:10px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
+          <h3 style="margin:0;font:400 18px/1.3 var(--fd);color:var(--tx)">{{ hmTitle }}</h3>
+          <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which harmonic" style="display:flex;gap:5px">
+            <sc-for list="{{ hmTabs }}" as="h" hint-placeholder-count="4">
+              <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase">{{ h.label }}</button>
+            </sc-for>
+          </div>
+          <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ hmLine }}</p>
+          <sc-if value="{{ hmPairsOn }}" hint-placeholder-val="{{ false }}">
+            <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px">
+              <sc-for list="{{ hmPairs }}" as="q" hint-placeholder-count="3"><li style="display:flex;align-items:baseline;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></li></sc-for>
+            </ul>
+          </sc-if>
+          <sc-if value="{{ hmPairsOff }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">No two bodies meet in this harmonic.</p>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
+            <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="10"><div style="display:flex;align-items:baseline;gap:7px;min-height:24px"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span></div></sc-for>
+          </div>
+        </section>
+      </sc-if>
       <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
            Today and opens from the chart it reads. -->
       <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
@@ -8768,7 +8791,30 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-for>
             </section>
           </sc-if>
-          <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
+          <!-- HARMONIC CHARTS (6 November 2026). -->
+          <sc-if value="{{ hmOn }}" hint-placeholder-val="{{ false }}">
+            <section aria-label="{{ hmTitle }}" data-lift="box" style="display:flex;flex-direction:column;gap:10px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
+              <h3 style="margin:0;font:400 18px/1.3 var(--fd);color:var(--tx)">{{ hmTitle }}</h3>
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which harmonic" style="display:flex;gap:5px">
+                <sc-for list="{{ hmTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase">{{ h.label }}</button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ hmLine }}</p>
+              <sc-if value="{{ hmPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px">
+                  <sc-for list="{{ hmPairs }}" as="q" hint-placeholder-count="3"><li style="display:flex;align-items:baseline;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ hmPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">No two bodies meet in this harmonic.</p>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="10"><div style="display:flex;align-items:baseline;gap:7px;min-height:24px"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span></div></sc-for>
+              </div>
+            </section>
+          </sc-if>
+      <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
                Today and opens from the chart it reads. -->
           <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
             <div data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
@@ -18938,6 +18984,55 @@ class Component extends DCLogic {
      Western studies add nothing the wheel does not already draw, so they show
      nothing here. A bracket in a heading names the method, which the page
      does not print. */
+  /* HARMONIC CHARTS (6 November 2026). Every longitude multiplied by the
+     harmonic and folded back into the circle, as Addey, Hamblin and the
+     software that follows them compute it, so a fifth or a seventh of the
+     circle becomes a meeting. The four offered are the ones the sources name
+     as most read. HARM_ORB is the orb in the harmonic chart itself, the same
+     6 degrees app/ephemeris/harmonic.ts uses; none of the sources read gives
+     one, and the owner was asked. */
+  HARM_ORB = 6;
+  HARM_SET = [
+    { n: 4, label: '4th', line: 'Effort and pressure, the places where you push against something until it gives.' },
+    { n: 5, label: '5th', line: 'Making and style, the way your hands and mind like to put things in order.' },
+    { n: 7, label: '7th', line: 'Imagination and inspiration, what arrives before it can be reasoned into place.' },
+    { n: 9, label: '9th', line: 'Understanding and joy, what ripens over time and asks to be shared.' }
+  ];
+  harmonicVals() {
+    const off = { hmOn: false, hmTabs: [], hmLine: '', hmPairs: [], hmPairsOn: false, hmPairsOff: false, hmRows: [], hmTitle: '' };
+    const x = this.chartStudyOf && this.chartStudyOf();
+    if (x && ['vedic', 'chinese', 'heliocentric'].indexOf(x.key) !== -1) return off;
+    const pick = this.HARM_SET.find(h => h.n === this.state.hmN) || this.HARM_SET[0];
+    const memo = this.chartStamp() + '|' + pick.n;
+    if (this._hmMemo !== memo) {
+      const t = this.t2000(this.natalDate());
+      const bodies = this.chartAt(this.natalDate()).filter(r => r.name.indexOf('Node') === -1 && Number.isFinite(r.lon));
+      /* Multiplied in the study's own zodiac, so a sidereal or draconic
+         reader's harmonic is of the positions their chart shows. */
+      const off = this.zodiacOff ? (this.zodiacOff(t) || 0) : 0;
+      const hl = bodies.map(r => ({ name: r.name, glyph: r.glyph, lon: this.norm360((r.lon - off) * pick.n) }));
+      const fmt = lon => { const s = this.signOf(this.norm360(lon + off), t), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60);
+        return d + '\u00b0 ' + String(m).padStart(2, '0') + '\u2032 ' + s.sign; };
+      const pairs = [];
+      for (let i = 0; i < hl.length; i++) for (let j = i + 1; j < hl.length; j++) {
+        let d = Math.abs(hl[i].lon - hl[j].lon); if (d > 180) d = 360 - d;
+        if (d <= this.HARM_ORB) pairs.push({ key: hl[i].name + '|' + hl[j].name, orb: d,
+          g: hl[i].glyph + ' ' + hl[j].glyph, t: hl[i].name + ' and ' + hl[j].name,
+          o: d < 1 ? 'within a degree' : Math.round(d) + '\u00b0 apart' });
+      }
+      pairs.sort((a, b) => a.orb - b.orb);
+      this._hmMemo = memo;
+      this._hmVals = { pairs: pairs, rows: hl.map(r => ({ key: r.name, g: r.glyph, name: r.name, pos: fmt(r.lon) })) };
+    }
+    const v = this._hmVals;
+    return { hmOn: true, hmTitle: 'Your harmonics',
+      hmTabs: this.HARM_SET.map(h => ({ key: 'h' + h.n, label: h.label, on: h.n === pick.n,
+        bg: h.n === pick.n ? 'rgba(var(--atmc),.32)' : 'var(--sf2)',
+        bd: h.n === pick.n ? 'rgba(var(--atmc),.9)' : 'var(--bd)',
+        go: () => this.setState({ hmN: h.n }) })),
+      hmLine: pick.line, hmPairs: v.pairs, hmPairsOn: v.pairs.length > 0, hmPairsOff: !v.pairs.length,
+      hmRows: v.rows };
+  }
   studyPanelVals() {
     const off = { stOn: false, stTitle: '', stGroups: [] }, x = this.chartStudyOf();
     if (!x || ['western', 'placidus', 'koch', 'equal'].indexOf(x.key) !== -1) return off;
@@ -33345,6 +33440,7 @@ class Component extends DCLogic {
           ...this.cycleWidgetVals(),
           ...this.skyWeatherVals(),
           ...this.studyPanelVals(),
+          ...this.harmonicVals(),
           ...this.cycleSheetVals(),
           ...this.tarotLibVals(),
           ...this.dreamLibVals(),

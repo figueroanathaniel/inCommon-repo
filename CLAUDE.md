@@ -3713,6 +3713,16 @@ arithmetic `ascAt()` now calls, so the derived Ascendant uses the same code.
 Checked against swisseph-wasm for a 1985 San Juan and 1981 New York pair: every
 body, both Midheavens and both Ascendants to the arcminute.
 
+**Harmonic charts are a card on the astrology page** (6 November 2026), "Your
+harmonics", under the chart study card in both shells (`harmonicVals()`,
+`HARM_SET`, state `hmN`, not kept). The 4th, 5th, 7th and 9th, the ones the
+sources read name as most used: each body's longitude in the study's own zodiac
+multiplied by the harmonic and folded into the circle, and the pairs that meet
+within `HARM_ORB`, 6 degrees in the harmonic chart, the orb
+`app/ephemeris/harmonic.ts` already used. No source read gives an orb, so the
+number was put to the owner. Not drawn for Vedic, Chinese or Heliocentric.
+Positions checked against swisseph-wasm to the arcminute.
+
 ## The sky weather, and the star clusters among the bodies
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
 (cazimis, moon phases, stations, meteor showers, alignments, the clusters),
