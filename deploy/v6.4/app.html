@@ -49736,9 +49736,12 @@ class Component extends DCLogic {
      day after birth for each lunar month of life, the tropical month of
      27.32158 days (kerykeion.net, Astro*Index). One body walks the same path in
      both; only the clock under it changes. */
+  /* Mercury, Venus and Mars progress too (secondary only): slower than the
+     Moon, and the three that can station, so a crossing may run backward and
+     a turn of direction in the progressed chart is read as its own event. */
   progressedHandoff(name, kind) {
-    if (name !== 'Sun' && name !== 'Moon') return null;
-    const ter = kind === 'tertiary';
+    const ter = kind === 'tertiary', inner = ['Mercury', 'Venus', 'Mars'].indexOf(name) !== -1;
+    if (name !== 'Sun' && name !== 'Moon' && !(inner && !ter)) return null;
     const nd = this.natalDate();
     if (!nd || isNaN(nd.getTime())) return null;
     const timed = !!this.ascendant();
@@ -49750,33 +49753,56 @@ class Component extends DCLogic {
     const age = (Date.now() - nd.getTime()) / YR;
     if (!(age > 0)) return (memo[mk] = null);
     const sgn = y => this.signOf(this.lonOf(name, tN + y), tN + y).idx;
-    const step = ter ? (name === 'Sun' ? 1 : 0.1) : (name === 'Sun' ? 1 : 0.2);
+    const step = ter ? (name === 'Sun' ? 1 : 0.1) : (name === 'Sun' ? 1 : inner ? 0.5 : 0.2);
     const edge = (a, b) => { const s = sgn(a); for (let k = 0; k < 30; k++) { const m = (a + b) / 2; if (sgn(m) === s) a = m; else b = m; } return b; };
     const find = (from, dir, lim) => { const s0 = sgn(from); for (let y = from; dir > 0 ? y < from + lim : y > Math.max(0, from - lim); y += dir * step) {
       const y2 = dir > 0 ? y + step : Math.max(0, y - step); if (sgn(y2) !== s0) return dir > 0 ? edge(y, y2) : edge(y2, y); if (y2 === 0) break; } return null; };
     const lonNow = this.norm360(this.lonOf(name, tN + age)), sNow = this.signOf(lonNow, tN + age), si = sNow.idx, sign = this.SIGNS12[si];
-    const natalSi = sgn(0), last = find(age, -1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 95 : 3.5)), next = find(age, 1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 40 : 3.5));
+    const natalSi = sgn(0), last = find(age, -1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 95 : inner ? 100 : 3.5)), next = find(age, 1, ter ? (name === 'Sun' ? 36 : 3) : (name === 'Sun' ? 40 : inner ? 60 : 3.5));
     const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const when = y => { const d = new Date(nd.getTime() + y * YR); return timed ? 'in ' + MON[d.getMonth()] + ' ' + d.getFullYear() : 'around ' + d.getFullYear(); };
     const old = y => { const n = Math.floor(y * YR / YEAR); return n < 1 ? 'in your first year' : 'the year you turned ' + n; };
-    const gone = Math.floor(sNow.deg), ahead = 30 - sNow.deg;
+    /* Which way each crossing ran: a crossing is forward when the sign after
+       it follows the sign before it. The Sun and the Moon always run forward. */
+    const E = 1e-4, fromL = last == null ? null : sgn(last - E), backIn = last != null && (fromL + 11) % 12 === si;
+    const toN = next == null ? null : sgn(next + E), backOut = next != null && toN === (si + 11) % 12;
+    const gone = Math.floor(backIn ? 30 - sNow.deg : sNow.deg), ahead = 30 - sNow.deg;
     const nm = (ter ? 'tertiary ' : 'progressed ') + name, paras = [];
     if (last != null) {
-      const from = this.SIGNS12[(si + 11) % 12];
-      paras.push('Your ' + nm + ' crossed from ' + from + ' into ' + sign + ' ' + when(last) + ', ' + old(last) + ', and has walked ' + (gone < 1 ? 'less than a degree' : gone === 1 ? 'one degree' : gone + ' degrees') + ' of it since.');
-      paras.push(this.HANDOFF_PAIR[(si + 11) % 12]);
+      const from = this.SIGNS12[backIn ? fromL : (si + 11) % 12];
+      if (backIn) paras.push('Your ' + nm + ' turned back out of ' + from + ' into ' + sign + ' ' + when(last) + ', ' + old(last) + ', and has walked ' + (gone < 1 ? 'less than a degree' : gone === 1 ? 'one degree' : gone + ' degrees') + ' back through it since, over ground it had crossed before.');
+      else {
+        paras.push('Your ' + nm + ' crossed from ' + from + ' into ' + sign + ' ' + when(last) + ', ' + old(last) + ', and has walked ' + (gone < 1 ? 'less than a degree' : gone === 1 ? 'one degree' : gone + ' degrees') + ' of it since.');
+        paras.push(this.HANDOFF_PAIR[(si + 11) % 12]);
+      }
     } else {
       paras.push('Your ' + nm + ' has not left the sign it was born in. It still walks ' + sign + ', ' + (gone < 1 ? 'less than a degree' : gone === 1 ? 'one degree' : gone + ' degrees') + ' in.');
     }
     if (next != null) {
-      const to = this.SIGNS12[(si + 1) % 12];
-      paras.push((ahead < 3 && name === 'Sun' ? 'It stands on the threshold now, and reaches ' : 'It reaches ') + to + ' ' + when(next) + ', ' + old(next).replace('the year you turned', 'the year you turn') + '. ' + this.HANDOFF_PAIR[si]);
+      const to = this.SIGNS12[backOut ? toN : (si + 1) % 12];
+      if (backOut) paras.push('It turns back into ' + to + ' ' + when(next) + ', ' + old(next).replace('the year you turned', 'the year you turn') + ', to walk again what it walked before.');
+      else paras.push((ahead < 3 && name === 'Sun' ? 'It stands on the threshold now, and reaches ' : 'It reaches ') + to + ' ' + when(next) + ', ' + old(next).replace('the year you turned', 'the year you turn') + '. ' + this.HANDOFF_PAIR[si]);
+    }
+    /* A progressed station: the year the body turns, found where its daily
+       motion changes sign, the nearest behind and the nearest ahead. */
+    if (inner) {
+      const rate = y => { const d = this.norm360(this.lonOf(name, tN + y + 0.5) - this.lonOf(name, tN + y - 0.5)); return d > 180 ? d - 360 : d; };
+      const turn = (from, dir, lim) => { const r0 = rate(from) < 0; for (let y = from; dir > 0 ? y < from + lim : y > Math.max(0, from - lim); y += dir * 0.5) {
+        const y2 = dir > 0 ? y + 0.5 : Math.max(0, y - 0.5); if ((rate(y2) < 0) !== r0) { let a = Math.min(y, y2), b = Math.max(y, y2); const ra = rate(a) < 0;
+          for (let k = 0; k < 30; k++) { const m = (a + b) / 2; if ((rate(m) < 0) === ra) a = m; else b = m; } return b; } if (y2 === 0) break; } return null; };
+      const back = rate(age) < 0, was = turn(age, -1, 100), will = turn(age, 1, 60);
+      if (was != null) paras.push(back ? 'It has been moving backward since it stationed ' + when(was) + ', ' + old(was) + '.' : 'It turned direct ' + when(was) + ', ' + old(was) + ', and has moved forward since.');
+      else if (back) paras.push('It was born moving backward in the progressed chart and has not yet turned.');
+      if (will != null) paras.push('It stations and turns ' + (back ? 'direct' : 'backward') + ' ' + when(will) + ', ' + old(will).replace('the year you turned', 'the year you turn') + '. A progressed turn is read as a slow change in how this part of you moves, felt over years rather than days.');
     }
     const lead = ter ? (name === 'Sun'
       ? 'Your Sun keeps walking on a quicker clock, a sign in about two and a half years.'
       : 'Your Moon keeps walking on a quicker clock, a new sign every two or three months, the weather of a season.')
       : name === 'Sun'
       ? 'Your Sun keeps walking, about a degree a year, and once or twice in a life it hands over to the next sign.'
+      : name === 'Mercury' ? 'Your Mercury keeps walking, quicker than the Sun in some years and backward in others, and the sign it walks changes the way you think out loud.'
+      : name === 'Venus' ? 'Your Venus keeps walking, a little faster than the Sun when it runs forward, and the sign it walks colours what you reach for.'
+      : name === 'Mars' ? 'Your Mars walks slowly, a sign in a few decades at most, so a crossing here changes how you go after things for a long while.'
       : 'Your Moon keeps walking, a sign every two and a half years, and each crossing changes the weather inside.';
     void natalSi;
     return (memo[mk] = { heading: 'Your ' + name + (ter ? ', by the month' : ', progressed'), lead: lead, paras: paras, last: last, next: next, age: age, lonNow: lonNow });
@@ -64943,7 +64969,7 @@ class Component extends DCLogic {
     const ret = western && r.name === 'Sun' && r.category !== 'angle' ? this.solarReturn() : null;
     if (ret) parts.push({ tab: 'The Return', sec: { heading: 'Your year, from the last birthday', lines: ret.paras.map(t => ({ text: t })) },
       lead: 'Once a year the Sun stands again where it stood at your first breath, and that moment is cast as a chart of its own.' });
-    const prog = western && (r.name === 'Sun' || r.name === 'Moon') && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
+    const prog = western && ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'].indexOf(r.name) !== -1 && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
     if (prog) parts.push({ tab: 'The Hand-off', sec: { heading: prog.heading, lines: prog.paras.map(t => ({ text: t })) }, lead: prog.lead });
     const ter = prog ? this.progressedHandoff(r.name, 'tertiary') : null;
     if (ter) parts.push({ tab: 'The Month', sec: { heading: ter.heading, lines: ter.paras.map(t => ({ text: t })) }, lead: ter.lead });

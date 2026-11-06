@@ -3692,6 +3692,14 @@ Western techniques. Checked once against swisseph-wasm for a 1985 San Juan birth
 the 2026 return 24 seconds apart, the same rising sign, and the same whole sign
 houses for the Sun, the Moon, Saturn and Neptune.
 
+**Mercury, Venus and Mars progress too** (6 November 2026): The Hand-off chapter
+on their packets, secondary only, from the same `progressedHandoff()`. They are
+the three that can station, so a crossing can run backward (the sentence says
+so and does not borrow a forward `HANDOFF_PAIR` line) and the nearest progressed
+station behind and ahead is named. Checked against swisseph-wasm for two births:
+every crossing and station within a fifth of a year, including a backward
+crossing of Mercury from Scorpio into Libra.
+
 ## The sky weather, and the star clusters among the bodies
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
 (cazimis, moon phases, stations, meteor showers, alignments, the clusters),
