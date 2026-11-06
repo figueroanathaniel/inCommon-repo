@@ -3681,6 +3681,17 @@ Moon's packet (`progressedHandoff(name, 'tertiary')`, a day for each tropical
 lunar month of 27.32158 days). The navamsa, the two relationship charts, a harmonic wheel and solar arc are
 not built and wait on the owner.
 
+**The solar return is a chapter, The Return, on the Sun's packet** (`solarReturn()`,
+6 November 2026, the first of the Astropedia's techniques to be built in its order).
+The moment is bisected on the Sun's longitude in the study's own zodiac, so a
+sidereal study takes the sidereal return; it is cast at the birth place and read
+through the chosen house system (`ascAt()`, the horizon at any instant and place,
+which `ascendant()` now calls with the same arithmetic). Untimed, only the date is
+given and the return's horizon is withheld. Western studies only, like the other
+Western techniques. Checked once against swisseph-wasm for a 1985 San Juan birth:
+the 2026 return 24 seconds apart, the same rising sign, and the same whole sign
+houses for the Sun, the Moon, Saturn and Neptune.
+
 ## The sky weather, and the star clusters among the bodies
 Asked for by the owner on 5 November 2026: a forecast of the sky's own events
 (cazimis, moon phases, stations, meteor showers, alignments, the clusters),

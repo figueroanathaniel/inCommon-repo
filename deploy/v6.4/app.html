@@ -49663,6 +49663,70 @@ class Component extends DCLogic {
         room ? 'The year asks after ' + room.arena + '. ' + room.asks : '',
         'Watch what ' + lord + ' does this year, by transit and by where it sits in you: the tradition reads the keeper of the year first.'].filter(Boolean) };
   }
+  /* The solar return: the moment the Sun comes back to its own place, read
+     as the chart of the year until it comes back again. Found by bisection
+     on the Sun's longitude in the study's zodiac, so a sidereal study takes
+     the sidereal return, which runs later as the ayanamsa grows. Cast where
+     the reader was born, the older convention. Untimed, the noon Sun can
+     stand half a degree out, so only the date is given and the return's
+     horizon is withheld. Memoised per day. */
+  solarReturn() {
+    const p = this.activeProfile(), nd = this.natalDate();
+    if (!p || !p.birthDate || this.usingSampleBirth() || !nd || isNaN(nd.getTime())) return null;
+    const memo = this._srMemo || (this._srMemo = {});
+    const mk = this.chartStamp() + '|' + new Date().toDateString();
+    if (memo[mk] !== undefined) return memo[mk];
+    const tN = this.t2000(nd), off = t => this.zodiacOff(t) || 0;
+    const sun = t => this.norm360(this.lonOf('Sun', t) - off(t));
+    const natal = sun(tN);
+    const gap = t => { const d = this.norm360(sun(t) - natal); return d > 180 ? d - 360 : d; };
+    const YEAR = 365.2422;
+    /* One return near each anniversary: the Sun moves about a degree a day,
+       so a three day bracket either side holds it, and fifty halvings take it
+       well under a second. */
+    const near = k => {
+      const g = tN + k * YEAR;
+      let a = g - 3, b = g + 3, ga = gap(a), gb = gap(b);
+      if (!(ga < 0 && gb > 0)) return null;
+      for (let i = 0; i < 50; i++) { const m = (a + b) / 2, gm = gap(m); if (gm < 0) { a = m; ga = gm; } else { b = m; gb = gm; } }
+      return (a + b) / 2;
+    };
+    const now = this.t2000(new Date());
+    let k = Math.max(0, Math.floor((now - tN) / YEAR) + 1), tR = null;
+    while (k > 0) { const r = near(k); if (r != null && r <= now) { tR = r; break; } k--; }
+    if (tR == null) return (memo[mk] = null);
+    const tNext = near(k + 1);
+    const toDate = t => new Date((t + 2451545.0 - 2440587.5) * 86400000);
+    const timed = !!this.ascendant();
+    const dR = toDate(tR), dNext = tNext == null ? null : toDate(tNext);
+    const day = d => d.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+    const clock = d => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    const ss = this.signOf(this.lonOf('Sun', tR), tR);
+    const ord = n => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
+    const paras = [];
+    paras.push('Your Sun came back to ' + Math.floor(ss.deg) + '° ' + ss.sign + (timed ? ' on ' + day(dR) + ' at ' + clock(dR) : ' around ' + day(dR)) +
+      ', and the sky at that moment is read as the chart of your year' + (dNext ? ', until it comes back again ' + (timed ? 'on ' : 'around ') + day(dNext) + '.' : '.'));
+    const moonL = this.lonOf('Moon', tR), moonS = this.signOf(moonL, tR);
+    const rows = { asc: null, sunH: null, moonH: null, angular: [] };
+    const ra = timed ? this.ascAt(tR, p.birthLat, p.birthLon, tR) : null;
+    if (ra) {
+      const ascS = this.signOf(ra.asc, tR), H = window.PlacementContent && window.PlacementContent.houses;
+      const hOf = l => this.houseOf(l, null, ra);
+      rows.asc = ascS.sign; rows.sunH = hOf(this.lonOf('Sun', tR)); rows.moonH = hOf(moonL);
+      const room = H && H[rows.sunH - 1];
+      paras.push('At that moment ' + ascS.sign + ' was rising where you were born, so the year comes in through a ' + ascS.sign + ' door. ' +
+        'The Sun stood in the return’s ' + ord(rows.sunH) + ' house' + (room ? ', the part of living given to ' + room.arena + ', and that is where the year tends to spend its light.' : '.'));
+      paras.push('The Moon was in ' + moonS.sign + ', in the return’s ' + ord(rows.moonH) + ' house, the year’s weather of feeling.');
+      rows.angular = this.PLNS.map(([n]) => n).filter(n => n !== 'Sun' && n !== 'Moon' && n !== 'North Node' && n !== 'South Node')
+        .filter(n => [1, 4, 7, 10].indexOf(hOf(this.lonOf(n, tR))) !== -1);
+      if (rows.angular.length) paras.push((rows.angular.length === 1 ? rows.angular[0] + ' stood' : rows.angular.slice(0, -1).join(', ') + ' and ' + rows.angular[rows.angular.length - 1] + ' stood') +
+        ' in an angular house of the return, and the tradition gives an angular body a louder voice in its year.');
+    } else {
+      paras.push('The Moon was in ' + moonS.sign + ', the year’s weather of feeling.');
+    }
+    paras.push('What did this birthday open, and what would you like the year to hold by the time the Sun comes round again?');
+    return (memo[mk] = { t: tR, next: tNext, date: dR, nextDate: dNext, timed: timed, sunSign: ss.sign, moonSign: moonS.sign, ...rows, paras: paras });
+  }
   /* The progressed Sun and Moon: a day after birth for each year of life. A
      sign change of either is a hand-off in time, the way a cusp is one in
      space. Returns { lead, paras } for the Sun or the Moon, or null. The Moon
@@ -50595,9 +50659,16 @@ class Component extends DCLogic {
   ascendant() {
     const p = this.activeProfile();
     if (!p || !p.timedChart) return null;
-    const R = this.RAD, t = this.t2000(this.natalDate());
-    const fr = this.chartSkyFrame(t, p.birthLon), lst = fr.ramc;
-    const eps = fr.eps, phi = p.birthLat * R, ramc = lst * R;
+    return this.ascAt(this.t2000(this.natalDate()), p.birthLat, p.birthLon);
+  }
+  /* The horizon at any instant and place, in the shape ascendant() returns,
+     so houseCusps() and houseOf() take it unchanged. signT names the instant
+     the sign is read at; left out, the sign is read as the natal one is. */
+  ascAt(t, latDeg, lonDeg, signT) {
+    if (![t, latDeg, lonDeg].every(Number.isFinite)) return null;
+    const R = this.RAD;
+    const fr = this.chartSkyFrame(t, lonDeg), lst = fr.ramc;
+    const eps = fr.eps, phi = latDeg * R, ramc = lst * R;
     let asc = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
     // A horizon cuts the ecliptic at two antipodal points. Beyond the polar
     // circle the closed form can pick the western crossing. Select the east
@@ -50606,7 +50677,7 @@ class Component extends DCLogic {
     const ra = this.norm360(Math.atan2(Math.sin(asc * R) * Math.cos(eps), Math.cos(asc * R)) / R);
     if (this.norm360(lst - ra) < 180) asc = this.norm360(asc + 180);
     const mc = this.norm360(Math.atan2(Math.sin(ramc), Math.cos(ramc) * Math.cos(eps)) / R);
-    const s = this.signOf(asc);
+    const s = signT === undefined ? this.signOf(asc) : this.signOf(asc, signT);
     return { asc: asc, mc: mc, sign: s.sign, deg: s.deg, idx: s.idx,
       ramc: ramc, obliquity: eps, latitude: phi };
   }
@@ -64869,6 +64940,9 @@ class Component extends DCLogic {
     const hel = this.helioPos(r);
     if (hel) parts.push({ tab: 'From the Sun', sec: { heading: hel.body === 'Earth' ? 'The Earth, from the Sun' : name + ', from the Sun', lines: this.helioLines(r, hel, name).map(t => ({ text: t })) },
       lead: 'Move the eye from the Earth to the Sun and every planet stands where it truly runs its orbit, with no retrograde and no rising sign.' });
+    const ret = western && r.name === 'Sun' && r.category !== 'angle' ? this.solarReturn() : null;
+    if (ret) parts.push({ tab: 'The Return', sec: { heading: 'Your year, from the last birthday', lines: ret.paras.map(t => ({ text: t })) },
+      lead: 'Once a year the Sun stands again where it stood at your first breath, and that moment is cast as a chart of its own.' });
     const prog = western && (r.name === 'Sun' || r.name === 'Moon') && r.category !== 'angle' ? this.progressedHandoff(r.name) : null;
     if (prog) parts.push({ tab: 'The Hand-off', sec: { heading: prog.heading, lines: prog.paras.map(t => ({ text: t })) }, lead: prog.lead });
     const ter = prog ? this.progressedHandoff(r.name, 'tertiary') : null;
