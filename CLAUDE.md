@@ -5628,12 +5628,16 @@ in the text, the sources or the study notes. "You" is allowed in a subordinate
 clause and an imperative; the keynote fragments of gates and lines have no
 subject and were left as they were.
 
-**Every label says what it holds.** The kicker reads "Share of people", "Theme",
-"Function", "In the X centre", "Keynote" or "Strategy for the X"; the epigraph
-has its own label (Signature, Hexagram N, In short, Standing); facets are
-Weight, Fidelity and Origins on a study claim, Low and High expression on a
-gate, and the like. A bare word over a value ("Success", "How reliable") is the
-fault this removed.
+**No eyebrow over a line** (the owner, 6 November 2026: "remove 'in short' and
+all subheaders like it", under the rule that a subheader exists only with a
+clear, emotionally driven purpose). The epigraph stands alone, with no label
+over it (In short, Signature, Hexagram N and Standing are gone), and the kicker
+is the value itself rather than a field name and a colon: "About 35 percent of
+people", the theme, the centre's function, the keynote, "In the X centre",
+"Strategy for the X". A term's other name reads "Also called ..." as the
+epigraph's own words. Facets keep their names (Weight, Fidelity, Origins, Low
+and High expression), because there the name is what tells two texts apart.
+Do not put a label back over the epigraph or the kicker without the owner.
 
 **Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
 holds each Type's and each authority's theme words; `atlasRich()` bolds the

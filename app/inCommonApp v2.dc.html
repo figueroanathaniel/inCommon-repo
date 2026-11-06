@@ -3155,7 +3155,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hdChapterName }}</div>
             <sc-if value="{{ hdFamOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 19px/1.2 var(--fd);color:var(--ac2-hi)">{{ hdFam }}</div>
             </sc-if>
@@ -3169,7 +3168,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </div>
             <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
-              <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi);text-align:center;margin-bottom:-6px">{{ hdEpiLabel }}</div>
               <div style="display:flex;align-items:center;gap:12px">
                 <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
                 <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
@@ -10789,7 +10787,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </div>
               </div>
             </sc-if>
-            <div style="font:700 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hdChapterName }}</div>
             <sc-if value="{{ hdFamOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 19px/1.2 var(--fd);color:var(--ac2-hi)">{{ hdFam }}</div>
             </sc-if>
@@ -10803,7 +10800,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </div>
             <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
-              <div style="font:600 9px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi);text-align:center;margin-bottom:-6px">{{ hdEpiLabel }}</div>
               <div style="display:flex;align-items:center;gap:12px">
                 <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
                 <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
@@ -25162,7 +25158,7 @@ class Component extends DCLogic {
         go: peek('g:' + n, { l: pct(s.x, 300), t: pct(s.y, 520) }, 'Gate ' + n + ' · ' + (A.GATES[n] ? A.GATES[n][0] : ''), 'gates:g' + n) }; });
     /* The folio. */
     const facets = [], links = [], yours = [], terms = [];
-    let kicker = '', lead = '', essay = [], dropcap = false, epi = '', epiLabel = '', now = '', bold = [];
+    let kicker = '', lead = '', essay = [], dropcap = false, epi = '', now = '', bold = [];
     const hexName = n => { const IC = this.IC(), h = IC && IC.hexagram ? IC.hexagram(n) : null; return h ? h.name : ''; };
     const skyLine = list => list.length ? 'In the sky now: ' + list.join(', ') : '';
     const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
@@ -25170,7 +25166,7 @@ class Component extends DCLogic {
     const wiringGo = this.searchGo(this.searchSpirit('humanDesign', 0));
     const yourLine = (label, text) => yours.push({ label: label, text: text, go: wiringGo });
     if (d.type) { const t = A.TYPES[d.type];
-      kicker = 'Share of people: ' + t.pct; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim(); epiLabel = 'Signature';
+      kicker = t.pct.charAt(0).toUpperCase() + t.pct.slice(1) + ' of people'; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim();
       bold = (A.EMPHASIS && A.EMPHASIS.types[d.type]) || [];
       [['Aura', t.aura], ['Strategy', t.strategy], ['Authority', t.authority], ['Signature', t.signature], ['Not-self theme', t.notSelf],
         ['Strengths', t.strengths], ['Challenges', t.challenges], ['Opportunities', t.opportunities], ['Obstacles', t.obstacles],
@@ -25179,7 +25175,7 @@ class Component extends DCLogic {
       term('Aura', 'terms:aura'); term('Signature', 'terms:signature'); term('Not-self theme', 'terms:not-self-theme');
       if (yourType === d.type) yourLine('Your type', d.type); }
     if (d.line) { const L = A.LINES[d.line];
-      kicker = 'Theme: ' + L.theme; lead = L.behavior; facets.push({ label: 'In men', text: L.male }, { label: 'In women', text: L.female });
+      kicker = L.theme; lead = L.behavior; facets.push({ label: 'In men', text: L.male }, { label: 'In women', text: L.female });
       Object.keys(A.PROFILES).filter(k => k.split('/').indexOf(String(d.line)) !== -1).forEach(k => link('Profile ' + k, k, 'profiles:' + this.atlasSlug(k)));
       if (pr && pr.c === d.line) yourLine('Your conscious line', 'Personality Sun, line ' + pr.c);
       if (pr && pr.u === d.line) yourLine('Your unconscious line', 'Design Sun, line ' + pr.u); }
@@ -25189,7 +25185,7 @@ class Component extends DCLogic {
       term('Line', 'terms:line');
       if (pr && pr.key === d.profile) yourLine('Your profile', d.profile + ', ' + P.name); }
     if (d.center || d.openc) { const k = d.center || d.openc, C = A.CENTERS[k];
-      kicker = 'Function: ' + C.fn;
+      kicker = C.fn;
       if (d.center) facets.push({ label: 'Defined', text: C.defined }, { label: 'Undefined', text: C.open }, { label: 'Wisdom when open', text: C.wisdom });
       else { lead = C.wisdom; facets.push({ label: 'Defined means consistent', text: C.defined }, { label: 'Undefined means variable', text: C.open }); }
       link(d.center ? 'Open and defined, ' + C.label : C.label, '', (d.center ? 'open:' : 'centers:') + this.atlasSlug(k));
@@ -25198,7 +25194,7 @@ class Component extends DCLogic {
       if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held');
       now = skyLine(sky.filter(a => this.hdCenterOf(a.gate) === k).map(a => a.body + ' in gate ' + a.gate)); }
     if (d.gate) { const g = A.GATES[d.gate];
-      kicker = 'In the ' + this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate); epiLabel = 'Hexagram ' + d.gate;
+      kicker = 'In the ' + this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate);
       facets.push({ label: 'Low expression', text: g[3] }, { label: 'High expression', text: g[4] });
       link('Its centre, ' + this.hdCenterOf(d.gate), '', 'centers:' + this.atlasSlug(this.hdCenterOf(d.gate)));
       (A.channelsFor(d.gate) || []).forEach(c => link('Channel ' + c.key + ', ' + c.name, '⟷', 'channels:' + this.atlasSlug(c.key)));
@@ -25208,14 +25204,14 @@ class Component extends DCLogic {
       if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line));
       now = skyLine(sky.filter(a => a.gate === d.gate).map(a => a.body + ', line ' + a.line)); }
     if (d.channel) { const c = A.CHANNELS[d.channel], p = d.channel.split('-').map(Number);
-      kicker = 'Keynote: ' + c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · '); epiLabel = 'Hexagrams ' + p.join(' and ');
+      kicker = c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · ');
       now = skyLine(sky.filter(a => p.indexOf(a.gate) !== -1).map(a => a.body + ' in gate ' + a.gate));
       p.forEach(n => link('Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''), String(n), 'gates:g' + n));
       { const ci = A.circuitOf ? A.circuitOf(d.channel) : ''; if (ci) term(ci + ' Circuit', 'terms:' + this.atlasSlug(ci + ' circuit')); }
       term('Definition', 'definition:single-definition');
       if (myChan.has(d.channel)) yourLine('Defined in your chart', 'both gates held');
       else if (mine && p.some(n => myGates.has(n))) yourLine('Half held in your chart', 'gate ' + p.filter(n => myGates.has(n)).join(' and ') + ', a hanging gate'); }
-    if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = 'Keynote: ' + c.keynote; lead = c.text; facets.push({ label: 'Circuits within it', text: c.sub }); }
+    if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = c.keynote; lead = c.text; facets.push({ label: 'Circuits within it', text: c.sub }); }
     if (d.definition) { const dn = A.DEFINITION.find(x => x.name === d.definition); lead = dn.text; dropcap = true;
       if (myDef && d.definition.toLowerCase().indexOf(myDef.toLowerCase()) === 0) yourLine('Your definition', myDef); }
     if (d.cross) { lead = A.CROSS[d.cross]; dropcap = true; link('Profiles', '', 'profiles:' + this.atlasSlug(Object.keys(A.PROFILES)[0]));
@@ -25233,11 +25229,11 @@ class Component extends DCLogic {
       if (/emotional/i.test(d.authority)) term('Emotional Wave', 'terms:emotional-wave');
       if (myAuth && myAuth.name === d.authority) yourLine('Your authority', String(hd.authority).split(':')[0]); }
     if (d.term) { const tm = A.TERMS.find(x => x.name === d.term); lead = tm.text; dropcap = true;
-      if (tm.aka) { epi = tm.aka; epiLabel = 'Also called'; }
+      if (tm.aka) { epi = 'Also called ' + tm.aka; }
       if (tm.see) { const k = tm.see[0] + ':' + this.atlasSlug(tm.see[1]), x = find(k); if (x) link((A.LESSONS || []).some(l => l.name === x.name && l.tier === x.ch) ? 'The lesson, ' + x.name : x.name, x.glyph, k); } }
     if (d.lesson) { const L = A.LESSONS.find(x => x.name === d.lesson), T = (A.TIERS || []).find(x => x.key === L.tier) || { name: '' };
       const tier = A.LESSONS.filter(x => x.tier === L.tier), at = tier.indexOf(L);
-      kicker = T.name + ' lesson ' + (at + 1) + ' of ' + tier.length; lead = L.lead; dropcap = true; epi = L.epi; epiLabel = 'In short';
+      kicker = T.name + ' · ' + (at + 1) + ' of ' + tier.length; lead = L.lead; dropcap = true; epi = L.epi;
       if (['Type', 'Strategy', 'Aura', 'Signature', 'Not-Self Theme'].indexOf(L.name) !== -1) Object.keys(A.TYPES).forEach(t => { bold = bold.concat((A.EMPHASIS && A.EMPHASIS.types[t]) || []); });
       L.parts.forEach(([l, x]) => facets.push({ label: l, text: x }));
       (L.see || []).forEach(([c, id]) => { const k = c + ':' + this.atlasSlug(id), x = find(k); if (x) link(x.name, x.glyph, k); });
@@ -25260,7 +25256,7 @@ class Component extends DCLogic {
     let fs = null;
     if (d.study) { const x = A.STUDY.find(z => z.key === d.study), W = A.weightOf(x.score);
       kicker = W.glyph + ' ' + W.name + ', weighed ' + (W.min === 0 ? 'under 60' : W.min + ' to ' + W.max) + ' in 100' + (W.field ? ' · a field study' : '');
-      lead = x.claim; epi = W.field ? 'Speculative' : ''; epiLabel = 'Standing';
+      lead = x.claim; epi = W.field ? 'Speculative' : '';
       facets.push({ label: 'Weight', text: W.line }, { label: 'Fidelity', text: x.note }, { label: 'Origins', text: x.from });
       if (x.see) { const k = x.see[0] + ':' + this.atlasSlug(x.see[1]); link((find(k) || {}).name || x.see[1], '', k); }
       link('How the study is weighed', this.HD_SEC_GLYPH.study, 'study:how');
@@ -25311,8 +25307,7 @@ class Component extends DCLogic {
           aria: label + ', ' + val, go: () => this.atlasPick(key, true) })),
       hdAnim: (st.atlasFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
       hdFolioLabel: e.name, hdIcon: e.glyph, hdIconFs: String(e.glyph).length > 2 ? '20px' : '34px', hdName: e.name,
-      hdChapterName: (A.SECTIONS.find(s => s[0] === e.ch) || ['', ''])[1],
-      hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi, hdEpiLabel: epiLabel,
+      hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi,
       hdNow: now, hdNowOn: !!now,
       hdLeadOn: !!lead && !dropcap, hdLeadCap: !!lead && dropcap, hdLead: lead, hdLeadSeg: this.atlasRich(lead, bold, terms.map(t => t.label)),
       hdFamOn: lv === 'first' && where.length > 0, hdFam: where.slice(0, 2).join(' · '),
