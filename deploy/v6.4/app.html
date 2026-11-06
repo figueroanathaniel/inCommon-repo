@@ -32586,6 +32586,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   <div style="display:flex;flex-direction:column;gap:9px;animation:fadeUp .22s ease;text-align:center">
                     <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ horoHorizon }}</span>
                     <span style="font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ horoLead }}</span>
+                    <sc-if value="{{ horoHasRetro }}" hint-placeholder-val="{{ false }}">
+                      <div role="group" aria-label="Retrograde today" style="display:flex;flex-wrap:wrap;justify-content:center;column-gap:18px">
+                        <sc-for list="{{ horoRxBtns }}" as="x" hint-placeholder-count="2">
+                          <button data-rx onClick="{{ x.go }}" aria-label="{{ x.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 2px;font:600 11px var(--fc);letter-spacing:.05em;color:var(--ac2-hi)"><span aria-hidden="true" style="font:400 13px Georgia,serif">℞︎</span>{{ x.name }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
                   </div>
                 </sc-if>
                 <sc-if value="{{ hpIsHd }}" hint-placeholder-val="{{ false }}">
@@ -33498,7 +33505,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
     <div style="display:flex;flex-direction:column;gap:16px">
         <div role="group" aria-label="The sky now" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px">
           <sc-for list="{{ chSky }}" as="sk" hint-placeholder-count="3">
-            <button data-lift onClick="{{ sk.toggle }}" aria-expanded="{{ sk.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:0;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:9px 13px;border:1px solid {{ sk.bd }};border-radius:12px;background:{{ sk.bg }};transition:border-color .3s ease,background .3s ease">
+            <button data-lift data-feat-key="{{ sk.key }}" onClick="{{ sk.toggle }}" aria-expanded="{{ sk.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:0;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:9px 13px;border:1px solid {{ sk.bd }};border-radius:12px;background:{{ sk.bg }};transition:border-color .3s ease,background .3s ease">
               <span style="font:400 15px/1.2 var(--fd);color:var(--tx)">{{ sk.title }}</span>
               <span style="font:400 10.5px/1.35 var(--fu);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sk.sub }}</span>
             </button>
@@ -39962,6 +39969,13 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                     <div style="display:flex;flex-direction:column;gap:10px;animation:dtIn .22s ease;text-align:center">
                       <span style="font:600 9px var(--fk);letter-spacing:.15em;text-transform:uppercase;color:var(--ac2-hi)">{{ horoHorizon }}</span>
                       <span style="font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty;align-self:center">{{ horoLead }}</span>
+                      <sc-if value="{{ horoHasRetro }}" hint-placeholder-val="{{ false }}">
+                        <div role="group" aria-label="Retrograde today" style="display:flex;flex-wrap:wrap;justify-content:center;column-gap:22px">
+                          <sc-for list="{{ horoRxBtns }}" as="x" hint-placeholder-count="2">
+                            <button data-rx onClick="{{ x.go }}" aria-label="{{ x.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 2px;font:600 11.5px var(--fc);letter-spacing:.05em;color:var(--ac2-hi)"><span aria-hidden="true" style="font:400 14px Georgia,serif">℞︎</span>{{ x.name }}</button>
+                          </sc-for>
+                        </div>
+                      </sc-if>
                     </div>
                   </sc-if>
                   <sc-if value="{{ hpIsHd }}" hint-placeholder-val="{{ false }}">
@@ -40501,7 +40515,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <div data-ch-col="1" style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
         <div role="group" aria-label="The sky now" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:8px">
           <sc-for list="{{ chSky }}" as="sk" hint-placeholder-count="3">
-            <button data-lift onClick="{{ sk.toggle }}" aria-expanded="{{ sk.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:0;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:9px 13px;border:1px solid {{ sk.bd }};border-radius:12px;background:{{ sk.bg }};transition:border-color .3s ease,background .3s ease">
+            <button data-lift data-feat-key="{{ sk.key }}" onClick="{{ sk.toggle }}" aria-expanded="{{ sk.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:0;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:9px 13px;border:1px solid {{ sk.bd }};border-radius:12px;background:{{ sk.bg }};transition:border-color .3s ease,background .3s ease">
               <span style="font:400 15px/1.2 var(--fd);color:var(--tx)">{{ sk.title }}</span>
               <span style="font:400 10.5px/1.35 var(--fu);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sk.sub }}</span>
             </button>
@@ -52985,6 +52999,11 @@ class Component extends DCLogic {
     const out = { horoHas: true, horoNone: false, horoLead: lead, horoBasis: basis, horoHorizon: horizon,
       horoSky: skyOut, horoCasts: casts, horoNoCasts: casts.length === 0,
       horoRetros: retros, horoHasRetro: retros.length > 0,
+      /* One plain button per celestial body retrograde on the day read, under the
+         horoscope (the owner, 6 November 2026: buttons, no pills). Each opens the
+         Current Retrogrades reading on the astrology page with that body chosen. */
+      horoRxBtns: retroRaw.map(r => ({ name: r.n, aria: r.n + ' retrograde, open its reading',
+        go: () => { this.searchGo(this.searchSpirit('astrology', 1, { featOpen: 'retro', retroSel: r.n }))(); this.featLand('retro'); } })),
       horoRetroCount: retros.length + (retros.length === 1 ? ' body retrograde' : ' bodies retrograde'),
       horoMoon: this.horoMoonLine(hs, ord, theme), horoTail: tail,
       horoNoCastText: 'No transiting body is inside orb of a natal placement.' };
@@ -53248,6 +53267,34 @@ class Component extends DCLogic {
     ['num', 'Daily Numerology', 'Numerology', '#7d9bff'],
     ['tog', 'Together', 'All three', '#2fff8f']
   ];
+  /* Brings an open card of the astrology strip to the top of the page it sits
+     in. It scrolls the nearest vertical scroller only, never the phone's section
+     column or a pager, and re-places until it lands, because the route there is
+     still settling (the pager slides, the card opens a frame later). */
+  featLand(key) {
+    const outer = this._vtScroll, t0 = Date.now();
+    let landed = 0;
+    const scrollerOf = el => {
+      for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+        if (n === outer || n.hasAttribute('data-vt-scroll')) return null;
+        const cs = getComputedStyle(n);
+        if (/auto|scroll/.test(cs.overflowY) && n.scrollHeight > n.clientHeight + 4) return n;
+      }
+      return document.scrollingElement;
+    };
+    const step = () => {
+      if (Date.now() - t0 > 2600) return;
+      const el = [...document.querySelectorAll('[data-feat-key="' + key + '"]')].find(e => e.offsetParent);
+      const sc = el && scrollerOf(el);
+      if (sc) {
+        const top = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
+        const off = el.getBoundingClientRect().top - top - 96;
+        if (Math.abs(off) > 12) { sc.scrollTop += off; landed = 0; } else if (++landed >= 2) return;
+      }
+      setTimeout(step, 160);
+    };
+    setTimeout(step, 120);
+  }
   horoPage() { const n = this.HORO_PAGES.length; return ((+this.state.hPage || 0) % n + n) % n; }
   horoPagerVals() {
     const i = this.horoPage(), n = this.HORO_PAGES.length, P = this.HORO_PAGES[i];
@@ -53452,7 +53499,7 @@ class Component extends DCLogic {
       ...(hd || { hdHoroHas: false, hdHoroLead: '', hdHoroBasis: '', hdHoroHorizon: '', hdHoroFigs: [], hdHoroGroups: [], hdHoroCta: '', hdHoroGo: () => {} }),
       ...(nm || { numHoroHas: false, numHoroLead: '', numHoroBasis: '', numHoroHorizon: '', numHoroFigs: [], numHoroGroups: [], numHoroCta: '', numHoroGo: () => {} }),
       ...(h || { horoHas: false, horoNone: true, horoLead: '', horoBasis: '', horoHorizon: '', horoSky: [], horoCasts: [],
-      horoNoCasts: false, horoNoCastText: '', horoRetros: [], horoHasRetro: false, horoRetroCount: '', horoMoon: '', horoTail: '' }) };
+      horoNoCasts: false, horoNoCastText: '', horoRetros: [], horoRxBtns: [], horoHasRetro: false, horoRetroCount: '', horoMoon: '', horoTail: '' }) };
   }
   TRKEY = 'incommon.transits.open';
   trIsOpen() { const v = this.state.trOpen; return (v === null || v === undefined) ? this.readLS(this.TRKEY, true) : !!v; }

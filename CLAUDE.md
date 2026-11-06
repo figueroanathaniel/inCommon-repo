@@ -3461,6 +3461,14 @@ held (the sky, the casts, the retrogrades, the next two days). The Cycle Audit's
 line left Today too and sits under the wheel in the astrology panel, opening the
 same sheet.
 
+**Each retrograde body is a plain button under the horoscope** (the owner, 6
+November 2026: buttons, no pills). `horoRxBtns` lists the bodies retrograde on
+the day the horoscope reads, in both shells, as text in `--ac2-hi` with the Rx
+glyph, no fill and no border, each 44px tall. A press opens the astrology page
+with Current Retrogrades open on that body (`featOpen: 'retro'`, `retroSel`),
+and `featLand()` scrolls the strip tile (`data-feat-key`) into view in the
+nearest vertical scroller, never the section column, stopping once it lands.
+
 **The chart's own controls live inside its card** (same day): the view switch,
 the layer or detail switch and the expand button are a bar at the top of the
 wheel and wiring cards, and everything under the bar sits in a
