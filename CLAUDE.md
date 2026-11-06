@@ -194,6 +194,44 @@ in it, and the head sheet gives it a soft halo in `--atmc2` once it is live.
 `scan()` finds it by the same selector, so nothing in `oracle-glyph.js` knows
 it is there.
 
+**The orb is drawn in depth** (the owner, 6 November 2026: "Make the oracle on
+the loading screen more 3 dimensional and realistic", with a recording of a
+lobed torus in dense lit contour lines). At 132px now, the orb span gets a
+WebGL 2 canvas: the same three lobed ring raymarched as a solid, its contours
+the level lines of a slow field over the surface (so they close into eyes and
+cross at saddles as it tumbles), lit from above left, line colour running from
+a lightened `--atmc` above to a lightened `--atmc2` below. Each world keeps its
+weather: Cyberspace steps in time at half resolution with pixelated scaling,
+Nature's Roots is lumpier and slower, the Biome ripples. The contour density
+follows the canvas's pixel height so the lines resolve instead of greying.
+The span wears `data-glyph-3d` while it does. Without WebGL 2, or a shader
+that will not build, it falls back to the flat glyph on a fresh canvas. The
+context is released (`WEBGL_lose_context`) the moment the orb leaves the page
+or the contrast modifier comes on, because the 3D stages need their contexts.
+Reduced motion, a hidden page and the contrast modifier behave as for the nav
+symbol. The nav symbol itself is unchanged.
+
+**Each world throws its own weather off the orb** (the owner, 6 November
+2026). The orb's canvas is 1.6 times its span (`ORB_Z`), centred on it, so
+what each world draws has room, and the span carries `margin: 10px 0 34px`
+in both shells so none of it lands on the loading line beside it. Deep Field:
+cosmic radiation streaming out of the rim, sparks running along the contours
+and thrown off the edge, glints on the surface, and five stars on tilted
+orbits that pass in front of and behind it. Cyberspace: glitch bursts that
+shove bands sideways and swap the colour channels, scanlines, an abduction
+beam from a craft overhead that lifts the orb and lights its top, and every
+seven seconds a buzzsaw that crosses it, leaves a glowing cut and sprays
+sparks. Nature's Roots: two thumbs pressing the clay in and easing off (an
+SDF subtraction, so it is the form that dents), a hearth under it whose
+flicker lights the underside, embers, and leaves falling past on both
+sides. The Biome: water running down the surface in threads, drops pulled
+from the underside that stretch, fall and splash, drops falling onto it from
+above, a lighthouse beam turning round it that flashes when it faces the
+reader, and now and then a current that wraps it, a different size and tilt
+each time. All of it is in the one fragment shader and computes nothing
+about the chart. The colours are the identity's `--atmc` and `--atmc2`
+except the fire, the sparks and the leaves, which are the things' own.
+
 **All four are dark with light type, and that is forced.** `--ac` is fixed and
 written as text in over two hundred places, so a light identity fails the
 contrast gate wherever the action green is a word. The concept's light gray
