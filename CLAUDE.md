@@ -6833,6 +6833,16 @@ Back and the breadcrumb, and the phone sheet is painted over an opaque `--bg`
 because `--sf` carries alpha. Measured over every page at 1440, 390 and 375,
 four identities hardened and not: no pair under 4.5:1, no control under 44px.
 
+**The packet speaks the aspect voice** (the owner, 7 November 2026, after a
+full Saturn read on the sample chart). At Home carries the approved body in
+house line (`PlacementContent.inHouse`) in place of the house's question,
+which The Room already asks; a house's part of living takes `happen` when it
+is a list (`livingVerb()`); Conversations lead with the 22 points a reader
+knows (`BLOOM_CORE`), then by orb, and open by naming what each body brings,
+never with a label and a colon; two transits at one angle never end on the
+same sentence; and the degree carries no line about what the build holds.
+Held together no longer tells the reader to keep what rings true.
+
 ## A passing tap opens the glance, a focused read opens the packet
 Asked for by the owner on 4 November 2026: "It's nice for a focused read. For
 passing, make it a pop up without the fantastic visuals, keep the info, and make
@@ -8143,3 +8153,29 @@ Sun's view has no retrograde, are the study itself and keep their words.
 On the phone the tile's title row wraps, so the New pill and the ℞ drop
 under the title rather than past the tile's edge, and the Cycle Audit card
 is the last thing on the phone's astrology page.
+
+## The aspect sheet speaks as the two bodies
+Asked for by the owner on 7 November 2026 ("How does the Sun act where it's
+at? Where does Saturn get to make anything happen in a room built to fit for
+a night out?"). The aspect dialog (`aspOpen`, both shells) and the
+Observatory's contact window read `aspectLines()`, which returns `paras`:
+a paragraph per body (`aspBodyPara()`: its voice, "In <sign> it" and the
+sign's entrance, a dignity sentence, the part of living its house holds, the
+body in house line, and the house's gift and shadow), then the angle
+(`ASP_MEET`: an opener, each body in its sign's manner, a follow line, and the
+orb said plainly with no "expect"). `ASP_CLOSE` still closes it, untouched.
+
+**The 120 body in house lines are `PlacementContent.inHouse(body, house)`**
+(`IN_HOUSE` in `placement-content.js`, 1.1.0), the ten bodies by twelve
+houses. The owner keeps them as Kin Common writing to be sold on its own:
+change them only with the owner. The source draft is
+`/mnt/project-files/aspect-language/body-in-house.md`. A point outside the ten
+gets no house line, never a generic one; an angle gets no house at all.
+
+There is no geometry lesson in the sheet (the owner, 7 November 2026: "No
+geometry lesson"); `ASP_NATURE` still serves the Observatory's contact window.
+The Aspects list keeps every contact, the Descendant, IC and South Node ones
+included, though each mirrors one to the Ascendant, Midheaven or North Node:
+the owner's rule is that nothing is taken from the reader before the reason
+is put to them ("We don't want to strip a reader from any element of their
+curiosity"). Ask before hiding a row anywhere.
