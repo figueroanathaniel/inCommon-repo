@@ -25620,6 +25620,7 @@ class Component extends DCLogic {
       const w = this.apLexicon()[e.li];
       kicker = w.study ? 'A word of ' + w.study : ''; lead = w.text;
       if (w.see) { const y = find(w.see); if (y) link(y.name, '', w.see); }
+      if (this.libFindHas(w.name)) links.push({ label: 'Find it in the Library', glyph: this.MARK_G, mk: true, tx: false, c: 'var(--ac2-hi)', aria: 'Find it in the Library', go: this.libFind(w.name) });
       if (w.sk) { const L = this.AP().studyLessons(w.sk), re = this.apWordRe(w.name);
         if (L && w.sk === this.chartStudy()) L.lessons.forEach((l, i) => { if (re.test(l.term + ' ' + l.text)) link('The lesson, ' + l.name, '', 'lesson:' + w.sk + ':' + i); }); }
     } else if (e.kind === 'essay') {
@@ -36586,6 +36587,9 @@ class Component extends DCLogic {
       (AP.TECHNIQUES || []).forEach(c => ap.push({ glyph: '◴', title: c.name,
         sub: 'technique · ' + cut(c.text, 62), keys: 'technique', body: c.text,
         target: this.searchLib('astropedia', { apSec: 'techniques', apOpen: 'technique:' + c.name }) }));
+      /* The lexicon's words, the study glossaries among them, each landing open. */
+      this.apLexicon().forEach(w => ap.push({ glyph: '\u25c7', title: w.name, sub: 'A word in the Astropedia',
+        keys: 'word lexicon ' + (w.study || ''), body: w.text, target: this.searchLib('astropedia', { apSec: 'lexicon', apOpen: 'lex:' + w.slug }) }));
       push('Astrology reference', this.searchRank(q, ap, 8));
     }
 
