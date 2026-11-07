@@ -8143,3 +8143,36 @@ Sun's view has no retrograde, are the study itself and keep their words.
 On the phone the tile's title row wraps, so the New pill and the ℞ drop
 under the title rather than past the tile's edge, and the Cycle Audit card
 is the last thing on the phone's astrology page.
+
+## The aspect squares are the reader's to arrange
+Asked for by the owner on 7 November 2026: "Give the user autonomy to
+rearrange the aspects squares in the placements table." The four squares
+over the Placements table (Conjunction, Opposition, Trine, Square, the
+`chAspTabs` row, both shells) stand in the order the reader sets, and with
+no aspect chosen the first square is the one that opens.
+
+**Three ways to move a square, so nobody is left with none.** Drag it: a
+mouse drags at once (after 6px), a finger after a 320ms hold, so a scroll or
+a tap on the row stays what it was. Press Alt with an arrow key on a focused
+square; a plain arrow still chooses, as in any radio group. Or press the
+arrange button at the end of the row (⇄, "Arrange the aspects"), tap a
+square to lift it and tap the place it should go; that is the single pointer
+way WCAG 2.5.7 asks for beside any drag, and the row is a plain group of
+pressed buttons while it is on. Each move is spoken through `speak()`.
+
+**The order is kept on the device, per account** (`incommon.aspOrder` through
+`acctKey()`), like the theme, and it does not sync. `aspOrder()` repairs
+whatever it reads, so a stored list with a missing, repeated or unknown key
+still yields all four. A move pins the aspect on show into `ledAsp`, because
+with none chosen the first square is the one shown and dragging another to
+the front would otherwise swap the reading under the reader's hand.
+
+**The drag paints from keys, never from a held node.** A move re-renders the
+row and the runtime may hand the dragged square's node to its neighbour, so
+`aspDragPaint()` re-queries `[data-asp-tile]` and puts the lift
+(`data-asp-drag`, a transform) on whichever node now carries the key and
+takes it off every other. The row carries `data-noswipe` and `touch-action:
+pan-y`, so a sideways finger there never turns the chart page. A click that
+lands at the end of a drag is dropped (`_aspDragAt`), so dropping a square
+does not choose it. `tools/drive-aspect-order.js` holds all of this, in both
+shells.

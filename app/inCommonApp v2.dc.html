@@ -253,7 +253,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 /* The Library shelf is a row of lit plates. Each draws its room in light; the stars and the warm fills breathe on their own, and the rest moves only under a hovering pointer or keyboard focus, so a phone that draws every section at once is not turning six wheels nobody is looking at. */
 [data-plate]{--plb:rgba(var(--atmc),.46);--plsh:inset 0 1px 0 rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.42)}[data-plate]:focus-visible,[data-plate]:hover{--plb:color-mix(in srgb,var(--ac2-hi) 62%,transparent);--plsh:inset 0 1px 0 rgba(255,255,255,.12),0 4px 8px rgba(0,0,0,.4),0 22px 48px rgba(0,0,0,.5),0 0 38px color-mix(in srgb,var(--ac2) 40%,transparent)}[data-plate]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}[data-plate]:hover [data-plate-go],[data-plate]:focus-visible [data-plate-go]{transform:translateX(3px)}[data-plate]:active{transform:scale(.985)!important}@keyframes plIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}@keyframes plTw{0%,100%{opacity:.18}50%{opacity:.9}}@keyframes plSpin{to{transform:rotate(360deg)}}@keyframes plFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes plFlow{to{stroke-dashoffset:-16}}@keyframes plBreath{0%,100%{opacity:.55}50%{opacity:1}}[data-pl]{transform-box:fill-box;transform-origin:center}[data-pl="tw"]{animation:plTw 3.8s ease-in-out infinite}[data-plate-tw]{animation:plTw 6.5s ease-in-out infinite}[data-pl="breath"]{animation:plBreath 4.6s ease-in-out infinite}[data-pl="spin"]{animation:plSpin 60s linear infinite paused}[data-pl="spinr"]{animation:plSpin 80s linear infinite reverse paused}[data-pl="float"]{animation:plFloat 4.8s ease-in-out infinite paused}[data-pl="flow"]{stroke-dasharray:3 5;animation:plFlow 1.4s linear infinite paused}[data-plate]:hover [data-pl],[data-plate]:focus-visible [data-pl],[data-portal]:hover [data-pl],[data-portal]:focus-within [data-pl]{animation-play-state:running}@media (prefers-reduced-motion:reduce){[data-pl],[data-plate-tw]{animation:none!important}}
 /* Closeness on the chart page (owner, 21 October 2026): no list may grow until it is the only thing on the screen. An open list and an open card stop at under half the screen and scroll inside themselves; on a wide desktop each of the three columns is held to the screen less the header and the banner and scrolls on its own, so once the title has scrolled away all three are on the screen together. The wheel's column never scrolls: the wheel holds its place and only the Horizon under it scrolls, so a list opened there cannot carry the wheel away. Not sticky: a column as tall as its row has nowhere to stick to. */
-[data-ch-list]{max-height:min(42vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-feat]{max-height:min(52vh,480px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding-right:4px}@media (min-width:1200px){[data-ch-col="wheel"]{max-width:max(520px,calc(100dvh - 260px))}}[data-ch-ledger]{max-height:min(62vh,620px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-plc="true"] [data-ch-ledger]{max-height:none;flex:1}@media (min-width:1180px){[data-ch-plc="true"]{min-height:calc(100dvh - 226px)}}[data-asp-grid] td,[data-asp-grid] th{width:24px;min-width:24px;height:24px;padding:0;text-align:center;vertical-align:middle;border:1px solid rgba(var(--atmc),.28);font:400 13px/1 var(--fb)}[data-asp-grid] th{font-weight:400;color:var(--tx);background:rgba(var(--atmc),.16)}[data-asp-grid] td.e{border-color:transparent}[data-ledger-row]{transition:background-color .2s ease}[data-ledger-row]:hover,[data-ledger-row]:focus-visible{background-color:rgba(var(--atmc),.16)!important}[data-ledger-row]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:-2px}[data-wb]{transition:opacity .2s ease!important}[data-ledger-hot] [data-wb]:not([data-hot]):not([data-wb="-"]){opacity:.28!important}[data-wb][data-hot] circle:last-of-type{stroke-width:3.2px}[data-wb][data-hot] circle:first-of-type{opacity:.6}@media (max-width:819.98px){[data-ch-list],[data-ch-feat]{max-height:min(36vh,340px)}}@media (min-width:1180px){[data-ch-col]{max-height:calc(100dvh - 210px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 6px 14px;margin:-2px -6px 0}[data-ch-col="wheel"]{overflow:visible!important}[data-ch-col] > *{flex-shrink:0}[data-ch-col="wheel"] > [data-ch-mid]{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 4px 10px;margin:0 -4px}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
+[data-ch-list]{max-height:min(42vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-feat]{max-height:min(52vh,480px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding-right:4px}@media (min-width:1200px){[data-ch-col="wheel"]{max-width:max(520px,calc(100dvh - 260px))}}[data-ch-ledger]{max-height:min(62vh,620px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-plc="true"] [data-ch-ledger]{max-height:none;flex:1}@media (min-width:1180px){[data-ch-plc="true"]{min-height:calc(100dvh - 226px)}}[data-asp-grid] td,[data-asp-grid] th{width:24px;min-width:24px;height:24px;padding:0;text-align:center;vertical-align:middle;border:1px solid rgba(var(--atmc),.28);font:400 13px/1 var(--fb)}[data-asp-grid] th{font-weight:400;color:var(--tx);background:rgba(var(--atmc),.16)}[data-asp-grid] td.e{border-color:transparent}[role="radiogroup"] > [data-asp-tile]{cursor:grab!important}[data-asp-drag]{position:relative;z-index:2;background:linear-gradient(rgba(var(--atmc),.26),rgba(var(--atmc),.26)),var(--bg)!important;cursor:grabbing!important;border-color:var(--ac2-hi)!important;box-shadow:0 10px 24px rgba(0,0,0,.45),0 0 0 1px rgba(var(--atmc),.6)!important}[data-ledger-row]{transition:background-color .2s ease}[data-ledger-row]:hover,[data-ledger-row]:focus-visible{background-color:rgba(var(--atmc),.16)!important}[data-ledger-row]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:-2px}[data-wb]{transition:opacity .2s ease!important}[data-ledger-hot] [data-wb]:not([data-hot]):not([data-wb="-"]){opacity:.28!important}[data-wb][data-hot] circle:last-of-type{stroke-width:3.2px}[data-wb][data-hot] circle:first-of-type{opacity:.6}@media (max-width:819.98px){[data-ch-list],[data-ch-feat]{max-height:min(36vh,340px)}}@media (min-width:1180px){[data-ch-col]{max-height:calc(100dvh - 210px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 6px 14px;margin:-2px -6px 0}[data-ch-col="wheel"]{overflow:visible!important}[data-ch-col] > *{flex-shrink:0}[data-ch-col="wheel"] > [data-ch-mid]{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 4px 10px;margin:0 -4px}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -1790,10 +1790,23 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </div>
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
             <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
-              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
-                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
-                </sc-for>
+              <div data-noswipe="1" style="display:flex;gap:5px">
+                <sc-if value="{{ chAspPicking }}" hint-placeholder-val="{{ true }}">
+                  <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="radiogroup" aria-label="Which aspect" aria-describedby="asp-hint-p" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                      <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.go }}" onPointerDown="{{ h.down }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
+                    </sc-for>
+                    <span id="asp-hint-p" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">Drag a square, or press Alt with an arrow key, to move it.</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ chAspArranging }}" hint-placeholder-val="{{ false }}">
+                  <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="group" aria-label="Arrange the aspects" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                      <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.place }}" aria-pressed="{{ h.held }}" aria-label="{{ h.arrLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px dashed {{ h.arrBd }};border-radius:10px;background:{{ h.arrBg }};color:var(--tx);-webkit-user-select:none;user-select:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <button data-lift onClick="{{ chAspArrangeGo }}" aria-pressed="{{ chAspArranging }}" aria-label="{{ chAspArrangeLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ chAspArrangeBd }};border-radius:10px;background:{{ chAspArrangeBg }};color:var(--mut)"><span aria-hidden="true" style="font:15px/1 Georgia,serif;color:{{ chAspArrangeC }}">{{ chAspArrangeSym }}</span></button>
               </div>
               <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
               <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
@@ -8874,10 +8887,23 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </div>
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
             <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
-              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
-                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
-                </sc-for>
+              <div data-noswipe="1" style="display:flex;gap:5px">
+                <sc-if value="{{ chAspPicking }}" hint-placeholder-val="{{ true }}">
+                  <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="radiogroup" aria-label="Which aspect" aria-describedby="asp-hint-d" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                      <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.go }}" onPointerDown="{{ h.down }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
+                    </sc-for>
+                    <span id="asp-hint-d" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">Drag a square, or press Alt with an arrow key, to move it.</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ chAspArranging }}" hint-placeholder-val="{{ false }}">
+                  <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="group" aria-label="Arrange the aspects" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                      <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.place }}" aria-pressed="{{ h.held }}" aria-label="{{ h.arrLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px dashed {{ h.arrBd }};border-radius:10px;background:{{ h.arrBg }};color:var(--tx);-webkit-user-select:none;user-select:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <button data-lift onClick="{{ chAspArrangeGo }}" aria-pressed="{{ chAspArranging }}" aria-label="{{ chAspArrangeLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ chAspArrangeBd }};border-radius:10px;background:{{ chAspArrangeBg }};color:var(--mut)"><span aria-hidden="true" style="font:15px/1 Georgia,serif;color:{{ chAspArrangeC }}">{{ chAspArrangeSym }}</span></button>
               </div>
               <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
               <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
@@ -23033,6 +23059,168 @@ class Component extends DCLogic {
      chart beside it: the 2D wheel by attribute, the 3D and Orbital views
      through the scene's own hover. Written to the DOM, never through state,
      because a setState per pointer move re-renders the whole app. */
+  /* THE ASPECT SQUARES ARE THE READER'S TO ARRANGE (the owner, 7 November
+     2026: "Give the user autonomy to rearrange the aspects squares in the
+     placements table"). Three ways to move one, so no reader is left with
+     none: drag it (a mouse at once, a finger after a short hold, so a
+     scroll or a tap stays what it was), press Alt with an arrow key on a
+     focused square, or press the arrange button and tap a square, then the
+     place it should go. The last is the single pointer way that dragging
+     needs beside it. The order is kept on the device, per account, like the
+     theme, and it does not sync. */
+  ASP4_KEYS = ['conjunct', 'opposite', 'trine', 'square'];
+  ASP4_NAMES = { conjunct: 'Conjunction', opposite: 'Opposition', trine: 'Trine', square: 'Square' };
+  get ASP_ORDER_KEY() { return this.acctKey('incommon.aspOrder'); }
+  aspOrder() {
+    const K = this.ASP4_KEYS, raw = this.readLS(this.ASP_ORDER_KEY, null);
+    const got = Array.isArray(raw) ? raw.filter((k, i) => K.indexOf(k) !== -1 && raw.indexOf(k) === i) : [];
+    return got.concat(K.filter(k => got.indexOf(k) === -1));
+  }
+  aspMove(key, to, say) {
+    const o = this.aspOrder(), from = o.indexOf(key);
+    if (from < 0) return false;
+    to = Math.max(0, Math.min(o.length - 1, to));
+    if (to === from) return false;
+    /* The square on show stays on show: with none chosen it is the first,
+       and moving another to the front must not swap the reading under it. */
+    const shown = this.ASP4_KEYS.indexOf(this.state.ledAsp) !== -1 ? this.state.ledAsp : o[0];
+    o.splice(from, 1);
+    o.splice(to, 0, key);
+    this.writeLS(this.ASP_ORDER_KEY, o);
+    this.setState({ aspOrderTick: (this.state.aspOrderTick || 0) + 1, ledAsp: shown });
+    if (say) this.speak(this.ASP4_NAMES[key] + ', place ' + (to + 1) + ' of ' + o.length + '.', 'polite');
+    return true;
+  }
+  aspTileEl(key) {
+    const all = [].slice.call(document.querySelectorAll('[data-asp-tile="' + key + '"]'));
+    return all.find(el => el.offsetParent !== null) || all[0] || null;
+  }
+  /* Focus follows the square it moved, re-queried after the render lands,
+     never held across it. */
+  aspRefocus(key) {
+    let n = 0;
+    const go = () => {
+      const el = this.aspTileEl(key);
+      if (el && document.activeElement !== el) el.focus();
+      if ((!el || document.activeElement !== el) && ++n < 8) requestAnimationFrame(go);
+    };
+    requestAnimationFrame(go);
+  }
+  aspKeys(e) {
+    const STEP = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 };
+    const key = e.target && e.target.getAttribute ? e.target.getAttribute('data-asp-tile') : null;
+    if (e.altKey && STEP[e.key] && key) {
+      e.preventDefault();
+      if (this.aspMove(key, this.aspOrder().indexOf(key) + STEP[e.key], true)) this.aspRefocus(key);
+      return;
+    }
+    if (this.state.aspArrange) {
+      if (e.key === 'Escape') { e.preventDefault(); this.setState({ aspHeld: null }); }
+      return;
+    }
+    this.radioKeys(e);
+  }
+  aspArrangeToggle() {
+    const on = !this.state.aspArrange;
+    this.setState({ aspArrange: on, aspHeld: null });
+    this.speak(on ? 'Tap a square, then the place it should go.' : 'The aspects keep this order.', 'polite');
+  }
+  aspPlace(k) {
+    const held = this.state.aspHeld;
+    if (!held) { this.setState({ aspHeld: k }); this.speak(this.ASP4_NAMES[k] + ' lifted. Choose its new place.', 'polite'); return; }
+    if (held === k) { this.setState({ aspHeld: null }); this.speak(this.ASP4_NAMES[k] + ' put back.', 'polite'); return; }
+    this.setState({ aspHeld: null });
+    this.aspMove(held, this.aspOrder().indexOf(k), true);
+    this.aspRefocus(held);
+  }
+  aspDown(e, key) {
+    if (this.state.aspArrange || (e.button != null && e.button !== 0)) return;
+    if (this._aspDrag) this.aspDragEnd(null);
+    const el = e.currentTarget, r = el.getBoundingClientRect();
+    const d = this._aspDrag = { key: key, id: e.pointerId, x0: e.clientX, y0: e.clientY, grab: e.clientX - r.left,
+      touch: e.pointerType === 'touch' || e.pointerType === 'pen', on: false, tx: 0, t: 0 };
+    const move = ev => this.aspDragMove(ev), up = ev => this.aspDragEnd(ev);
+    const tm = ev => { if (d.on && ev.cancelable) ev.preventDefault(); };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    window.addEventListener('touchmove', tm, { passive: false });
+    d.off = () => {
+      clearTimeout(d.t);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      window.removeEventListener('touchmove', tm);
+    };
+    if (d.touch) d.t = setTimeout(() => { if (this._aspDrag === d) this.aspDragStart(d); }, 320);
+  }
+  aspDragStart(d) {
+    d.on = true;
+    this.aspDragPaint(d);
+    try { if (d.touch && navigator.vibrate) navigator.vibrate(8); } catch (e) {}
+  }
+  aspDragMove(ev) {
+    const d = this._aspDrag;
+    if (!d || ev.pointerId !== d.id) return;
+    const dx = ev.clientX - d.x0, dy = ev.clientY - d.y0;
+    if (!d.on) {
+      /* A finger that moves before the hold lands was scrolling. */
+      if (d.touch) { if (Math.hypot(dx, dy) > 10) this.aspDragEnd(null); return; }
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      this.aspDragStart(d);
+    }
+    ev.preventDefault && ev.preventDefault();
+    const el = this.aspTileEl(d.key);
+    if (!el) return;
+    const tiles = [].slice.call(el.parentElement.querySelectorAll('[data-asp-tile]'));
+    /* Where each square stands untransformed, so the one in the hand is
+       measured where it sits, not where it is being carried. A render may
+       have moved it to a new slot or handed its node on, so the carry is
+       taken off before anything is measured. */
+    tiles.forEach(t => { t.style.transform = 'none'; });
+    const home = tiles.map(t => t.getBoundingClientRect().left);
+    const w = el.getBoundingClientRect().width;
+    const x = ev.clientX - d.grab + w / 2;
+    let to = 0;
+    home.forEach((h, i) => { if (Math.abs(h + w / 2 - x) < Math.abs(home[to] + w / 2 - x)) to = i; });
+    const at = tiles.indexOf(el);
+    d.tx = ev.clientX - d.grab - home[at];
+    this.aspDragPaint(d);
+    if (to !== at) {
+      this.aspMove(d.key, to, false);
+      /* The render puts the square in its new slot, and may hand its old
+         node to a neighbour, so the lift is painted again from the keys. */
+      let n = 0;
+      const land = () => {
+        if (this._aspDrag !== d) return;
+        const e2 = this.aspTileEl(d.key);
+        const row = e2 ? [].slice.call(e2.parentElement.querySelectorAll('[data-asp-tile]')) : [];
+        if (row.indexOf(e2) !== to) { if (++n < 12) requestAnimationFrame(land); return; }
+        e2.style.transform = 'none';
+        d.tx = ev.clientX - d.grab - e2.getBoundingClientRect().left;
+        this.aspDragPaint(d);
+      };
+      requestAnimationFrame(land);
+    }
+  }
+  aspDragPaint(d) {
+    [].slice.call(document.querySelectorAll('[data-asp-tile]')).forEach(t => {
+      const mine = !!d && t.getAttribute('data-asp-tile') === d.key;
+      if (mine) { t.setAttribute('data-asp-drag', '1'); t.style.transform = 'translateX(' + d.tx + 'px)'; }
+      else if (t.hasAttribute('data-asp-drag') || t.style.transform) { t.removeAttribute('data-asp-drag'); t.style.transform = ''; }
+    });
+  }
+  aspDragEnd(ev) {
+    const d = this._aspDrag;
+    if (!d || (ev && ev.pointerId !== d.id)) return;
+    d.off();
+    this._aspDrag = null;
+    if (!d.on) return;
+    this._aspDragAt = Date.now();
+    this.aspDragPaint(null);
+    const o = this.aspOrder();
+    this.speak(this.ASP4_NAMES[d.key] + ', place ' + (o.indexOf(d.key) + 1) + ' of ' + o.length + '.', 'polite');
+  }
   ledgerHot(key) {
     document.querySelectorAll('[data-wb]').forEach(el => {
       if (key && el.getAttribute('data-wb') === key) el.setAttribute('data-hot', '1'); else el.removeAttribute('data-hot');
@@ -23228,8 +23416,10 @@ class Component extends DCLogic {
        harmonics card is built, with the four major aspects where the 4th,
        5th, 7th and 9th stand. A tab, the aspect's own line, the reader's
        pairs closest first, then every placement, the pair's bodies lit. */
-    const ASP4 = [['conjunct', 'Conjunction'], ['opposite', 'Opposition'], ['trine', 'Trine'], ['square', 'Square']];
-    const aspPick = ASP4.some(a => a[0] === st.ledAsp) ? st.ledAsp : 'conjunct';
+    /* The four squares stand in the order the reader set (aspOrder), and the
+       first of them is the one that opens when nothing has been chosen. */
+    const ASP4 = this.aspOrder().map(k => [k, this.ASP4_NAMES[k]]);
+    const aspPick = ASP4.some(a => a[0] === st.ledAsp) ? st.ledAsp : ASP4[0][0];
     const MIRROR4 = ['Descendant', 'IC', 'South Node'];
     const coreKeys4 = corePts.map(r => this.pointKey(r));
     const kOf = p => p.id || p.name;
@@ -23245,9 +23435,20 @@ class Component extends DCLogic {
       g: l.glyph, gc: litKeys[l.key] ? 'var(--ac2-hi)' : 'var(--dim)',
       bd: litKeys[l.key] ? 'rgba(var(--atmc),.7)' : 'transparent', bg: litKeys[l.key] ? 'rgba(var(--atmc),.14)' : 'transparent' }));
     const aspVals = {
-      chAspTabs: ASP4.map(([k, lb]) => ({ key: k, label: lb, sym: SYM(k), on: k === aspPick,
+      chAspTabs: ASP4.map(([k, lb], i) => ({ key: k, label: lb, sym: SYM(k), on: k === aspPick,
         bg: k === aspPick ? 'rgba(var(--atmc),.32)' : 'var(--sf2)', bd: k === aspPick ? 'rgba(var(--atmc),.9)' : 'var(--bd)',
-        go: () => this.setState({ ledAsp: k }) })),
+        go: () => { if (Date.now() - (this._aspDragAt || 0) > 400) this.setState({ ledAsp: k }); },
+        down: e => this.aspDown(e, k),
+        held: st.aspHeld === k,
+        arrLabel: lb + ', place ' + (i + 1) + ' of ' + ASP4.length + (st.aspHeld === k ? ', lifted' : st.aspHeld ? ', put ' + this.ASP4_NAMES[st.aspHeld] + ' here' : ', lift it'),
+        arrBd: st.aspHeld === k ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.7)', arrBg: st.aspHeld === k ? 'rgba(var(--atmc),.32)' : 'var(--sf2)',
+        place: () => this.aspPlace(k) })),
+      chAspPicking: !st.aspArrange, chAspArranging: !!st.aspArrange,
+      chAspArrangeGo: () => this.aspArrangeToggle(),
+      chAspArrangeLabel: st.aspArrange ? 'Done arranging' : 'Arrange the aspects',
+      chAspArrangeSym: st.aspArrange ? '\u2713\ufe0e' : '\u21c4\ufe0e',
+      chAspArrangeC: st.aspArrange ? 'var(--ac2-hi)' : 'var(--mut)',
+      chAspArrangeBd: st.aspArrange ? 'var(--ac2-hi)' : 'var(--bd)', chAspArrangeBg: st.aspArrange ? 'rgba(var(--atmc),.24)' : 'var(--sf2)',
       chAspLine: mean4 ? mean4.charAt(0).toUpperCase() + mean4.slice(1) + '.' : '',
       chAspPairs: aspPairs.map(({ x, i }) => ({ g: (x.a.glyph || '') + ' ' + (x.b.glyph || ''),
         t: this.studyName(x.a.name) + ' and ' + this.studyName(x.b.name),
@@ -33705,6 +33906,7 @@ class Component extends DCLogic {
       skipToMain: () => this.skipToMain(),
       secFocus: e => this.secFocusIn(e),
       radioKeys: e => this.radioKeys(e),
+      aspKeys: e => this.aspKeys(e),
       /* G11: the plain language summary leaves the accessibility tree while a
          detail sheet is open, so the sheet is not read behind the wheel. */
       chartSummaryOff: (st.dpSel || st.placeSel || st.aspSel) ? 'true' : 'false',
