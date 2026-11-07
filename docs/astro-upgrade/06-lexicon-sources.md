@@ -96,19 +96,57 @@ says only what both hold.
 | Midpoint | The point halfway between two bodies, direct when a body stands on it | https://en.wikipedia.org/wiki/Midpoint_(astrology) |
 | Synastry | Comparing two charts | https://en.wikipedia.org/wiki/Astrological_compatibility (the entry keeps the app's rule: synastry is not compatibility, and no score) |
 
+## Read on 7 November 2026, second batch
+
+Skyscript's entry pages come back empty to an automated read, so these were
+read from its letter pages, which carry the same entries. Its glossary is
+written by Deborah Houlding (CC BY-NC-SA 4.0); the lexicon paraphrases it and
+quotes nothing.
+
+### Aspects in motion
+
+| Term | What the page holds | Page |
+|---|---|---|
+| Application | Within orb and moving toward exactness; retrograde motion can reverse it | https://www.skyscript.co.uk/glossary/ (heading Application) |
+| Separation | Within orb and moving away from exactness; retrograde motion can reverse it | https://www.skyscript.co.uk/glossary/S |
+| Translation of light | A planet separates from one significator and applies to another while still in orb of the first, carrying the first one's influence across | https://www.skyscript.co.uk/glossary/T |
+| Collection of light | Two planets, in aspect or not, both apply to a third that collects their light | https://www.skyscript.co.uk/glossary/C |
+| Prohibition | A third planet perfects with one of two applying planets first and blocks the contact; Lilly, Christian Astrology p. 110 | https://www.skyscript.co.uk/glossary/P |
+| Refranation | A kind of prohibition: the applying planet turns retrograde and separates before perfection | https://www.skyscript.co.uk/glossary/R |
+| Station | Daily motion turning direct to retrograde or back, the planet hanging at one degree; read as hesitation and lingering effect; Bonatti's 25th Consideration | https://www.skyscript.co.uk/glossary/S |
+
+### Traditional techniques
+
+| Term | What the page holds | Page |
+|---|---|---|
+| Oriental, occidental | From the Latin for east and west: rising and emerging, setting and falling | https://www.skyscript.co.uk/glossary/O |
+| Hyleg | The point or planet of greatest influence on vitality, the giver of life; its ruler is the alcocoden | https://www.skyscript.co.uk/glossary/H |
+| Alcocoden | Rules the degree of the hyleg while aspecting it, the giver of years; Perso-Arabic kadhkhudah | https://www.skyscript.co.uk/glossary/ (heading Alchocoden) |
+| Firdaria | Planetary life periods, medieval, attributed to the Persians; a day chart begins with the Sun, a night chart with the Moon (the period lengths were cut off in the read, so the entry gives none) | https://www.skyscript.co.uk/glossary/F |
+| Dodecatemoria | Signs and degrees given extended meaning by dividing or multiplying by twelve; also the twelve signs, or 12 degree portions | https://www.skyscript.co.uk/glossary/D |
+| Final disposition | The chain of dispositors ends at a planet in its own sign or loops; the page says final disposition, so the entry does too | https://en.wikipedia.org/wiki/Dispositor (served the Domicile (astrology) article) |
+
+### Aspect patterns
+
+| Term | What the page holds | Page |
+|---|---|---|
+| Grand trine | Three planets linked by three trines; harmonious, stable, may be static; cites Sakoian and Acker | https://cafeastrology.com/articles/aspectpatterns.html |
+| T-square | Two planets in opposition both square a focal planet; the point opposite the focus is sensitive | same |
+| Grand cross | Two oppositions joined by squares, four interlocking squares, no focal planet | same |
+
+Not used though read: Wikipedia's Composite chart, Descendant, Midheaven and
+Vertex addresses each served a different article (Horoscope, House, Astrological
+symbols), and Progression (astrology) and Solar return no longer exist there.
+
 ## Not yet read
 
 These were tried and could not be read on 7 November 2026, so they are not in
 the lexicon. Skyscript's index and most of AstroWiki refuse automated reads,
 and the session's page budget ran out partway through.
 
-Grand trine, T-square, grand cross, secondary and tertiary progression (the
-app's own chapters rest on `02`), solar arc, solar and lunar return,
-composite, Davison, overlay, ingress, hemisphere and quadrant emphasis,
-retrograde and station as astrology uses them, applying and separating, out
-of sign, final dispositor, Vertex, Midheaven and Descendant as their own
-entries, the rest of Skyscript's traditional terms (oriental, occidental,
-translation and collection of light, prohibition, refranation, hyleg,
-alcocoden, firdaria, benefic and malefic),
-evolutionary and psychological astrology, zodiacal releasing (the app's
-chapter rests on `04`), dodecatemoria, pre-shadow.
+Secondary and tertiary progression (the app's own chapters rest on `02`),
+solar arc, solar and lunar return, composite, Davison, overlay, ingress,
+hemisphere and quadrant emphasis, out of sign, Vertex as its own entry,
+benefic and malefic from Skyscript (both are already words of the Hellenistic
+study), evolutionary and psychological astrology, zodiacal releasing (the
+app's chapter rests on `04`), pre-shadow.
