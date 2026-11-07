@@ -963,7 +963,7 @@
   /* What each house is, said the way the owner asked on 6 November 2026: "A
      part of living where [this] happens consistently". */
   var HOUSE_LIVING = [
-    'your in-person visibility, your impression on the world,',
+    'being seen in person and the first impression you make',
     'money, keeping and the worth you feel underneath',
     'everyday talk, errands and the people close by',
     'home, family and the ground under your feet',
