@@ -13,7 +13,16 @@
  *       whole name wins over a longer one (Venus, not the Venus Node);
  *   F4  an unknown word says so rather than showing an empty grid;
  *   F5  focus stays in the field while typing;
- *   F6  clearing the field brings the grid back.
+ *   F6  clearing the field brings back the view in use;
+ *   V1  the grid opens on the desktop and the list on the phone;
+ *   V2  the list holds every contact, closest first, and By body gathers
+ *       each lead body's contacts together;
+ *   V3  an aspect switched off leaves the list and the grid;
+ *   V4  the grid's labels stay pinned to the top and the left when it is
+ *       scrolled to its far corner;
+ *   V5  a press on a label down the side lights its row and column, and a
+ *       second press clears it;
+ *   V6  one family beside the usual 22 draws only those points.
  *
  * Usage: node tools/drive-aspect-find.js     exit 0 when every row passes
  */
@@ -78,7 +87,68 @@ const t = (id, ok, v) => { rows.push([id, ok]); console.log((ok ? 'PASS ' : 'FAI
       r = await type('zzzz');
       t(name + ' F4', !r.lines.length && !r.table && /No point by that name/.test(r.text), r.text);
       r = await type('');
-      t(name + ' F6', r.table, r.table);
+      t(name + ' F6', touch ? (!r.table && r.lines.length > 0) : r.table, { table: r.table, lines: r.lines.length });
+      const press = (group, label) => p.evaluate(([g, l]) => {
+        const box = [...document.querySelectorAll('[data-bg-ctl]')].find(e => e.offsetParent);
+        const b = [...box.querySelectorAll('[role="radiogroup"],[role="group"]')].filter(x => x.getAttribute('aria-label') === g)
+          .flatMap(x => [...x.querySelectorAll('button')]).find(x => x.textContent.trim().replace(/^\S+\s(?=[A-Z])/, '') === l || x.textContent.trim() === l || x.textContent.trim().endsWith(l));
+        if (!b) return false; b.click(); return true;
+      }, [group, label]);
+      t(name + ' V1', touch ? (!r.table && r.lines.length > 0) : r.table, r.table);
+      await press('Show the contacts as', 'List'); await p.waitForTimeout(500);
+      r = await read();
+      const all = r.lines.length;
+      t(name + ' V2a', all > 50 && r.orbs.map(deg).every((v, i, a) => !i || a[i - 1] <= v), all);
+      await press('Order the contacts', 'By body'); await p.waitForTimeout(500);
+      r = await read();
+      const leads = r.lines.map(l => l.split(/ (conjunct|sextile|square|trine|opposite|quincunx|semisextile|semisquare|sesquisquare) /)[0]);
+      const runs = leads.filter((l, i) => !i || leads[i - 1] !== l);
+      t(name + ' V2b', r.lines.length === all && new Set(runs).size === runs.length, { lines: r.lines.length, runs: runs.length });
+      await press('Order the contacts', 'Closest first');
+      await press('Aspects shown', 'Trine'); await p.waitForTimeout(500);
+      r = await read();
+      const noTrineList = r.lines.length > 0 && r.lines.length < all && r.lines.every(l => !/ trine /.test(l));
+      await press('Show the contacts as', 'Grid'); await p.waitForTimeout(600);
+      const gridTrines = await p.evaluate(() => { const g = [...document.querySelectorAll('[data-asp-grid]')].find(e => e.offsetParent); return [...g.querySelectorAll('td[title]')].filter(td => / trine /.test(td.title)).length; });
+      t(name + ' V3', noTrineList && gridTrines === 0, { list: r.lines.length, gridTrines });
+      await press('Aspects shown', 'Trine'); await p.waitForTimeout(500);
+      const pin = await p.evaluate(async () => {
+        const g = [...document.querySelectorAll('[data-asp-grid]')].find(e => e.offsetParent);
+        g.scrollIntoView({ block: 'start' });
+        g.scrollTop = g.scrollHeight; g.scrollLeft = g.scrollWidth;
+        await new Promise(r => setTimeout(r, 200));
+        const box = g.getBoundingClientRect();
+        const top = g.querySelector('thead th:last-child').getBoundingClientRect();
+        const side = g.querySelector('tbody tr:last-child th').getBoundingClientRect();
+        return { scrolled: g.scrollTop > 0 && g.scrollLeft > 0, topIn: top.top >= box.top - 1 && top.top < box.top + 30, sideIn: side.left >= box.left - 1 && side.left < box.left + 30 };
+      });
+      t(name + ' V4', pin.scrolled && pin.topIn && pin.sideIn, pin);
+      const trace = await p.evaluate(async () => {
+        const g = [...document.querySelectorAll('[data-asp-grid]')].find(e => e.offsetParent);
+        const btn = g.querySelector('tbody tr:nth-child(4) th button');
+        const k = btn.getAttribute('data-bg-trace');
+        btn.click();
+        await new Promise(r => setTimeout(r, 100));
+        const t = g.querySelector('table');
+        const on = [...t.querySelectorAll('td.on')];
+        const a = { pressed: btn.getAttribute('aria-pressed'), tracing: t.hasAttribute('data-tracing'), on: on.length,
+          right: on.every(c => c.getAttribute('data-bg-r') === k || c.getAttribute('data-bg-c') === k) };
+        btn.click();
+        await new Promise(r => setTimeout(r, 100));
+        a.cleared = !t.hasAttribute('data-tracing') && btn.getAttribute('aria-pressed') === 'false';
+        return a;
+      });
+      t(name + ' V5', trace.pressed === 'true' && trace.tracing && trace.on > 3 && trace.right && trace.cleared, trace);
+      const before = await p.evaluate(() => [...document.querySelectorAll('[data-asp-grid]')].find(e => e.offsetParent).querySelectorAll('tbody tr').length);
+      const famOk = await press('Which family of points beside the usual 22', 'Asteroids'); await p.waitForTimeout(600);
+      const fam = await p.evaluate(() => {
+        const app = window.__incommonApp, g = [...document.querySelectorAll('[data-asp-grid]')].find(e => e.offsetParent);
+        const keys = [...g.querySelectorAll('tbody th button')].map(b => b.getAttribute('data-bg-trace'));
+        const core = new Set(app.BLOOM_CORE);
+        const rows = app.fullChart(true);
+        return { n: keys.length, ok: keys.every(k => core.has(k) || (rows.find(r => app.pointKey(r) === k) || {}).category === 'asteroid'), some: keys.some(k => !core.has(k)) };
+      });
+      t(name + ' V6', famOk && fam.ok && fam.some && fam.n < before, { ...fam, before });
       await ctx.close();
     }
   } finally { await b.close(); server.close(); }

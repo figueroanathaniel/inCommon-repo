@@ -8157,5 +8157,34 @@ bodies give the contact between them; an aspect's name keeps only that
 aspect. A whole name wins over a longer one, so "venus" is Venus and not the
 Venus Node too. The list is written into the grid host by `bloomGridSync()`,
 a DOM write like the grid, with the query in its signature, and the count is
-spoken after a pause. Clearing the field brings the grid back.
-`tools/drive-aspect-find.js` holds it in both shells.
+spoken after a pause. Clearing the field brings back the view in use.
+
+**Four more ways to read it, and the owner chose all of them** (7 November 2026).
+Under the field is a strip of controls (`[data-bg-ctl]`, `bloomGridCtl()`),
+outside `[data-chart]` so the contrast and touch sweeps measure it:
+
+- **List or Grid** (`bloomGridView`). The list is every contact as a line,
+  and it is where the phone opens (`bloomGridViewOf()`: below 820 wide); the
+  desktop opens on the grid. A query always shows the list. The list orders
+  Closest first or By body (`bloomGridSort`), and By body gathers each
+  point's contacts under the one higher on the chart (`bloomGridList()`).
+- **Aspects shown** (`bloomGridOff`): any aspect can be switched off, in the
+  list and the grid alike. Each switch carries its colour as a line under
+  the symbol, never as the text's colour.
+- **One family beside the usual 22** (`bloomGridFam`): Every family, or
+  `BLOOM_CORE` plus one category, which turns ninety four rows into about
+  forty. Shown only when a family beyond the 22 is switched on.
+- **The grid's labels are pinned**: a header row along the top and a column
+  down the side, both `position: sticky` inside a host that scrolls both
+  ways at `min(68vh, 640px)`. The host has no padding in grid view, because
+  a sticky label sits inside the padding and the cells show through it.
+- **A press on a label traces it** (`bloomGridTap()`, `bloomGridTrace()`):
+  the point's row and column light, the other symbols fade, and a second
+  press clears it. Only the side labels are buttons (one tab stop a point);
+  the top labels answer a pointer. The trace is held in `_bgTrace` and put
+  back after every rebuild, a DOM write like the rest, never state.
+
+All of it is this dialog's own and is not kept. `tools/drive-aspect-find.js`
+holds it in both shells, 26 rows. The strip measured clean with the
+harness's own `contrastFails()` and `tapTargets()`, four identities,
+hardened and not, at 1440 and 375.
