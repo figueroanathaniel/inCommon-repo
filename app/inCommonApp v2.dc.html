@@ -1479,7 +1479,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </sc-for>
               </div>
               <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
-                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
+                <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Reaching your chart, and when</span>
                 <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
                   <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:12px 15px">
                     <span style="font:600 13px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
@@ -8580,7 +8580,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   </sc-for>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
-                  <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
+                  <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Reaching your chart, and when</span>
                   <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
                     <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:12px 15px">
                       <span style="font:600 13px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
@@ -20776,20 +20776,23 @@ class Component extends DCLogic {
   dpOpen(sel) { return () => this.setState({ dpSel: sel }); }
   dailyAstroGroups(d) {
     const H = (head, text) => this.headLine(head, text), f = p => this.fmtPos(p);
+    const natalSun = d.tr.natal[0], asc = this.ascendant();
+    const hs = lon => (lon == null || !natalSun) ? null : this.houseOf(lon, natalSun, asc);
     const out = [{ hasHead: false, head: '', cta: '', go: () => {}, lines: [
-      H('', 'The Sun is at ' + f(d.sun) + ' today and the Moon at ' + f(d.moon) + ', in a ' + d.phase.toLowerCase() + ' phase. ' + (d.hits.length
-        ? (d.hits.length === 1 ? 'One transit sits' : d.hits.length + ' transits sit') + ' within orb of your natal chart right now, and each is set out below.'
-        : 'Nothing sits within orb of a natal placement of yours. The sky is not pressing on your chart today, which is a more common condition than most readings admit.'))
+      H('', 'The Sun stands at ' + f(d.sun) + ' today and the Moon at ' + f(d.moon) + ', in its ' + d.phase.toLowerCase() + ' phase. ' + (d.hits.length
+        ? (d.hits.length === 1 ? 'One transit touches' : this.horoCap(this.HORO_WORD[d.hits.length] || String(d.hits.length)) + ' transits touch') + ' your natal chart closely right now, each one here in turn.'
+        : 'Nothing overhead touches a placement of yours closely today, and that quiet is more common than most readings admit.'))
     ] }];
     d.hits.forEach(h => {
-      const a = String(h.asp).toLowerCase();
+      const a = String(h.asp).toLowerCase(), nh = hs(h.b.lon);
+      const said = [this.voiceOf(h.a.name), h.b.name !== h.a.name ? this.voiceOf(h.b.name) : ''].filter(Boolean).join(' ');
       out.push({ hasHead: true,
         head: 'Transiting ' + h.a.name + ' ' + this.aspName(a) + ' to your natal ' + h.b.name,
         cta: h.b.name + ' \u2192', go: this.dpOpen({ kind: 'astral body', name: h.b.name }),
         lines: [
           H('The measurement', h.a.name + ' at ' + f(h.a) + ' forms a ' + this.aspName(a) + ' to your natal ' + h.b.name + ' at ' + f(h.b) + ', within ' + h.orb.toFixed(1) + ' degrees. That part is arithmetic; everything after it is interpretation, and it is worth keeping the two apart.'),
-          H('What the tradition makes of it', 'A ' + this.aspName(a) + ' between ' + h.a.name + ' and ' + h.b.name + ' carries ' + (this.ASP_MEAN[a] || 'a live contact') + '. ' + this.horoCap(this.bodyEnergy(h.a.name)) + ' leans one way, ' + this.bodyEnergy(h.b.name) + ' leans another, and this week they have to share a room.'),
-          H('How it may land', 'You may notice this as ' + (this.ASP_POSS[a] || 'a contact you feel before you can name it') + '. The sky sets the weather; what grows in it has always depended on the ground, and the ground is yours.')
+          H('What the tradition makes of it', (said ? said + ' ' : '') + 'Between them runs ' + (this.ASP_MEAN[a] || 'a live contact') + '.'),
+          H('How it may land', 'It may arrive as ' + (this.ASP_POSS[a] || 'a contact felt before it can be named') + (nh ? ', gathering in ' + this.roomOf(nh) : '') + '. The sky sets the weather; what grows in it has always depended on the ground, and the ground is yours.')
         ] });
     });
     return out;
@@ -20800,31 +20803,37 @@ class Component extends DCLogic {
     let last = '';
     const T = (tag, text) => { const h = H[tag] || ''; const use = h && h !== last ? h : ''; if (h) last = h; return this.headLine(use, text); };
     const gname = g => this.GATE_NAMES[g] || '';
-    const centerLabel = d.center ? d.center + ' center' : 'bodygraph';
+    const centerLabel = d.center ? d.center + ' center' : 'wiring';
+    const TL = window.TimingLexicon;
+    const gx = TL ? TL.gate(d.sunGate.gate, d.sunGate.line, { held: !!d.natalHasGate, partner: d.chan ? d.partner : null }) : null;
+    const sky = gx ? this.horoSky1(gx.sky) : 'Gate ' + d.sunGate.gate + ' carries the theme of ' + gname(d.sunGate.gate).toLowerCase() + '.';
     const groups = [{ hasHead: true, head: 'Gate ' + d.sunGate.gate + '.' + d.sunGate.line + ', ' + gname(d.sunGate.gate),
       cta: 'Gate ' + d.sunGate.gate + ' \u2192', go: this.dpOpen({ kind: 'gate', gate: d.sunGate.gate }), lines: [
         T('CALCULATED', 'The Sun today activates Gate ' + d.sunGate.gate + '.' + d.sunGate.line + ' in your ' + centerLabel + '.'),
-        T('TRADITIONAL', 'Gate ' + d.sunGate.gate + ' carries the theme of ' + gname(d.sunGate.gate).toLowerCase() + '. Your ' + centerLabel + ' handles ' + this.centerTheme(d.center) + ', and it is ' + (d.definedCenter ? 'defined in your chart, so this activation lands on ground that already behaves consistently.' : 'undefined in your chart, so this activation is borrowed rather than fixed. It can feel loud today and absent tomorrow.')),
+        T('TRADITIONAL', sky + (d.center ? ' Your ' + centerLabel + ' holds ' + this.centerTheme(d.center) + ', and it is ' + (d.definedCenter
+          ? 'defined in your chart, so the day lands on ground that already keeps its shape.'
+          : 'open in your chart, so the day comes in through the room and the people in it, borrowed rather than fixed.') : '')),
         T('POSSIBILITY', d.definedCenter
-          ? 'You may find this theme easier to act from than usual, because the center it touches is already reliable in you.'
-          : 'You may find yourself taking on this theme from the room around you. Notice whether it is yours or the day\u2019s.')
+          ? 'The theme may come easier than usual, spoken from a place that is already steady in you.'
+          : 'Some of this theme may be picked up from the room, and some of it belongs to the day rather than to you.')
       ] }];
     if (d.chan) {
       groups.push({ hasHead: true, head: 'Channel ' + d.chan[0] + '-' + d.chan[1] + ', ' + d.chan[2] + ' to ' + d.chan[3],
         cta: 'Gate ' + d.partner + ' \u2192', go: this.dpOpen({ kind: 'gate', gate: d.partner }), lines: [
-          T('CALCULATED', 'This completes the ' + d.chan[0] + '-' + d.chan[1] + ' channel with your natal Gate ' + d.partner + ', ' + gname(d.partner) + '.'),
-          T('TRADITIONAL', 'That channel runs between the ' + d.chan[2] + ' center (' + this.centerTheme(d.chan[2]) + ') and the ' + d.chan[3] + ' center (' + this.centerTheme(d.chan[3]) + '). While the transit holds, the circuit is temporarily complete.'),
-          T('POSSIBILITY', 'You may experience this as an unusual fluency between those two functions, lasting roughly a day.')
+          T('CALCULATED', 'With your natal Gate ' + d.partner + ', ' + gname(d.partner) + ', it completes the ' + d.chan[0] + '-' + d.chan[1] + ' channel.'),
+          T('TRADITIONAL', 'The channel runs between your ' + d.chan[2] + ' center, ' + this.centerTheme(d.chan[2]) + ', and your ' + d.chan[3] + ' center, ' + this.centerTheme(d.chan[3]) + ', and while the transit holds the circuit stays whole.'),
+          T('POSSIBILITY', (gx && gx.channel ? this.horoCap(gx.channel) + ', ' : 'There may be ') + 'an unusual fluency between the two, lasting roughly a day.')
         ] });
     } else {
       groups.push({ hasHead: false, head: '', cta: '', go: () => {}, lines: [
-        T('CALCULATED', 'Today\u2019s solar gate does not complete a channel with any of your ' + d.hd.gates.length + ' natal gates.'),
-        T('TRADITIONAL', 'An activation without a completed circuit is read as a theme in the air rather than a working current.')
+        T('CALCULATED', 'Today\u2019s solar gate finds no partner among your ' + d.hd.gates.length + ' natal gates, so no channel completes.'),
+        T('TRADITIONAL', 'The gate moves through the day as a theme in the air rather than a working current.')
       ] });
     }
+    const auth = String(d.hd.authority || ''), aName = auth.replace(/:.*$/, ''), aKey = auth.indexOf(':') > -1 ? auth.slice(auth.indexOf(':') + 1).trim() : '';
     groups.push({ hasHead: false, head: '', cta: '', go: () => {}, lines: [
-      T('CALCULATED', 'The Moon is in Gate ' + d.moonGate.gate + '.' + d.moonGate.line + ', ' + gname(d.moonGate.gate) + ', moving about one gate every eleven hours.'),
-      T('TRADITIONAL', 'Your chart is ' + (/^[AEIOU]/.test(d.hd.type) ? 'an ' : 'a ') + d.hd.type + ' chart. ' + d.hd.strategy + ' Your authority is ' + d.hd.authority.replace(/^([A-Za-z ]+): /, '$1, which means ') + '.')
+      T('CALCULATED', 'The Moon is in Gate ' + d.moonGate.gate + '.' + d.moonGate.line + ', ' + gname(d.moonGate.gate) + ', and moves on to the next gate in about eleven hours.'),
+      T('TRADITIONAL', 'Your chart is ' + (/^[AEIOU]/.test(d.hd.type) ? 'an ' : 'a ') + d.hd.type + ' chart. ' + d.hd.strategy + ' Your authority is ' + aName + (aKey ? ', and its keynote reads, ' + aKey : '') + '.')
     ] });
     return groups;
   }
@@ -20834,49 +20843,51 @@ class Component extends DCLogic {
        every day of the year. They are pools now, cycled against the figure they
        describe, so the row does not read as boilerplate under a changing number. */
     const P = (fig, span, arr) => this.dpick('n.grp' + span, arr);
+    /* A number already voiced in this panel is not voiced twice: the second
+       time it speaks through its role instead. */
+    const voiced = {}, speak = (v, role) => { if (voiced[v]) return this.numRole(v, role) || this.numEssence(v); voiced[v] = 1; return this.numVoice(v) || this.numEssence(v); };
     const g = (label, pos, v, trad, poss) => ({ hasHead: true, head: label + ' ' + v, cta: 'open \u2192',
       go: this.dpOpen({ kind: 'number', pos: pos, v: v }),
       lines: [T('CALCULATED', trad.calc), T('TRADITIONAL', trad.trad), T('POSSIBILITY', poss)] });
+    const dayPool = [
+      'Today may bring that quality in small practical form, in one conversation rather than all of them.',
+      'It tends to come in the ordinary size, one decision or one exchange rather than the whole day rearranged.',
+      'It tends to show up once, briefly, in something that would otherwise go unnoticed.'
+    ];
     if (!full) {
       const day = g('Personal Day', 'personalDay', d.pdV, {
-        calc: 'Your ' + d.pyV + ' Personal Year and ' + d.pmV + ' Personal Month reduce with today\u2019s date to ' + art(d.pdV) + ' ' + d.pdV + ' Personal Day.',
-        trad: art(d.pdV).replace(/^a/, 'A') + ' ' + d.pdV + ' day carries ' + this.numEssence(d.pdV) + ', read inside the year\u2019s theme of ' + this.numEssence(d.pyV) + '.'
-      }, P(d.pdV, 9, [
-        'Today may bring that quality in small practical form, in one conversation rather than all of them.',
-        'Expect it in the ordinary size: one decision, one exchange, not the whole day rearranged.',
-        'It tends to show up once, briefly, in something you would otherwise not have noticed.'
-      ]));
+        calc: 'Your ' + d.pyV + ' Personal Year and ' + d.pmV + ' Personal Month meet today\u2019s date in ' + art(d.pdV) + ' ' + d.pdV + ' Personal Day.',
+        trad: speak(d.pdV, 'day')
+      }, P(d.pdV, 9, dayPool));
       return [day];
     }
     return [
       g('Personal Year', 'personalYear', d.pyV, {
-        calc: 'You are in ' + art(d.pyV) + ' ' + d.pyV + ' Personal Year, reduced from your birth month and day plus ' + d.now.getFullYear() + '.',
-        trad: art(d.pyV).replace(/^a/, 'A') + ' ' + d.pyV + ' year is associated with ' + this.numEssence(d.pyV) + '.'
+        calc: 'This is ' + art(d.pyV) + ' ' + d.pyV + ' Personal Year, drawn from your birth month and day and the year ' + d.now.getFullYear() + '.',
+        trad: speak(d.pyV, 'year')
       }, P(d.pyV, 365, [
-        'This year may keep returning you to that theme in different rooms, whether or not you chose it.',
-        'A year number is slow enough that you notice it in hindsight rather than on the day.',
-        'The theme repeats until it is answered, which is the only sense in which a year insists.'
+        'The year may keep returning to that theme in different rooms, chosen or not.',
+        'A year number moves slowly enough that it shows in hindsight rather than on the day.',
+        'The theme comes round again until it is answered, which is the only sense in which a year insists.'
       ])),
       g('Personal Month', 'personalMonth', d.pmV, {
-        calc: 'This is ' + art(d.pmV) + ' ' + d.pmV + ' Personal Month, the year number plus the calendar month, reduced.',
-        trad: art(d.pmV).replace(/^a/, 'A') + ' ' + d.pmV + ' month inside ' + art(d.pyV) + ' ' + d.pyV + ' year emphasises ' + this.numEssence(d.pmV) + ' within the larger theme of ' + this.numEssence(d.pyV) + '.'
+        calc: 'Inside it runs ' + art(d.pmV) + ' ' + d.pmV + ' Personal Month, the year number joined with the calendar month.',
+        trad: speak(d.pmV, 'month')
       }, P(d.pmV, 30, [
-        'You may notice the month asking for a narrower version of what the year is asking for.',
-        'The month is the year at working scale: same question, small enough to act on.',
-        'Where the month and the year disagree, the month is the one you can actually schedule around.'
+        'The month often asks for a narrower version of what the year is asking for.',
+        'The month is the year at working scale, the same question made small enough to act on.',
+        'Where the month and the year disagree, the month is the one a calendar can hold.'
       ])),
       g('Personal Day', 'personalDay', d.pdV, {
-        calc: 'Today is ' + art(d.pdV) + ' ' + d.pdV + ' Personal Day, the month number plus today\u2019s date, reduced to a single digit.',
-        trad: art(d.pdV).replace(/^a/, 'A') + ' ' + d.pdV + ' day carries ' + this.numEssence(d.pdV) + '.'
-      }, P(d.pdV, 9, [
-        'Today may bring that quality in small practical form, in one conversation rather than all of them.',
-        'Expect it in the ordinary size: one decision, one exchange, not the whole day rearranged.',
-        'It tends to show up once, briefly, in something you would otherwise not have noticed.'
-      ])),
+        calc: 'Today is ' + art(d.pdV) + ' ' + d.pdV + ' Personal Day, the month number joined with today\u2019s date.',
+        trad: speak(d.pdV, 'day')
+      }, P(d.pdV, 9, dayPool)),
       g('Life Path', 'lifePath', d.lp, {
-        calc: 'Your Life Path is ' + d.lp + ', reduced from your whole birth date.',
-        trad: 'That path is characterised by ' + this.numEssence(d.lp) + '.'
-      }, 'Today\u2019s ' + d.pdV + ' day may meet your ' + d.lp + ' path easily or awkwardly. ' + (this.reduceNum(d.lp) === this.reduceNum(d.pdV) ? 'They reduce to the same digit today, which tradition reads as a day that runs with your grain.' : 'They reduce differently, so the day may ask for something slightly off your habit.'))
+        calc: 'Your Life Path is ' + d.lp + ', drawn from the whole of your birth date.',
+        trad: speak(d.lp, 'path')
+      }, (this.reduceNum(d.lp) === this.reduceNum(d.pdV)
+        ? 'Today\u2019s ' + d.pdV + ' shares its root with your ' + d.lp + ' path, and the day runs with the grain of the life.'
+        : 'Today\u2019s ' + d.pdV + ' moves on a different root from your ' + d.lp + ' path, and may carry something a little outside the usual road.'))
     ];
   }
   /* Today’s Transits disclosure. Open by default, and the reader’s choice is
@@ -20900,18 +20911,18 @@ class Component extends DCLogic {
     Pluto: 'slow pressure. Nothing is announced, and everything is different by the end of it'
   };
   HORO_ARRIVES = {
-    conjunct: 'in the same place as you, with no gap to think in',
-    sextile: 'as an opening that does not knock twice',
-    square: 'as friction between two things that cannot both be done first',
-    trine: 'easily, which is how it usually gets spent on nothing',
+    conjunct: 'in the same place as you, close enough that the two move as one',
+    sextile: 'as an opening that answers a light touch and does not knock twice',
+    square: 'as friction between two things that each want to go first',
+    trine: 'easily, a gift that grows when it is given somewhere to go',
     opposite: 'through somebody else, most often as their half of it'
   };
   HORO_DO = {
-    conjunct: 'Whatever starts under this will feel like your own idea. Check in a week whether it still is.',
-    sextile: 'Nothing here happens unless you make the call. It will not escalate on its own.',
-    square: 'The friction is the instruction. Pick one of the two and let the other wait.',
-    trine: 'It will go well without you pushing, so decide in advance what you want it spent on.',
-    opposite: 'Someone will state your own position back to you badly. Argue with the content, not the delivery.'
+    conjunct: 'Whatever begins under this feels like your own idea, and a week from now it shows whether it still is.',
+    sextile: 'Nothing here moves until someone reaches for it, and it stays quiet until then.',
+    square: 'Two things want to go first, and the one chosen leaves the other waiting its turn, sharper for the wait.',
+    trine: 'It goes well without pushing, and it goes furthest when it already knows what it is for.',
+    opposite: 'Someone may say your own position back to you badly, and the content is worth more than the delivery.'
   };
   // The four angles are points, not bodies, so PL_MEAN has nothing for them.
   // Without these the reading promises a subject and delivers a placeholder.
@@ -21237,6 +21248,23 @@ class Component extends DCLogic {
     });
     return out.sort((a, b) => a.rank - b.rank || a.hour - b.hour);
   }
+  /* The placement voice, shared by the horoscope, the forecast banners and the
+     Today pages (the owner, 7 November 2026): a body speaks its own line, a
+     house is a part of living, a number speaks as itself. */
+  voiceOf(n) { const PC = window.PlacementContent || {}, B = PC.bodies || {}, b = B[PC.keyFor ? PC.keyFor(n) : n]; return b && b.voice ? b.voice : ''; }
+  livingOf(h) { const H = (window.PlacementContent || {}).houses || [], x = h ? H[h - 1] : null; return x && x.living ? String(x.living).replace(/,\s*$/, '') : ''; }
+  happensOf(l) { return /,| and /.test(l) ? ' happen' : ' happens'; }
+  roomOf(h) { if (!h) return ''; const l = this.livingOf(h); return 'your ' + (this.HORO_DAY_ORD[h] || h + 'th') + ' house' + (l ? ', a part of living where ' + l + this.happensOf(l) : ''); }
+  theBody(n) { return /^(Sun|Moon|North Node|South Node)$/.test(n) ? 'the ' + n : n; }
+  numNum(v) { const NC = window.NumerologyContent; return NC && NC.numbers ? NC.numbers[v] || NC.numbers[this.reduceNum(v)] || null : null; }
+  numVoice(v) {
+    const e = this.numNum(v);
+    if (!e || !e.universal) return '';
+    const s = String(e.universal).split(/(?<=\.)\s+/);
+    if (/master number/.test(s[0]) && s[1]) return s[1].replace(/^It /, 'The ' + v + ' ');
+    return s[0].split(/\s+/).length < 5 && s[1] ? s[0] + ' ' + s[1] : s[0];
+  }
+  numRole(v, role) { const e = this.numNum(v); return e && e[role] ? String(e[role]) : ''; }
   horoProse(d, casts, sky, retros, hs, ord, theme) {
     const PC = window.PlacementContent || {}, B = PC.bodies || {}, S = PC.signs || {}, H = PC.houses || [];
     const day = this.horoNow(), ow = n => this.HORO_DAY_ORD[n] || ord(n);
@@ -21257,7 +21285,7 @@ class Component extends DCLogic {
     /* The Moon, its sign and the part of living it crosses. */
     const moonH = hs(d.moon.lon), sg = S[d.moon.sign] || {}, liv = moonH ? living(moonH) : '';
     const where = moonH ? ' and your ' + ow(moonH) + ' house' : '';
-    const part = liv ? ', a part of living where ' + liv + ' happens' : '';
+    const part = liv ? ', a part of living where ' + liv + this.happensOf(liv) : '';
     out.push(this.dpick('hd.moon', [
       'The Moon moves through ' + d.moon.sign + where + ' today' + part + '.',
       'Today the Moon walks through ' + d.moon.sign + where + part + '.',
@@ -21400,7 +21428,7 @@ class Component extends DCLogic {
       'The Moon is in ' + d.moon.sign + ', crossing your ' + ord(mh) + ' house, so the day is felt in ' + theme(mh) + ' rather than merely thought about there.',
       'It arrives through ' + theme(mh) + ', where the ' + d.moon.sign + ' Moon is crossing your ' + ord(mh) + ' house.',
       'The ' + d.moon.sign + ' Moon puts the weight of it in your ' + ord(mh) + ' house, which is to say in ' + theme(mh) + '.',
-      'Your ' + ord(mh) + ' house carries it today, with the Moon in ' + d.moon.sign + ': expect ' + theme(mh) + ' to be where you notice it.'
+      'Your ' + ord(mh) + ' house carries it today, with the Moon in ' + d.moon.sign + ', and ' + theme(mh) + ' is where it is felt.'
     ]);
     /* Same reason as the Human Design card: inside a gate run the design half of
        this paragraph is unchanged fact, so once the run is under way it is said
@@ -21434,10 +21462,10 @@ class Component extends DCLogic {
       'The pace under all of it is ' + ((vnum && vnum.essence) || this.numEssence(d.pdV)) + ', which is a speed rather than an instruction.'
     ]);
     const tail = top ? this.dpick('t.tail', [
-      'Expect ' + this.eventOf(top.a.name, 't') + ' around ' + theme(th) + ', and hold the three beside each other rather than stacking them.',
-      'The thing to watch for is ' + this.eventOf(top.a.name, 't') + ' in ' + theme(th) + '. Three readings, one day: they are not meant to be added up.',
+      'It may come as ' + this.eventOf(top.a.name, 't') + ' around ' + theme(th) + ', with the three held beside each other rather than stacked.',
+      'It tends to show as ' + this.eventOf(top.a.name, 't') + ' in ' + theme(th) + '. Three readings, one day, and they are not meant to be added up.',
       'If it becomes an event it becomes ' + this.eventOf(top.a.name, 't') + ', in ' + theme(th) + '. Let the three describe it from three sides instead of agreeing.',
-      'Around ' + theme(th) + ', look for ' + this.eventOf(top.a.name, 't') + '. Three systems, one day, and no obligation to make them say the same thing.'
+      'Around ' + theme(th) + ' it may arrive as ' + this.eventOf(top.a.name, 't') + '. Three systems, one day, and no obligation to make them say the same thing.'
     ]) : this.dpick('t.tailnone', [
       'With nothing in the sky touching your chart, all three run quietly in the same direction, which is the easiest weather there is to waste.',
       'No transit is in orb, so none of the three is being pressed. Quiet days like this one go missing unless something is deliberately spent on them.',
@@ -21475,9 +21503,9 @@ class Component extends DCLogic {
       'Nothing in the sky is touching your chart closely, which leaves the design and the numbers to set the day on their own.',
       'No transit is in orb, so the day is described by the design and the numbers rather than pressed on by the sky.'
     ]);
-    const meet = tr ? tr.meet + (th ? ' In your chart it lands in the ' + ord(th) + ' house, among ' + theme(th) + '.' : '') : '';
+    const meet = tr ? tr.meet + (th ? ' In your chart it lands in ' + this.roomOf(th) + '.' : '') : '';
     const design = this.horoCap(this.horoSky1(gx.sky)) + ' ' + gx.personal + ' ' + gx.line +
-      (gx.channel ? ' Meeting a gate already in your chart, it completes a channel for as long as it is held: ' + gx.channel + '.' : '');
+      (gx.channel ? ' Meeting a gate already in your chart, it completes a channel for as long as it is held, and ' + gx.channel + '.' : '');
     /* The closing question follows the system the reader last changed, so a
        number or a gate chosen by hand is answered with its own question rather
        than the transit's. Today and Shuffle close on the transit. */
@@ -21567,9 +21595,9 @@ class Component extends DCLogic {
         // and reading it at the crossing makes the line contradict itself.
         const l2 = this.lonOf('Moon', this.t2000(new Date(now.getTime() + (i + 48) * 3600000)));
         const nh = hs(l2 == null ? l : l2), ch = hs(l0);
-        return 'The Moon is at ' + Math.floor(s0.deg) + '\u00b0 ' + s0.sign + ', crossing your ' + ord(ch) + ' house, and it leaves for ' + s.sign +
-          ' in about ' + i + (i === 1 ? ' hour' : ' hours') + '. The mood of the day turns then, and the two days after it belong to your ' + ord(nh) +
-          ' house: ' + theme(nh) + '. That is the shortest hand on this clock, and the one you can check against the day itself.';
+        return 'The Moon is at ' + Math.floor(s0.deg) + '\u00b0 ' + s0.sign + ', crossing ' + this.roomOf(ch) + ', and it leaves for ' + s.sign +
+          ' in about ' + i + (i === 1 ? ' hour' : ' hours') + '. The mood of the day turns then, and the two days after it belong to ' + this.roomOf(nh) +
+          '. It is the quickest hand on this clock, and the one the day itself can be held against.';
       }
     }
     return '';
@@ -21616,24 +21644,24 @@ class Component extends DCLogic {
         hasSpan: !(arc && arc.spans <= 0 && arc.exactIn === 0),
         orb: 'orb ' + (arc ? arc.orb : h.orb).toFixed(1) + '\u00b0 \u00b7 ' + (arc && arc.closing ? 'tightening' : 'separating'),
         body: again
-          ? 'The same ' + h.a.name + ' pass, still at ' + this.fmtPos(h.a) + ' in your ' + ord(th) + ' house. This is the ' +
+          ? 'The same ' + h.a.name + ' pass, still at ' + this.fmtPos(h.a) + ' in your ' + this.HORO_DAY_ORD[th] + ' house. This is the ' +
             ordw(n) + ' of ' + word(total) + ' points it catches on the way through, and this one arrives ' +
             (this.HORO_ARRIVES[k] || 'without much warning') + '.'
-          : (h.a.name === 'Sun' || h.a.name === 'Moon' ? 'The ' + h.a.name : h.a.name) +
-            ' is at ' + this.fmtPos(h.a) + ', crossing your ' + ord(th) + ' house, which is where you handle ' + theme(th) +
-            '. It brings ' + (this.HORO_BRINGS[h.a.name] || 'its own business') + ', and it arrives ' + (this.HORO_ARRIVES[k] || 'without much warning') + '.' +
-            (total > 1 ? ' It reaches ' + word(total) + ' points of your chart on this pass, set out here in turn.' : ''),
+          : this.horoCap(this.theBody(h.a.name)) + ' is at ' + this.fmtPos(h.a) + ', crossing ' + this.roomOf(th) + '. ' +
+            (this.voiceOf(h.a.name) ? this.voiceOf(h.a.name) + ' ' : '') +
+            'It brings ' + (this.HORO_BRINGS[h.a.name] || 'its own business') + ', and it arrives ' + (this.HORO_ARRIVES[k] || 'without much warning') + '.' +
+            (total > 1 ? ' On this pass it reaches ' + word(total) + ' points of your chart, each here in turn.' : ''),
         land: onCusp
-          ? 'It lands on your natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', which is the cusp of your ' + ord(nh) +
-            ' house rather than a body sitting inside it. So this one is ' + this.horoMean(h.b.name) +
-            ' taken head-on, with nothing between the transit and the subject.'
-          : 'It lands on your natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ' in your ' + ord(nh) + ' house, so the subject is ' +
-            this.horoMean(h.b.name) + ' worked out in ' + theme(nh) + '.' +
-            (ci === 0 ? ' That is the department to expect it in, and the one to watch while the orb closes.' : ''),
+          ? 'It meets your natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', the doorway of your ' + this.HORO_DAY_ORD[nh] +
+            ' house itself rather than a body inside it, so ' + this.horoMean(h.b.name) + ' is touched directly, with nothing standing between.' +
+            (this.voiceOf(h.b.name) ? ' ' + this.voiceOf(h.b.name) : '')
+          : 'It meets your natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', which lives in ' + this.roomOf(nh) + '.' +
+            (this.voiceOf(h.b.name) && this.voiceOf(h.b.name) !== this.voiceOf(h.a.name) ? ' ' + this.voiceOf(h.b.name) : ' Here it touches ' + this.horoMean(h.b.name) + '.') +
+            (ci === 0 ? (arc && arc.closing ? ' This is where the day gathers most, and it grows louder as the two draw closer.' : ' This is where the day gathers most, easing now, and clearest in looking back.') : ''),
         act: !again ? (this.HORO_DO[k] || '')
-          : n < total ? 'Same source, a different department. Whatever you decide for the first of these decides this one too.'
-          : 'One transit, ' + word(total) + ' points of your chart. Expect a single event with ' + word(total) +
-            ' symptoms rather than ' + word(total) + ' separate problems.',
+          : n < total ? 'The same source in a different part of living, and whatever settles the first of these settles this one too.'
+          : 'One transit touching ' + word(total) + ' points of your chart tends to arrive as one event with ' + word(total) +
+            ' faces rather than ' + word(total) + ' separate troubles.',
         cta: 'Your ' + h.b.name + ' \u2192', go: this.dpOpen({ kind: 'astral body', name: h.b.name }),
         arcIn: arc ? arc.exactIn : 99, exactAt: arc ? arc.date : null,
         toAt: arc ? arc.to : null, hiBound: !!(arc && arc.hiBound),
@@ -21643,9 +21671,9 @@ class Component extends DCLogic {
     /* What the sky is doing to itself, and whether it reaches this chart. */
     const skySeen = {};
     const skySeg = (nm, hh) => {
-      if (skySeen[nm]) return nm + ' again, still in your ' + ord(hh);
+      if (skySeen[nm]) return this.horoCap(this.theBody(nm)) + ' again, still in your ' + this.HORO_DAY_ORD[hh] + ' house';
       skySeen[nm] = 1;
-      return nm + ' is walking your ' + ord(hh) + ' house, where you handle ' + theme(hh);
+      return this.horoCap(this.theBody(nm)) + ' is walking ' + this.roomOf(hh);
     };
     const sky = d.tr.global.slice(0, 2).map((h, si) => {
       const k = String(h.asp).toLowerCase(), arc = this.horoArc(h, true);
@@ -21653,16 +21681,17 @@ class Component extends DCLogic {
       const ha = hs(h.a.lon), hb = hs(h.b.lon);
       return { head: h.a.name + ' ' + this.aspName(k) + ' ' + h.b.name, aName: h.a.name, k: k,
         when: this.horoWhen(arc),
-        text: h.a.name + ' at ' + this.fmtPos(h.a) + ' is ' + this.aspName(k) + ' ' + h.b.name + ' at ' + this.fmtPos(h.b) + '. ' +
-          this.horoCap(this.horoMean(h.a.name)) + ' meeting ' + this.horoMean(h.b.name) + ', ' + (this.ASP_MEAN[k] || 'a live contact') +
-          '. This is the weather everybody is in ' + this.horoSpanFor(arc) + ', whatever their own chart says.',
+        text: this.horoCap(this.theBody(h.a.name)) + ' at ' + this.fmtPos(h.a) + ' and ' + this.theBody(h.b.name) + ' at ' + this.fmtPos(h.b) + ' stand in ' +
+          (k === 'opposite' ? 'an ' : 'a ') + this.aspName(k) + '. ' +
+          [this.voiceOf(h.a.name), this.voiceOf(h.b.name)].filter(Boolean).join(' ') + (this.voiceOf(h.a.name) || this.voiceOf(h.b.name) ? ' ' : '') +
+          'Between them runs ' + (this.ASP_MEAN[k] || 'a live contact') + '. Everyone shares this weather ' + this.horoSpanFor(arc) + ', whatever their own chart says.',
         hook: hooks.length
-          ? 'It reaches you directly: ' + hooks.slice(0, 2).map(p => p.a.name + ' ' + this.aspName(p.asp) + ' your natal ' + p.b.name).join(', and ') +
-            '. Expect the general weather to arrive as a specific event.'
+          ? 'It reaches you directly, through ' + hooks.slice(0, 2).map(p => p.a.name + ' ' + this.aspName(p.asp) + ' your natal ' + p.b.name).join(', and ') +
+            ', and the general weather tends to arrive as something particular.'
           : (si === 0
-              ? 'Neither body is within orb of a placement of yours, so you get this as background rather than as an event. It still runs between two rooms of your life: '
-              : 'This pair misses your chart as well, and lands in your houses like this: ') +
-            skySeg(h.a.name, ha) + '; ' + skySeg(h.b.name, hb) + '.' };
+              ? 'Neither body touches a placement of yours closely, so this stays background rather than event, running between two parts of your life. '
+              : 'This pair passes your chart too, and falls across your houses like this. ') +
+            skySeg(h.a.name, ha) + '. ' + skySeg(h.b.name, hb) + '.' };
     });
 
     /* An eclipse leads the sky list when it is presently considerable. It is handed to
@@ -21677,10 +21706,10 @@ class Component extends DCLogic {
           ' Node, which is close enough to eclipse: it reads as a ' + eclE.klass + ' ' + eclE.kind.toLowerCase() + ' eclipse at ' + Math.floor(eclE.deg) + '\u00b0 ' + eclE.sign +
           (eclE.kind === 'Lunar' ? ', with the Sun opposite at ' + Math.floor(eclE.oppDeg) + '\u00b0 ' + eclE.oppSign : '') + '. ' + read,
         hook: hits.length
-          ? 'It reaches you directly: ' + hits.map(x => this.eclHitLabel(x)).join(', and ') + ', in your ' + ord(eh) + ' house, where you handle ' +
-              theme(eh) + '. Expect this one as an event rather than as background.'
-          : 'It falls in your ' + ord(eh) + ' house, where you handle ' + theme(eh) +
-              ', and no placement of yours falls inside three degrees of it. So it reads as the season\u2019s headline rather than as your own.' };
+          ? 'It reaches you directly, through ' + hits.map(x => this.eclHitLabel(x)).join(', and ') + ', in ' + this.roomOf(eh) +
+              '. This one tends to arrive as an event rather than as background.'
+          : 'It falls in ' + this.roomOf(eh) +
+              ', and no placement of yours sits within three degrees of it, so it reads as the season\u2019s headline rather than your own.' };
     })();
     const skyOut = eclSky ? [eclSky].concat(sky) : sky;
 
@@ -21697,11 +21726,11 @@ class Component extends DCLogic {
       return { name: r.n + ' retrograde',
         meta: r.s ? Math.floor(r.s.deg) + '\u00b0 ' + r.s.sign + ' \u00b7 your ' + ord(r.h) + ' house' : '',
         text: (sent[1] || sent[0] || '') + ' ' + (!mates.length
-          ? 'It is doing that in your ' + ord(r.h) + ' house, so the review surfaces in ' + theme(r.h) + '.'
+          ? 'It goes back over ' + this.roomOf(r.h) + '.'
           : (retroHouse[r.h] || [])[0] === r.n
-            ? 'It is doing that in your ' + ord(r.h) + ' house alongside ' + this.horoList(mates) + ', so ' +
-              word(mates.length + 1) + ' bodies are going over ' + theme(r.h) + ' at once rather than one.'
-            : 'It is in that same ' + ord(r.h) + ' house, reviewing the same ground as ' + this.horoList(mates) + ', in its own department.') +
+            ? 'It goes back over ' + this.roomOf(r.h) + ', alongside ' + this.horoList(mates) + ', so ' +
+              word(mates.length + 1) + ' bodies are walking that ground at once.'
+            : 'It walks that same ' + this.HORO_DAY_ORD[r.h] + ' house beside ' + this.horoList(mates) + ', going over the same ground in its own way.') +
           (i === 0 ? ' The same material as always, worked backwards.' : '') };
     });
 
@@ -21721,15 +21750,15 @@ class Component extends DCLogic {
     /* The reading belongs to the day it is read for (the owner, 7 November 2026). */
     const horizon = this.fmtDay(when);
     const tail = !casts.length
-      ? 'This redraws itself as the sky moves. The Moon changes the shortest hand every two days or so.'
+      ? 'This redraws itself as the sky moves, and the Moon turns the quickest hand every two days or so.'
       : nowExact
-        ? nowExact.head.replace('Transiting ', '') + ' is exact today, so this is the top of it rather than the approach. ' +
-          (next ? 'The next to perfect is ' + next.head.replace('Transiting ', '') + ' on ' + this.fmtDay(next.exactAt) + '.'
-                : 'Everything else here is already separating.')
+        ? nowExact.head.replace('Transiting ', '') + ' is exact today, the height of it rather than the approach. ' +
+          (next ? 'Next to come exact is ' + next.head.replace('Transiting ', '') + ', on ' + this.fmtDay(next.exactAt) + '.'
+                : 'Everything else here is already easing.')
         : next
-          ? 'The next of these to perfect is ' + next.head.replace('Transiting ', '') + ', on ' + this.fmtDay(next.exactAt) +
-            (casts.length > 1 ? '. The others have already gone exact and are unwinding, which is the part you tend to notice in hindsight.' : '.')
-          : 'Every contact here has already gone exact and is separating, so what is left is the tail of it, the same material, quieter, and easier to see now than it was on the day.';
+          ? 'Next of these to come exact is ' + next.head.replace('Transiting ', '') + ', on ' + this.fmtDay(next.exactAt) +
+            (casts.length > 1 ? '. The others have already passed exact and are unwinding, the part most often seen in hindsight.' : '.')
+          : 'Every contact here has passed exact and is easing, the same material, quieter, and clearer now than it was on the day.';
 
     const out = { horoHas: true, horoNone: false, horoLead: lead, horoBasis: basis, horoHorizon: horizon,
       horoSky: skyOut, horoCasts: casts, horoNoCasts: casts.length === 0,
@@ -21741,7 +21770,7 @@ class Component extends DCLogic {
         go: () => { this.searchGo(this.searchSpirit('astrology', 1, { featOpen: 'retro', retroSel: r.n }))(); this.featLand('retro'); this.setState({ rxGlance: r.n }); } })),
       horoRetroCount: retros.length + (retros.length === 1 ? ' body retrograde' : ' bodies retrograde'),
       horoMoon: this.horoMoonLine(hs, ord, theme), horoTail: tail,
-      horoNoCastText: 'No transiting body is inside orb of a natal placement.' };
+      horoNoCastText: 'Nothing overhead touches a placement of yours closely today.' };
     this._horoKey = key; this._horo = out;
     return out;
   }
@@ -21782,84 +21811,90 @@ class Component extends DCLogic {
        already under way leads with what moved instead: the line. */
     const runDay = Math.round((when - run.from) / 86400000);
     const nth = this.HORO_ORD[runDay + 1] || (runDay + 1) + 'th';
+    const TL = window.TimingLexicon;
+    const gx = TL ? TL.gate(g.gate, g.line, { held: !!d.natalHasGate, partner: d.chan ? d.partner : null }) : null;
+    const lw = this.HORO_DAY_ORD[g.line] || g.line + 'th', img = this.hdLineImage(g.line), Img = this.hdLineImageCap(g.line);
     const head = runDay > 0
       ? this.dpick('d.cont', [
-          this.hdLineImageCap(g.line) + '. The line has moved under it: Gate ' + g.gate + ' still, ' + gname(g.gate) + ', now reading at line ' + g.line + ' through ' + centerTxt + '.',
-          'Same subject as yesterday, Gate ' + g.gate + ', ' + gname(g.gate) + ', in ' + centerTxt + ', and the line is ' + g.line + ' now. ' + this.hdLineImageCap(g.line) + '.',
-          this.hdLineImageCap(g.line) + '. That is the ' + nth + ' day of Gate ' + g.gate + ', ' + gname(g.gate) + ', reading at line ' + g.line + ' through ' + centerTxt + '.',
-          this.hdLineImageCap(g.line) + '. Gate ' + g.gate + ' has held the Sun since ' + this.fmtDay(run.from) + ', in ' + centerTxt + '; what changed today is the line, now ' + g.line + '.',
-          'Nothing changes subject today: Gate ' + g.gate + ', ' + gname(g.gate) + ', in ' + centerTxt + ' again. What line ' + g.line + ' adds is that ' + this.hdLineImage(g.line) + '.'
+          Img + '. The line has moved beneath it, and Gate ' + g.gate + ', ' + gname(g.gate) + ', now reads on line ' + g.line + ' through ' + centerTxt + '.',
+          'Gate ' + g.gate + ', ' + gname(g.gate) + ', keeps the Sun for another day in ' + centerTxt + ', and the line is ' + g.line + ' now. ' + Img + '.',
+          Img + '. It is the ' + nth + ' day of Gate ' + g.gate + ', ' + gname(g.gate) + ', on line ' + g.line + ' through ' + centerTxt + '.',
+          Img + '. Gate ' + g.gate + ' has held the Sun since ' + this.fmtDay(run.from) + ' in ' + centerTxt + ', and today the line turns to ' + g.line + '.',
+          'The subject stays the same today, Gate ' + g.gate + ', ' + gname(g.gate) + ', in ' + centerTxt + ', and line ' + g.line + ' adds that ' + img + '.'
         ])
       : this.dpick('d.open', [
-      this.hdLineImageCap(g.line) + '. That is Gate ' + g.gate + '.' + g.line + ', ' + gname(g.gate) + ', arriving through ' + centerTxt + ': the part of you that handles ' + this.centerTheme(d.center) + '.',
-      this.hdLineImageCap(g.line) + '. The design under it is Gate ' + g.gate + '.' + g.line + ', ' + gname(g.gate) + ', in ' + centerTxt + '.',
-      'Gate ' + g.gate + '.' + g.line + ' has the Sun today, ' + gname(g.gate) + ', through ' + centerTxt + '. In practice that tends to mean ' + this.hdLineImage(g.line) + '.',
-      this.hdLineImageCap(g.line) + '. Line ' + g.line + ' of Gate ' + g.gate + ', ' + gname(g.gate) + ', running through ' + centerTxt + ', which is where you handle ' + this.centerTheme(d.center) + '.',
-      this.hdLineImageCap(g.line) + '. What your design is carrying under that is ' + gname(g.gate) + ', Gate ' + g.gate + '.' + g.line + ', in ' + centerTxt + '.'
+      Img + '. That is Gate ' + g.gate + '.' + g.line + ', ' + gname(g.gate) + ', arriving through ' + centerTxt + ', the part of you that holds ' + this.centerTheme(d.center) + '.',
+      Img + '. The design under it is Gate ' + g.gate + '.' + g.line + ', ' + gname(g.gate) + ', in ' + centerTxt + '.',
+      'Gate ' + g.gate + '.' + g.line + ', ' + gname(g.gate) + ', has the Sun today through ' + centerTxt + ', and often ' + img + '.',
+      Img + '. Line ' + g.line + ' of Gate ' + g.gate + ', ' + gname(g.gate) + ', runs through ' + centerTxt + ', where ' + this.centerTheme(d.center) + ' live.',
+      Img + '. Under that, your design carries ' + gname(g.gate) + ', Gate ' + g.gate + '.' + g.line + ', in ' + centerTxt + '.'
     ]);
+    /* The gate speaks first as the sky holds it, then as this line holds it:
+       both are written for this gate in the Timing Lexicon. */
+    const voice = gx ? this.horoSky1(gx.sky) + ' ' + gx.line : '';
     const line = this.dpick('d.line', [
-      'The line matters as much as the gate. ' + lord + ' line is the ' + L[0] + ', and it ' + L[1] + '. That is the shape today asks the theme to take, not the theme itself.',
-      lord + ' line makes this the ' + L[0] + ': it ' + L[1] + '. The gate says what today is about; the line says how it wants to be gone about.',
-      'Method before subject: ' + lord.toLowerCase() + ' line is the ' + L[0] + ', which ' + L[1] + '.',
-      'The ' + L[0] + ' is the line today, which ' + L[1] + ', the same theme, approached differently than it was yesterday.',
-      'Because it is ' + lord.toLowerCase() + ' line, the theme comes as the ' + L[0] + ', and that ' + L[1] + '.'
-    ]);
+      'The ' + lw + ' line is the ' + L[0] + ', and it ' + L[1] + '. ' + voice,
+      'On the ' + lw + ' line the gate moves as the ' + L[0] + ', which ' + L[1] + '. ' + voice,
+      voice + ' Line ' + g.line + ' is the ' + L[0] + ', and it ' + L[1] + '.',
+      'The ' + L[0] + ' carries the gate today, and it ' + L[1] + '. ' + voice
+    ]).trim();
     const defined = d.definedCenter
       ? this.dpick('d.def', [
-          'Because that center is defined in you, this lands on ground that already behaves the same way every day. Expect it to feel like more of yourself rather than something new arriving: the volume up, not the station changed.',
-          'That center is defined in you, so nothing here is borrowed. It should feel like a familiar part of you turned up louder, which is easy to mistake for a mood.',
-          'Defined center, so this is reliable ground. Whatever the theme asks for today, you have the same capacity for it that you had yesterday.',
-          'Since the center is defined in you, this arrives as more of what you already are. The risk is assuming everyone else is running it too.'
+          'That center is defined in you, so the day lands on ground that already behaves the same way, more of yourself turned up rather than something new arriving.',
+          'That center is defined in you, so nothing here is borrowed, a familiar part of you turned louder and easy to mistake for a mood.',
+          'The center is defined in you, steady ground, and whatever the theme asks for today meets the same capacity it met yesterday.',
+          'Since the center is defined in you, this arrives as more of what is already there, and others around you may not be running it at all.'
         ])
       : this.dpick('d.open2', [
-          'Because that center is open in you, this is borrowed rather than fixed. Expect to pick the theme up from whoever you are with, and to be unsure by evening which part of the day was actually yours. That question is the useful one.',
-          'That center is open in you, which means today\u2019s theme is conditional. It will be loud in some rooms and absent in others, and neither is a fault.',
-          'Open center: read this as weather rather than as character. Notice who you are with when it gets strong.',
-          'With the center open in you, this is amplified by company. By evening it is worth asking which of today was yours and which was picked up.'
+          'That center is open in you, so the theme is borrowed rather than fixed, picked up from whoever is near, and by evening it can be hard to tell which part of the day was yours.',
+          'That center is open in you, so the theme is conditional, loud in some rooms and absent in others, and neither is a fault.',
+          'With the center open, the day reads as weather rather than character, and it grows strongest in certain company.',
+          'With the center open in you, company turns this up, and by evening some of the day belongs to the room.'
         ]);
     const chan = d.chan
       ? this.dpick('d.chan', [
-          'It completes a circuit: the ' + d.chan[0] + '-' + d.chan[1] + ' channel closes against your natal Gate ' + d.partner + ', ' + gname(d.partner) + ', running between the ' + d.chan[2] + ' center and the ' + d.chan[3] + ' center. While the transit holds you have a current you do not usually have, and it is worth spending on something that needs it.',
-          'This one completes a channel. The ' + d.chan[0] + '-' + d.chan[1] + ' closes with your Gate ' + d.partner + ' (' + gname(d.partner) + '), joining your ' + d.chan[2] + ' and ' + d.chan[3] + ' centers for about a day: temporary wiring, worth using while it is there.',
-          'For as long as the transit lasts, the ' + d.chan[0] + '-' + d.chan[1] + ' channel is complete: your natal Gate ' + d.partner + ' takes the other end, and the ' + d.chan[2] + ' and ' + d.chan[3] + ' centers are connected. Expect a fluency you do not normally have.',
+          'It completes a circuit. The ' + d.chan[0] + '-' + d.chan[1] + ' channel closes against your natal Gate ' + d.partner + ', ' + gname(d.partner) + ', running between the ' + d.chan[2] + ' center and the ' + d.chan[3] + ' center, and while the transit holds a current runs that does not usually run, going furthest on something that needs it.',
+          'This one completes a channel. The ' + d.chan[0] + '-' + d.chan[1] + ' closes with your Gate ' + d.partner + ', ' + gname(d.partner) + ', joining your ' + d.chan[2] + ' and ' + d.chan[3] + ' centers for about a day, temporary wiring that is there to be used.',
+          'For as long as the transit lasts the ' + d.chan[0] + '-' + d.chan[1] + ' channel is whole, your natal Gate ' + d.partner + ' holding the other end, and the ' + d.chan[2] + ' and ' + d.chan[3] + ' centers move with an unusual fluency.',
           'A circuit closes today. Gate ' + d.partner + ', ' + gname(d.partner) + ', is your half of the ' + d.chan[0] + '-' + d.chan[1] + ' channel, and with the Sun on the other half the ' + d.chan[2] + ' and ' + d.chan[3] + ' centers are talking directly.'
         ])
       : this.dpick('d.nochan', [
-          'It completes no channel with your ' + d.hd.gates.length + ' natal gates, so read it as a theme in the air rather than a working current. You may notice it in the room and not in your own hands.',
-          'None of your ' + d.hd.gates.length + ' natal gates takes the other end of this one, so there is no circuit today: a subject rather than a capability.',
-          'No channel completes. The theme is available to think about and not to act from, which is a distinction worth keeping.',
-          'This gate finds no partner in your chart today. Expect to recognise the theme without having any particular power over it.'
+          'It completes no channel with your ' + d.hd.gates.length + ' natal gates, so it moves as a theme in the air rather than a working current, felt in the room more than in the hands.',
+          'None of your ' + d.hd.gates.length + ' natal gates holds the other end of this one, so no circuit closes today, and the gate offers a subject rather than a capability.',
+          'No channel completes, and the theme is there to think about more than to act from.',
+          'This gate finds no partner in your chart today, and the theme is recognised without being held.'
         ]);
     /* The type mechanics are a standing fact, not news: printed every day they
        became the largest block of identical text between one reading and the
        next. Said about every third day instead, never two days running, and
        the strategy is on the card below regardless. */
+    const art = /^[AEIOU]/.test(d.hd.type) ? 'an ' : 'a ';
     const type = this.dvarIndex(when, 'd.typeshow', 3) !== 0 ? '' : this.dpick('d.type', [
-      'As ' + (/^[AEIOU]/.test(d.hd.type) ? 'an ' : 'a ') + d.hd.type + ', the way this becomes usable is unchanged by the day: ' + d.hd.strategy.replace(/\.$/, '') + '. Anything decided against that today will be the part you revisit.',
-      'Your type does not move with the transit. ' + (/^[AEIOU]/.test(d.hd.type) ? 'An ' : 'A ') + d.hd.type + ' still works the same way, ' + d.hd.strategy.replace(/\.$/, '') + ', and today is no exception to it.',
-      'However today reads, the mechanics are the same as always: ' + d.hd.strategy.replace(/\.$/, '') + '. That is the ' + d.hd.type + ' part, and it is not weather.',
-      'The strategy is the constant here. ' + d.hd.strategy.replace(/\.$/, '') + ', and a day with a strong gate is exactly when that gets skipped.'
+      'For ' + art + d.hd.type + ' chart the way this becomes usable stays the same whatever the day. ' + d.hd.strategy + ' Whatever is decided against that today tends to be the part that comes back to be revisited.',
+      'The type does not move with the transit. ' + this.horoCap(art) + d.hd.type + ' chart still works the same way. ' + d.hd.strategy,
+      'However today reads, the ' + d.hd.type + ' rhythm holds the same under every gate. ' + d.hd.strategy,
+      'The strategy is the constant here, and a day with a strong gate is the one where it slips most easily. ' + d.hd.strategy
     ]);
     const win = run.leftDays > 0
       ? this.dpick('d.win', [
-          'The Sun holds Gate ' + g.gate + ' through ' + this.fmtDay(run.to) + ', then moves to Gate ' + run.next.gate + ', ' + gname(run.next.gate) + '. The line changes roughly every day inside that, so the theme keeps its subject and changes its method.',
-          'This subject runs to ' + this.fmtDay(run.to) + '; after that the Sun is in Gate ' + run.next.gate + ', ' + gname(run.next.gate) + '. The line moves daily in the meantime, which is why the same gate does not read the same twice.',
-          'Gate ' + g.gate + ' has the Sun until ' + this.fmtDay(run.to) + '. Then ' + gname(run.next.gate) + ' takes over. Inside the window the line advances about once a day, so the method keeps shifting under a fixed subject.',
-          'You have this theme through ' + this.fmtDay(run.to) + ', with a different line on it most days, and then Gate ' + run.next.gate + ', ' + gname(run.next.gate) + ': replaces it.'
+          'The Sun holds Gate ' + g.gate + ' through ' + this.fmtDay(run.to) + ', then moves to Gate ' + run.next.gate + ', ' + gname(run.next.gate) + '. The line turns roughly every day inside that, so the theme keeps its subject and changes its manner.',
+          'This subject runs to ' + this.fmtDay(run.to) + ', and after that the Sun is in Gate ' + run.next.gate + ', ' + gname(run.next.gate) + '. The line moves daily in the meantime, which is why the same gate never reads the same twice.',
+          'Gate ' + g.gate + ' has the Sun until ' + this.fmtDay(run.to) + ', and then ' + gname(run.next.gate) + ' takes the light. Inside that window the line moves about once a day, the subject staying while its manner keeps changing.',
+          'The theme stays through ' + this.fmtDay(run.to) + ', with a different line on it most days, and then Gate ' + run.next.gate + ', ' + gname(run.next.gate) + ', takes its place.'
         ])
       : this.dpick('d.last', [
-          'This is the last day of Gate ' + g.gate + '. Tomorrow the Sun moves to Gate ' + run.next.gate + ', ' + gname(run.next.gate) + ', and the subject changes rather than the method.',
-          'Gate ' + g.gate + ' ends today. From tomorrow it is Gate ' + run.next.gate + ', ' + gname(run.next.gate) + ': a change of subject, not of approach.',
-          'Last day on this one. ' + gname(run.next.gate) + ', Gate ' + run.next.gate + ', has the Sun tomorrow, so whatever this theme was for, today is the end of the window.',
-          'The Sun leaves Gate ' + g.gate + ' tonight for Gate ' + run.next.gate + ', ' + gname(run.next.gate) + '. Anything this theme was going to do, it does today.'
+          'This is the last day of Gate ' + g.gate + '. Tomorrow the Sun moves to Gate ' + run.next.gate + ', ' + gname(run.next.gate) + ', and the subject changes rather than the manner.',
+          'Gate ' + g.gate + ' ends today. From tomorrow it is Gate ' + run.next.gate + ', ' + gname(run.next.gate) + ', a change of subject rather than of approach.',
+          'The last day on this one. ' + gname(run.next.gate) + ', Gate ' + run.next.gate + ', has the Sun tomorrow, and today is the end of this window.',
+          'The Sun leaves Gate ' + g.gate + ' tonight for Gate ' + run.next.gate + ', ' + gname(run.next.gate) + ', and whatever this theme was going to do, it does today.'
         ]);
     const lead = this.dprose('d', [head], [line, defined, chan, type], [win]);
     const figs = [
       { k: 'Solar gate', v: 'Gate ' + g.gate + '.' + g.line, m: gname(g.gate) },
       { k: 'Center', v: d.center || 'none', m: d.center ? (d.definedCenter ? 'defined in you' : 'open in you') : 'no center for this gate' },
-      { k: 'Line', v: String(g.line) + ' \u00b7 ' + L[0], m: 'the method, not the subject' },
+      { k: 'Line', v: String(g.line) + ' \u00b7 ' + L[0], m: 'how the gate moves today' },
       { k: 'Moon gate', v: 'Gate ' + d.moonGate.gate + '.' + d.moonGate.line, m: gname(d.moonGate.gate) + ' \u00b7 about 11 hours' },
-      { k: 'Channel', v: d.chan ? d.chan[0] + '-' + d.chan[1] : 'none today', m: d.chan ? 'completed by your Gate ' + d.partner : 'a theme, not a current' },
+      { k: 'Channel', v: d.chan ? d.chan[0] + '-' + d.chan[1] : 'none today', m: d.chan ? 'completed by your Gate ' + d.partner : 'a theme in the air' },
       { k: 'Gate window', v: this.fmtDay(run.from) + ' to ' + this.fmtDay(run.to), m: 'then Gate ' + run.next.gate }
     ];
     const out = { hdHoroHas: true, hdHoroLead: lead,
@@ -21920,15 +21955,16 @@ class Component extends DCLogic {
     const eom = new Date(when.getFullYear(), when.getMonth() + 1, 0);
     const daysLeft = Math.round((eom - when) / 86400000);
     const pd = this.artNum(d.pdV) + ' ' + d.pdV, ess = this.numEssence(d.pdV);
+    const V = this.numVoice(d.pdV) || this.horoCap(ess) + '.', Img = this.numImageCap(d.pdV), img = this.numImage(d.pdV);
     const head = this.dpick('n.open', [
-      this.numImageCap(d.pdV) + '. The arithmetic under that is ' + pd + ' Personal Day: ' + ess + '.',
-      this.numImageCap(d.pdV) + '. Reduced from the date, today is a ' + d.pdV + ', which the tradition reads as ' + ess + '.',
-      'Today reduces to ' + d.pdV + ', and what ' + pd + ' tends to feel like is this: ' + this.numImage(d.pdV) + '.',
-      this.numImageCap(d.pdV) + '. That shape is what ' + pd + ' day is named for: ' + ess + '.',
-      this.numImageCap(d.pdV) + '. The number under it is ' + d.pdV + ', ' + ess + '.',
-      this.horoCap(pd) + ' day, ' + ess + '. In practice, ' + this.numImage(d.pdV) + '.',
-      this.numImageCap(d.pdV) + '. By the arithmetic that is ' + pd + ' Personal Day, ' + ess + '.',
-      this.numImageCap(d.pdV) + '. The date reduces to ' + d.pdV + ', and ' + ess + ' is what ' + pd + ' asks for.'
+      Img + '. The day under it is ' + pd + ' Personal Day. ' + V,
+      Img + '. Drawn from the date, today is a ' + d.pdV + '. ' + V,
+      V + ' Today is ' + pd + ' Personal Day, and ' + img + '.',
+      Img + '. That shape is what ' + pd + ' day is named for. ' + V,
+      Img + '. The number under it is ' + d.pdV + '. ' + V,
+      this.horoCap(pd) + ' day. ' + V + ' In practice, ' + img + '.',
+      Img + '. Today is ' + pd + ' Personal Day. ' + V,
+      Img + '. The date comes to ' + d.pdV + ', and ' + V.charAt(0).toLowerCase() + V.slice(1)
     ]);
     /* Same reasoning as the type mechanics in the design reading: tempo-not-
        instruction is a standing caveat, and printing it daily made two readings
@@ -21940,40 +21976,44 @@ class Component extends DCLogic {
       'The number gives you a rhythm to work at. What goes into it is still entirely yours to choose.'
     ]);
     const expect = this.dpick('n.expect', [
-      'Expect ' + E[0] + '. The way this number goes wrong is ' + E[1] + ', which is worth knowing before the afternoon.',
-      'What tends to turn up: ' + E[0] + '. Where it goes wrong: ' + E[1] + '.',
-      'Look for ' + E[0] + ', and watch for ' + E[1] + ', which is this number\u2019s particular failure.',
+      'It tends to bring ' + E[0] + '. This number goes wrong as ' + E[1] + ', and knowing that early helps the afternoon.',
+      'What tends to turn up is ' + E[0] + ', and where it goes wrong is ' + E[1] + '.',
+      'It often shows up as ' + E[0] + ', and its particular failure is ' + E[1] + '.',
       'A ' + d.pdV + ' day usually brings ' + E[0] + '. It usually goes wrong as ' + E[1] + '.',
       'The shape of it is ' + E[0] + '. The trap in it is ' + E[1] + '.',
       'On the day this tends to arrive as ' + E[0] + ', and it comes apart as ' + E[1] + '.',
-      'Watch for ' + E[0] + ', and watch yourself for ' + E[1] + '.',
-      'Likely: ' + E[0] + '. The failure that goes with it: ' + E[1] + '.'
+      'It comes as ' + E[0] + ', and it slips into ' + E[1] + '.',
+      'Likely it brings ' + E[0] + ', and the failure that walks beside it is ' + E[1] + '.'
     ]);
+    const M = this.numRole(d.pmV, 'month'), Y = this.numRole(d.pyV, 'year');
+    const around = (M ? ' ' + M : '') + (Y ? ' ' + Y : '');
     const context = this.dpick('n.ctx', [
-      'It sits inside ' + this.artNum(d.pmV) + ' ' + d.pmV + ' Personal Month, ' + this.numEssence(d.pmV) + ', and ' + this.artNum(d.pyV) + ' ' + d.pyV + ' Personal Year, which is asking for ' + this.numEssence(d.pyV) + '. When the day and the year disagree, the year is the one that keeps coming back.',
-      'The month around it is ' + d.pmV + ' (' + this.numEssence(d.pmV) + '), inside ' + this.artNum(d.pyV) + ' ' + d.pyV + ' year of ' + this.numEssence(d.pyV) + '. Days argue with years fairly often, and the year wins on points.',
-      'Above the day sits ' + this.artNum(d.pmV) + ' ' + d.pmV + ' Personal Month, ' + this.numEssence(d.pmV) + ', and above that ' + this.artNum(d.pyV) + ' ' + d.pyV + ' Personal Year asking for ' + this.numEssence(d.pyV) + '. Read the day against both rather than on its own.',
-      'Two larger numbers are running: the month is ' + d.pmV + ', ' + this.numEssence(d.pmV) + ', and the year is ' + d.pyV + ', ' + this.numEssence(d.pyV) + '. A single day rarely overrules either.'
+      'It sits inside ' + this.artNum(d.pmV) + ' ' + d.pmV + ' Personal Month and ' + this.artNum(d.pyV) + ' ' + d.pyV + ' Personal Year.' + around + ' When the day and the year disagree, the year is the one that keeps coming back.',
+      'The month around it is ' + d.pmV + ', inside ' + this.artNum(d.pyV) + ' ' + d.pyV + ' year.' + around + ' Days argue with years fairly often, and the year wins on points.',
+      'Above the day sits ' + this.artNum(d.pmV) + ' ' + d.pmV + ' Personal Month, and above that ' + this.artNum(d.pyV) + ' ' + d.pyV + ' Personal Year.' + around + ' The day reads truest against both.',
+      'Two larger numbers are running, the month a ' + d.pmV + ' and the year a ' + d.pyV + '.' + around + ' A single day rarely overrules either.'
     ]);
+    const essT = this.numEssence(pdTom);
     const tomorrow = this.dpick('n.tom', [
-      'Tomorrow the day number turns to ' + pdTom + ', ' + this.numEssence(pdTom) + (pdTom === d.pdV ? ', which is the same tempo twice: rare, and worth using while it holds.' : '. So whatever today is for, it has a deadline.'),
-      'By tomorrow it is ' + pdTom + ': ' + this.numEssence(pdTom) + (pdTom === d.pdV ? '. The same number two days running, which does not happen often.' : '. Today does not carry over.'),
-      'The number changes overnight to ' + pdTom + ', ' + this.numEssence(pdTom) + (pdTom === d.pdV ? ', unusually the same tempo again.' : ', so this pace is on a clock.'),
-      'Tomorrow reads ' + pdTom + ' instead: ' + this.numEssence(pdTom) + (pdTom === d.pdV ? '. Twice in a row, which is worth noticing.' : '. Use today for what only today\u2019s pace suits.'),
-      'It reads ' + pdTom + ' tomorrow, ' + this.numEssence(pdTom) + (pdTom === d.pdV ? ', the same tempo held over, which is worth using while it lasts.' : ', so today is the only day at this speed.'),
-      'The number moves to ' + pdTom + ' overnight: ' + this.numEssence(pdTom) + (pdTom === d.pdV ? '. Twice running, which is rare enough to notice.' : '. Today does not extend.')
+      'Tomorrow the day number turns to ' + pdTom + ', ' + essT + (pdTom === d.pdV ? ', the same tempo twice, rare and worth using while it holds.' : ', so whatever today is for has its own deadline.'),
+      'By tomorrow it is ' + pdTom + ', ' + essT + (pdTom === d.pdV ? '. The same number two days running does not happen often.' : '. Today does not carry over.'),
+      'The number changes overnight to ' + pdTom + ', ' + essT + (pdTom === d.pdV ? ', unusually the same tempo again.' : ', and this pace belongs to today alone.'),
+      'Tomorrow reads ' + pdTom + ' instead, ' + essT + (pdTom === d.pdV ? '. Twice in a row is rare enough to notice.' : '. What only this pace suits belongs to today.'),
+      'It reads ' + pdTom + ' tomorrow, ' + essT + (pdTom === d.pdV ? ', the same tempo held over and worth using while it lasts.' : ', so today is the only day at this speed.'),
+      'The number moves to ' + pdTom + ' overnight, ' + essT + (pdTom === d.pdV ? '. Twice running is rare enough to notice.' : '. Today does not extend.')
     ]);
+    const left = daysLeft <= 0 ? 'a day' : daysLeft + (daysLeft === 1 ? ' day' : ' days');
     const tail = daysLeft <= 3
       ? this.dpick('n.turn', [
-          'The Personal Month turns in ' + (daysLeft <= 0 ? 'a day' : daysLeft + (daysLeft === 1 ? ' day' : ' days')) + ', so the background tempo is about to change under the daily one.',
-          'The month is nearly over, ' + (daysLeft <= 0 ? 'a day' : daysLeft + (daysLeft === 1 ? ' day' : ' days')) + ' left, and the background is about to move under your feet.',
-          'With ' + (daysLeft <= 0 ? 'a day' : daysLeft + (daysLeft === 1 ? ' day' : ' days')) + ' left in the Personal Month, expect the larger tempo to shift shortly after the daily one does.'
+          'The Personal Month turns in ' + left + ', and the background tempo is about to change under the daily one.',
+          'The month is nearly over, ' + left + ' left, and the background is about to move underfoot.',
+          'With ' + left + ' left in the Personal Month, the larger tempo shifts shortly after the daily one does.'
         ])
       : this.dpick('n.hold', [
-          'The month holds this background for another ' + daysLeft + ' days, and your Life Path ' + d.lp + ' holds underneath all of it: the constant these numbers are being read against, not another opinion.',
-          'That background stays for ' + daysLeft + ' more days. Under everything sits Life Path ' + d.lp + ', which is the fixed point the rest is measured from.',
-          'Another ' + daysLeft + ' days of this month, and Life Path ' + d.lp + ' underneath it all: the one number here that never changes.',
-          'You have ' + daysLeft + ' days left of this month\u2019s tempo. Life Path ' + d.lp + ' is the constant beneath it, and it is not a forecast.'
+          'The month holds this background for another ' + daysLeft + ' days, and your Life Path ' + d.lp + ' holds underneath all of it, the constant these numbers are read against rather than another opinion.',
+          'That background stays for ' + daysLeft + ' more days. Under everything sits Life Path ' + d.lp + ', the fixed point the rest is measured from.',
+          'Another ' + daysLeft + ' days of this month, and Life Path ' + d.lp + ' underneath it all, the one number here that never changes.',
+          'There are ' + daysLeft + ' days left of this month\u2019s tempo. Life Path ' + d.lp + ' is the constant beneath it, and it is not a forecast.'
         ]);
     const lead = this.dprose('n', [head], [caveat, expect, context, tomorrow], [tail]);
     const figs = [
@@ -22287,15 +22327,15 @@ class Component extends DCLogic {
   RETRO_WIN = 300;
   RETRO_DOCTRINE = 'A retrograde body slows, stands still, and walks backwards through the zodiac for a season before turning forward again. The tradition reads that backward season as a turn inward: the same business as always, handled in review rather than in advance.';
   RETRO_MEAN = {
-    Mercury: 'Mercury governs speech, exchange, transit and the written record. Retrograde, the tradition expects the second draft rather than the first: things said again, contracts reread, plans revised, and people from earlier turning up mid-sentence.',
-    Venus: 'Venus governs attraction, worth and the terms of an agreement. Retrograde, it is read as a re-pricing. What you value, what you tolerate, and what you have been calling love out of habit all come up for another look.',
-    Mars: 'Mars governs drive, appetite and the moment of striking. Retrograde, force is read as losing its outward line: effort turns back on the person making it, and starting something by pushing harder tends to cost more than it returns.',
-    Jupiter: 'Jupiter governs growth, doctrine and the size of a life. Retrograde, expansion is read as turning inward rather than stopping. The belief gets examined instead of preached, and opportunity tends to arrive as something already owned rather than something new.',
-    Saturn: 'Saturn governs structure, limit, and the debt that comes due. Retrograde, the tradition reads an internal audit: the commitment is tested from the inside, and whatever was built on an unexamined rule is where the strain shows first.',
-    Uranus: 'Uranus governs disruption and the break in the pattern. Retrograde, the shock is read as arriving inwardly first. Something you thought was settled turns out to still be moving, and the pressure to change comes from your own position rather than an outside event.',
-    Neptune: 'Neptune governs dissolution, longing, and what is not quite seen. Retrograde, the tradition expects the fog to thin: an illusion loses its hold, sometimes as relief and sometimes as plain disappointment.',
-    Pluto: 'Pluto governs what is buried and what will not stay buried. Retrograde, it is read as descent rather than eruption. The same material, worked at privately and slowly, usually well before anyone else notices.',
-    Chiron: 'Chiron is the healer who could not heal himself, read as the place where a hurt becomes a skill. Retrograde, the tradition turns that work inward: the old wound is revisited without an audience, and what you know about pain is offered first to yourself.'
+    Mercury: 'Mercury governs speech, exchange, transit and the written record. Retrograde, it comes back for the second draft, with things said again, contracts reread, plans revised, and people from earlier turning up mid-sentence.',
+    Venus: 'Venus governs attraction, worth and the terms of an agreement. Retrograde, Venus goes back over the price of things, and what you value, what you tolerate and what has been called love out of habit all come up for another look.',
+    Mars: 'Mars governs drive, appetite and the moment of striking. Retrograde, its force turns back toward the one carrying it, and starting something by pushing harder tends to cost more than it returns.',
+    Jupiter: 'Jupiter governs growth, doctrine and the size of a life. Retrograde, its growth turns inward rather than stopping, the belief examined instead of preached, and opportunity arriving as something already owned rather than something new.',
+    Saturn: 'Saturn governs structure, limit, and the debt that comes due. Retrograde, it walks its own walls from the inside, and whatever was built on an unexamined rule is where the strain shows first.',
+    Uranus: 'Uranus governs disruption and the break in the pattern. Retrograde, its shock arrives inwardly first, and something that seemed settled turns out to still be moving, the pressure to change rising from within rather than from an outside event.',
+    Neptune: 'Neptune governs dissolution, longing, and what is not quite seen. Retrograde, the fog begins to thin, and an illusion loses its hold, sometimes as relief and sometimes as plain disappointment.',
+    Pluto: 'Pluto governs what is buried and what will not stay buried. Retrograde, it descends rather than erupts, working the same material privately and slowly, usually well before anyone else notices.',
+    Chiron: 'Chiron is the healer who could not heal himself, read as the place where a hurt becomes a skill. Retrograde, it turns that work inward, the old wound revisited without an audience, and what is known about pain offered first to yourself.'
   };
   // Shadow periods are only tracked for the personal celestial bodies. An outer celestial body is
   // retrograde for months and in shadow for most of what is left, so dating its
@@ -35660,12 +35700,12 @@ class Component extends DCLogic {
    * everybody recognises every day is an image of nothing.
    */
   HD_LINE_IMAGE = {
-    1: 'you will want the ground checked before you put weight on it, and somebody is going to read that as hesitation',
-    2: 'the thing you do without effort will be noticed by somebody else before you notice it yourself',
-    3: 'something will not work today, and the not working is the information rather than the failure',
-    4: 'what moves today moves through somebody you already know, and not through a stranger',
-    5: 'you may be handed a problem that was never yours, on the assumption that you are the one who can solve it',
-    6: 'you will be watched more than you are asked, and whatever you do will be taken as the instruction'
+    1: 'the ground wants checking before any weight goes on it, and someone may read that care as hesitation',
+    2: 'the thing done without effort gets noticed by somebody else before it is noticed from inside',
+    3: 'something does not work today, and the not working is the information rather than the failure',
+    4: 'what moves today moves through somebody already known, and not through a stranger',
+    5: 'a problem that was never yours may arrive, carried by the assumption that you can solve it',
+    6: 'the day is watched more than it is asked, and whatever is done reads as the instruction'
   };
   hdLineImage(n) {
     return this.HD_LINE_IMAGE[n] || 'the day has a way of going before it has a reason for going that way';
@@ -35720,12 +35760,12 @@ class Component extends DCLogic {
     2: 'today moves at someone else’s pace, and pushing it will cost more than waiting',
     3: 'what you say out loud today will travel further than what you write down',
     4: 'today rewards the unglamorous thing: the message sent, the shelf fixed, the number checked twice',
-    5: 'whatever you decided on Sunday is unlikely to survive the afternoon intact',
+    5: 'whatever was decided on Sunday may not survive the afternoon intact',
     6: 'someone is going to lean, and you are the one standing nearest',
     7: 'the answer is not in the room, it is in the quiet after you have left it',
     8: 'today the ledger is literal: what you built either carries weight or it does not',
     9: 'something wants finishing, and finishing it will feel like loss before it feels like room',
-    11: 'you will feel it well before you can explain it, and the explaining will lag all day',
+    11: 'it is felt well before it can be explained, and the explaining lags all day',
     22: 'a small competent act today is the kind a larger thing rests on later',
     33: 'the thing you know how to do is needed by somebody who does not'
   };
