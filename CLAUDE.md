@@ -8143,3 +8143,27 @@ Sun's view has no retrograde, are the study itself and keep their words.
 On the phone the tile's title row wraps, so the New pill and the ℞ drop
 under the title rather than past the tile's edge, and the Cycle Audit card
 is the last thing on the phone's astrology page.
+
+## The aspect sheet speaks as the two bodies
+Asked for by the owner on 7 November 2026 ("How does the Sun act where it's
+at? Where does Saturn get to make anything happen in a room built to fit for
+a night out?"). The aspect dialog (`aspOpen`, both shells) and the
+Observatory's contact window read `aspectLines()`, which returns `paras`:
+a paragraph per body (`aspBodyPara()`: its voice, "In <sign> it" and the
+sign's entrance, a dignity sentence, the part of living its house holds, the
+body in house line, and the house's gift and shadow), then the angle
+(`ASP_MEET`: an opener, each body in its sign's manner, a follow line, and the
+orb said plainly with no "expect"). `ASP_CLOSE` still closes it, untouched.
+
+**The 120 body in house lines are `PlacementContent.inHouse(body, house)`**
+(`IN_HOUSE` in `placement-content.js`, 1.1.0), the ten bodies by twelve
+houses. The owner keeps them as Kin Common writing to be sold on its own:
+change them only with the owner. The source draft is
+`/mnt/project-files/aspect-language/body-in-house.md`. A point outside the ten
+gets no house line, never a generic one; an angle gets no house at all.
+
+The angle's geometry lesson (`ASP_NATURE`) is folded under "About squares"
+and the like, a `<details>` under the reading. The Aspects list no longer
+shows a contact to the Descendant, IC or South Node, because each mirrors the
+one to the Ascendant, Midheaven or North Node (`MIRROR4`, as the Placements
+pairs already did); the row keeps its index into `asps`.

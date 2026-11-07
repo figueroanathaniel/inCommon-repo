@@ -1009,9 +1009,158 @@
   function low(s) { return String(s || '').charAt(0).toLowerCase() + String(s || '').slice(1); }
   function stripDot(s) { return String(s || '').replace(/\.$/, ''); }
 
+  /* WHAT EACH BODY DOES IN EACH HOUSE (owner, 7 November 2026). One line per
+     body per house, the body acting in the room's own scenes. Kin Common
+     writing, kept as a product of its own: read by the aspect sheet after the
+     body's voice and sign. Index 0 is the 1st house. */
+  var IN_HOUSE = {
+    Sun: [
+      "The Sun stands in the doorway of the chart and is the first thing anyone meets. It shows in the face, the walk, the way a room turns when it arrives.",
+      "The Sun builds itself out of what it earns and keeps. It shines through the work that pays, the things it chooses to own, and what it will not sell.",
+      "The Sun lights up in conversation. It finds itself in the street, the group chat, the sibling who argues back, the sentence that comes out sharper than planned.",
+      "The Sun shines behind the front door first. It grows in the kitchen and the family story, and it lights the house before it lights the street.",
+      "The Sun comes alive on the night out. It shines on a stage, in a crush, in something made for the joy of making, and it wants an audience that claps.",
+      "The Sun shines through the ordinary day done well. It finds itself in the craft, the routine that works, the body kept in good order, the job finished properly.",
+      "The Sun finds itself across the table. It shines most clearly beside a partner, a rival or a client, and it learns who it is by what the other person sees.",
+      "The Sun moves into closeness and stays for the hard part. It says the true thing before the other person does, opens the shared account, and ends what has already ended.",
+      "The Sun shines on the long road. It grows by going further, through the plane ticket, the book that rearranges the shelf, the teacher it argues with and keeps.",
+      "The Sun steps into public view. It shines in the title, the reputation, the work with its name on it, and it wants to be known for something that stands.",
+      "The Sun shines among friends and for the years ahead. It finds itself in the crew, the cause, the plan for a world a little further along than this one.",
+      "The Sun shines where nobody is watching. It grows in solitude, in dreams and quiet service, and it often lights other people before it lights itself."
+    ],
+    Moon: [
+      "The Moon wears its feelings on the surface. A mood crosses the face before any word does, and the body knows how it feels before the mind has a name for it.",
+      "The Moon feels safe through what it can hold. A full pantry, a soft blanket, money set aside, the familiar things that steady it when the week does not.",
+      "The Moon talks its feelings through. It calms down in the phone call, the short drive, the sibling or neighbour who already knows the whole story.",
+      "The Moon is at home at home. It settles among the old photographs, keeps the family's weather, and needs one place where nothing has to be performed.",
+      "The Moon feels most itself while playing. It soothes through making things, through the crush, the child's game, the evening that has no point except delight.",
+      "The Moon feels its way through the workday. Routine steadies it, the body reports every worry, and tending something small each day keeps the tide even.",
+      "The Moon feels through the other person. It reads a partner's mood before its own and needs a closeness that answers back.",
+      "The Moon feels at depth or not at all. It lives in the private hour, the shared secret, the grief that turns a life, and it trusts slowly because it feels everything.",
+      "The Moon feels at home far away. It settles in a belief, a foreign city, a course of study, and needs the horizon open to breathe.",
+      "The Moon feels in public. Its moods show at work, it looks after the people it leads, and its reputation is often one of caring for others.",
+      "The Moon feels held by the group. It belongs through friends who feel like family, the circle that checks in, a hope shared with people who want the same thing.",
+      "The Moon feels in private. It keeps its tides behind a closed door, dreams vividly, and needs time alone to know what it feels before anyone asks."
+    ],
+    Mercury: [
+      "Mercury talks first. The mind shows on the face, quick and curious, and people meet the questions before they meet anything else.",
+      "Mercury thinks in terms of value. It counts, prices and bargains, and it earns through the words and ideas it can explain.",
+      "Mercury is at home in the local chatter. It reads the street, writes the message, learns the shortcut, and keeps the siblings and neighbours talking.",
+      "Mercury thinks at the kitchen table. It turns over the family story, keeps the house's records, and does its best thinking somewhere familiar.",
+      "Mercury plays with words. It flirts in jokes, writes for fun, invents the game, and makes the night out funnier than it would have been.",
+      "Mercury runs the daily list. It solves the small problems, catches the detail at work, and worries in the body when the list grows too long.",
+      "Mercury thinks out loud with someone. It sharpens in the conversation, the contract, the debate across the table, and listens for what the other person means.",
+      "Mercury thinks underneath. It researches, reads the fine print on shared money, and wants to know what nobody is saying.",
+      "Mercury thinks far. It studies, translates, teaches, travels to learn, and argues philosophy into the small hours.",
+      "Mercury speaks in public. It makes its name by writing, teaching, selling or explaining, and its words are what people remember.",
+      "Mercury talks with the crowd. It floats the idea in the group chat and keeps it moving until the group decides to do something.",
+      "Mercury thinks in private. It works things out in the journal and the dream, and it often knows more than it says."
+    ],
+    Venus: [
+      "Venus shows in the first impression. Grace sits on the surface, in the clothes, the smile, the ease that makes people want to stay a little longer.",
+      "Venus loves what it can keep. Beautiful things, good food, money handled with taste, comfort it has chosen and paid for.",
+      "Venus charms in conversation. It writes the kind note, smooths the argument, and finds the pretty corner of the neighbourhood everyone else walks past.",
+      "Venus makes the home lovely. It sets the table, keeps the peace in the family, and loves best somewhere warm and private.",
+      "Venus is made for the night out. It falls for someone, makes something beautiful, and loves pleasure for its own sake.",
+      "Venus makes the ordinary day pleasant. It brings grace to the work, kindness to the people beside it, and gentleness to the care of the body.",
+      "Venus is at home in partnership. It loves through the other person, keeps the bond sweet, and wants it to be fair.",
+      "Venus loves at depth. It wants the whole person, shares money and secrets, and finds beauty in what has been through something.",
+      "Venus loves what is far away. It falls for a foreign place, a teacher, an idea, and finds beauty in the meaning things carry.",
+      "Venus brings grace to the public role. It is liked at work, may choose beauty as its trade, and builds a name for charm.",
+      "Venus loves the circle. It is the friend who brings people together and finds beauty in a hope the group shares.",
+      "Venus loves in secret. It keeps a private devotion, gives without being seen, and finds beauty in the quiet room."
+    ],
+    Mars: [
+      "Mars moves first and shows it. The drive is visible in the walk and the voice, ready to act before anyone else has.",
+      "Mars works for its money. It earns by effort, fights for what it values, and spends with force when it wants something.",
+      "Mars argues in the street. It speaks sharply, moves fast from place to place, and competes with the siblings and the neighbours.",
+      "Mars fights at home. It works on the house with its hands, defends the family, and sometimes carries the oldest arguments in the kitchen.",
+      "Mars plays to win. It chases the crush, competes in the game, and makes things with heat and nerve.",
+      "Mars works hard every day. It attacks the task, trains the body, and runs hot when the routine keeps it from moving.",
+      "Mars meets its match across the table. It sparks with the partner, the rival, the opponent, and finds its force in the friction.",
+      "Mars goes all the way in. It fights for what is shared, wants intensity, and faces the hard ending head on.",
+      "Mars crusades. It fights for a belief, travels with purpose, and argues for the truth it found.",
+      "Mars climbs. It drives the career, competes in public, and wants to be known for what it did.",
+      "Mars rallies the group. It leads the crew, fights for the cause, and pushes the plan toward the future.",
+      "Mars moves in private. It works behind the scenes, fights its battles alone, and needs rest it does not always take."
+    ],
+    Jupiter: [
+      "Jupiter arrives generously. It brings a big laugh into the room and the sense that things will work out.",
+      "Jupiter grows what it has. Money comes and goes in large measures, and it gives as easily as it gains.",
+      "Jupiter talks big and kindly. It teaches the neighbour, encourages the sibling, and finds something worth learning on every short trip.",
+      "Jupiter fills the house. It keeps a full table and a home with room for one more.",
+      "Jupiter plays generously. It loves widely, makes things in abundance, and turns the night out into a celebration.",
+      "Jupiter brings luck to the workday. It finds meaning in the job, grows through service, and keeps good faith with the body.",
+      "Jupiter grows through partners. It meets people who open doors and loves someone who widens the world.",
+      "Jupiter deepens through what is shared. It gains through other people's resources and grows wiser with each ending.",
+      "Jupiter is at home on the long road. It believes, studies, travels and teaches, and the horizon keeps getting wider.",
+      "Jupiter grows in public. It builds a good name, rises in the work, and is trusted with a larger role.",
+      "Jupiter grows among friends. It finds a generous circle, a cause worth hoping for, and a future that looks large.",
+      "Jupiter grows in quiet. It finds faith in solitude and kindness in hidden service, and help often arrives unseen."
+    ],
+    Saturn: [
+      "Saturn stands at the door with a serious face. It enters carefully, and its presence earns trust slowly.",
+      "Saturn builds wealth stone by stone. It saves and budgets, and learns that security is made rather than found.",
+      "Saturn chooses its words. It speaks carefully, studies hard, and takes the sibling and the neighbour seriously.",
+      "Saturn builds the foundation. It carries family duty, works on the house, and makes a home that will stand.",
+      "Saturn does not cancel the night. It makes the night last. The band keeps rehearsing after the fun part, the romance is kept on purpose, and the thing made for joy gets made well.",
+      "Saturn masters the daily work. It keeps the routine, perfects the craft, and asks the body to hold up over the long run.",
+      "Saturn takes partnership seriously. It chooses carefully, commits for the long term, and builds a bond that can carry weight.",
+      "Saturn guards what is shared. It handles joint money carefully, trusts slowly, and meets endings with patience.",
+      "Saturn builds a philosophy. It studies deeply, tests what it believes, and travels when the journey means something.",
+      "Saturn climbs slowly to the top. It builds the career over years, earns the title, and wants a reputation that lasts.",
+      "Saturn chooses its friends carefully. It keeps a few close, serves the group with patience, and builds the future one step at a time.",
+      "Saturn works in private. It faces its fears alone, serves quietly, and builds strength in the hours nobody sees."
+    ],
+    Uranus: [
+      "Uranus arrives unexpectedly. It shows in an unusual look, a sudden change, and a refusal to be predictable.",
+      "Uranus earns in strange ways. Money arrives and leaves suddenly, and it values freedom more than security.",
+      "Uranus thinks differently out loud. It says the surprising thing, changes its route, and keeps the neighbourhood guessing.",
+      "Uranus shakes the house. It moves often, breaks family patterns, and makes a home nobody else would have made.",
+      "Uranus plays wildly. It falls for the unexpected person, makes something new, and refuses the usual night out.",
+      "Uranus changes the routine. It invents better ways to work and rebels against the schedule that stopped fitting.",
+      "Uranus needs freedom in partnership. It meets the unusual partner, keeps space in the bond, and changes the terms when they stop fitting.",
+      "Uranus breaks through in closeness. Shared money, intimacy and endings change suddenly, often without warning.",
+      "Uranus believes against the grain. It studies the strange subject, travels far, and changes its mind in a single afternoon.",
+      "Uranus changes the career. It makes its name by being different, switches paths, and refuses the expected ladder.",
+      "Uranus is at home in the group. It finds the like minded crowd, works for the future, and builds a circle of misfits.",
+      "Uranus wakes in private. Sudden insights come alone, the dreams are strange, and its rebellion stays behind the door."
+    ],
+    Neptune: [
+      "Neptune softens the first impression. It shows as something dreamy, hard to pin down, and different to each person who meets it.",
+      "Neptune dissolves the ledger. It values what money cannot buy, gives too easily, and needs care with what slips away.",
+      "Neptune speaks in images. It writes poems, hears what is not said, and wanders the neighbourhood dreaming.",
+      "Neptune fills the home with feeling. It keeps a dreamy family story and longs for an ideal house.",
+      "Neptune falls in love with love. It makes things from dreams, plays with fantasy, and makes the night out feel like a film.",
+      "Neptune serves with compassion. It brings care to the work, feels the body subtly, and needs a routine that leaves room to dream.",
+      "Neptune idealises the partner. It loves through the dream of the other person and learns, over time, to see them clearly.",
+      "Neptune dissolves into closeness. It merges deeply, feels what is hidden, and meets endings as something sacred.",
+      "Neptune seeks the infinite. It believes through faith, travels toward something holy, and studies the mystical.",
+      "Neptune casts a public image. It inspires through art or service, and its reputation shifts like weather.",
+      "Neptune dreams with the group. It finds a circle of shared ideals and hopes for a future that looks like a vision.",
+      "Neptune is at home alone. It dreams, prays, retreats, and finds the sacred in the quiet room."
+    ],
+    Pluto: [
+      "Pluto arrives with intensity. It shows in a gaze that sees through people and a presence that changes the room.",
+      "Pluto transforms what it owns. It loses and rebuilds, and learns what it truly values through what it lets go.",
+      "Pluto speaks to the bottom of things. It asks the question nobody else will, and its words change people.",
+      "Pluto digs under the house. It uncovers family secrets, transforms its roots, and rebuilds home from the ground.",
+      "Pluto plays for keeps. It loves intensely, makes things from the depths, and turns a night out into something that changes a life.",
+      "Pluto transforms the daily work. It overhauls the routine, works with total focus, and heals the body from the root.",
+      "Pluto transforms through partners. It meets people who change it completely and learns about power inside the bond.",
+      "Pluto is at home in the depths. It handles shared power, intimacy and endings, and comes back changed each time.",
+      "Pluto transforms belief. It loses one faith and finds another, and studies what most people avoid.",
+      "Pluto takes power in public. It transforms the career, holds influence, and its name carries weight.",
+      "Pluto transforms the group. It changes the circle, holds power in the cause, and builds a future from what was torn down.",
+      "Pluto works in the dark. It faces what is hidden, transforms in private, and finds power in solitude."
+    ]
+  };
+
   var PC = {
-    VERSION: '1.0.0',
-    bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY,
+    VERSION: '1.1.0',
+    bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY, inHouseTable: IN_HOUSE,
+    /* inHouse(body, house) -> the line, or '' for a point the table does not hold. */
+    inHouse: function (body, house) { var r = IN_HOUSE[body]; return r && house >= 1 && house <= 12 ? r[house - 1] : ''; },
     known: function (body) { return !!BODIES[keyFor(body)]; },
     keyFor: keyFor, label: nm,
     glyph: function (body) { return BODIES[body] ? BODIES[body].glyph : ''; },

@@ -7423,9 +7423,158 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   function low(s) { return String(s || '').charAt(0).toLowerCase() + String(s || '').slice(1); }
   function stripDot(s) { return String(s || '').replace(/\.$/, ''); }
 
+  /* WHAT EACH BODY DOES IN EACH HOUSE (owner, 7 November 2026). One line per
+     body per house, the body acting in the room's own scenes. Kin Common
+     writing, kept as a product of its own: read by the aspect sheet after the
+     body's voice and sign. Index 0 is the 1st house. */
+  var IN_HOUSE = {
+    Sun: [
+      "The Sun stands in the doorway of the chart and is the first thing anyone meets. It shows in the face, the walk, the way a room turns when it arrives.",
+      "The Sun builds itself out of what it earns and keeps. It shines through the work that pays, the things it chooses to own, and what it will not sell.",
+      "The Sun lights up in conversation. It finds itself in the street, the group chat, the sibling who argues back, the sentence that comes out sharper than planned.",
+      "The Sun shines behind the front door first. It grows in the kitchen and the family story, and it lights the house before it lights the street.",
+      "The Sun comes alive on the night out. It shines on a stage, in a crush, in something made for the joy of making, and it wants an audience that claps.",
+      "The Sun shines through the ordinary day done well. It finds itself in the craft, the routine that works, the body kept in good order, the job finished properly.",
+      "The Sun finds itself across the table. It shines most clearly beside a partner, a rival or a client, and it learns who it is by what the other person sees.",
+      "The Sun moves into closeness and stays for the hard part. It says the true thing before the other person does, opens the shared account, and ends what has already ended.",
+      "The Sun shines on the long road. It grows by going further, through the plane ticket, the book that rearranges the shelf, the teacher it argues with and keeps.",
+      "The Sun steps into public view. It shines in the title, the reputation, the work with its name on it, and it wants to be known for something that stands.",
+      "The Sun shines among friends and for the years ahead. It finds itself in the crew, the cause, the plan for a world a little further along than this one.",
+      "The Sun shines where nobody is watching. It grows in solitude, in dreams and quiet service, and it often lights other people before it lights itself."
+    ],
+    Moon: [
+      "The Moon wears its feelings on the surface. A mood crosses the face before any word does, and the body knows how it feels before the mind has a name for it.",
+      "The Moon feels safe through what it can hold. A full pantry, a soft blanket, money set aside, the familiar things that steady it when the week does not.",
+      "The Moon talks its feelings through. It calms down in the phone call, the short drive, the sibling or neighbour who already knows the whole story.",
+      "The Moon is at home at home. It settles among the old photographs, keeps the family's weather, and needs one place where nothing has to be performed.",
+      "The Moon feels most itself while playing. It soothes through making things, through the crush, the child's game, the evening that has no point except delight.",
+      "The Moon feels its way through the workday. Routine steadies it, the body reports every worry, and tending something small each day keeps the tide even.",
+      "The Moon feels through the other person. It reads a partner's mood before its own and needs a closeness that answers back.",
+      "The Moon feels at depth or not at all. It lives in the private hour, the shared secret, the grief that turns a life, and it trusts slowly because it feels everything.",
+      "The Moon feels at home far away. It settles in a belief, a foreign city, a course of study, and needs the horizon open to breathe.",
+      "The Moon feels in public. Its moods show at work, it looks after the people it leads, and its reputation is often one of caring for others.",
+      "The Moon feels held by the group. It belongs through friends who feel like family, the circle that checks in, a hope shared with people who want the same thing.",
+      "The Moon feels in private. It keeps its tides behind a closed door, dreams vividly, and needs time alone to know what it feels before anyone asks."
+    ],
+    Mercury: [
+      "Mercury talks first. The mind shows on the face, quick and curious, and people meet the questions before they meet anything else.",
+      "Mercury thinks in terms of value. It counts, prices and bargains, and it earns through the words and ideas it can explain.",
+      "Mercury is at home in the local chatter. It reads the street, writes the message, learns the shortcut, and keeps the siblings and neighbours talking.",
+      "Mercury thinks at the kitchen table. It turns over the family story, keeps the house's records, and does its best thinking somewhere familiar.",
+      "Mercury plays with words. It flirts in jokes, writes for fun, invents the game, and makes the night out funnier than it would have been.",
+      "Mercury runs the daily list. It solves the small problems, catches the detail at work, and worries in the body when the list grows too long.",
+      "Mercury thinks out loud with someone. It sharpens in the conversation, the contract, the debate across the table, and listens for what the other person means.",
+      "Mercury thinks underneath. It researches, reads the fine print on shared money, and wants to know what nobody is saying.",
+      "Mercury thinks far. It studies, translates, teaches, travels to learn, and argues philosophy into the small hours.",
+      "Mercury speaks in public. It makes its name by writing, teaching, selling or explaining, and its words are what people remember.",
+      "Mercury talks with the crowd. It floats the idea in the group chat and keeps it moving until the group decides to do something.",
+      "Mercury thinks in private. It works things out in the journal and the dream, and it often knows more than it says."
+    ],
+    Venus: [
+      "Venus shows in the first impression. Grace sits on the surface, in the clothes, the smile, the ease that makes people want to stay a little longer.",
+      "Venus loves what it can keep. Beautiful things, good food, money handled with taste, comfort it has chosen and paid for.",
+      "Venus charms in conversation. It writes the kind note, smooths the argument, and finds the pretty corner of the neighbourhood everyone else walks past.",
+      "Venus makes the home lovely. It sets the table, keeps the peace in the family, and loves best somewhere warm and private.",
+      "Venus is made for the night out. It falls for someone, makes something beautiful, and loves pleasure for its own sake.",
+      "Venus makes the ordinary day pleasant. It brings grace to the work, kindness to the people beside it, and gentleness to the care of the body.",
+      "Venus is at home in partnership. It loves through the other person, keeps the bond sweet, and wants it to be fair.",
+      "Venus loves at depth. It wants the whole person, shares money and secrets, and finds beauty in what has been through something.",
+      "Venus loves what is far away. It falls for a foreign place, a teacher, an idea, and finds beauty in the meaning things carry.",
+      "Venus brings grace to the public role. It is liked at work, may choose beauty as its trade, and builds a name for charm.",
+      "Venus loves the circle. It is the friend who brings people together and finds beauty in a hope the group shares.",
+      "Venus loves in secret. It keeps a private devotion, gives without being seen, and finds beauty in the quiet room."
+    ],
+    Mars: [
+      "Mars moves first and shows it. The drive is visible in the walk and the voice, ready to act before anyone else has.",
+      "Mars works for its money. It earns by effort, fights for what it values, and spends with force when it wants something.",
+      "Mars argues in the street. It speaks sharply, moves fast from place to place, and competes with the siblings and the neighbours.",
+      "Mars fights at home. It works on the house with its hands, defends the family, and sometimes carries the oldest arguments in the kitchen.",
+      "Mars plays to win. It chases the crush, competes in the game, and makes things with heat and nerve.",
+      "Mars works hard every day. It attacks the task, trains the body, and runs hot when the routine keeps it from moving.",
+      "Mars meets its match across the table. It sparks with the partner, the rival, the opponent, and finds its force in the friction.",
+      "Mars goes all the way in. It fights for what is shared, wants intensity, and faces the hard ending head on.",
+      "Mars crusades. It fights for a belief, travels with purpose, and argues for the truth it found.",
+      "Mars climbs. It drives the career, competes in public, and wants to be known for what it did.",
+      "Mars rallies the group. It leads the crew, fights for the cause, and pushes the plan toward the future.",
+      "Mars moves in private. It works behind the scenes, fights its battles alone, and needs rest it does not always take."
+    ],
+    Jupiter: [
+      "Jupiter arrives generously. It brings a big laugh into the room and the sense that things will work out.",
+      "Jupiter grows what it has. Money comes and goes in large measures, and it gives as easily as it gains.",
+      "Jupiter talks big and kindly. It teaches the neighbour, encourages the sibling, and finds something worth learning on every short trip.",
+      "Jupiter fills the house. It keeps a full table and a home with room for one more.",
+      "Jupiter plays generously. It loves widely, makes things in abundance, and turns the night out into a celebration.",
+      "Jupiter brings luck to the workday. It finds meaning in the job, grows through service, and keeps good faith with the body.",
+      "Jupiter grows through partners. It meets people who open doors and loves someone who widens the world.",
+      "Jupiter deepens through what is shared. It gains through other people's resources and grows wiser with each ending.",
+      "Jupiter is at home on the long road. It believes, studies, travels and teaches, and the horizon keeps getting wider.",
+      "Jupiter grows in public. It builds a good name, rises in the work, and is trusted with a larger role.",
+      "Jupiter grows among friends. It finds a generous circle, a cause worth hoping for, and a future that looks large.",
+      "Jupiter grows in quiet. It finds faith in solitude and kindness in hidden service, and help often arrives unseen."
+    ],
+    Saturn: [
+      "Saturn stands at the door with a serious face. It enters carefully, and its presence earns trust slowly.",
+      "Saturn builds wealth stone by stone. It saves and budgets, and learns that security is made rather than found.",
+      "Saturn chooses its words. It speaks carefully, studies hard, and takes the sibling and the neighbour seriously.",
+      "Saturn builds the foundation. It carries family duty, works on the house, and makes a home that will stand.",
+      "Saturn does not cancel the night. It makes the night last. The band keeps rehearsing after the fun part, the romance is kept on purpose, and the thing made for joy gets made well.",
+      "Saturn masters the daily work. It keeps the routine, perfects the craft, and asks the body to hold up over the long run.",
+      "Saturn takes partnership seriously. It chooses carefully, commits for the long term, and builds a bond that can carry weight.",
+      "Saturn guards what is shared. It handles joint money carefully, trusts slowly, and meets endings with patience.",
+      "Saturn builds a philosophy. It studies deeply, tests what it believes, and travels when the journey means something.",
+      "Saturn climbs slowly to the top. It builds the career over years, earns the title, and wants a reputation that lasts.",
+      "Saturn chooses its friends carefully. It keeps a few close, serves the group with patience, and builds the future one step at a time.",
+      "Saturn works in private. It faces its fears alone, serves quietly, and builds strength in the hours nobody sees."
+    ],
+    Uranus: [
+      "Uranus arrives unexpectedly. It shows in an unusual look, a sudden change, and a refusal to be predictable.",
+      "Uranus earns in strange ways. Money arrives and leaves suddenly, and it values freedom more than security.",
+      "Uranus thinks differently out loud. It says the surprising thing, changes its route, and keeps the neighbourhood guessing.",
+      "Uranus shakes the house. It moves often, breaks family patterns, and makes a home nobody else would have made.",
+      "Uranus plays wildly. It falls for the unexpected person, makes something new, and refuses the usual night out.",
+      "Uranus changes the routine. It invents better ways to work and rebels against the schedule that stopped fitting.",
+      "Uranus needs freedom in partnership. It meets the unusual partner, keeps space in the bond, and changes the terms when they stop fitting.",
+      "Uranus breaks through in closeness. Shared money, intimacy and endings change suddenly, often without warning.",
+      "Uranus believes against the grain. It studies the strange subject, travels far, and changes its mind in a single afternoon.",
+      "Uranus changes the career. It makes its name by being different, switches paths, and refuses the expected ladder.",
+      "Uranus is at home in the group. It finds the like minded crowd, works for the future, and builds a circle of misfits.",
+      "Uranus wakes in private. Sudden insights come alone, the dreams are strange, and its rebellion stays behind the door."
+    ],
+    Neptune: [
+      "Neptune softens the first impression. It shows as something dreamy, hard to pin down, and different to each person who meets it.",
+      "Neptune dissolves the ledger. It values what money cannot buy, gives too easily, and needs care with what slips away.",
+      "Neptune speaks in images. It writes poems, hears what is not said, and wanders the neighbourhood dreaming.",
+      "Neptune fills the home with feeling. It keeps a dreamy family story and longs for an ideal house.",
+      "Neptune falls in love with love. It makes things from dreams, plays with fantasy, and makes the night out feel like a film.",
+      "Neptune serves with compassion. It brings care to the work, feels the body subtly, and needs a routine that leaves room to dream.",
+      "Neptune idealises the partner. It loves through the dream of the other person and learns, over time, to see them clearly.",
+      "Neptune dissolves into closeness. It merges deeply, feels what is hidden, and meets endings as something sacred.",
+      "Neptune seeks the infinite. It believes through faith, travels toward something holy, and studies the mystical.",
+      "Neptune casts a public image. It inspires through art or service, and its reputation shifts like weather.",
+      "Neptune dreams with the group. It finds a circle of shared ideals and hopes for a future that looks like a vision.",
+      "Neptune is at home alone. It dreams, prays, retreats, and finds the sacred in the quiet room."
+    ],
+    Pluto: [
+      "Pluto arrives with intensity. It shows in a gaze that sees through people and a presence that changes the room.",
+      "Pluto transforms what it owns. It loses and rebuilds, and learns what it truly values through what it lets go.",
+      "Pluto speaks to the bottom of things. It asks the question nobody else will, and its words change people.",
+      "Pluto digs under the house. It uncovers family secrets, transforms its roots, and rebuilds home from the ground.",
+      "Pluto plays for keeps. It loves intensely, makes things from the depths, and turns a night out into something that changes a life.",
+      "Pluto transforms the daily work. It overhauls the routine, works with total focus, and heals the body from the root.",
+      "Pluto transforms through partners. It meets people who change it completely and learns about power inside the bond.",
+      "Pluto is at home in the depths. It handles shared power, intimacy and endings, and comes back changed each time.",
+      "Pluto transforms belief. It loses one faith and finds another, and studies what most people avoid.",
+      "Pluto takes power in public. It transforms the career, holds influence, and its name carries weight.",
+      "Pluto transforms the group. It changes the circle, holds power in the cause, and builds a future from what was torn down.",
+      "Pluto works in the dark. It faces what is hidden, transforms in private, and finds power in solitude."
+    ]
+  };
+
   var PC = {
-    VERSION: '1.0.0',
-    bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY,
+    VERSION: '1.1.0',
+    bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY, inHouseTable: IN_HOUSE,
+    /* inHouse(body, house) -> the line, or '' for a point the table does not hold. */
+    inHouse: function (body, house) { var r = IN_HOUSE[body]; return r && house >= 1 && house <= 12 ? r[house - 1] : ''; },
     known: function (body) { return !!BODIES[keyFor(body)]; },
     keyFor: keyFor, label: nm,
     glyph: function (body) { return BODIES[body] ? BODIES[body].glyph : ''; },
@@ -40310,10 +40459,17 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <button onClick="{{ aspClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
       </div>
       <div style="font:600 10px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ asp.orb }}</div>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.nature }}</div>
-      <div style="font:400 13px/1.7 var(--fb);color:var(--mut);border-left:2px solid var(--bd);padding-left:11px">{{ asp.depth }}</div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.possibility }}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px">
+        <sc-for list="{{ asp.paras }}" as="pa" hint-placeholder-count="3">
+          <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
+        </sc-for>
+        <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
+        <sc-if value="{{ asp.natureOn }}" hint-placeholder-val="{{ false }}">
+          <details style="font:400 13px/1.6 var(--fb);color:var(--mut)">
+            <summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font:600 12px var(--fc);color:var(--ac2-hi)">{{ asp.natureLabel }}</summary>
+            <div style="padding-top:4px">{{ asp.nature }}</div>
+          </details>
+        </sc-if>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -47635,10 +47791,17 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <button onClick="{{ aspClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
       </div>
       <div style="font:600 10px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ asp.orb }}</div>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.nature }}</div>
-      <div style="font:400 13px/1.7 var(--fb);color:var(--mut);border-left:2px solid var(--bd);padding-left:11px">{{ asp.depth }}</div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.possibility }}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px">
+        <sc-for list="{{ asp.paras }}" as="pa" hint-placeholder-count="3">
+          <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
+        </sc-for>
+        <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
+        <sc-if value="{{ asp.natureOn }}" hint-placeholder-val="{{ false }}">
+          <details style="font:400 13px/1.6 var(--fb);color:var(--mut)">
+            <summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font:600 12px var(--fc);color:var(--ac2-hi)">{{ asp.natureLabel }}</summary>
+            <div style="padding-top:4px">{{ asp.nature }}</div>
+          </details>
+        </sc-if>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -52084,33 +52247,73 @@ class Component extends DCLogic {
     const fn = this.SYN_CLOSE[String(pr.asp).toLowerCase()] || this.SYN_CLOSE.conjunct;
     return fn(pr.a.name, pr.b.name, pull(pr.a.name), pull(pr.b.name), firstA, firstB);
   }
+  /* THE ASPECT SHEET SPEAKS AS THE TWO BODIES (owner, 7 November 2026).
+     Each body gets a paragraph of its own before the contact is read: its
+     voice, how its sign walks into the room, its dignity, the part of living
+     its house holds and what this body does there (PlacementContent.inHouse,
+     the 120 body in house lines), then the house's gift and shadow. The third
+     paragraph is the angle between them, each in its sign's manner, and how
+     loud the contact runs. The closer is ASP_CLOSE, untouched. */
+  ASP_MEET = {
+    conjunct: ['At a conjunction the two stand on one degree and act as one.', ', and ', 'Whatever wakes one wakes the other in the same breath.'],
+    sextile: ['At a sextile the two reach each other easily, and the door opens when one of them knocks.', ', and ', 'Put one in service of the other and each grows more capable.'],
+    square: ['At a square the two press on each other.', ', while ', 'They cannot both win the same hour. The rub keeps the chart awake, and over the years it becomes a strength nobody handed over.'],
+    trine: ['At a trine the two share an element and help each other without being asked.', ', and ', 'It costs nothing, which makes it easy to overlook and worth training.'],
+    opposite: ['At an opposition the two face each other across the chart.', ', while ', 'Each holds the half the other lacks, and over time the pull between them turns into perspective.']
+  };
+  aspBodyPara(r, house) {
+    const PC = (typeof window !== 'undefined' && window.PlacementContent) || null;
+    const name = r.name, sign = r.sign;
+    const b = PC ? PC.bodies[PC.keyFor(r.id || name)] || PC.bodies[name] : null;
+    const sg = PC && sign ? PC.signs[sign] : null;
+    const out = [];
+    out.push(b && b.voice ? b.voice : name + ' stands at ' + Math.floor(r.deg) + '\u00b0 ' + sign + '.');
+    if (sg && sg.enters && sg.enters.indexOf(sign + ' ') === 0) out.push('In ' + sign + ' it ' + sg.enters.slice(sign.length + 1));
+    const dg = PC && b ? PC.dignity(name, sign) : null;
+    if (dg) out.push({
+      rulership: sign + ' is one of its own signs, so nothing has to be translated.',
+      exaltation: 'It is exalted there, an honoured guest that gives its best.',
+      detriment: sign + ' sits across from its home, so it works in a borrowed manner.',
+      fall: 'It sits in its fall there, so what comes easily elsewhere is learned slowly here.'
+    }[dg.state] || '');
+    const hs = PC && house && r.group !== 'angle' ? PC.houses[house - 1] : null;
+    if (hs) {
+      out.push('It lives in a part of living where ' + hs.living + ' happens.');
+      const ln = PC.inHouse(name, house);
+      if (ln) out.push(ln);
+      if (hs.gift && hs.shadow) out.push('Its gift here is ' + hs.gift + '. Its shadow is ' + hs.shadow + '.');
+    }
+    return out.filter(Boolean).join(' ');
+  }
   aspectLines(x, houseOf, ordinal) {
     const A = x.a.name, B = x.b.name;
     const pull = n => this.ASP_PULL[n] ||
       (this.PL_MEAN[n] ? 'to have its ' + this.PL_MEAN[n] + ' taken seriously' : 'to be given its own weight');
     const pa = pull(A), pb = pull(B);
-    const th = h => this.HOUSE_THEMES[(h - 1 + 12) % 12] || 'that part of your life';
-    const ha = houseOf(x.a), hb = houseOf(x.b);
-    const place = r => r.name + ' at ' + Math.floor(r.deg) + '\u00b0 ' + r.sign;
-    /* Orb is the volume knob and the reader is owed it plainly: a contact
-       inside a degree runs most days, one at the edge of orb is weather. */
+    const PC = (typeof window !== 'undefined' && window.PlacementContent) || null;
+    const THE = ['Sun', 'Moon', 'North Node', 'South Node', 'Ascendant', 'Descendant', 'Midheaven', 'IC'];
+    const the = n => (THE.indexOf(n) !== -1 ? 'the ' : '') + n;
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    /* Orb is the volume knob, said plainly. */
+    const o = x.orb.toFixed(1) + '\u00b0';
     const loud = x.orb <= 1
-      ? 'At ' + x.orb.toFixed(1) + '\u00b0 this is one of the tightest contacts in your chart, so it runs most days rather than occasionally.'
+      ? 'At ' + o + ' this is one of the tightest contacts in the chart, so it runs most days.'
       : x.orb <= 3
-        ? 'At ' + x.orb.toFixed(1) + '\u00b0 it is firmly in orb: present in the ordinary run of things, not only under pressure.'
-        : 'At ' + x.orb.toFixed(1) + '\u00b0 it sits at the wide end of orb, so expect it in strong weather rather than every week.';
-    const where = ha === hb
-      ? 'Both sit in your ' + ordinal(ha) + ' house, so the whole exchange happens on one ground: ' + th(ha) + '.'
-      : 'It runs between your ' + ordinal(ha) + ' house and your ' + ordinal(hb) + ', so it shows up where you handle ' + th(ha) + ' and where you handle ' + th(hb) + '.';
-    /* The register, not the finding. voice.turn introduces the behaviour of the
-       angle and voice.hold closes the paragraph, so a water chart is read at a
-       different pace than an air one while the mechanics, the houses and the
-       orb are identical for everybody. Nothing here changes what is asserted. */
-    const voice = this.toneVoice(false);
+        ? 'At ' + o + ' it is firmly in orb and shows up in the ordinary run of things.'
+        : 'At ' + o + ' it sits at the wide end of orb and comes forward in strong weather.';
     const mn = this.ASP_MINOR[x.asp] || {};
+    const meet = this.ASP_MEET[x.asp] || ['At ' + (/^[aeiou]/i.test(this.aspName(x.asp)) ? 'an ' : 'a ') + this.aspName(x.asp).toLowerCase() + ' the two meet at a finer angle.', ', and ', mn.short || ''];
+    const ma = PC && PC.signs[x.a.sign] ? PC.signs[x.a.sign].manner : '', mb = PC && PC.signs[x.b.sign] ? PC.signs[x.b.sign].manner : '';
+    const manner = !ma || !mb ? ''
+      : x.a.sign === x.b.sign ? 'Both move ' + ma + ', so the two arrive together.'
+        : cap(the(A)) + ' moves ' + ma + meet[1] + the(B) + ' moves ' + mb + '.';
+    const paras = [
+      this.aspBodyPara(x.a, houseOf(x.a)),
+      this.aspBodyPara(x.b, houseOf(x.b)),
+      [meet[0], manner, meet[2], loud].filter(Boolean).join(' ')
+    ];
     return {
-      depth: place(x.a) + ' and ' + place(x.b) + '. ' + where + ' ' +
-        voice.turn + ' this: ' + this.lowerFirst(this.ASP_PLAY[x.asp] || mn.play || '') + ' ' + loud + ' ' + voice.hold,
+      paras: paras, depth: paras.join(' '),
       close: this.ASP_CLOSE[x.asp] ? this.ASP_CLOSE[x.asp](A, B, pa, pb) : mn.ask ? mn.ask(A, B) : this.ASP_CLOSE.conjunct(A, B, pa, pb)
     };
   }
@@ -55858,7 +56061,12 @@ class Component extends DCLogic {
     const houses = group('houses', housesHead, this.HOUSE_THEMES.map((th, i) => row({ glyph: String(i + 1), title: houseWord + ' ' + (i + 1), hi: cuspWord(i + 1), sub: th,
       aria: houseWord + ' ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
       { cards: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => this.impactHouseCard(h, ctx)) });
-    const aspects = group('aspects', o.expanded ? 'Aspects' : 'Major Aspects', o.asps.slice(0, 40).map((x, i) => row({
+    /* A contact to the Descendant, the IC or the South Node only mirrors the
+       one to the Ascendant, the Midheaven or the North Node, and the two nodes
+       always oppose each other, so the list shows each contact once
+       (owner, 7 November 2026). The index stays the one into asps. */
+    const aspects = group('aspects', o.expanded ? 'Aspects' : 'Major Aspects', o.asps.map((x, i) => ({ x: x, i: i }))
+      .filter(({ x }) => MIRROR4.indexOf(x.a.name) === -1 && MIRROR4.indexOf(x.b.name) === -1).slice(0, 40).map(({ x, i }) => row({
       title: x.a.glyph + ' ' + this.studyName(x.a.name) + ' ' + x.asp + ' ' + x.b.glyph + ' ' + this.studyName(x.b.name), meta: x.orb.toFixed(1) + '° orb',
       edge: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', sub: this.ASP_SHORT[x.asp] || '', go: () => this.setState({ aspSel: i }) })));
     const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map(x => row({
@@ -67388,14 +67596,19 @@ class Component extends DCLogic {
               aspClose: () => this.setState({ aspSel: null }),
               asp: (() => {
                 const x = st.aspSel != null ? asps[st.aspSel] : null;
-                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', depth: '', possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
+                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', natureOn: false, natureLabel: '', paras: [], possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
                 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+                const L = this.aspectLines(x, houseOf, ordinal);
+                const nature = this.ASP_NATURE[x.asp] || (this.ASP_MINOR[x.asp] || {}).nature || '';
+                const plural = { conjunct: 'conjunctions', sextile: 'sextiles', square: 'squares', trine: 'trines', opposite: 'oppositions' }[x.asp] || this.aspName(x.asp).toLowerCase() + 's';
                 return { c: this.ASP_COLOR[x.asp][0], ga: x.a.glyph, gb: x.b.glyph,
                   title: x.a.name + ' ' + cap(x.asp) + ' ' + x.b.name,
                   orb: 'Within ' + x.orb.toFixed(1) + '\u00b0 orb',
-                  nature: this.ASP_NATURE[x.asp] || (this.ASP_MINOR[x.asp] || {}).nature || '',
-                  depth: this.aspectLines(x, houseOf, ordinal).depth,
-                  possibility: this.aspectLines(x, houseOf, ordinal).close,
+                  /* The angle's own lesson folds under a small link (owner's
+                     pending call, 7 November 2026): the two bodies lead. */
+                  nature: nature, natureOn: !!nature, natureLabel: 'About ' + plural,
+                  paras: L.paras.map(t => ({ t: t })),
+                  possibility: L.close,
                   labelA: 'See ' + x.a.name, labelB: 'See ' + x.b.name,
                   goA: () => { this.setState({ aspSel: null }); openBody(x.a.name); },
                   goB: () => { this.setState({ aspSel: null }); openBody(x.b.name); } };
