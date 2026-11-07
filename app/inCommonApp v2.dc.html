@@ -19528,6 +19528,8 @@ class Component extends DCLogic {
     const hs = PC && house && r.group !== 'angle' ? PC.houses[house - 1] : null;
     if (hs) {
       out.push('It lives in a part of living where ' + this.livingVerb(hs.living) + '.');
+      const sh = PC.signHouse ? PC.signHouse(sign, house) : '';
+      if (sh) out.push(sh);
       const ln = PC.inHouse(name, house);
       if (ln) out.push(ln);
       if (hs.gift && hs.shadow) out.push('Its gift here is ' + hs.gift + '. Its shadow is ' + hs.shadow + '.');
