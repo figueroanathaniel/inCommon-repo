@@ -6842,6 +6842,12 @@ knows (`BLOOM_CORE`), then by orb, and open by naming what each body brings,
 never with a label and a colon; two transits at one angle never end on the
 same sentence; and the degree carries no line about what the build holds.
 Held together no longer tells the reader to keep what rings true.
+At Home is the body and the room as one paragraph (the owner, same day:
+"repetitive and drawling, no sense of integration"): the body in house line,
+then one sentence of the house's gift and shadow said through the body. The
+house's generic presence line, its question and the arena list are not
+repeated there; a point with no body in house line gets one plain sentence of
+what it carries into the house instead.
 
 ## A passing tap opens the glance, a focused read opens the packet
 Asked for by the owner on 4 November 2026: "It's nice for a focused read. For

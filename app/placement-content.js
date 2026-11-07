@@ -1158,7 +1158,7 @@
   };
 
   var PC = {
-    VERSION: '1.2.0',
+    VERSION: '1.3.0',
     bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY, inHouseTable: IN_HOUSE,
     /* inHouse(body, house) -> the line, or '' for a point the table does not hold. */
     inHouse: function (body, house) { var r = IN_HOUSE[body]; return r && house >= 1 && house <= 12 ? r[house - 1] : ''; },
@@ -1232,11 +1232,8 @@
     astralBodyInHouse: function (body, house) {
       var name = nm(body);
       var b = BODIES[body], h = HOUSES[house - 1]; if (!b || !h) return '';
-      /* The approved body in house line stands where the house's question used
-         to, because The Room already asks it and a sentence is never said twice. */
-      var own = PC.inHouse ? PC.inHouse(body, house) : '';
       return name + ' in the ' + ord(house) + ' house carries ' + b.energy + ' into ' + h.arena + '. ' +
-        (own ? own + ' ' : '') + h.presence;
+        h.asks + ' ' + h.presence;
     },
     signInHouse: function (sign, house) {
       var s = SIGNS[sign], h = HOUSES[house - 1]; if (!s || !h) return '';
@@ -1316,10 +1313,19 @@
             T('POSSIBILITY', 'You may catch this as a reflex: around ' + h.arena.split(',')[0] + ', the ' + sign + ' answer is already there before you reach for it.')]
         },
         body: { heading: name, lines: [T('TRADITIONAL', b.definition), T('TRADITIONAL', b.role)] },
-        astralBodyInHouse: {
+        /* At Home is the body and the room as one thing (the owner, 7 November
+           2026: "repetitive and drawling, no sense of integration"). Where an
+           approved body in house line exists it is the chapter, with the
+           house's gift and shadow said through the body; the generic presence
+           line and the arena list would only say it again. */
+        astralBodyInHouse: PC.inHouse && PC.inHouse(body, house) ? {
           heading: name + ' in the ' + ord(house) + ' House',
-          lines: [T('TRADITIONAL', PC.astralBodyInHouse(body, house)),
-            T('POSSIBILITY', 'You may find yourself drawn to ' + h.arena + ' more often than you planned, and that what you bring to it is ' + low(b.energy) + '.')]
+          lines: [T('TRADITIONAL', PC.inHouse(body, house)),
+            T('POSSIBILITY', cap(/^(Sun|Moon)$/.test(name) ? 'the ' + name : name) + ' keeps ' + h.gift + ' here, and the thing to watch is ' + h.shadow + '.')]
+        } : {
+          heading: name + ' in the ' + ord(house) + ' House',
+          lines: [T('TRADITIONAL', name + ' in the ' + ord(house) + ' house carries ' + b.energy + ' into ' + h.arena + '.'),
+            T('POSSIBILITY', cap(/^(Sun|Moon)$/.test(name) ? 'the ' + name : name) + ' keeps ' + h.gift + ' here, and the thing to watch is ' + h.shadow + '.')]
         },
         astralBodyInSign: {
           heading: name + ' in ' + sign,
