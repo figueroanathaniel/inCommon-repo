@@ -34380,8 +34380,8 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
                 <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
               </sc-if>
-              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
-                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:5px 8px;border:1px solid {{ r.bd }};border-radius:8px;background:{{ r.bg }}"><span style="display:flex;align-items:baseline;gap:7px;min-width:0"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);font-variant-numeric:tabular-nums;color:var(--mut);white-space:nowrap;margin-left:auto">{{ r.pos }}</span></span><sc-if value="{{ r.noteOn }}" hint-placeholder-val="{{ false }}"><span style="font:12.5px/1.45 var(--fb);color:var(--mut);padding-left:25px">{{ r.note }}</span></sc-if></button></div></sc-for>
+              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
               </div>
             </div>
           </sc-if>
@@ -41440,8 +41440,8 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
                 <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
               </sc-if>
-              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
-                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:5px 8px;border:1px solid {{ r.bd }};border-radius:8px;background:{{ r.bg }}"><span style="display:flex;align-items:baseline;gap:7px;min-width:0"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);font-variant-numeric:tabular-nums;color:var(--mut);white-space:nowrap;margin-left:auto">{{ r.pos }}</span></span><sc-if value="{{ r.noteOn }}" hint-placeholder-val="{{ false }}"><span style="font:12.5px/1.45 var(--fb);color:var(--mut);padding-left:25px">{{ r.note }}</span></sc-if></button></div></sc-for>
+              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
               </div>
             </div>
           </sc-if>
@@ -55344,25 +55344,13 @@ class Component extends DCLogic {
       const hel = off ? null : this.helioPos(r);
       const tags = (ved ? [{ t: ved.rashi + ' \u00b7 ' + ved.nak + ' ' + ved.pada + (ved.dignity ? ' \u00b7 ' + ved.dignity : '') + (ved.combust ? ' \u00b7 combust' : '') }] : [])
         .concat(hel ? [{ t: (hel.body === 'Earth' ? 'Earth ' : 'From the Sun ') + Math.floor(hel.deg) + '\u00b0 ' + this.SIGN_GLYPHS[hel.idx] }] : []).concat(gIn.length ? [{ t: gIn.join(' ') + ' gathering' }] : []);
-      /* The Table view's grey line: the same facts as the tags, said in
-         words at the size the harmonics card uses for its own. */
-      const gSign = stel.sign.filter(g => g.names.indexOf(r.name) !== -1).map(g => g.key)
-        .concat((stel.cross || []).filter(g => g.names.indexOf(r.name) !== -1).map(g => g.signs.join(' and ')));
-      const gHouse = stel.house.some(g => g.names.indexOf(r.name) !== -1);
-      const gWhere = gSign.concat(gHouse ? [h ? 'this house' : 'its house'] : []);
-      const hWord = h ? o.ordinal(h) + ' house' : '';
-      const gLine = gWhere.length ? 'gathered with others in ' + gWhere.join(' and in ') : '';
-      const first = hWord && gLine ? hWord + ', ' + gLine : (hWord || (gLine ? gLine.charAt(0).toUpperCase() + gLine.slice(1) : ''));
-      const note = [first,
-        ved ? ved.rashi + ', ' + ved.nak + ' pada ' + ved.pada + (ved.dignity ? ', ' + ved.dignity : '') + (ved.combust ? ', combust' : '') : '',
-        hel ? (hel.body === 'Earth' ? 'The Earth from the Sun at ' : 'From the Sun at ') + Math.floor(hel.deg) + '\u00b0 ' + this.SIGNS12[hel.idx] : ''].filter(Boolean).join('. ');
       const cs = off ? [] : this.impactContacts(r.lon), top = cs[0];
       const nx = nextOn[r.name];
       const wxText = top ? this.impactGlyph(top.mover) + ' ' + SYM(top.asp) : '';
       const hzText = nx ? this.impactGlyph(nx.mover) + ' ' + SYM(nx.asp) : '';
       return { key: key, glyph: r.glyph || '', name: name,
         pos: off ? 'not drawn' : dm + ' ' + this.SIGN_GLYPHS[si], house: h ? 'H' + h : '', houseOn: !!h,
-        tags: tags, tagsOn: tags.length > 0, note: note ? note + '.' : '',
+        tags: tags, tagsOn: tags.length > 0,
         asp: chips, aspOn: chips.length > 0, aspOff: !chips.length, aspMore: mine.length > 3 ? '+' + (mine.length - 3) : '', aspMoreOn: mine.length > 3,
         wxOn: !!top, wx: wxText, wxPhase: top ? PHASE[top.phase] || '' : '', wxMore: cs.length > 1 ? '+' + (cs.length - 1) : '', wxMoreOn: cs.length > 1,
         wxDot: top && top.phase === 'exact' ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.8)',
@@ -55394,8 +55382,7 @@ class Component extends DCLogic {
     const plRows = ledger.map((l, i) => ({ ...l, lit: !!litKeys[l.key],
       pos: (r => r.uncomputed || r.lon == null ? 'not drawn' : Math.floor(r.deg) + '\u00b0 ' + String(Math.floor((r.deg % 1) * 60)).padStart(2, '0') + '\u2032 ' + r.sign)(corePts[i]),
       g: l.glyph, gc: litKeys[l.key] ? 'var(--ac2-hi)' : 'var(--dim)',
-      note: l.note, noteOn: !!l.note,
-      bd: litKeys[l.key] ? 'rgba(var(--atmc),.7)' : 'transparent', bg: litKeys[l.key] ? 'rgba(var(--atmc),.16)' : 'transparent' }));
+      bd: litKeys[l.key] ? 'rgba(var(--atmc),.7)' : 'transparent', bg: litKeys[l.key] ? 'rgba(var(--atmc),.14)' : 'transparent' }));
     const aspVals = {
       chAspTabs: ASP4.map(([k, lb]) => ({ key: k, label: lb, sym: SYM(k), on: k === aspPick,
         bg: k === aspPick ? 'rgba(var(--atmc),.32)' : 'var(--sf2)', bd: k === aspPick ? 'rgba(var(--atmc),.9)' : 'var(--bd)',
