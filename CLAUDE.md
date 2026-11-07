@@ -8143,3 +8143,19 @@ Sun's view has no retrograde, are the study itself and keep their words.
 On the phone the tile's title row wraps, so the New pill and the ℞ drop
 under the title rather than past the tile's edge, and the Cycle Audit card
 is the last thing on the phone's astrology page.
+
+## A body can be found in the Expert aspect grid
+The owner said on 7 November 2026 that the Expert table "is impossible to
+read or utilize after a certain point. A search utility is a good start."
+With every point on, the grid is 94 points and about 310 contacts, a staircase
+some 2,400px wide, and below its first rows a symbol has no column label in
+sight. A find field sits over the grid (`[data-asp-find]`, all four grid
+hosts, `bloomGridQ`). A word typed there turns the grid into a list
+(`bloomGridFound()`), read from the same pairs the grid draws: one body gives
+every contact it makes among the points shown, closest to exact first; two
+bodies give the contact between them; an aspect's name keeps only that
+aspect. A whole name wins over a longer one, so "venus" is Venus and not the
+Venus Node too. The list is written into the grid host by `bloomGridSync()`,
+a DOM write like the grid, with the query in its signature, and the count is
+spoken after a pause. Clearing the field brings the grid back.
+`tools/drive-aspect-find.js` holds it in both shells.

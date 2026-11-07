@@ -6270,7 +6270,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
           </div>
-          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
@@ -6301,7 +6301,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
+        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
       </sc-if>
     </div>
   </div>
@@ -13408,7 +13408,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
           </div>
-          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
@@ -13439,7 +13439,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
+        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
       </sc-if>
     </div>
   </div>
@@ -19955,6 +19955,8 @@ class Component extends DCLogic {
       bloomCount: total + ' placements',
       bloomLeft: left, bloomRight: right, bloomAll: left.concat(right),
       bloomShowAll: () => setShow(rows.reduce((o, r) => (o[this.pointKey(r)] = true, o), {})),
+      bloomGridQ: st.bloomGridQ || '',
+      bloomGridFind: e => this.setState({ bloomGridQ: e && e.target ? e.target.value : '' }),
       bloomShowCore: () => setShow(this.bloomShowOf(true)),
       bloomSkyOn: st.bloomSky ? 'true' : 'false', bloomSkyDot: st.bloomSky ? 'var(--ac2-hi)' : 'transparent',
       bloomSkyGo: () => this.setState({ bloomSky: !this.state.bloomSky }),
@@ -20030,7 +20032,8 @@ class Component extends DCLogic {
     const show = this.bloomShowOf();
     const rows = this.fullChart(true).filter(r => r.lon != null && !r.uncomputed && show[this.pointKey(r)]);
     const minor = st.chartExpandShowMinorAspects !== false;
-    const sig = rows.map(r => this.pointKey(r)).join(',') + '|' + minor + '|' + this.chartStamp() + '|' + hosts.length;
+    const q = String(st.bloomGridQ || '').trim().toLowerCase();
+    const sig = rows.map(r => this.pointKey(r)).join(',') + '|' + minor + '|' + this.chartStamp() + '|' + hosts.length + '|' + q;
     if (sig === this._bgSig && hosts[0].firstChild) return;
     this._bgSig = sig;
     const keyOf = r => this.pointKey(r), shown = {};
@@ -20045,6 +20048,13 @@ class Component extends DCLogic {
     const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const SR = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';
     const ASPW = { conjunct: 'conjunct', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposite', quincunx: 'quincunx', semisextile: 'semisextile', semisquare: 'semisquare', sesquisquare: 'sesquisquare' };
+    if (q) {
+      const h = this.bloomGridFound(q, rows, pair, keyOf, ASPW, esc);
+      hosts.forEach(el => { el.innerHTML = h.html; });
+      clearTimeout(this._bgSayT);
+      this._bgSayT = setTimeout(() => this.speak(h.say, 'polite'), 600);
+      return;
+    }
     let h = '<table style="border-collapse:collapse;margin:0 auto"><caption style="' + SR + '">Aspect grid: each point on the diagonal, and the contact between two points where their row and column meet</caption><tbody>';
     rows.forEach((r, i) => {
       h += '<tr>';
@@ -20063,6 +20073,63 @@ class Component extends DCLogic {
     });
     h += '</tbody></table>';
     hosts.forEach(el => { el.innerHTML = rows.length > 1 ? h : ''; });
+  }
+  /* FINDING A BODY IN THE EXPERT GRID (the owner, 7 November 2026: the
+     Expert table "is impossible to read or utilize after a certain point. A
+     search utility is a good start"). Ninety four points make a staircase
+     wider than any screen, and below its first rows a symbol has no column
+     label in sight. A word typed over the grid turns it into a list: one
+     body gives every contact it makes among the points shown, closest to
+     exact first; two bodies give the contact between them; an aspect's name
+     keeps only that aspect. It reads the same pairs the grid draws. */
+  bloomGridFound(q, rows, pair, keyOf, ASPW, esc) {
+    const ASP_WORD = {};
+    Object.keys(ASPW).forEach(k => { ASP_WORD[k] = k; });
+    Object.assign(ASP_WORD, { conjunction: 'conjunct', opposition: 'opposite', sextiles: 'sextile', squares: 'square', trines: 'trine' });
+    const words = q.split(/[\s,+&]+/).filter(w => w && w !== 'and' && w !== 'with' && w !== 'to');
+    const asps = [], bodies = [];
+    words.forEach(w => {
+      const a = ASP_WORD[w] || Object.keys(ASP_WORD).find(k => w.length >= 4 && k.indexOf(w) === 0);
+      if (a) { asps.push(ASP_WORD[a] || a); return; }
+      const namesOf = r => [this.pointLabel(r), r.name, r.id].filter(Boolean).map(n => String(n).toLowerCase());
+      /* A whole name wins: "venus" is Venus, not the Venus Node as well. */
+      const exact = rows.filter(r => namesOf(r).some(n => n === w));
+      const hits = (exact.length ? exact : rows.filter(r => namesOf(r).some(n => n.indexOf(w) === 0 || (w.length >= 3 && n.indexOf(w) !== -1)))).map(keyOf);
+      bodies.push(hits);
+    });
+    const byKey = {};
+    rows.forEach(r => { byKey[keyOf(r)] = r; });
+    const shownName = keys => keys.map(k => this.pointLabel(byKey[k])).join(' or ');
+    if (bodies.some(b => !b.length)) {
+      return { html: '<p style="margin:0;padding:10px 4px;font:400 14px/1.5 var(--fb);color:var(--mut)">No point by that name is on the chart now.</p>',
+        say: 'No point by that name is on the chart now.' };
+    }
+    const found = Object.keys(pair).map(k => pair[k]).filter(x => {
+      if (asps.length && asps.indexOf(x.asp) === -1) return false;
+      const ka = keyOf(x.a), kb = keyOf(x.b);
+      if (!bodies.length) return true;
+      if (bodies.length === 1) return bodies[0].indexOf(ka) !== -1 || bodies[0].indexOf(kb) !== -1;
+      return (bodies[0].indexOf(ka) !== -1 && bodies[1].indexOf(kb) !== -1) || (bodies[0].indexOf(kb) !== -1 && bodies[1].indexOf(ka) !== -1);
+    }).sort((x, y) => x.orb - y.orb);
+    /* The body the reader named reads first in each line. */
+    const lead = bodies.length ? bodies[0] : [];
+    const lines = found.map(x => {
+      const flip = lead.length && lead.indexOf(keyOf(x.a)) === -1;
+      const a = flip ? x.b : x.a, b = flip ? x.a : x.b;
+      const d = Math.floor(x.orb), m = Math.floor((x.orb - d) * 60);
+      const c = (this.ASP_COLOR[x.asp] || ['var(--tx)'])[0];
+      return '<li style="display:flex;align-items:center;gap:10px;min-height:40px;border-bottom:1px solid rgba(var(--atmc),.22)">' +
+        '<span aria-hidden="true" style="flex:none;min-width:58px;font:15px Georgia,serif;white-space:nowrap;color:var(--ac2-hi)">' + esc(a.glyph || '') + ' <span style="color:' + c + '">' + esc(this.ASP_SYM[x.asp] || '') + '</span> ' + esc(b.glyph || '') + '</span>' +
+        '<span style="flex:1;min-width:0;font:400 14px/1.4 var(--fb);color:var(--tx)">' + esc(this.pointLabel(a) + ' ' + (ASPW[x.asp] || x.asp) + ' ' + this.pointLabel(b)) + '</span>' +
+        '<span style="flex:none;font:12.5px var(--fm);color:var(--mut);white-space:nowrap">' + d + '°' + String(m).padStart(2, '0') + '′</span></li>';
+    });
+    const who = bodies.length ? bodies.map(shownName).join(' and ') : 'The chart';
+    if (!lines.length) {
+      const t = who + (bodies.length > 1 ? ' make no contact' : ' makes no contact') + (asps.length ? ' of that kind' : '') + ' among the points shown.';
+      return { html: '<p style="margin:0;padding:10px 4px;font:400 14px/1.5 var(--fb);color:var(--mut)">' + esc(t) + '</p>', say: t };
+    }
+    const say = lines.length + (lines.length === 1 ? ' contact' : ' contacts') + ', closest to exact first.';
+    return { html: '<ul aria-label="' + esc(say) + '" style="margin:0;padding:4px 2px 0;list-style:none;min-width:min(520px,82vw);text-align:left">' + lines.join('') + '</ul>', say: say };
   }
   bloomShowOf(core) {
     const base = this.BLOOM_CORE.reduce((o, k) => (o[k] = true, o), {});
