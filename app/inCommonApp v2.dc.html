@@ -1741,29 +1741,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
         </section>
       </sc-if>
-      <!-- HARMONIC CHARTS (6 November 2026). -->
-      <sc-if value="{{ hmOn }}" hint-placeholder-val="{{ false }}">
-        <section aria-label="{{ hmTitle }}" data-lift="box" style="display:flex;flex-direction:column;gap:10px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
-          <h3 style="margin:0;font:400 18px/1.3 var(--fd);color:var(--tx)">{{ hmTitle }}</h3>
-          <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which harmonic" style="display:flex;gap:5px">
-            <sc-for list="{{ hmTabs }}" as="h" hint-placeholder-count="4">
-              <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase">{{ h.label }}</button>
-            </sc-for>
-          </div>
-          <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ hmLine }}</p>
-          <sc-if value="{{ hmPairsOn }}" hint-placeholder-val="{{ false }}">
-            <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px">
-              <sc-for list="{{ hmPairs }}" as="q" hint-placeholder-count="3"><li style="display:flex;align-items:baseline;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></li></sc-for>
-            </ul>
-          </sc-if>
-          <sc-if value="{{ hmPairsOff }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">No two bodies meet in this harmonic.</p>
-          </sc-if>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
-            <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="10"><div style="display:flex;align-items:baseline;gap:7px;min-height:24px"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span></div></sc-for>
-          </div>
-        </section>
-      </sc-if>
       <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
            Today and opens from the chart it reads. -->
       <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
@@ -1831,6 +1808,25 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
         <sc-for list="{{ chSkyOpen }}" as="f" hint-placeholder-count="0">
           <div data-lift="card" data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--ac2-hi);border-radius:12px;padding:13px 15px;animation:fadeUp .22s ease-out">
+            <sc-if value="{{ f.hmIn }}" hint-placeholder-val="{{ false }}">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which harmonic" style="display:flex;gap:5px">
+                <sc-for list="{{ hmTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase">{{ h.label }}</button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ hmLine }}</p>
+              <sc-if value="{{ hmPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px">
+                  <sc-for list="{{ hmPairs }}" as="q" hint-placeholder-count="3"><li style="display:flex;align-items:baseline;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ hmPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">No two bodies meet in this harmonic.</p>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="10"><div style="display:flex;align-items:baseline;gap:7px;min-height:24px"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span></div></sc-for>
+              </div>
+            </sc-if>
 <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
                 <div style="display:flex;flex-direction:column;gap:3px">
                   <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
@@ -1869,9 +1865,24 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
           </div>
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
-            
-            <div data-ch-ledger="1" role="list" aria-label="Placements" style="display:flex;flex-direction:column">
-              <sc-for list="{{ chLedger }}" as="l" hint-placeholder-count="10"><div role="listitem"><button data-ledger-row="1" onClick="{{ l.go }}" onMouseEnter="{{ l.enter }}" onMouseLeave="{{ l.leave }}" onFocus="{{ l.enter }}" onBlur="{{ l.leave }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:54px;display:flex;flex-direction:column;gap:7px;padding:10px 12px;border-bottom:1px solid var(--bd)"><span style="display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.7);background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.22),rgba(var(--atmc),.2) 60%,transparent);font:400 16px/1 var(--fb);color:var(--tx)">{{ l.glyph }}</span><span style="flex:1;min-width:0"><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 15px/1.2 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span><sc-if value="{{ l.tagsOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-wrap:wrap;gap:4px;min-width:0"><sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="1"><span style="box-sizing:border-box;max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 8.5px var(--fu);letter-spacing:.06em;padding:1px 6px;border:1px solid var(--bd);border-radius:999px;color:var(--mut);white-space:nowrap">{{ t.t }}</span></sc-for></span></sc-if></span></span><span style="flex:none;text-align:right"><span style="font:600 12px var(--fm);font-variant-numeric:tabular-nums;color:var(--tx);white-space:nowrap">{{ l.pos }}<sc-if value="{{ l.houseOn }}" hint-placeholder-val="{{ true }}"><span style="color:var(--dim)"> · {{ l.house }}</span></sc-if></span></span></span><span style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);column-gap:10px;align-items:start"><span style="min-width:0;display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="flex:none;width:11px;height:11px;background-color:var(--dim);-webkit-mask:{{ chLedgerIcons.b }} center/contain no-repeat;mask:{{ chLedgerIcons.b }} center/contain no-repeat"></span><sc-if value="{{ l.aspOn }}" hint-placeholder-val="{{ true }}"><span style="font:400 12.5px/1.3 var(--fb);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><sc-for list="{{ l.asp }}" as="a" hint-placeholder-count="2"><span style="margin-right:8px;text-decoration:{{ a.deco }};text-underline-offset:3px">{{ a.t }}</span></sc-for><sc-if value="{{ l.aspMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.aspMore }}</span></sc-if></span></sc-if><sc-if value="{{ l.aspOff }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span><span style="min-width:0;display:flex;align-items:flex-start;gap:6px"><span aria-hidden="true" style="flex:none;margin-top:3px;width:11px;height:11px;background-color:var(--dim);-webkit-mask:{{ chLedgerIcons.w }} center/contain no-repeat;mask:{{ chLedgerIcons.w }} center/contain no-repeat"></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.wxOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span aria-hidden="true" style="flex:none;width:6px;height:6px;border-radius:50%;background:{{ l.wxDot }};box-shadow:0 0 8px rgba(var(--atmc),.9)"></span><span style="font:400 14px/1.2 var(--fb);color:var(--tx)">{{ l.wx }}</span><sc-if value="{{ l.wxMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.wxMore }}</span></sc-if></span><span style="font:600 9px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ l.wxPhase }}</span></sc-if><sc-if value="{{ l.wxOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></span><span style="min-width:0;display:flex;align-items:flex-start;gap:6px"><span aria-hidden="true" style="flex:none;margin-top:3px;width:11px;height:11px;background-color:var(--dim);-webkit-mask:{{ chLedgerIcons.h }} center/contain no-repeat;mask:{{ chLedgerIcons.h }} center/contain no-repeat"></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.hzOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px/1.2 var(--fb);color:var(--tx);white-space:nowrap">{{ l.hz }}</span><span style="font:600 9px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap">{{ l.hzWhen }}</span></sc-if><sc-if value="{{ l.hzOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></span></span></button></div></sc-for>
+            <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
+                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
+              <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+                  <sc-for list="{{ chAspPairs }}" as="q" hint-placeholder-count="3"><li><button onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.4 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:44px;white-space:nowrap">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ q.o }}</span></button></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
+              </sc-if>
+              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
+              </div>
             </div>
           </sc-if>
         </div>
@@ -8828,29 +8839,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-for>
             </section>
           </sc-if>
-          <!-- HARMONIC CHARTS (6 November 2026). -->
-          <sc-if value="{{ hmOn }}" hint-placeholder-val="{{ false }}">
-            <section aria-label="{{ hmTitle }}" data-lift="box" style="display:flex;flex-direction:column;gap:10px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
-              <h3 style="margin:0;font:400 18px/1.3 var(--fd);color:var(--tx)">{{ hmTitle }}</h3>
-              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which harmonic" style="display:flex;gap:5px">
-                <sc-for list="{{ hmTabs }}" as="h" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase">{{ h.label }}</button>
-                </sc-for>
-              </div>
-              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ hmLine }}</p>
-              <sc-if value="{{ hmPairsOn }}" hint-placeholder-val="{{ false }}">
-                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px">
-                  <sc-for list="{{ hmPairs }}" as="q" hint-placeholder-count="3"><li style="display:flex;align-items:baseline;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></li></sc-for>
-                </ul>
-              </sc-if>
-              <sc-if value="{{ hmPairsOff }}" hint-placeholder-val="{{ false }}">
-                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">No two bodies meet in this harmonic.</p>
-              </sc-if>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
-                <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="10"><div style="display:flex;align-items:baseline;gap:7px;min-height:24px"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span></div></sc-for>
-              </div>
-            </section>
-          </sc-if>
       <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
                Today and opens from the chart it reads. -->
           <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
@@ -8880,6 +8868,25 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
         <sc-for list="{{ chSkyOpen }}" as="f" hint-placeholder-count="0">
           <div data-lift="card" data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--ac2-hi);border-radius:12px;padding:13px 15px;animation:fadeUp .22s ease-out">
+            <sc-if value="{{ f.hmIn }}" hint-placeholder-val="{{ false }}">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which harmonic" style="display:flex;gap:5px">
+                <sc-for list="{{ hmTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase">{{ h.label }}</button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ hmLine }}</p>
+              <sc-if value="{{ hmPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px">
+                  <sc-for list="{{ hmPairs }}" as="q" hint-placeholder-count="3"><li style="display:flex;align-items:baseline;gap:8px;font:400 14px/1.5 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:34px">{{ q.g }}</span><span style="flex:1">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut)">{{ q.o }}</span></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ hmPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">No two bodies meet in this harmonic.</p>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="10"><div style="display:flex;align-items:baseline;gap:7px;min-height:24px"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx)">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto">{{ r.pos }}</span></div></sc-for>
+              </div>
+            </sc-if>
 <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
                 <div style="display:flex;flex-direction:column;gap:3px">
                   <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
@@ -8918,9 +8925,24 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
           </div>
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
-            <div aria-hidden="true" style="display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.8fr);column-gap:10px;padding:8px 12px;border-bottom:1px solid var(--bd);font:600 9.5px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)"><span>Placement</span><span>Aspects</span><span>Now</span><span>Ahead</span></div>
-            <div data-ch-ledger="1" role="list" aria-label="Placements" style="display:flex;flex-direction:column">
-              <sc-for list="{{ chLedger }}" as="l" hint-placeholder-count="10"><div role="listitem"><button data-ledger-row="1" onClick="{{ l.go }}" onMouseEnter="{{ l.enter }}" onMouseLeave="{{ l.leave }}" onFocus="{{ l.enter }}" onBlur="{{ l.leave }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:56px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.8fr);column-gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bd)"><span style="min-width:0;display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.7);background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.22),rgba(var(--atmc),.2) 60%,transparent);font:400 16px/1 var(--fb);color:var(--tx)">{{ l.glyph }}</span><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 15px/1.2 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span><sc-if value="{{ l.tagsOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-wrap:wrap;gap:4px;min-width:0"><sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="1"><span style="box-sizing:border-box;max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 8.5px var(--fu);letter-spacing:.06em;padding:1px 6px;border:1px solid var(--bd);border-radius:999px;color:var(--mut);white-space:nowrap">{{ t.t }}</span></sc-for></span></sc-if></span></span><span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:600 12px var(--fm);font-variant-numeric:tabular-nums;color:var(--tx);white-space:nowrap">{{ l.pos }}<sc-if value="{{ l.houseOn }}" hint-placeholder-val="{{ true }}"><span style="color:var(--dim)"> · {{ l.house }}</span></sc-if></span><sc-if value="{{ l.aspOn }}" hint-placeholder-val="{{ true }}"><span style="font:400 12.5px/1.3 var(--fb);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><sc-for list="{{ l.asp }}" as="a" hint-placeholder-count="2"><span style="margin-right:8px;text-decoration:{{ a.deco }};text-underline-offset:3px">{{ a.t }}</span></sc-for><sc-if value="{{ l.aspMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.aspMore }}</span></sc-if></span></sc-if></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.wxOn }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span aria-hidden="true" style="flex:none;width:6px;height:6px;border-radius:50%;background:{{ l.wxDot }};box-shadow:0 0 8px rgba(var(--atmc),.9)"></span><span style="font:400 14px/1.2 var(--fb);color:var(--tx)">{{ l.wx }}</span><sc-if value="{{ l.wxMoreOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px var(--fu);color:var(--dim)">{{ l.wxMore }}</span></sc-if></span><span style="font:600 9px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ l.wxPhase }}</span></sc-if><sc-if value="{{ l.wxOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span><span style="min-width:0;display:flex;flex-direction:column;gap:2px"><sc-if value="{{ l.hzOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px/1.2 var(--fb);color:var(--tx);white-space:nowrap">{{ l.hz }}</span><span style="font:600 9px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap">{{ l.hzWhen }}</span></sc-if><sc-if value="{{ l.hzOff }}" hint-placeholder-val="{{ true }}"><span style="font:400 14px var(--fb);color:var(--dim)">{{ l.quiet }}</span></sc-if></span></button></div></sc-for>
+            <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
+                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
+              <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+                  <sc-for list="{{ chAspPairs }}" as="q" hint-placeholder-count="3"><li><button onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.4 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:44px;white-space:nowrap">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ q.o }}</span></button></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
+              </sc-if>
+              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
+              </div>
             </div>
           </sc-if>
         </div>
@@ -18162,6 +18184,54 @@ class Component extends DCLogic {
     trine: (a, b, pa, pb) => 'What comes free here is that ' + a + ' asking ' + pa + ' already carries ' + b + ' asking ' + pb + ', which is why you are liable to treat it as ordinary and give it away.',
     opposite: (a, b, pa, pb) => 'The stretch is between ' + a + ' asking ' + pa + ' at one end and ' + b + ' asking ' + pb + ' at the other, and you will keep meeting the far end in people until you can hold both ends yourself.'
   };
+  /* The closing sentence of a contact on a placement page (the owner, 7
+     November 2026: never repeat a sentence; give each contact a mood). Each
+     aspect has a theme and four closers; every closer names both ends and
+     where each one stands, so no two contacts read alike. */
+  ASP_MOOD = {
+    conjunct: { theme: 'Fusion', lines: [
+      (A, B, pa, pb) => A + ' and ' + B + ' share one address in ' + pa + ', so whatever stirs one wakes the other, and the force of the two together is yours to aim.',
+      (A, B, pa, pb) => 'Standing this close in ' + pa + ', ' + A + ' and ' + B + ' speak with one voice, and telling their two accents apart is a quiet pleasure that deepens with age.',
+      (A, B, pa, pb) => A + ' colours ' + B + ' and ' + B + ' colours ' + A + ' until, in ' + pa + ', the blend becomes a signature only you carry.',
+      (A, B, pa, pb) => 'In ' + pa + ', ' + A + ' and ' + B + ' arrive together like two notes struck at once, and the chord they make is the sound people come to know as you.',
+      (A, B, pa, pb) => 'Where ' + A + ' goes in ' + pa + ', ' + B + ' is already walking beside it, and the two of them make one stride long enough to cover real ground.',
+      (A, B, pa, pb) => A + ' lends ' + B + ' its fire and ' + B + ' lends ' + A + ' its shape, so in ' + pa + ' a single gesture of yours can carry both at once.'] },
+    opposite: { theme: 'The Mirror', lines: [
+      (A, B, pa, pb) => A + ' in ' + pa + ' and ' + B + ' in ' + pb + ' face each other across the wheel, so what one of them forgets, the other tends to find in the people around you.',
+      (A, B, pa, pb) => 'Across the chart from each other, ' + A + ' and ' + B + ' trade places like dancers, and the steadiness comes from learning the whole floor between ' + pa + ' and ' + pb + '.',
+      (A, B, pa, pb) => 'Some days ' + A + ' in ' + pa + ' feels like the whole of you and ' + B + ' in ' + pb + ' like a stranger; the balance arrives when both are invited to the same table.',
+      (A, B, pa, pb) => B + ' holds up a mirror to ' + A + ', ' + pb + ' answering ' + pa + ', and what looks back is rarely an enemy, more often the half still waiting to be met.',
+      (A, B, pa, pb) => 'Like the two pans of a scale, ' + A + ' in ' + pa + ' and ' + B + ' in ' + pb + ' tip back and forth until you find the weight that steadies both.',
+      (A, B, pa, pb) => 'The distance from ' + pa + ' to ' + pb + ' is the width of a whole sky, and ' + A + ' and ' + B + ' teach you to stand in the middle of it without losing either view.'] },
+    trine: { theme: 'The Current', lines: [
+      (A, B, pa, pb) => A + ' in ' + pa + ' flows into ' + B + ' in ' + pb + ' like water finding its own channel, and the gift grows each time you steer it on purpose.',
+      (A, B, pa, pb) => 'Between ' + pa + ' and ' + pb + ', ' + A + ' and ' + B + ' move in step without being asked, an ease worth spending rather than saving.',
+      (A, B, pa, pb) => A + ' hands ' + B + ' what it needs before ' + B + ' knows to ask, and from ' + pb + ' that generosity can carry you further than effort alone.',
+      (A, B, pa, pb) => 'What runs between ' + A + ' and ' + B + ' feels so natural it can pass unnoticed; name it once, ' + pa + ' to ' + pb + ', and it starts working for you.',
+      (A, B, pa, pb) => 'Talents travel easily from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ', a tailwind that turns ordinary days into chances when you lean into it.',
+      (A, B, pa, pb) => A + ' and ' + B + ' already speak the same language across ' + pa + ' and ' + pb + ', and a little practice turns that fluency into something others can feel.'] },
+    square: { theme: 'The Forge', lines: [
+      (A, B, pa, pb) => A + ' and ' + B + ' rarely want the same thing at the same hour, and each time you choose between ' + pa + ' and ' + pb + ', the blade gets a little keener.',
+      (A, B, pa, pb) => 'Think of ' + A + ' in ' + pa + ' as the hammer and ' + B + ' in ' + pb + ' as the anvil: the ringing is uncomfortable, and it is also the sound of something taking shape.',
+      (A, B, pa, pb) => 'When ' + A + ' tugs toward ' + pa + ' and ' + B + ' answers from ' + pb + ', the knot you feel is a working knot, the kind that holds weight once you learn its tie.',
+      (A, B, pa, pb) => B + ' keeps asking ' + A + ' to prove itself, ' + pb + ' pressing on ' + pa + ', and the proof you build over the years becomes a strength nobody handed you.',
+      (A, B, pa, pb) => 'The corner where ' + A + ' in ' + pa + ' meets ' + B + ' in ' + pb + ' is a hard turn to take, and taking it again and again is how your balance learns to hold.',
+      (A, B, pa, pb) => A + ' sets the pace in ' + pa + ' and ' + B + ' refuses it from ' + pb + ', and out of that refusal comes a rhythm entirely your own.'] },
+    sextile: { theme: 'The Open Door', lines: [
+      (A, B, pa, pb) => A + ' in ' + pa + ' leaves a door ajar for ' + B + ' in ' + pb + '; walking through takes one small, deliberate step, and the room beyond is worth it.',
+      (A, B, pa, pb) => B + ' is ready to help ' + A + ' the moment you ask, ' + pb + ' lending a hand to ' + pa + ', and the asking is the whole of the skill.',
+      (A, B, pa, pb) => 'An easy word passes between ' + A + ' and ' + B + ', ' + pa + ' to ' + pb + ', and each time you act on it the path between them widens.',
+      (A, B, pa, pb) => A + ' and ' + B + ' are friendly neighbours, ' + pa + ' and ' + pb + ' within calling distance, and a little visiting turns that friendliness into real support.',
+      (A, B, pa, pb) => 'A spark jumps from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ' whenever you give it something to catch on, and small kindling is enough.',
+      (A, B, pa, pb) => 'Opportunity sits lightly between ' + A + ' and ' + B + ', ' + pa + ' beckoning to ' + pb + ', and it answers best to curiosity rather than force.'] },
+    minor: { theme: 'The Whisper', lines: [
+      (A, B, pa, pb) => A + ' and ' + B + ' speak quietly to each other between ' + pa + ' and ' + pb + ', and the message comes through best when the rest of the day goes still.',
+      (A, B, pa, pb) => 'The link between ' + A + ' in ' + pa + ' and ' + B + ' in ' + pb + ' is subtle, an adjustment more than an event, and it rewards a patient ear.',
+      (A, B, pa, pb) => A + ' nudges ' + B + ' at an odd angle, ' + pa + ' to ' + pb + ', and small corrections made over the years are how this contact earns its keep.',
+      (A, B, pa, pb) => 'Between ' + A + ' and ' + B + ' the signal is faint and persistent, ' + pa + ' and ' + pb + ' tuning to each other a little more each season.',
+      (A, B, pa, pb) => 'A thread runs from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ', thin enough to forget and strong enough to pull you back to it.',
+      (A, B, pa, pb) => A + ' and ' + B + ' meet at an awkward slant, ' + pa + ' leaning toward ' + pb + ', and the small adjustments they ask for add up to grace.'] }
+  };
   ASP_NATURE = {
     conjunct: 'Zero degrees: the two bodies stand side by side, usually in the same sign, and their energies blur into a single drive. Each one colours everything the other does. That concentration is the gift. A conjunction is where a chart is most focused, and often the first thing other people feel from you, because it arrives at full strength.',
     sextile: 'Sixty degrees, usually between signs of friendly elements, fire with air or earth with water. The two bodies speak a common language and help each other readily, and the tradition calls it an opportunity. It behaves like a door that opens a little wider every time you walk through it, so small, deliberate efforts here tend to pay back more than their size.',
@@ -20798,7 +20868,9 @@ class Component extends DCLogic {
      openings even after the sentence structure was varied. */
   HORO_TONE = {
     Sun: { e: ['a clear sense of your own weight in the room', 'the feeling of being seen for what you actually do', 'your own authority, unforced and legible to other people'],
-      h: ['a pull between what you want and what is expected of you', 'the cost of being visible when you would rather not be', 'a day where your own aims and somebody else\u2019s both have a claim'] },
+      h: ['a pull between what you want and what is expected of you', 'the cost of being visible when you would rather not be', 'a day where your own aims and somebody else\u2019s both have a claim',
+      (A, B, pa, pb) => 'A thread runs from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ', thin enough to forget and strong enough to pull you back to it.',
+      (A, B, pa, pb) => A + ' and ' + B + ' meet at an awkward slant, ' + pa + ' leaning toward ' + pb + ', and the small adjustments they ask for add up to grace.'] },
     Moon: { e: ['an unusually accurate read on the mood around you', 'instincts that are worth trusting before they are worth explaining', 'an easy fluency with what other people are not saying'],
       h: ['feelings that arrive faster than their reasons', 'a mood that turns before you have finished the last one', 'reactions that are older than the thing setting them off'] },
     Mercury: { e: ['sharp communication', 'the right words arriving on time', 'a clarity that makes an awkward conversation simple'],
@@ -22841,6 +22913,40 @@ class Component extends DCLogic {
           top ? 'now ' + top.mover + ' ' + this.aspName(top.asp) + ', ' + (PHASE[top.phase] || '') : 'nothing touching it now',
           nx ? 'next ' + nx.mover + ' ' + this.aspName(nx.asp) + ' from ' + this.fmtDay(nx.from) : ''].filter(Boolean).join(', ') };
     });
+    /* THE PLACEMENTS TABLE (owner, 6 November 2026): built the way the
+       harmonics card is built, with the four major aspects where the 4th,
+       5th, 7th and 9th stand. A tab, the aspect's own line, the reader's
+       pairs closest first, then every placement, the pair's bodies lit. */
+    const ASP4 = [['conjunct', 'Conjunction'], ['opposite', 'Opposition'], ['trine', 'Trine'], ['square', 'Square']];
+    const aspPick = ASP4.some(a => a[0] === st.ledAsp) ? st.ledAsp : 'conjunct';
+    const MIRROR4 = ['Descendant', 'IC', 'South Node'];
+    const coreKeys4 = corePts.map(r => this.pointKey(r));
+    const kOf = p => p.id || p.name;
+    const aspPairs = o.asps.map((x, i) => ({ x: x, i: i })).filter(({ x }) => x.asp === aspPick
+      && coreKeys4.indexOf(kOf(x.a)) !== -1 && coreKeys4.indexOf(kOf(x.b)) !== -1
+      && MIRROR4.indexOf(x.a.name) === -1 && MIRROR4.indexOf(x.b.name) === -1).sort((a, b) => a.x.orb - b.x.orb);
+    const litKeys = {};
+    aspPairs.forEach(({ x }) => { litKeys[kOf(x.a)] = 1; litKeys[kOf(x.b)] = 1; });
+    const aspName4 = (ASP4.find(a => a[0] === aspPick) || ASP4[0])[1];
+    const mean4 = this.ASP_MEAN[aspPick] || '';
+    const plRows = ledger.map((l, i) => ({ ...l, lit: !!litKeys[l.key],
+      pos: (r => r.uncomputed || r.lon == null ? 'not drawn' : Math.floor(r.deg) + '\u00b0 ' + String(Math.floor((r.deg % 1) * 60)).padStart(2, '0') + '\u2032 ' + r.sign)(corePts[i]),
+      g: l.glyph, gc: litKeys[l.key] ? 'var(--ac2-hi)' : 'var(--dim)',
+      bd: litKeys[l.key] ? 'rgba(var(--atmc),.7)' : 'transparent', bg: litKeys[l.key] ? 'rgba(var(--atmc),.14)' : 'transparent' }));
+    const aspVals = {
+      chAspTabs: ASP4.map(([k, lb]) => ({ key: k, label: lb, sym: SYM(k), on: k === aspPick,
+        bg: k === aspPick ? 'rgba(var(--atmc),.32)' : 'var(--sf2)', bd: k === aspPick ? 'rgba(var(--atmc),.9)' : 'var(--bd)',
+        go: () => this.setState({ ledAsp: k }) })),
+      chAspLine: mean4 ? mean4.charAt(0).toUpperCase() + mean4.slice(1) + '.' : '',
+      chAspPairs: aspPairs.map(({ x, i }) => ({ g: (x.a.glyph || '') + ' ' + (x.b.glyph || ''),
+        t: this.studyName(x.a.name) + ' and ' + this.studyName(x.b.name),
+        o: (x.orb < 1 ? '<1' : Math.round(x.orb)) + '\u00b0 from exact',
+        aria: this.studyName(x.a.name) + ' ' + aspName4.toLowerCase() + ' ' + this.studyName(x.b.name) + ', ' + (x.orb < 1 ? 'within a degree' : Math.round(x.orb) + ' degrees from exact') + ', open the aspect',
+        go: () => this.setState({ aspSel: i }) })),
+      chAspPairsOn: aspPairs.length > 0, chAspPairsOff: !aspPairs.length,
+      chAspNone: 'No two placements make ' + (aspName4 === 'Opposition' ? 'an ' : 'a ') + aspName4.toLowerCase() + ' in your chart.',
+      chPlRows: ledgerCards ? [] : plRows
+    };
     const ledgerDeck = (() => {
       if (!ledgerCards) return null;
       const g = group('ledger', 'Placements', [], {});
@@ -22915,6 +23021,7 @@ class Component extends DCLogic {
     return {
       chBands: bands,
       chLedger: ledgerCards ? [] : ledger, chLedgerOn: !ledgerCards, chLedgerCount: String(ledger.length),
+      ...aspVals,
       chLedgerIcons: { b: this.bandIcon('bedrock'), w: this.bandIcon('weather'), h: this.bandIcon('horizon') },
       chLedgerModes: [['table', 'Table'], ['cards', 'Flash cards']].map(([id, lb]) => ({ label: lb, ...modeOf(id), go: () => this.setState({ ledgerMode: id }) })),
       chSky: sky.map(f => ({ key: f.key, title: f.title, sub: f.sub, open: f.open, toggle: f.toggle,
@@ -33478,12 +33585,16 @@ class Component extends DCLogic {
     // Contacts. The angles sit in the natal set now, so the Ascendant reads its
     // own aspects and its own transits exactly as a celestial body does.
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
+    const moodUsed = {}, placeOf = p => { const h = p && p.lon != null ? this.houseOf(p.lon, all[0], asc) : null;
+      return h ? 'your ' + PC.ord(h) + ' house' : (p && p.sign) || 'its sign'; };
     const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
+      const M = this.ASP_MOOD[k] || this.ASP_MOOD.minor, seed = this.shash(rk);
+      const n = moodUsed[k] = (moodUsed[k] || 0) + 1, close = M.lines[(Math.abs(seed) + n - 1) % M.lines.length](name, oName, placeOf(r), placeOf(o));
       return { glyph: o.glyph, edge: edgeOf(k),
         title: name + ' ' + this.aspName(k) + ' ' + oName,
-        meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0',
-        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. Two parts of you in a conversation that never quite ends, and like most long conversations, its tone is set by how you tend it rather than by how it began.',
+        meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0 \u00b7 ' + M.theme,
+        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. ' + close,
         cta: 'See ' + oName + ' \u2192', okey: key(o), go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
@@ -34211,37 +34322,6 @@ class Component extends DCLogic {
                   out.push(S('The difficulty', 'Concentration is force, and force is not the same as perspective. The classic difficulty with a stellium is not weakness in that area: it is that everything gets routed through it, including questions that belong somewhere else entirely. If the answer to every problem in your life arrives in the same accent, that is worth noticing.'));
                   return out;
                 })();
-                const todayLines = (() => {
-                  const d = this.dailyData();
-                  if (!d) return [plain('Today\u2019s contacts appear once your birth information is saved.')];
-                  const hits = d.hits || [];
-                  return [plain('The Sun sits at ' + this.fmtPos(d.sun) + ' today, the Moon at ' + this.fmtPos(d.moon) + ', in a ' + d.phase + ' phase. ' +
-                    (hits.length
-                      ? (hits.length === 1 ? 'One contact' : hits.length + ' contacts') + ' from the sky ' + (hits.length === 1 ? 'sits' : 'sit') + ' within orb of your own chart right now.'
-                      : 'Nothing in the sky is within orb of a natal placement of yours.'))];
-                })();
-                const todayBody = (() => {
-                  const d = this.dailyData();
-                  if (!d) return [];
-                  const hits = d.hits || [], out = [];
-                  out.push(S('What the sky is doing', 'The Sun at ' + this.fmtPos(d.sun) + ' sets the season\u2019s subject; the Moon at ' + this.fmtPos(d.moon) + ' sets the day\u2019s mood and will have moved on by tomorrow. A ' + d.phase.toLowerCase() + ' phase is the relationship between the two: how far the Moon has travelled from the Sun since they last met. That is all a phase is, though it is routinely treated as more.'));
-                  if (hits.length) {
-                    const h = hits[0], k = String(h.asp).toLowerCase(), a = this.aspName(k);
-                    out.push(S('The contact that matters most today',
-                      'Transiting ' + h.a.name + ' at ' + this.fmtPos(h.a) + ' is ' + a + ' your natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', within ' + h.orb.toFixed(1) + ' degrees. In plain terms: something moving overhead has lined up with something fixed in you. The tradition reads it as ' + this.bodyEnergy(h.b.name) + ' being called forward. ' + (this.ASP_SHORT[k] || 'The two are in conversation.')));
-                    const tally = {};
-                    hits.forEach(x => { const hs = houseOf(x.b); if (hs) tally[hs] = (tally[hs] || 0) + 1; });
-                    const top = Object.keys(tally).sort((x, y) => tally[y] - tally[x])[0];
-                    if (top) out.push(S('Where it lands in your life',
-                      'Most of today\u2019s traffic falls in your ' + ordinal(+top) + ' house: ' + first(this.HOUSE_LONG[+top - 1]) + '. A transit tells you the room before it tells you the event, and honestly the room is the more reliable half. What actually happens there is up to circumstance, other people, and you.'));
-                    if (hits.length > 1) out.push(S('The rest of the traffic',
-                      hits.length + ' contacts are live at once. When several arrive together the temptation is to add them up into a single verdict about the day. That is worth resisting. They are separate weather systems that happen to be overhead at the same hour, and the full list sits under Personal Transits below.'));
-                  } else {
-                    out.push(S('A quiet sky', 'No transiting body is within orb of a natal point of yours. That is not nothing: it is a day with no outside hand on the wheel. Whatever moves has to be moved by you, which is either a relief or a discomfort depending on how used to momentum you are.'));
-                    out.push(S('What to do with it', 'Quiet days are best spent on the work nobody is asking for. There is no pressure to react, and that is a rarer condition than it sounds.'));
-                  }
-                  return out;
-                })();
                 const RP = this.retroPhases();
                 const nameList = a => a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
                 const retroLines = (() => {
@@ -34391,15 +34471,18 @@ class Component extends DCLogic {
                 })();
                 const eclRow = { key: 'eclipse', when: eclNow ? 'weather' : 'horizon', title: 'Eclipses', sub: eclSub, lines: eclLines, tabs: eclTabs, body: eclBody };
                 const rows2 = [
-                  { key: 'today', when: 'weather', title: 'Important Today', sub: 'what the sky is presently touching', lines: todayLines, body: todayBody },
+                  /* HARMONICS (owner, 6 November 2026): the pill that was Important
+                     Today opens the harmonic charts card, unchanged. */
+                  ...(this.harmonicVals().hmOn ? [{ key: 'harmonics', when: 'bedrock', title: 'Harmonics', sub: 'the 4th, 5th, 7th and 9th', lines: [], body: [], hm: true }] : []),
                   { key: 'retro', when: 'weather', title: 'Current Retrogrades', sub: retroSub, lines: retroLines, tabs: retroTabs, body: retroBody },
                   { key: 'stellium', when: 'bedrock', title: 'Stellium', sub: stel.any ? 'a gathering in your wheel' : 'no gathering found', lines: stellLines, body: stellBody }
                 ];
                 // An eclipse inside its five-day window is the loudest thing in the sky, so
-                // it sits directly under Important Today. Otherwise it waits its turn after
+                // it sits directly after Harmonics. Otherwise it waits its turn after
                 // the retrogrades rather than crowding the panel with a date months away.
-                rows2.splice(eclNow ? 1 : 2, 0, eclRow);
+                rows2.splice(eclNow ? 1 : Math.min(2, rows2.length), 0, eclRow);
                 return rows2.map(r => ({
+                  hmIn: !!r.hm,
                   key: r.key, when: r.when, title: r.title, sub: r.sub, lines: r.lines,
                   hasTabs: !!(r.tabs && r.tabs.length), tabs: r.tabs || [],
                   hasBody: !!(r.body && r.body.length), body: r.body || [],
