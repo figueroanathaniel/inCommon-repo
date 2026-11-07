@@ -2235,8 +2235,8 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your name</div>
       <sc-if value="{{ hasBirthName }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
-            <sc-for list="{{ nameNumbers }}" as="n" hint-placeholder-count="3">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+            <sc-for list="{{ nameNumbers }}" as="n" hint-placeholder-count="4">
               <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:11px 12px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
                 <div style="font:400 26px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                 <div style="font:600 8.5px var(--fk);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
@@ -2245,6 +2245,14 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </button>
             </sc-for>
           </div>
+          <sc-if value="{{ karmicLessonsOn }}" hint-placeholder-val="{{ false }}">
+            <div role="group" aria-label="Karmic Lessons" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+              <span style="font:600 8.5px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Karmic Lessons</span>
+              <sc-for list="{{ karmicLessons }}" as="l" hint-placeholder-count="2">
+                <button data-lift onClick="{{ l.go }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--sf);border:1px solid rgba(var(--atmc),.44);font:400 18px var(--fd);color:var(--ac2-hi)">{{ l.v }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
           <div style="display:flex;align-items:center;gap:9px">
             <button onClick="{{ nameClear }}" style="all:unset;cursor:pointer;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:flex-end;font:600 10.5px var(--fc);color:var(--ac)">Change</button>
           </div>
@@ -3938,9 +3946,14 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                     <sc-if value="{{ w.open }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:12px">
                         <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ w.text }}</div>
-                        <sc-if value="{{ w.linkOn }}" hint-placeholder-val="{{ false }}">
-                          <button data-lift onClick="{{ w.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">{{ w.linkLabel }} <span aria-hidden="true">&#8594;</span></button>
-                        </sc-if>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px">
+                          <sc-if value="{{ w.linkOn }}" hint-placeholder-val="{{ false }}">
+                            <button data-lift onClick="{{ w.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">{{ w.linkLabel }} <span aria-hidden="true">&#8594;</span></button>
+                          </sc-if>
+                          <sc-if value="{{ w.findOn }}" hint-placeholder-val="{{ false }}">
+                            <button data-lift onClick="{{ w.findGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">Find it in the Library <span aria-hidden="true">&#8594;</span></button>
+                          </sc-if>
+                        </div>
                       </div>
                     </sc-if>
                   </div>
@@ -9840,6 +9853,14 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </button>
               </sc-for>
             </div>
+            <sc-if value="{{ karmicLessonsOn }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="Karmic Lessons" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+                <span style="font:600 8.5px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Karmic Lessons</span>
+                <sc-for list="{{ karmicLessons }}" as="l" hint-placeholder-count="2">
+                  <button data-lift onClick="{{ l.go }}" aria-label="{{ l.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--sf);border:1px solid rgba(var(--atmc),.44);font:400 18px var(--fd);color:var(--ac2-hi)">{{ l.v }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
             <div style="display:flex;align-items:center;gap:10px">
               <button onClick="{{ nameClear }}" style="all:unset;cursor:pointer;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:flex-end;font:600 10.5px var(--fc);color:var(--ac)">Change</button>
             </div>
@@ -11623,9 +11644,14 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                     <sc-if value="{{ w.open }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:12px">
                         <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ w.text }}</div>
-                        <sc-if value="{{ w.linkOn }}" hint-placeholder-val="{{ false }}">
-                          <button data-lift onClick="{{ w.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">{{ w.linkLabel }} <span aria-hidden="true">&#8594;</span></button>
-                        </sc-if>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px">
+                          <sc-if value="{{ w.linkOn }}" hint-placeholder-val="{{ false }}">
+                            <button data-lift onClick="{{ w.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">{{ w.linkLabel }} <span aria-hidden="true">&#8594;</span></button>
+                          </sc-if>
+                          <sc-if value="{{ w.findOn }}" hint-placeholder-val="{{ false }}">
+                            <button data-lift onClick="{{ w.findGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">Find it in the Library <span aria-hidden="true">&#8594;</span></button>
+                          </sc-if>
+                        </div>
                       </div>
                     </sc-if>
                   </div>
@@ -25381,9 +25407,24 @@ class Component extends DCLogic {
           bd: on ? 'rgba(var(--atmc),.6)' : 'var(--bd)',
           toggle: () => this.setState({ bnLexSel: on ? null : name }),
           linkLabel: cat ? CAT[cat] : 'My numerology',
-          go: cat ? () => this.setState({ bnCat: cat, bnQuery: '' }) : this.searchGo(this.searchSpirit('numerology', 2)) };
+          go: cat ? () => this.setState({ bnCat: cat, bnQuery: '' }) : this.searchGo(this.searchSpirit('numerology', 2)),
+          findOn: on && this.libFindHas(name), findGo: this.libFind(name) };
       }) : []
     };
+  }
+  /* A lexicon word opens the search sheet already holding it, so the reader
+     sees every room in the Library that speaks of it (owner, 7 November 2026:
+     "give the option to link from lexicon to library"). The search is the one
+     index over the app, so this finds what the rooms find. */
+  libFind(q) {
+    const t = String(q || '').slice(0, 80);
+    return () => this.setState(this.isVt() ? { vtSearch: true, vtQuery: t } : { dtSearch: true, dtQuery: t });
+  }
+  /* Offered only where the search finds a room beyond the word's own entry,
+     so the link never opens onto the word alone. */
+  libFindHas(q) {
+    const t = String(q || '').trim();
+    return this.searchAll(t).some(g => (g.rows || []).some(r => r.title !== t && r.sub !== 'A word in the Book of Numbers' && r.sub !== 'A word in the Astropedia'));
   }
   /* THE HUMAN DESIGN ATLAS, given the room the Astropedia and the Book have
      (owner, 20 October 2026: "Doing the same thing for human design").
@@ -26936,6 +26977,7 @@ class Component extends DCLogic {
     /* A tap in passing opens the radiant glance (owner, 4 November 2026); the
        glance's Open the focused read is the way into the packet. */
     const open = (pos, v, extra) => () => this.setState({ numGlance: { pos: pos, v: v, ...(extra || {}) }, plGlance: null });
+    const mat = nm && NC.settle && n.lp != null && nm.expression != null ? NC.settle([Number(n.lp) + Number(nm.expression)]) : null;
     let span = '';
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob);
     if (m) {
@@ -26958,8 +27000,13 @@ class Component extends DCLogic {
         ['Personal Month', pm, 'personalMonth', pmC], ['Personal Day', pdV, 'personalDay', pdC], ['Challenge', n.challenge, 'challenge', null]]
         .map(([k, v, pos, c, kd], i) => ({ k: k, v: v == null ? '0' : v, pos: pos, mean: mean(v), delay: (i * 70) + 'ms', go: open(pos, v == null ? 1 : v, { c: c, k: kd }), ...this.numCmp(c, v, kd) })),
       hasBirthName: !!nm, noBirthName: !nm,
-      nameNumbers: nm ? [['Expression', nm.expression, 'expression'], ['Soul Urge', nm.soulUrge, 'soulUrge'], ['Personality', nm.personality, 'personality']]
-        .map(([k, v, pos], i) => ({ k: k, v: v, pos: pos, mean: mean(v), delay: (420 + i * 70) + 'ms', go: open(pos, v, { c: nmC[pos], k: nmK[pos] || [] }), ...this.numCmp(nmC[pos], v, nmK[pos] || []) })) : [],
+      nameNumbers: nm ? [['Expression', nm.expression, 'expression'], ['Soul Urge', nm.soulUrge, 'soulUrge'], ['Personality', nm.personality, 'personality'], ['Maturity', mat ? mat.value : null, 'maturity']]
+        .filter(([k, v]) => v != null)
+        .map(([k, v, pos], i) => pos === 'maturity'
+          ? ({ k: k, v: v, pos: pos, mean: mean(v), delay: (420 + i * 70) + 'ms', go: open(pos, v, { c: mat.compound }), ...this.numCmp(mat.compound, v) })
+          : ({ k: k, v: v, pos: pos, mean: mean(v), delay: (420 + i * 70) + 'ms', go: open(pos, v, { c: nmC[pos], k: nmK[pos] || [] }), ...this.numCmp(nmC[pos], v, nmK[pos] || []) })) : [],
+      karmicLessons: nm && nm.lessons ? nm.lessons.map(d => ({ v: d, go: open('karmicLesson', d), aria: 'Karmic Lesson ' + d })) : [],
+      karmicLessonsOn: !!(nm && nm.lessons && nm.lessons.length),
       birthNameLine: nm ? 'From ' + nm.letters + ' letters of the birth name saved on this device. Pythagorean values.' : '',
       nameDraft: st.nameDraft,
       nameType: e => this.setState({ nameDraft: String(e.target.value || '').slice(0, 80) }),
@@ -35855,7 +35902,7 @@ class Component extends DCLogic {
     if (NC && NC.positions) {
       push('Your numbers', this.searchRank(q, Object.keys(NC.positions).map(k => {
         const p = NC.positions[k];
-        return { glyph: '①', title: p.label, keys: 'numerology number ' + k,
+        return { glyph: '①', title: p.label, keys: 'numerology number ' + k + ' ' + p.label + 's',
           sub: 'from ' + p.from + ' · open your numerology',
           target: this.searchSpirit('numerology', 2) };
       }), 6));
@@ -35869,6 +35916,9 @@ class Component extends DCLogic {
       for (let n = 10; n <= 99; n++) { const e = NMX.get(n);
         if (e) bn.push({ glyph: '\u221e', title: n + ' \u00b7 ' + e.title, keys: 'compound ' + n + ' ' + e.category,
           sub: e.category + ' \u00b7 root ' + e.root, body: e.desc, target: this.searchLib('numbers', { bnSel: n }) }); }
+      /* The Book's own words, each landing open in its lexicon. */
+      ((NC && NC.LEXICON) || []).forEach(([name, text]) => bn.push({ glyph: '\u221e', title: name, keys: 'word lexicon numerology',
+        sub: 'A word in the Book of Numbers', body: text, target: this.searchLib('numbers', { bnLexOpen: true, bnLexSel: name }) }));
       push('The Book of Numbers', this.searchRank(q, bn, 6));
     }
 

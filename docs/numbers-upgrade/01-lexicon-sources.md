@@ -34,6 +34,9 @@ is ours; no page is quoted.
 | Balance | https://affinitynumerology.com/using-numerology/the-balance-number.php |
 | Capstone | https://affinitynumerology.com/using-numerology/your-capstone.php |
 | Universal Year | https://affinitynumerology.com/using-numerology/universal-year-number.php |
+| Maturity | https://www.worldnumerology.com/numerology-articles/numerology-maturity-number.html |
+| Karmic Lessons | https://www.worldnumerology.com/numerology-karmic-lessons.htm and https://www.numerologist.com/numerology/karmic-lessons/ (its MARY ANN JONES example, missing 2, 3 and 8, is the test case) |
+| Chaldean chart | https://www.ganeshaspeaks.com/numerology/chaldean-numerology/ (one source only; the letter table is not drawn in the app) |
 
 ## From the owner
 
@@ -55,9 +58,17 @@ is ours; no page is quoted.
 - **The Birthday number.** numerology.com keeps the day unreduced (29 stays
   29); the app reads the compound first and the root after, which agrees.
 
+## Choices made
+
+- **Maturity keeps 11, 22 and 33.** worldnumerology reduces the sum to a
+  single digit and says nothing about masters. The app keeps them wherever a
+  number is read (CLAUDE.md, "Master numbers are kept wherever a number is
+  read"), so Maturity follows the app.
+- **Karmic Lessons are not softened.** worldnumerology says a lesson weighs
+  less when the same digit is among the core numbers, and numerologist.com
+  discounts two 5s for English names. Neither is applied; the screen shows
+  every missing digit.
+
 ## Not yet read
 
-Karmic Lessons and Maturity (affinitynumerology and numerology.com refused
-the fetch on 7 November 2026, and the site's index lists neither), and the
-Chaldean letter chart (Wikipedia's Numerology article does not describe it).
-None has an entry until a page is read for it.
+Nothing outstanding for the numbers on 7 November 2026.

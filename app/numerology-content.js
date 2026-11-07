@@ -289,6 +289,32 @@
      then hands over to the number's own sentence for that seat. The "about"
      lines explain the seat, never the arithmetic: "No disclaimers" still
      holds, and how a figure is added is not part of the reading. */
+  var MATURITY = {
+    1: 'Later in life the wish to stand on your own grows louder, and the second half becomes a lesson in leading without waiting to be asked.',
+    2: 'The second half of life leans toward partnership and quiet diplomacy, and its deepest satisfactions come through what is shared.',
+    3: 'What ripens later is the urge to express: words, colour, sound, the joy of making something and letting it be seen.',
+    4: 'Later years ask for structure that lasts, and their reward is building something solid enough to outlive the effort it took.',
+    5: 'The later road keeps a door open, and freedom of movement turns from an escape into a way of staying awake to the world.',
+    6: 'What grows later is a pull toward home and responsibility, a wish to be useful to the people within reach.',
+    7: 'The second half turns inward, toward study, reflection and the questions that only show themselves in quiet.',
+    8: 'Later life brings authority within reach, and the work becomes holding power, money and influence with a steady hand.',
+    9: 'The later years widen the circle until it holds strangers, and giving without keeping score becomes the aim.',
+    11: 'Later, intuition sharpens into something other people lean on, and the task is trusting a signal that cannot be proved.',
+    22: 'The second half offers the chance to give a large vision practical form, built to serve many people at once.',
+    33: 'What ripens late is a teacher\u2019s care, the wish to lift others simply because they happen to be near.'
+  };
+  var LESSON = {
+    1: 'With no 1 in the name, standing up for your own view may not come easily, and taking the first step is a skill built by practice.',
+    2: 'With no 2, patience and cooperation are learned along the way rather than handed over at the start.',
+    3: 'With no 3, speaking up and letting yourself be seen can take courage, and expression grows by being used.',
+    4: 'With no 4, order and steady routine may feel foreign, until structure starts to feel like a kind of freedom.',
+    5: 'With no 5, change can feel like a threat, and saying yes to the unfamiliar now and then is where the growth sits.',
+    6: 'With no 6, care for home and family may arrive before it feels comfortable, and it brings a warmth of its own.',
+    7: 'With no 7, trust in your own inner life may need tending, and time alone becomes the teacher.',
+    8: 'With no 8, money and authority can feel slippery, and handling them plainly is part of the road.',
+    9: 'With no 9, letting go and seeing the larger picture may come slowly, and compassion keeps returning as the thing to practise.'
+  };
+
   var POSITIONS = {
     lifePath: { label: 'Life Path', from: 'the whole birth date, reduced',
       about: 'The Life Path is drawn from the whole of the day you arrived, every part of it at once. That is why it is read as the widest of your numbers: the road itself, rather than any stop along it.',
@@ -320,6 +346,12 @@
     challenge: { label: 'Challenge', from: 'the differences between reduced birth-date components',
       about: 'A challenge measures a gap, the distance between one part of your birth date and another. Because it is a distance, the tradition reads it as what keeps asking to be crossed until it is.',
       frame: function (n, d) { return d.challenge; } },
+    maturity: { label: 'Maturity', from: 'the Life Path joined to the Expression',
+      about: 'Maturity joins the Life Path to the Expression, the road and the equipment you carry along it. The tradition reads it as an aim that stays quiet early on and comes forward somewhere in the thirties, growing as the years add up.',
+      frame: function (n) { return MATURITY[n] || MATURITY[NC.reduce(n)]; } },
+    karmicLesson: { label: 'Karmic Lesson', from: 'a digit no letter of the birth name carries',
+      about: 'A Karmic Lesson is a number from one to nine that no letter of your birth name carries. The name did not bring that skill along, so life tends to keep offering it until it has been practised.',
+      frame: function (n) { return LESSON[NC.reduce(n)]; } },
     cycle: { label: 'Period cycle', from: 'the reduced birth month, day, and year in turn',
       about: 'The three period cycles lay your birth month, day and year end to end across a life, as three long seasons: the formative, the productive and the harvest.',
       frame: function (n, d) { return d.cycle; } }
@@ -389,10 +421,14 @@
         wAll += NC.keep(a); wVow += NC.keep(vo); wCon += NC.keep(co);
       });
       var e = NC.settle([all, wAll]), su = NC.settle([vow, wVow]), pe = NC.settle([con, wCon]);
+      /* Karmic Lessons: the digits from 1 to 9 that no letter of the name carries. */
+      var seen = {}, lessons = [];
+      for (var j = 0; j < s.length; j++) seen[NC.LETTERS[s.charAt(j)]] = 1;
+      for (var dgt = 1; dgt <= 9; dgt++) if (!seen[dgt]) lessons.push(dgt);
       return { letters: s.length, expression: e.value, soulUrge: su.value, personality: pe.value,
         compounds: { expression: e.compound, soulUrge: su.compound, personality: pe.compound },
         karmic: { expression: e.karmic || [], soulUrge: su.karmic || [], personality: pe.karmic || [] },
-        rawTotals: { all: all, vowels: vow, consonants: con } };
+        lessons: lessons, rawTotals: { all: all, vowels: vow, consonants: con } };
     },
     keep: function (t) { t = Math.abs(+t || 0); while (t > 9 && t !== 11 && t !== 22 && t !== 33) t = String(t).split('').reduce(function (x, c) { return x + +c; }, 0); return t; },
     /* settle() is the core's; this is only what the page falls back to when
@@ -429,6 +465,7 @@
   var LEXICON = [
     ['Balance', "A number drawn from the initials of the birth name, the family name included. It is read for how a person steadies themselves when something knocks them off course.", 'mine'],
     ['Birthday', "The day of the month someone was born on. Some teach it whole, so the 29th stays 29; this book reads the double digit first and keeps its root beside it.", 'mine'],
+    ['Chaldean chart', "An older table of letters that gives them the values 1 to 8 only. Nine is held back as a sacred number and appears only when a total reaches it.", ''],
     ['Capstone', "The last letter of the first name at birth, read for how a person tends to bring a thing to its finish.", ''],
     ['Challenge', "A number found in the distance between two parts of the birth date. There are four, each read as something that keeps asking to be crossed.", 'mine'],
     ['Cheiro', "The pen name of William John Warner, 1866 to 1936, the Irish palmist and numerologist. Among his books is Cheiro's Book of Numbers, and he said he learned Chaldean numerology in India.", ''],
@@ -439,8 +476,10 @@
     ['Gematria', "Reading a word as a number by giving each of its letters a value. The tradition is Hebrew in the first place, with Greek and English kin.", ''],
     ['Hidden Passion', "The digit that turns up most often among the letter values of the full birth name.", ''],
     ['Isopsephy', "The Greek practice of adding the letters of a word into one number, so that words with equal totals can be heard together. The name joins equal and pebble.", ''],
+    ['Karmic Lessons', "The digits from 1 to 9 that no letter of the full birth name carries. Each is read as a skill the name did not bring along.", 'mine'],
     ['Karmic debt', "Four compounds, 13, 14, 16 and 19, read as a debt when a birth number passes through one of them. Met on a cycle, each is read as a season instead.", 'cat:karmic'],
     ['Life Path', "The whole birth date brought down: month, day and year each reduced, then added and reduced again, with 11, 22 and 33 kept.", 'mine'],
+    ['Maturity', "The Life Path and the Expression added together and reduced. It is read as an aim that comes forward around the middle thirties.", 'mine'],
     ['Master number', "11, 22 and 33, the three numbers that are not reduced any further.", 'cat:master'],
     ['Period cycle', "Three long seasons of a life, drawn from the birth date. The first gives way somewhere between 25 and 33, the second between 52 and 60.", 'mine'],
     ['Personal Day', "The tone of a single day, the shortest of the personal cycles.", 'mine'],
@@ -452,6 +491,7 @@
     ['Soul Urge', "The vowels of the full birth name added together. It is also called Heart's Desire.", 'mine'],
     ['Universal Year', "The calendar year alone, reduced to one digit. It is the same for everybody and turns every 1 January; each Personal Year is read inside it.", '']
   ];
+  LEXICON.sort(function (a, b) { return a[0].localeCompare(b[0], 'en', { sensitivity: 'base' }); });
   NC.LEXICON = LEXICON;
 
   window.NumerologyContent = NC;
