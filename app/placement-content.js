@@ -963,7 +963,7 @@
   /* What each house is, said the way the owner asked on 6 November 2026: "A
      part of living where [this] happens consistently". */
   var HOUSE_LIVING = [
-    'your in-person visibility, your impression on the world,',
+    'being seen in person and the first impression you make',
     'money, keeping and the worth you feel underneath',
     'everyday talk, errands and the people close by',
     'home, family and the ground under your feet',
@@ -1174,11 +1174,190 @@
     ]
   };
 
+  /* WHAT EACH SIGN MAKES OF EACH HOUSE (owner, 7 November 2026). One line per
+     sign per house: the sign on that part of the chart, speaking as itself in
+     the room's own scenes. Kin Common LLC writing (record HBS-1.0), approved
+     master; every other surface takes its own rendition from an approved one.
+     Read by the aspect sheet after the part of living line. Index 0 is the
+     1st house. */
+  var SIGN_IN_HOUSE = {
+    Aries: [
+      "Aries reaches the door before the introduction does. The face is open, the step is quick, and people meet someone already halfway into the next thing.",
+      "Aries earns by going first. Money comes from nerve and quick starts, leaves just as quickly, and worth is measured in what it dared to go after.",
+      "Aries keeps the talk short and direct. Errands get run at a jog, and a sibling or neighbour learns quickly where they stand.",
+      "Aries makes home a lively place. The family speaks its mind, the furniture gets moved often, and the ground is claimed rather than handed down.",
+      "Aries plays to win. Romance starts with a dare, and the making happens in a burst before the doubt has time to arrive.",
+      "Aries attacks the to do list at once. The workday moves fast, and the body wants a workout that leaves it breathing hard.",
+      "Aries brings sparks to the partnership. The other person is bold and direct, and the bond grows strong through honest friction.",
+      "Aries runs straight into the deep end. Closeness is brave and quick, a crisis gets met head on, and the shared account is something to fight for.",
+      "Aries takes up a cause. Belief is fierce, study is a quest, and the long road begins with a sudden one way ticket.",
+      "Aries leads in public. The career is pioneering and independent, and the name gets known for starting what others finish.",
+      "Aries rallies the friends. The group needs someone to go first, and the future is something to charge at together.",
+      "Aries paces in the quiet. Solitude is restless, the dreams are full of chases, and letting go begins with one clear decision."
+    ],
+    Taurus: [
+      "Taurus lets the body speak first here. The presence is unhurried and solid, and people trust it before a word has been said.",
+      "Taurus is at home here. It earns slowly and keeps well, and worth is something the hands can feel: good bread, good wool, a savings account that only grows.",
+      "Taurus says a thing once and means it. The daily round follows the same good route for years, and the corner shop knows the order by heart.",
+      "Taurus plants roots and stays. Home smells of cooking and holds the same chair for decades, and change comes to this room very slowly.",
+      "Taurus plays with all five senses. A good meal, live music, a long slow kiss, and whatever it makes is made to last.",
+      "Taurus keeps a steady pace. The work is practical and dependable, and the body stays well on good food, sleep and a walk after dinner.",
+      "Taurus makes the partnership loyal and slow to start. The other person is dependable, and once the bond is built it is kept.",
+      "Taurus holds on here. Closeness is physical and loyal, the shared things are guarded, and an ending is resisted right up until it is accepted.",
+      "Taurus learns by doing. Belief is practical and tested by time, and the long road is walked at an unhurried pace, with good meals on the way.",
+      "Taurus climbs one step at a time. The career is steady and practical, and the name gets known for being completely dependable.",
+      "Taurus keeps friends for decades. The group is loyal and steady, and the future is built carefully, brick by shared brick.",
+      "Taurus rests easily alone. Solitude is a warm bath and a closed door, the dreams are rich with texture, and letting go takes its time."
+    ],
+    Gemini: [
+      "Gemini arrives asking questions. The first impression is bright and quick, and it changes a little with each person in the room.",
+      "Gemini earns through talk and trade. Money arrives from two or three directions at once, and worth is a matter of how many doors stay open.",
+      "Gemini is at home here. The phone is always lit, every errand becomes a conversation, and the whole block is connected by messages.",
+      "Gemini fills the house with voices. Books stack up, visitors come and go, and the roots spread across more than one address.",
+      "Gemini flirts in sentences. Play is a word game, crushes begin in conversation, and the creative work comes in many small bright pieces.",
+      "Gemini juggles. The workday is twenty small tasks and as many conversations, and the body stays well while the mind has variety.",
+      "Gemini makes the partnership a conversation. The other person is curious and quick, and the bond stays alive as long as the talk does.",
+      "Gemini talks its way into the deep. Closeness grows through confidences told late at night, and an ending is understood by being put into words.",
+      "Gemini collects views like postcards. Study jumps from subject to subject, and the long road is full of stops and conversations with strangers.",
+      "Gemini works in words. The career holds several roles at once, and the name gets known for wit and range.",
+      "Gemini knows everyone. The friends are many and varied, the group is one long conversation, and the future is full of plans.",
+      "Gemini thinks out loud even alone. The dreams hold conversations, and letting go happens on the page, in a notebook by the bed."
+    ],
+    Cancer: [
+      "Cancer comes in with a soft shell on. The first impression is careful and kind, and the rest of the person appears once the room feels safe.",
+      "Cancer keeps this room like a pantry. Money is a cushion for the family and the lean season, and worth is being able to look after someone.",
+      "Cancer talks from the heart. The family group chat carries the feeling of the week, and the familiar street is a comfort in itself.",
+      "Cancer is at home here. The family is the centre of the chart, old photographs are kept like heirlooms, and the door is open to anyone who needs it.",
+      "Cancer brings tenderness to the game. Romance wants to look after someone, and the things it makes carry the memory of where they came from.",
+      "Cancer works by looking after people. The job feels like caring for a household, and the stomach keeps score of every feeling.",
+      "Cancer makes the partnership a home. The other person cares and wants caring for, and the bond comes to feel like family.",
+      "Cancer feels this room fully. An inheritance carries the family's feeling, closeness is protective, and every ending is grieved and remembered.",
+      "Cancer carries home along. Belief comes from family and tradition, and the long road has a way of leading back to where it started.",
+      "Cancer takes care of people in public. The work feeds, houses or protects someone, and the name feels familiar and safe.",
+      "Cancer turns friends into kin. The group looks after its own, and the future is a place where everyone has a seat at the table.",
+      "Cancer remembers in the quiet. Old feelings come back to visit, the dreams return to childhood rooms, and letting go means grieving properly."
+    ],
+    Leo: [
+      "Leo lights the doorway. The warmth is visible from across the room, and the room tends to turn toward it without being asked.",
+      "Leo spends with a flourish. Money moves toward beauty and toward gifts, and worth is the pride of having made something that shines.",
+      "Leo turns everyday talk into a story with a punchline. The neighbours become an audience, and then a circle of people who look out for each other.",
+      "Leo keeps a warm court. Home is a place of pride and long dinners, and the family story gets told with a little theatre every time.",
+      "Leo is at home here. The curtain is up, the heart is on the sleeve, and joy is something to make loudly and share with everyone.",
+      "Leo wants the work to shine. A job well done should be noticed, and the body stays well with play, sunlight and a bit of applause.",
+      "Leo makes the partnership warm and proud. The other person shines and loves to be admired, and the loyalty runs both ways.",
+      "Leo brings its whole heart to the deep. Shared things are given generously, and an ending becomes a kind of second birth.",
+      "Leo lives its beliefs out loud. Study is a source of pride, and the long road becomes a story worth telling for years.",
+      "Leo wants the spotlight on the work. The career asks for a stage, and the name gets known for warmth and confidence.",
+      "Leo is the warm centre of the circle. The group makes things together, and the future looks like a party worth planning.",
+      "Leo keeps a hidden stage. In solitude the heart performs for no one, the dreams are vivid, and letting go is a generous act."
+    ],
+    Virgo: [
+      "Virgo notices on the way in. The first impression is of someone who saw the crooked frame, and straightened it before sitting down.",
+      "Virgo keeps the receipts. Money is earned by being useful and kept by paying attention, and worth grows out of a skill done properly.",
+      "Virgo keeps notes. Words are exact, the list is finished, and the one wrong detail in a message gets caught before it is sent.",
+      "Virgo keeps the house in working order. Love here looks like the tap that got fixed and the meal that was ready on time.",
+      "Virgo turns play into craft. Romance shows itself in remembered details, and the pleasure is in getting the stitch exactly right.",
+      "Virgo is at home here. The workday is craft and service, the routine actually holds, and health comes from patient attention.",
+      "Virgo makes the partnership practical. The other person helps and wants to be helpful, and love shows up in small daily acts.",
+      "Virgo keeps careful accounts of what is shared. Closeness is earned through care, and an ending is faced one honest detail at a time.",
+      "Virgo checks the sources. Belief is examined and refined, and the long road is planned down to the train times.",
+      "Virgo is known for precision. The career is skilled and useful, and the name stands for getting the job exactly right.",
+      "Virgo shows up with the toolbox. The friends are kind and useful, and the group gets real work done for the future it believes in.",
+      "Virgo tends things quietly where nobody sees. The dreams sort through the day's details, and letting go means making peace with imperfection."
+    ],
+    Libra: [
+      "Libra enters with a listening face. The first impression is easy and fair, shaped around the comfort of whoever is there.",
+      "Libra earns through agreements. Money moves by fair exchange and good taste, and worth leans toward what is lovely to live with.",
+      "Libra keeps the conversation courteous. It finds the middle of every disagreement, and a sibling quarrel gets smoothed over by dinner.",
+      "Libra makes home a shared and beautiful room. Peace in the family is worth a great deal of quiet effort, and the cushions match.",
+      "Libra plays in company. Romance is a courtship with good manners, and the creative work leans toward harmony and grace.",
+      "Libra works best beside good colleagues. A pleasant room and fair treatment matter, and the body wants balance more than strain.",
+      "Libra is at home here. Partnership is the art itself, fairness is the rule, and the balance between two people is kept on purpose.",
+      "Libra looks for fairness in the deep. Shared resources are divided evenly, closeness is mutual, and an ending is negotiated with grace.",
+      "Libra weighs every belief. Study is a dialogue, justice matters, and the long road is better with a companion.",
+      "Libra works between people. The career deals in beauty, fairness or agreement, and the name gets known for diplomacy.",
+      "Libra keeps the circle fair. Friends are charming and easy company, and the future is one where nobody is left out.",
+      "Libra restores its balance alone. The dreams are full of other people, and letting go feels like a reconciliation."
+    ],
+    Scorpio: [
+      "Scorpio stands still and takes the room in. The first impression is of depth held back, and people feel seen before they know why.",
+      "Scorpio holds money close and says little about it. Worth here is tested by loss, and what survives the test is kept for good.",
+      "Scorpio listens more than it speaks. Talk goes to what is underneath, a secret travels only where it is safe, and one sibling bond runs very deep.",
+      "Scorpio keeps the house private. What happens behind the door stays there, family bonds run intense, and the ground itself is where the deep changes begin.",
+      "Scorpio plays for keeps. Romance is all or nothing, and what it makes goes all the way to the bone.",
+      "Scorpio works at the root of the problem. The day goes to what needs fixing for good, and the body answers to real change rather than gestures.",
+      "Scorpio makes the partnership binding. The other person goes deep, trust is everything, and the bond changes both of them.",
+      "Scorpio is at home here. Closeness is total, power is handled with open eyes, and every ending is a door to what comes next.",
+      "Scorpio digs for the hidden text. A belief has to survive hard questions, and the long road changes whoever walks it.",
+      "Scorpio holds power quietly. The career goes deep into something others avoid, and the name carries a little mystery.",
+      "Scorpio lets few people in. The friends are trusted completely, and the group changes together in ways outsiders never see.",
+      "Scorpio goes down into the cave. Solitude is deep and private, the dreams give up their secrets, and letting go is a full transformation."
+    ],
+    Sagittarius: [
+      "Sagittarius arrives with a story from somewhere else. The first impression is frank and restless, already pointing past the walls.",
+      "Sagittarius treats money as a ticket out. It spends on experience and teaching and the next flight, trusting that more will come round.",
+      "Sagittarius never stays on the block. A trip to the shop turns into a drive across the state, and small talk turns into philosophy by the second sentence.",
+      "Sagittarius keeps a bag by the door. Home may move more than once, the family argues happily about ideas, and the roots travel along.",
+      "Sagittarius plays outdoors and far away. Romance is an adventure in a new city, and fun feels a lot like freedom.",
+      "Sagittarius needs room in the workday. The job has to mean something, and the body is kept well by movement and open air.",
+      "Sagittarius makes the partnership a shared journey. The other person is a free spirit, and the bond needs room to roam and grow.",
+      "Sagittarius looks for the meaning in the deep. Closeness opens a whole new view, and an ending is understood as one more stretch of road.",
+      "Sagittarius is at home here. Belief is a horizon, study is pure joy, and the long road never quite comes to an end.",
+      "Sagittarius aims the career high. The work teaches, travels or publishes, and the name gets known for vision.",
+      "Sagittarius has friends in every port. The group shares a cause, and the future is met with open optimism.",
+      "Sagittarius retreats to find the spirit. The dreams travel to distant places, and letting go comes through faith in something larger."
+    ],
+    Capricorn: [
+      "Capricorn walks in composed. The first impression is capable and a little reserved, and the warmth that follows tends to last.",
+      "Capricorn lays money down one stone at a time. Wealth is a structure meant to outlast its maker, and worth is measured by what was built.",
+      "Capricorn gives words weight. Promises made in passing get kept, and the daily round is a schedule with a reason behind every stop.",
+      "Capricorn builds home to last. The family carries duty and tradition, and someone in this room has always been the one holding the roof up.",
+      "Capricorn lets itself play once the work is done. Romance is careful and committed, and the creative work is built to stand for years.",
+      "Capricorn shoulders the work. Routines are built for the long run, and the body is tended like a building that has to last.",
+      "Capricorn makes the partnership a commitment. The other person is serious and steady, and the bond is built like an institution.",
+      "Capricorn takes responsibility for the deep. Shared money is managed for the long term, closeness is slow and real, and an ending is handled with structure.",
+      "Capricorn builds a belief to live by. Study leads to the degree and the credential, and the long road has a destination marked on the map.",
+      "Capricorn is at home here. The career is a long climb with every handhold earned, and the name is built to outlast the title.",
+      "Capricorn gives the group a structure. The friends are ambitious, and the future comes with a plan and a timeline.",
+      "Capricorn carries weight even in the quiet. The dreams are about structures and stairs, and letting go means finally setting the load down."
+    ],
+    Aquarius: [
+      "Aquarius stands at a slight angle to the crowd. The first impression is original and friendly on its own terms, like someone visiting from a few years ahead.",
+      "Aquarius earns in ways nobody planned. Money follows ideas and networks, and worth is weighed by principle more than price.",
+      "Aquarius brings the odd idea to the kitchen table. The neighbourhood is a network, and the talk drifts happily into how things could be.",
+      "Aquarius chooses its family. Home may be a shared house, an experiment or a circle of friends, and freedom is respected inside its walls.",
+      "Aquarius plays with friends and ideas. Romance often starts as friendship, and the creative work breaks a rule on purpose.",
+      "Aquarius reinvents the workday. Systems, shortcuts and odd hours keep it going, and the body does well on routines that are allowed to change.",
+      "Aquarius makes the partnership a friendship of equals. The other person keeps their independence, and the bond holds by leaving room.",
+      "Aquarius keeps a clear head in the deep. Closeness respects freedom, shared things follow principle, and an ending is seen whole from a little distance.",
+      "Aquarius questions the received wisdom. Belief is unorthodox, study runs ahead of its time, and the long road points toward the future.",
+      "Aquarius breaks new ground in public. The career looks unusual from the outside, and the name gets known for being early.",
+      "Aquarius is at home here. Friends are equals, the group is a movement, and the future is the whole reason for meeting.",
+      "Aquarius finds freedom alone. Solitude is a clear high place, the dreams are visionary, and letting go happens from a calm distance."
+    ],
+    Pisces: [
+      "Pisces blurs the outline. The first impression shifts like water, taking on the colour of whoever is closest.",
+      "Pisces lets money come and go like a tide. It earns through imagination and care, gives freely, and finds its worth in what no ledger counts.",
+      "Pisces speaks in images. Messages are read between the lines, errands wander, and the right word often arrives in a dream.",
+      "Pisces lets the walls soften. Home is a refuge and a dream at once, and family feeling moves through the generations without needing words.",
+      "Pisces drifts into play. Romance feels like a dream, and the things it makes seem to arrive from somewhere beyond the self.",
+      "Pisces works by feel. Service and compassion fill the day, schedules drift, and the body picks up on everything in the room.",
+      "Pisces makes the partnership devoted and porous. The other person is seen in a soft light, and much is shared without being said.",
+      "Pisces dissolves into the deep. The line between yours and mine blurs, closeness becomes merging, and an ending feels like a tide going out.",
+      "Pisces follows a feeling across the map. Belief is mystical, study follows inspiration, and the long road turns into a pilgrimage.",
+      "Pisces works in the open the way mist moves through a valley. The career heals, imagines or serves, and the name is gentle and hard to pin down.",
+      "Pisces dreams alongside the friends. The group gathers around compassion, and the future it hopes for is an ideal held in common.",
+      "Pisces is at home here. Solitude is spiritual, the dreams are oceanic, and letting go is a gentle surrender."
+    ]
+  };
+
   var PC = {
-    VERSION: '1.3.0',
-    bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY, inHouseTable: IN_HOUSE,
+    VERSION: '1.4.0',
+    bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY, inHouseTable: IN_HOUSE, signHouseTable: SIGN_IN_HOUSE,
     /* inHouse(body, house) -> the line, or '' for a point the table does not hold. */
     inHouse: function (body, house) { var r = IN_HOUSE[body]; return r && house >= 1 && house <= 12 ? r[house - 1] : ''; },
+    /* signHouse(sign, house) -> what the sign makes of that house, or ''. */
+    signHouse: function (sign, house) { var r = SIGN_IN_HOUSE[sign]; return r && house >= 1 && house <= 12 ? r[house - 1] : ''; },
     known: function (body) { return !!BODIES[keyFor(body)]; },
     keyFor: keyFor, label: nm,
     glyph: function (body) { return BODIES[body] ? BODIES[body].glyph : ''; },

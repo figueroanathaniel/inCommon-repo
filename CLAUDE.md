@@ -8178,6 +8178,17 @@ change them only with the owner. The source draft is
 `/mnt/project-files/aspect-language/body-in-house.md`. A point outside the ten
 gets no house line, never a generic one; an angle gets no house at all.
 
+**What the sign makes of the house comes next** (the owner, 7 November 2026):
+after the part of living line, `PlacementContent.signHouse(sign, house)` gives
+one of 144 lines (`SIGN_IN_HOUSE`, the twelve signs by twelve houses, read with
+the body's own sign), then the body in house line. These are Kin Common LLC
+writing too, recorded as HBS-1.0 in
+`/mnt/project-files/kin-common-ip/house-by-sign-ip-record.docx`. **Every other
+surface gets its own rendition, and a rendition may stem only from an approved
+one** (the master or a rendition the owner has approved). Draft it, show it
+to the owner, record its parent in the record's lineage table, and ship it
+only once approved. Do not paste the master into a second surface.
+
 There is no geometry lesson in the sheet (the owner, 7 November 2026: "No
 geometry lesson"); `ASP_NATURE` still serves the Observatory's contact window.
 The Aspects list keeps every contact, the Descendant, IC and South Node ones
