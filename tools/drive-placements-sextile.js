@@ -30,7 +30,7 @@ let bad = 0; const t = (id, ok, info) => { if (!ok) bad++; console.log((ok ? 'PA
     await p.evaluate(() => { const g = [...document.querySelectorAll('[role=radiogroup][aria-label="Which aspect"]')].find(e => e.offsetParent); g.scrollIntoView({ block: 'start' }); [...g.querySelectorAll('[role=radio]')].pop().click(); });
     await p.waitForTimeout(500);
     const s = await grp();
-    const shown = await p.evaluate(() => { const g = [...document.querySelectorAll('[role=radiogroup][aria-label="Which aspect"]')].find(e => e.offsetParent); const box = g.parentElement;
+    const shown = await p.evaluate(() => { const g = [...document.querySelectorAll('[role=radiogroup][aria-label="Which aspect"]')].find(e => e.offsetParent); const box = g.closest('[data-ch-ledger]');
       const line = box.querySelector('p').textContent.trim(); const pairs = [...box.querySelectorAll('ul button')].map(x => x.getAttribute('aria-label'));
       const none = [...box.querySelectorAll('p')].map(x => x.textContent).find(x => /No two placements/.test(x)) || ''; return { line, pairs, none }; });
     const mean = await p.evaluate(() => window.__incommonApp.ASP_MEAN.sextile);
