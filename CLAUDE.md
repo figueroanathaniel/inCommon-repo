@@ -6833,6 +6833,22 @@ Back and the breadcrumb, and the phone sheet is painted over an opaque `--bg`
 because `--sf` carries alpha. Measured over every page at 1440, 390 and 375,
 four identities hardened and not: no pair under 4.5:1, no control under 44px.
 
+**The packet speaks the aspect voice** (the owner, 7 November 2026, after a
+full Saturn read on the sample chart). At Home carries the approved body in
+house line (`PlacementContent.inHouse`) in place of the house's question,
+which The Room already asks; a house's part of living takes `happen` when it
+is a list (`livingVerb()`); Conversations lead with the 22 points a reader
+knows (`BLOOM_CORE`), then by orb, and open by naming what each body brings,
+never with a label and a colon; two transits at one angle never end on the
+same sentence; and the degree carries no line about what the build holds.
+Held together no longer tells the reader to keep what rings true.
+At Home is the body and the room as one paragraph (the owner, same day:
+"repetitive and drawling, no sense of integration"): the body in house line,
+then one sentence of the house's gift and shadow said through the body. The
+house's generic presence line, its question and the arena list are not
+repeated there; a point with no body in house line gets one plain sentence of
+what it carries into the house instead.
+
 ## A passing tap opens the glance, a focused read opens the packet
 Asked for by the owner on 4 November 2026: "It's nice for a focused read. For
 passing, make it a pop up without the fantastic visuals, keep the info, and make
@@ -7579,7 +7595,7 @@ Until 15 October 2026 they shipped unrewritten, and from a site root that
 address is answered by the catch all with the app, so a home screen icon was
 an HTML page.
 
-`tools/` holds thirty five scripts. Twenty two are gates and are worth running
+`tools/` holds thirty five scripts. Twenty three are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -7587,7 +7603,11 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
-`check-astral-bodies.js`, `check-timing-lexicon.js`, `check-sky-weather.js`.
+`check-astral-bodies.js`, `check-timing-lexicon.js`, `check-sky-weather.js`,
+`check-reading-text.js` (no phrase table mixes plain phrases with template
+functions, the fault that printed function source into the Today horoscope on
+7 November 2026; `drive-reading-text.js` is its rendered half, 730 days in a
+browser).
 Ten generate:
 `build-bundle.js`, `build-number-matrix.js` (`app/number-matrix.js`, from the owner's Book of Numbers CSV), `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
@@ -8087,3 +8107,144 @@ own panel open (`hdSel`).
 iPhone's, and measures the window and the pill with the harness's own
 `contrastFails()` and `tapTargets()` over four identities, hardened and not, at
 1440 and 375: 32 cases, clean on 6 November 2026.
+
+## Retrogrades holds nine bodies, and each opens a read in chapters
+Asked for by the owner on 7 November 2026. The strip's first pull is
+**Retrogrades** (no longer Current Retrogrades), and it lists every body from
+Mercury to Pluto and Chiron (`RETRO_BODIES`), always, as rows
+(`retroRows()`): glyph, name, where it stands, and its state (retrograde and
+when it turns direct, pre-shadow, post-shadow, or direct and when it next
+stations, from `retroState()`). A body retrograde now wears a dot in `--ok`,
+the confirmed value green, never `--ac`, and the ℞ beside its name; the tile
+title carries the ℞ too. The section tabs inside the panel are gone.
+
+**A row opens the read, not a tab** (`rxGlance`, `retroGlanceVals()`), in the
+same glance dialog a placement and a number use (the pg* keys), with no
+"Open the focused read" button (`pgFocusOn` false). Its chapters: Now, the
+body, what its backward motion means, your chart (only with a known house),
+then the pre-shadow, the turn and the post-shadow, each led by the dates
+worked out for this run. Every body's words are its own (`RETRO_READ`,
+`RETRO_TALK`, `RETRO_MEAN`) and no sentence is shared between bodies. The
+retrograde buttons under the horoscope open the same read. Chiron's run in
+November 2026 measured 156 days in the app's own scan (`retroState`), which
+is what "about five months" rests on. Shadow dates exist only for Mercury,
+Venus and Mars (`SHADOW_BODIES`); for the slower bodies the read says the
+shadow spreads across most of a year.
+
+**The pulls sit under the Placements table**, in both shells, in this order:
+Retrogrades, the Eclipses (first while one is in season), the Stellium, and
+Harmonics last with a small New mark (`isNew`, `--ac2` border and
+`--ac2-hi` text). Take the mark off when the owner says Harmonics is no
+longer new. On the desktop the Placements card carries `data-ch-plc` and the
+Ledger has no height cap there, so the table stretches to the bottom of the
+column (from 1180px the card fills the column's view).
+
+**The Expanded Chart carries the aspect grid under the wheel**
+(`bloomGridSync()`, `[data-asp-grid]`, both branches in both shells): the
+staircase astrologers use, each shown point's glyph on the diagonal and the
+contact symbol (`ASP_SYM`, in `ASP_COLOR`) where two rows meet. It reads the
+same rich pass the wheel's lines draw and only the points switched on
+(`bloomShowOf()`), so Advanced gives the 22 and Expert every placed point.
+It is a DOM write keyed by a signature, never state, because a grid of ninety
+points is thousands of cells. Each contact cell carries its words for a
+screen reader. The dialog scrolls in the wide layout now so the grid can be
+reached. Measured in Deep Field only, at 1440 and 390: no contrast failure.
+
+**The motion is stated, never hedged** (the owner, 7 November 2026: "Just
+say the sentence."). A retrograde body moves backwards through the zodiac,
+and every line says so plainly: no "apparent", "appears to", "seems to",
+"in fact" or "from a moving Earth" anywhere a retrograde is described, in
+the app or the Astropedia. The heliocentric lessons, which teach that the
+Sun's view has no retrograde, are the study itself and keep their words.
+On the phone the tile's title row wraps, so the New pill and the ℞ drop
+under the title rather than past the tile's edge, and the Cycle Audit card
+is the last thing on the phone's astrology page.
+
+## The aspect sheet speaks as the two bodies
+Asked for by the owner on 7 November 2026 ("How does the Sun act where it's
+at? Where does Saturn get to make anything happen in a room built to fit for
+a night out?"). The aspect dialog (`aspOpen`, both shells) and the
+Observatory's contact window read `aspectLines()`, which returns `paras`:
+a paragraph per body (`aspBodyPara()`: its voice, "In <sign> it" and the
+sign's entrance, a dignity sentence, the part of living its house holds, the
+body in house line, and the house's gift and shadow), then the angle
+(`ASP_MEET`: an opener, each body in its sign's manner, a follow line, and the
+orb said plainly with no "expect"). `ASP_CLOSE` still closes it, untouched.
+
+**The 120 body in house lines are `PlacementContent.inHouse(body, house)`**
+(`IN_HOUSE` in `placement-content.js`, 1.1.0), the ten bodies by twelve
+houses. The owner keeps them as Kin Common writing to be sold on its own:
+change them only with the owner. The source draft is
+`/mnt/project-files/aspect-language/body-in-house.md`. A point outside the ten
+gets no house line, never a generic one; an angle gets no house at all.
+
+**What the sign makes of the house comes next** (the owner, 7 November 2026):
+after the part of living line, `PlacementContent.signHouse(sign, house)` gives
+one of 144 lines (`SIGN_IN_HOUSE`, the twelve signs by twelve houses, read with
+the body's own sign), then the body in house line. These are Kin Common LLC
+writing too, recorded as HBS-1.0 in
+`/mnt/project-files/kin-common-ip/house-by-sign-ip-record.docx`. **Every other
+surface gets its own rendition, and a rendition may stem only from an approved
+one** (the master or a rendition the owner has approved). Draft it, show it
+to the owner, record its parent in the record's lineage table, and ship it
+only once approved. Do not paste the master into a second surface.
+
+There is no geometry lesson in the sheet (the owner, 7 November 2026: "No
+geometry lesson"); `ASP_NATURE` still serves the Observatory's contact window.
+The Aspects list keeps every contact, the Descendant, IC and South Node ones
+included, though each mirrors one to the Ascendant, Midheaven or North Node:
+the owner's rule is that nothing is taken from the reader before the reason
+is put to them ("We don't want to strip a reader from any element of their
+curiosity"). Ask before hiding a row anywhere.
+
+## The Placements table has five aspect squares
+Asked for by the owner on 7 November 2026: the Sextile square sits after
+Conjunction, Opposition, Trine and Square over the Placements table, in both
+shells (`ASP4` in `chartGroupVals()`). It reads the same rich pass as the
+other four and its own `ASP_MEAN` line, and lights the pairs the same way.
+`tools/drive-placements-sextile.js` holds it, 10 rows.
+
+## A body can be found in the Expert aspect grid
+The owner said on 7 November 2026 that the Expert table "is impossible to
+read or utilize after a certain point. A search utility is a good start."
+With every point on, the grid is 94 points and about 310 contacts, a staircase
+some 2,400px wide, and below its first rows a symbol has no column label in
+sight. A find field sits over the grid (`[data-asp-find]`, all four grid
+hosts, `bloomGridQ`). A word typed there turns the grid into a list
+(`bloomGridFound()`), read from the same pairs the grid draws: one body gives
+every contact it makes among the points shown, closest to exact first; two
+bodies give the contact between them; an aspect's name keeps only that
+aspect. A whole name wins over a longer one, so "venus" is Venus and not the
+Venus Node too. The list is written into the grid host by `bloomGridSync()`,
+a DOM write like the grid, with the query in its signature, and the count is
+spoken after a pause. Clearing the field brings back the view in use.
+
+**Four more ways to read it, and the owner chose all of them** (7 November 2026).
+Under the field is a strip of controls (`[data-bg-ctl]`, `bloomGridCtl()`),
+outside `[data-chart]` so the contrast and touch sweeps measure it:
+
+- **List or Grid** (`bloomGridView`). The list is every contact as a line,
+  and it is where the phone opens (`bloomGridViewOf()`: below 820 wide); the
+  desktop opens on the grid. A query always shows the list. The list orders
+  Closest first or By body (`bloomGridSort`), and By body gathers each
+  point's contacts under the one higher on the chart (`bloomGridList()`).
+- **Aspects shown** (`bloomGridOff`): any aspect can be switched off, in the
+  list and the grid alike. Each switch carries its colour as a line under
+  the symbol, never as the text's colour.
+- **One family beside the usual 22** (`bloomGridFam`): Every family, or
+  `BLOOM_CORE` plus one category, which turns ninety four rows into about
+  forty. Shown only when a family beyond the 22 is switched on.
+- **The grid's labels are pinned**: a header row along the top and a column
+  down the side, both `position: sticky` inside a host that scrolls both
+  ways at `min(68vh, 640px)`. The host has no padding in grid view, because
+  a sticky label sits inside the padding and the cells show through it.
+- **A press on a label traces it** (`bloomGridTap()`, `bloomGridTrace()`):
+  the point's row and column light, the other symbols fade, and a second
+  press clears it. Only the side labels are buttons (one tab stop a point);
+  the top labels answer a pointer. The trace is held in `_bgTrace` and put
+  back after every rebuild, a DOM write like the rest, never state.
+
+All of it is this dialog's own and is not kept. `tools/drive-aspect-find.js`
+holds it in both shells, 26 rows. The strip measured clean with the
+harness's own `contrastFails()` and `tapTargets()`, four identities,
+hardened and not, at 1440 and 375.
