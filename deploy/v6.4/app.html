@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-11-06  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-11-07  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8036,6 +8036,38 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
         'A few notes kept across the year will say more about you than any meaning written here.';
     }
   };
+
+  /* The words of numerology, A to Z, for the Book of Numbers' lexicon. Each
+     was written from a page read on 7 November 2026; the pages are in
+     docs/numbers-upgrade/01-lexicon-sources.md. The third field is where the
+     word leads in the room: a category of the book, the reader's own numbers,
+     or nothing. */
+  var LEXICON = [
+    ['Balance', "A number drawn from the initials of the birth name, the family name included. It is read for how a person steadies themselves when something knocks them off course.", 'mine'],
+    ['Birthday', "The day of the month someone was born on. Some teach it whole, so the 29th stays 29; this book reads the double digit first and keeps its root beside it.", 'mine'],
+    ['Capstone', "The last letter of the first name at birth, read for how a person tends to bring a thing to its finish.", ''],
+    ['Challenge', "A number found in the distance between two parts of the birth date. There are four, each read as something that keeps asking to be crossed.", 'mine'],
+    ['Cheiro', "The pen name of William John Warner, 1866 to 1936, the Irish palmist and numerologist. Among his books is Cheiro's Book of Numbers, and he said he learned Chaldean numerology in India.", ''],
+    ['Compound number', "A number from 10 to 99, met on the way down to a single digit. This book reads the double digit first, because it is the number's own frequency, and its root after.", 'cat:all'],
+    ['Cornerstone', "The first letter of the first name at birth, read for a person's first way of meeting life.", ''],
+    ['Digital root', "What is left when the digits of a number are added again and again until one remains: 12345 becomes 15, then 6. Western numerology works with it, and lets 11, 22 and 33 stand.", ''],
+    ['Expression', "Every letter of the full birth name turned into a number and added together. It is also called Destiny.", 'mine'],
+    ['Gematria', "Reading a word as a number by giving each of its letters a value. The tradition is Hebrew in the first place, with Greek and English kin.", ''],
+    ['Hidden Passion', "The digit that turns up most often among the letter values of the full birth name.", ''],
+    ['Isopsephy', "The Greek practice of adding the letters of a word into one number, so that words with equal totals can be heard together. The name joins equal and pebble.", ''],
+    ['Karmic debt', "Four compounds, 13, 14, 16 and 19, read as a debt when a birth number passes through one of them. Met on a cycle, each is read as a season instead.", 'cat:karmic'],
+    ['Life Path', "The whole birth date brought down: month, day and year each reduced, then added and reduced again, with 11, 22 and 33 kept.", 'mine'],
+    ['Master number', "11, 22 and 33, the three numbers that are not reduced any further.", 'cat:master'],
+    ['Period cycle', "Three long seasons of a life, drawn from the birth date. The first gives way somewhere between 25 and 33, the second between 52 and 60.", 'mine'],
+    ['Personal Day', "The tone of a single day, the shortest of the personal cycles.", 'mine'],
+    ['Personal Month', "A short cycle inside the Personal Year that turns with every month.", 'mine'],
+    ['Personal Year', "The current year added to the birth month and day, then reduced. It turns over with the calendar year.", 'mine'],
+    ['Personality', "The consonants of the full birth name added together: the side others meet first.", 'mine'],
+    ['Pinnacle', "Four long periods of a life, each with a number. The first runs from birth to somewhere between 27 and 35, the next two last nine years each, and the fourth runs on from there.", 'mine'],
+    ['Pythagorean chart', "The usual table of letters: A to I are 1 to 9, J to R begin again at 1, and S to Z run from 1 to 8.", ''],
+    ['Soul Urge', "The vowels of the full birth name added together. It is also called Heart's Desire.", 'mine']
+  ];
+  NC.LEXICON = LEXICON;
 
   window.NumerologyContent = NC;
 })();
@@ -36408,6 +36440,36 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </sc-for>
           </div>
         </sc-if>
+        <sc-if value="{{ bnLexOn }}" hint-placeholder-val="{{ true }}">
+          <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ bnLexBd }};border-radius:var(--rad);padding:8px 14px;transition:border-color .3s ease">
+            <button onClick="{{ bnLexToggle }}" aria-expanded="{{ bnLexOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:54px;display:flex;align-items:center;gap:13px">
+              <span aria-hidden="true" style="flex:none;width:36px;font:400 30px/1 var(--fd);color:var(--ac2-hi);text-align:center"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></span>
+              <span style="flex:1;min-width:0;text-align:left;font:400 16px var(--fd);color:var(--tx)">The Lexicon</span>
+              <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ bnLexCount }}</span>
+              <span style="flex:none;font:400 18px var(--fu);color:var(--ac2-hi)">{{ bnLexIcon }}</span>
+            </button>
+            <sc-if value="{{ bnLexOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:6px;animation:fadeUp .22s ease-out">
+                <sc-for list="{{ bnLex }}" as="w" hint-placeholder-count="8">
+                  <div style="display:flex;flex-direction:column;gap:8px;border:1px solid {{ w.bd }};border-radius:14px;background:var(--sf2);padding:0 14px">
+                    <button data-lift onClick="{{ w.toggle }}" aria-expanded="{{ w.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;gap:12px">
+                      <span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fb);color:var(--ac2-hi)"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></span>
+                      <span style="flex:1;min-width:0;text-align:left;font:400 15px/1.25 var(--fd);color:var(--tx)">{{ w.name }}</span>
+                    </button>
+                    <sc-if value="{{ w.open }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:12px">
+                        <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ w.text }}</div>
+                        <sc-if value="{{ w.linkOn }}" hint-placeholder-val="{{ false }}">
+                          <button data-lift onClick="{{ w.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">{{ w.linkLabel }} <span aria-hidden="true">&#8594;</span></button>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
       </div>
     </div>
   </div>
@@ -44041,6 +44103,36 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </sc-if>
               </div>
             </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ bnLexOn }}" hint-placeholder-val="{{ true }}">
+          <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ bnLexBd }};border-radius:var(--rad);padding:8px 14px;transition:border-color .3s ease">
+            <button onClick="{{ bnLexToggle }}" aria-expanded="{{ bnLexOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:54px;display:flex;align-items:center;gap:13px">
+              <span aria-hidden="true" style="flex:none;width:36px;font:400 30px/1 var(--fd);color:var(--ac2-hi);text-align:center"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></span>
+              <span style="flex:1;min-width:0;text-align:left;font:400 16px var(--fd);color:var(--tx)">The Lexicon</span>
+              <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ bnLexCount }}</span>
+              <span style="flex:none;font:400 18px var(--fu);color:var(--ac2-hi)">{{ bnLexIcon }}</span>
+            </button>
+            <sc-if value="{{ bnLexOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:6px;animation:fadeUp .22s ease-out">
+                <sc-for list="{{ bnLex }}" as="w" hint-placeholder-count="8">
+                  <div style="display:flex;flex-direction:column;gap:8px;border:1px solid {{ w.bd }};border-radius:14px;background:var(--sf2);padding:0 14px">
+                    <button data-lift onClick="{{ w.toggle }}" aria-expanded="{{ w.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;gap:12px">
+                      <span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fb);color:var(--ac2-hi)"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></span>
+                      <span style="flex:1;min-width:0;text-align:left;font:400 15px/1.25 var(--fd);color:var(--tx)">{{ w.name }}</span>
+                    </button>
+                    <sc-if value="{{ w.open }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:12px">
+                        <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ w.text }}</div>
+                        <sc-if value="{{ w.linkOn }}" hint-placeholder-val="{{ false }}">
+                          <button data-lift onClick="{{ w.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf);font:600 11.5px var(--fc);color:var(--ac2-hi)">{{ w.linkLabel }} <span aria-hidden="true">&#8594;</span></button>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </sc-if>
       </div>
@@ -57616,7 +57708,30 @@ class Component extends DCLogic {
           peek: list.map(x => ({ fill: this.BN_FILL[x.cat], size: x.cat === 'standard' ? '6px' : '8px' })),
           toggle: () => this.setState({ bnRoot: open ? 0 : r }),
           rows: open ? list.map(row) : [] };
-      })
+      }),
+      /* The lexicon: the words of numerology, A to Z, each written from a
+         page read (NumerologyContent.LEXICON). A word opens in place; where it
+         names a category or one of the reader's own numbers, it leads there. */
+      ...this.bnLexVals(mine)
+    };
+  }
+  bnLexVals(mine) {
+    const st = this.state, L = (window.NumerologyContent && window.NumerologyContent.LEXICON) || [];
+    const own = mine.marks.some(m => m.natal), open = !!st.bnLexOpen;
+    const CAT = { all: 'Every compound', master: 'Every Master Number', karmic: 'Every Karmic Debt' };
+    return {
+      bnLexOn: L.length > 0, bnLexOpen: open, bnLexCount: String(L.length), bnLexIcon: open ? '\u2212' : '+',
+      bnLexBd: open ? 'rgba(var(--atmc),.6)' : 'var(--bd)',
+      bnLexToggle: () => this.setState({ bnLexOpen: !open }),
+      bnLex: open ? L.map(([name, text, to]) => {
+        const on = st.bnLexSel === name, cat = /^cat:/.test(to) ? to.slice(4) : '';
+        const linkOn = on && (!!cat || (to === 'mine' && own));
+        return { name, text, open: on, linkOn,
+          bd: on ? 'rgba(var(--atmc),.6)' : 'var(--bd)',
+          toggle: () => this.setState({ bnLexSel: on ? null : name }),
+          linkLabel: cat ? CAT[cat] : 'My numerology',
+          go: cat ? () => this.setState({ bnCat: cat, bnQuery: '' }) : this.searchGo(this.searchSpirit('numerology', 2)) };
+      }) : []
     };
   }
   /* THE HUMAN DESIGN ATLAS, given the room the Astropedia and the Book have

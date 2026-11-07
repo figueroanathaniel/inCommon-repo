@@ -421,5 +421,37 @@
     }
   };
 
+  /* The words of numerology, A to Z, for the Book of Numbers' lexicon. Each
+     was written from a page read on 7 November 2026; the pages are in
+     docs/numbers-upgrade/01-lexicon-sources.md. The third field is where the
+     word leads in the room: a category of the book, the reader's own numbers,
+     or nothing. */
+  var LEXICON = [
+    ['Balance', "A number drawn from the initials of the birth name, the family name included. It is read for how a person steadies themselves when something knocks them off course.", 'mine'],
+    ['Birthday', "The day of the month someone was born on. Some teach it whole, so the 29th stays 29; this book reads the double digit first and keeps its root beside it.", 'mine'],
+    ['Capstone', "The last letter of the first name at birth, read for how a person tends to bring a thing to its finish.", ''],
+    ['Challenge', "A number found in the distance between two parts of the birth date. There are four, each read as something that keeps asking to be crossed.", 'mine'],
+    ['Cheiro', "The pen name of William John Warner, 1866 to 1936, the Irish palmist and numerologist. Among his books is Cheiro's Book of Numbers, and he said he learned Chaldean numerology in India.", ''],
+    ['Compound number', "A number from 10 to 99, met on the way down to a single digit. This book reads the double digit first, because it is the number's own frequency, and its root after.", 'cat:all'],
+    ['Cornerstone', "The first letter of the first name at birth, read for a person's first way of meeting life.", ''],
+    ['Digital root', "What is left when the digits of a number are added again and again until one remains: 12345 becomes 15, then 6. Western numerology works with it, and lets 11, 22 and 33 stand.", ''],
+    ['Expression', "Every letter of the full birth name turned into a number and added together. It is also called Destiny.", 'mine'],
+    ['Gematria', "Reading a word as a number by giving each of its letters a value. The tradition is Hebrew in the first place, with Greek and English kin.", ''],
+    ['Hidden Passion', "The digit that turns up most often among the letter values of the full birth name.", ''],
+    ['Isopsephy', "The Greek practice of adding the letters of a word into one number, so that words with equal totals can be heard together. The name joins equal and pebble.", ''],
+    ['Karmic debt', "Four compounds, 13, 14, 16 and 19, read as a debt when a birth number passes through one of them. Met on a cycle, each is read as a season instead.", 'cat:karmic'],
+    ['Life Path', "The whole birth date brought down: month, day and year each reduced, then added and reduced again, with 11, 22 and 33 kept.", 'mine'],
+    ['Master number', "11, 22 and 33, the three numbers that are not reduced any further.", 'cat:master'],
+    ['Period cycle', "Three long seasons of a life, drawn from the birth date. The first gives way somewhere between 25 and 33, the second between 52 and 60.", 'mine'],
+    ['Personal Day', "The tone of a single day, the shortest of the personal cycles.", 'mine'],
+    ['Personal Month', "A short cycle inside the Personal Year that turns with every month.", 'mine'],
+    ['Personal Year', "The current year added to the birth month and day, then reduced. It turns over with the calendar year.", 'mine'],
+    ['Personality', "The consonants of the full birth name added together: the side others meet first.", 'mine'],
+    ['Pinnacle', "Four long periods of a life, each with a number. The first runs from birth to somewhere between 27 and 35, the next two last nine years each, and the fourth runs on from there.", 'mine'],
+    ['Pythagorean chart', "The usual table of letters: A to I are 1 to 9, J to R begin again at 1, and S to Z run from 1 to 8.", ''],
+    ['Soul Urge', "The vowels of the full birth name added together. It is also called Heart's Desire.", 'mine']
+  ];
+  NC.LEXICON = LEXICON;
+
   window.NumerologyContent = NC;
 })();
