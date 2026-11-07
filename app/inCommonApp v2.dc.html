@@ -1791,7 +1791,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
             <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
               <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
-                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="5">
                   <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
                 </sc-for>
               </div>
@@ -8876,7 +8876,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
             <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
               <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
-                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="5">
                   <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
                 </sc-for>
               </div>
@@ -23444,10 +23444,11 @@ class Component extends DCLogic {
           nx ? 'next ' + nx.mover + ' ' + this.aspName(nx.asp) + ' from ' + this.fmtDay(nx.from) : ''].filter(Boolean).join(', ') };
     });
     /* THE PLACEMENTS TABLE (owner, 6 November 2026): built the way the
-       harmonics card is built, with the four major aspects where the 4th,
-       5th, 7th and 9th stand. A tab, the aspect's own line, the reader's
+       harmonics card is built, with the major aspects where the 4th,
+       5th, 7th and 9th stand. The sextile joined the four on 7 November
+       2026, the owner's ask. A tab, the aspect's own line, the reader's
        pairs closest first, then every placement, the pair's bodies lit. */
-    const ASP4 = [['conjunct', 'Conjunction'], ['opposite', 'Opposition'], ['trine', 'Trine'], ['square', 'Square']];
+    const ASP4 = [['conjunct', 'Conjunction'], ['opposite', 'Opposition'], ['trine', 'Trine'], ['square', 'Square'], ['sextile', 'Sextile']];
     const aspPick = ASP4.some(a => a[0] === st.ledAsp) ? st.ledAsp : 'conjunct';
     const MIRROR4 = ['Descendant', 'IC', 'South Node'];
     const coreKeys4 = corePts.map(r => this.pointKey(r));

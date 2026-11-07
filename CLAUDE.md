@@ -8186,6 +8186,13 @@ the owner's rule is that nothing is taken from the reader before the reason
 is put to them ("We don't want to strip a reader from any element of their
 curiosity"). Ask before hiding a row anywhere.
 
+## The Placements table has five aspect squares
+Asked for by the owner on 7 November 2026: the Sextile square sits after
+Conjunction, Opposition, Trine and Square over the Placements table, in both
+shells (`ASP4` in `chartGroupVals()`). It reads the same rich pass as the
+other four and its own `ASP_MEAN` line, and lights the pairs the same way.
+`tools/drive-placements-sextile.js` holds it, 10 rows.
+
 ## A body can be found in the Expert aspect grid
 The owner said on 7 November 2026 that the Expert table "is impossible to
 read or utilize after a certain point. A search utility is a good start."
