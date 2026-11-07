@@ -1008,6 +1008,23 @@
   function ordWord(n) { return ['first', 'second', 'third'][n - 1] || String(n); }
   function low(s) { return String(s || '').charAt(0).toLowerCase() + String(s || '').slice(1); }
   function stripDot(s) { return String(s || '').replace(/\.$/, ''); }
+  /* When a placement is felt least: the sign ready to do its thing and asked
+     not to (the owner, 7 November 2026: "least when Capricorn is prepared,
+     but asked to take a backseat"). */
+  var LEAST = {
+    Aries: 'least when Aries is ready to go first, but asked to wait its turn',
+    Taurus: 'least when Taurus has settled in, but asked to move before it is ready',
+    Gemini: 'least when Gemini has three ideas going, but asked to pick one and keep quiet',
+    Cancer: 'least when Cancer is ready to look after everyone, but asked to keep its distance',
+    Leo: 'least when Leo is ready to shine, but asked to stand at the back of the room',
+    Virgo: 'least when Virgo has spotted the fix, but asked to leave it alone',
+    Libra: 'least when Libra is ready to make the peace, but asked to pick a side and hold it',
+    Scorpio: 'least when Scorpio is ready to go deep, but asked to keep things light',
+    Sagittarius: 'least when Sagittarius is packed for the horizon, but asked to stay put',
+    Capricorn: 'least when Capricorn is prepared, but asked to take a backseat',
+    Aquarius: 'least when Aquarius has a better way, but asked to do it the usual way',
+    Pisces: 'least when Pisces is ready to feel all of it, but asked to stick to the facts'
+  };
   function cap(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
 
   /* WHAT EACH BODY DOES IN EACH HOUSE (owner, 7 November 2026). One line per
@@ -1254,8 +1271,7 @@
           ' around ' + h.arena + ', and meets it ' + s.manner + '.' + digClause +
           ' ' + name + ' brings the longing, ' + sign + ' brings the style, and the ' + ord(house) +
           ' house is where life keeps handing it back to you.',
-        possibility: 'You may feel this most around ' + h.arena + ', and least when a moment asks you to be the opposite of ' +
-          sign + '.'
+        possibility: 'You may feel this most around ' + h.arena + ', and ' + (LEAST[sign] || 'least when a moment asks you to be the opposite of ' + sign) + '.'
       };
     },
 
