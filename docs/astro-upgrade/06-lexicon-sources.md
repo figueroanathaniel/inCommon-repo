@@ -138,15 +138,27 @@ Not used though read: Wikipedia's Composite chart, Descendant, Midheaven and
 Vertex addresses each served a different article (Horoscope, House, Astrological
 symbols), and Progression (astrology) and Solar return no longer exist there.
 
+## Read on 7 November 2026, third batch
+
+| Term | Source |
+|---|---|
+| Secondary progression | https://en.wikipedia.org/wiki/Astrological_progression ("moving the natal chart forward one day for each year") |
+| Tertiary progression | the rows in `02-derived-and-decans-sources.md` (Skyscript /glossary/progressions, kerykeion, Astro*Dictionary tertiary) |
+| Solar arc | the rows in `02` (astrologysoftware.com article_90, Wikipedia) |
+| Composite chart, Relationship chart | the rows in `02` (The Astrology Podcast on Townley; Astro*Dictionary relationship_chart) |
+| Vertex | https://astrologysoftware.com/community/learn/dictionary/vertex.html (western intersection of the prime vertical and the ecliptic); the reading of meetings rests on the Astropedia's own Vertex entry |
+| Ingress | https://astrologysoftware.com/community/learn/dictionary/ingress.html |
+| Dissociate aspect (out of sign) | https://www.skyscript.co.uk/glossary/D |
+| Benefic | https://www.skyscript.co.uk/glossary/B |
+| Malefic | https://www.skyscript.co.uk/glossary/M; Saturn and Mars as the malefics rest on the Hellenistic study's lesson (`05`) |
+
 ## Not yet read
 
 These were tried and could not be read on 7 November 2026, so they are not in
 the lexicon. Skyscript's index and most of AstroWiki refuse automated reads,
 and the session's page budget ran out partway through.
 
-Secondary and tertiary progression (the app's own chapters rest on `02`),
-solar arc, solar and lunar return, composite, Davison, overlay, ingress,
-hemisphere and quadrant emphasis, out of sign, Vertex as its own entry,
-benefic and malefic from Skyscript (both are already words of the Hellenistic
-study), evolutionary and psychological astrology, zodiacal releasing (the
-app's chapter rests on `04`), pre-shadow.
+Solar and lunar return (astrologysoftware.com refused both pages on 7
+November), overlay, hemisphere and quadrant emphasis, evolutionary and
+psychological astrology, zodiacal releasing (the app's chapter rests on `04`),
+pre-shadow.
