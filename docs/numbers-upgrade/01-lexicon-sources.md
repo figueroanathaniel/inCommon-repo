@@ -33,6 +33,7 @@ is ours; no page is quoted.
 | Hidden Passion | https://affinitynumerology.com/using-numerology/your-hidden-passion-number.php |
 | Balance | https://affinitynumerology.com/using-numerology/the-balance-number.php |
 | Capstone | https://affinitynumerology.com/using-numerology/your-capstone.php |
+| Universal Year | https://affinitynumerology.com/using-numerology/universal-year-number.php |
 
 ## From the owner
 
@@ -56,5 +57,7 @@ is ours; no page is quoted.
 
 ## Not yet read
 
-Karmic Lessons, Maturity, the Chaldean letter chart, and Universal Year (only
-a teaser page was found). None has an entry until a page is read for it.
+Karmic Lessons and Maturity (affinitynumerology and numerology.com refused
+the fetch on 7 November 2026, and the site's index lists neither), and the
+Chaldean letter chart (Wikipedia's Numerology article does not describe it).
+None has an entry until a page is read for it.

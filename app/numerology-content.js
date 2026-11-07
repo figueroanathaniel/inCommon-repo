@@ -449,7 +449,8 @@
     ['Personality', "The consonants of the full birth name added together: the side others meet first.", 'mine'],
     ['Pinnacle', "Four long periods of a life, each with a number. The first runs from birth to somewhere between 27 and 35, the next two last nine years each, and the fourth runs on from there.", 'mine'],
     ['Pythagorean chart', "The usual table of letters: A to I are 1 to 9, J to R begin again at 1, and S to Z run from 1 to 8.", ''],
-    ['Soul Urge', "The vowels of the full birth name added together. It is also called Heart's Desire.", 'mine']
+    ['Soul Urge', "The vowels of the full birth name added together. It is also called Heart's Desire.", 'mine'],
+    ['Universal Year', "The calendar year alone, reduced to one digit. It is the same for everybody and turns every 1 January; each Personal Year is read inside it.", '']
   ];
   NC.LEXICON = LEXICON;
 
