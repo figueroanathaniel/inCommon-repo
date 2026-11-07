@@ -48,7 +48,9 @@ is ours; no page is quoted.
   arithmetic turns it on 1 January (CLAUDE.md, "A house that crosses a sign is
   a hand-off"), and so does affinitynumerology. Some schools do use the
   birthday. The lexicon entry follows the app; the seat text is the owner's
-  call and was not changed.
+  call and was not changed. On 7 November 2026 the owner asked for both: a
+  Settings choice, Personal Year Turns (On 1 January, the default, or On my
+  birthday), and the seat text now names both.
 - **The Birthday number.** numerology.com keeps the day unreduced (29 stays
   29); the app reads the compound first and the root after, which agrees.
 

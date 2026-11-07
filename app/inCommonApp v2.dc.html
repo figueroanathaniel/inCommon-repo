@@ -5392,6 +5392,15 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </button>
       </sc-for>
     </div>
+    <div role="radiogroup" aria-label="Personal Year turns" style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Personal Year Turns</div>
+      <sc-for list="{{ pyTurnRows }}" as="t" hint-placeholder-count="2">
+        <button data-lift onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid {{ t.bd }};border-radius:12px;padding:11px 14px">
+          <span style="flex:1;min-width:0;font:600 12.5px var(--fu);color:var(--tx)">{{ t.label }}</span>
+          <span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:var(--ac)">{{ t.tick }}</span>
+        </button>
+      </sc-for>
+    </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Memory &amp; Privacy</div>
       <sc-for list="{{ memRows }}" as="m" hint-placeholder-count="4">
@@ -13060,6 +13069,15 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </button>
       </sc-for>
     </div>
+    <div role="radiogroup" aria-label="Personal Year turns" style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Personal Year Turns</div>
+      <sc-for list="{{ pyTurnRows }}" as="t" hint-placeholder-count="2">
+        <button data-lift onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid {{ t.bd }};border-radius:12px;padding:11px 14px">
+          <span style="flex:1;min-width:0;font:600 12.5px var(--fu);color:var(--tx)">{{ t.label }}</span>
+          <span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:var(--ac)">{{ t.tick }}</span>
+        </button>
+      </sc-for>
+    </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Memory &amp; Privacy</div>
       <sc-for list="{{ memRows }}" as="m" hint-placeholder-count="4">
@@ -19073,7 +19091,7 @@ class Component extends DCLogic {
      the Oracle. */
   chartStamp(p) {
     p = p === undefined ? this.activeProfile() : p;
-    return (p ? p.birthStamp : 'legacy') + '|h' + this.houseSys() + '|s' + this.chartStudy();
+    return (p ? p.birthStamp : 'legacy') + '|h' + this.houseSys() + '|s' + this.chartStudy() + (this.pyTurn() === 'birthday' ? '|yb' : '');
   }
   houseSysSet(k) {
     const H = window.HouseSystems;
@@ -19095,6 +19113,27 @@ class Component extends DCLogic {
     const x = this.chartStudyOf(k);
     if (!x || (k === this.chartStudy() && (!x.houses || x.houses === this.houseSys()))) return;
     this.studySave(x.houses ? { study: k, houses: x.houses } : { study: k });
+  }
+  /* WHEN THE PERSONAL YEAR TURNS IS THE READER'S CHOICE (the owner, 7
+     November 2026: "Give the option for both year turns"). The calendar count
+     turns it on 1 January, which is where it always turned here; the older
+     count turns it on the birthday. Kept with the study, per profile. Only the
+     year moves: the Personal Month and Day still add the calendar month and
+     day to whichever year is running. */
+  pyTurn() { return this.studyState().pyTurn === 'birthday' ? 'birthday' : 'jan'; }
+  pyYearOf(d, dob) {
+    d = d || new Date();
+    const y = d.getFullYear();
+    if (this.pyTurn() !== 'birthday') return y;
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dob || this.dob() || '');
+    if (!m) return y;
+    return d.getTime() < new Date(y, +m[2] - 1, +m[3]).getTime() ? y - 1 : y;
+  }
+  pyTurnSet(k) { if (k !== this.pyTurn()) this.studySave({ pyTurn: k }); }
+  pyTurnRows() {
+    const cur = this.pyTurn();
+    return [['jan', 'On 1 January'], ['birthday', 'On my birthday']].map(([k, label]) => ({ label: label, on: k === cur,
+      bd: k === cur ? 'var(--ac)' : 'var(--bd)', tick: k === cur ? '\u2713' : '', go: () => this.pyTurnSet(k) }));
   }
   chartStudyRows() {
     const T = window.ChartTraditions, cur = this.chartStudy();
@@ -20742,7 +20781,7 @@ class Component extends DCLogic {
     const core = window.InCommonCore;
     if (!core || !this.state.ready) return null;
     const now = when || new Date(), tr = this.transitsNow(now), hd = this.hdChart();
-    const py = core.personalYear(this.dob(), now.getFullYear());
+    const py = core.personalYear(this.dob(), this.pyYearOf(now));
     const pyV = py ? py.value : 0;
     const pmV = core.personalMonth(pyV, now.getMonth() + 1).value;
     const pdV = this.personalDay(pyV, now);
@@ -21121,8 +21160,8 @@ class Component extends DCLogic {
   dpdOf(date) {
     const core = window.InCommonCore;
     if (!core) return 0;
-    const y = date.getFullYear();
-    // Matched to how the live figure is computed: personal year by calendar year.
+    const y = this.pyYearOf(date);
+    // Matched to how the live figure is computed: the year the reader's turn says is running.
     const pv = this.dcacheGet(this._dpyCache, y + '|' + this.dob(),
       () => { const p = core.personalYear(this.dob(), y); return p ? p.value : 0; });
     return this.personalDay(pv, date) || 0;
@@ -24084,6 +24123,7 @@ class Component extends DCLogic {
           go: () => this.themeSet(k) };
       }),
       studyRows: this.chartStudyRows(),
+      pyTurnRows: this.pyTurnRows(),
       hcOn: hc,
       hcNote: hc ? 'On: brighter text, firmer borders, and readings at 16px in the interface face.' : 'Off: each identity keeps its own type and weight.',
       hcTrack: hc ? 'var(--ac)' : 'var(--sf)',
@@ -25123,7 +25163,7 @@ class Component extends DCLogic {
   bnMine() {
     const core = window.InCommonCore, NC = window.NumerologyContent, now = new Date();
     const p = this.activeProfile(), sample = this.usingSampleBirth(), name = this.birthName();
-    const key = (p ? p.birthStamp : '') + '|' + this.dob() + '|' + name + '|' + sample + '|' + now.toDateString();
+    const key = (p ? p.birthStamp : '') + '|' + this.dob() + '|' + name + '|' + sample + '|' + now.toDateString() + '|' + this.pyTurn();
     if (this._bnMineKey === key) return this._bnMine;
     const ok = c => c != null && c >= 10 && c <= 99;
     const marks = [];
@@ -25145,7 +25185,7 @@ class Component extends DCLogic {
         add(l, c, true);
         ((nm.karmic || {})[k] || []).filter(x => x !== c).forEach(x => add(l + ' debt', x, true));
       });
-      const py = core.personalYear(dob, now.getFullYear()), pm = py && py.value != null ? core.personalMonth(py.value, now.getMonth() + 1) : null;
+      const py = core.personalYear(dob, this.pyYearOf(now, dob)), pm = py && py.value != null ? core.personalMonth(py.value, now.getMonth() + 1) : null;
       if (py) add('Personal Year', py.compound, false);
       if (pm) { add('Personal Month', pm.compound, false); add('Personal Day', core.compound(pm.value + now.getDate()), false); }
     }
@@ -26889,7 +26929,7 @@ class Component extends DCLogic {
     const n = this.numerology(), prof = this.activeProfile(), dob = this.dob();
     const mean = v => this.NUM_MEANING[v] || (NC ? NC.essence(v) : '');
     const pmR = core ? core.personalMonth(pyV, now.getMonth() + 1) : null, pm = pmR ? pmR.value : null;
-    const pyR = core ? core.personalYear(dob, now.getFullYear()) : null;
+    const pyR = core ? core.personalYear(dob, this.pyYearOf(now, dob)) : null;
     const pyC = pyR && pyR.value === pyV ? pyR.compound : null, pmC = pmR ? pmR.compound : null;
     const pdC = core && core.compound && pm != null ? core.compound(pm + now.getDate()) : null;
     const nm = NC ? NC.fromName(this.birthName()) : null, nmC = (nm && nm.compounds) || {}, nmK = (nm && nm.karmic) || {};
@@ -27136,6 +27176,16 @@ class Component extends DCLogic {
     const day0 = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     const today = day0(now), DAY = 86400000;
     const py = yy => { const p = core.personalYear(dob, yy); return p ? p.value : null; };
+    if (sel.pos === 'personalYear' && this.pyTurn() === 'birthday') {
+      const cy = this.pyYearOf(now, dob), cur = py(cy), nxt = py(cy + 1);
+      if (cur == null) return null;
+      const before = cy < y, bdStr = MON[bm - 1] + ' ' + bd;
+      const nextB = new Date(before ? y : y + 1, bm - 1, bd).getTime(), left = Math.round((nextB - today) / DAY);
+      const lines = ['Your Personal Year turned to ' + cur + ' on your birthday, ' + bdStr + (nxt != null ? ', and it turns to ' + nxt + ' on the next one' : '') + '. The calendar keeps a second count that starts each 1 January, and ' + (before ? 'by that count ' + nxt + ' has already begun.' : 'by that count the ' + cur + ' opened on 1 January, ahead of your birthday.'),
+        'From 1 January until your birthday the two counts disagree, and whatever that stretch carries belongs partly to the year still finishing and partly to the one waiting in the hall.',
+        before ? 'Today falls in that stretch, ' + (left === 1 ? 'one day' : left + ' days') + ' before your birthday opens the ' + nxt + '.' : 'That stretch is behind you this year and comes round again next 1 January.'];
+      return { heading: 'The ' + cur + ' from birthday to birthday', lead: 'Counted from your birthday, a year in numbers opens on your own day and keeps the calendar’s turn as a second door.', lines: lines };
+    }
     if (sel.pos === 'personalYear') {
       const cur = py(y), prev = py(y - 1), nxt = py(y + 1);
       if (cur == null) return null;
@@ -27149,11 +27199,12 @@ class Component extends DCLogic {
     if (sel.pos === 'personalMonth') {
       const last = new Date(y, now.getMonth() + 1, 0).getDate(), left = last - now.getDate() + 1;
       if (left > 7) return null;
-      const nm = now.getMonth() === 11 ? 1 : now.getMonth() + 2, ny = now.getMonth() === 11 ? y + 1 : y, pyN = py(ny);
+      const nm = now.getMonth() === 11 ? 1 : now.getMonth() + 2, ny = now.getMonth() === 11 ? y + 1 : y;
+      const nyY = this.pyYearOf(new Date(ny, nm - 1, 1), dob), turns = nyY !== this.pyYearOf(now, dob), pyN = py(nyY);
       if (pyN == null) return null;
       const nxt = core.personalMonth(pyN, nm).value;
       return { heading: 'Into ' + MON[nm - 1], lead: 'A month in numbers rarely ends on the last day. Its final week is already leaning toward the next.',
-        lines: ['Your Personal Month hands over in ' + (left === 1 ? 'a day' : left + ' days') + '. On 1 ' + MON[nm - 1] + ' it becomes ' + nxt + (now.getMonth() === 11 ? ', inside a new Personal Year of ' + pyN : '') + '.',
+        lines: ['Your Personal Month hands over in ' + (left === 1 ? 'a day' : left + ' days') + '. On 1 ' + MON[nm - 1] + ' it becomes ' + nxt + (turns ? ', inside a new Personal Year of ' + pyN : '') + '.',
           'What this month opened is still worth finishing; what the next one asks may already be at the door.'] };
     }
     if ((sel.pos === 'pinnacle' || sel.pos === 'cycle') && sel.range) {
@@ -30039,7 +30090,7 @@ class Component extends DCLogic {
     /* The numbers: inCommon's own, at the period's instant as the Codex took them. */
     const core = window.InCommonCore, NC = window.NumerologyContent, dob = this.dob();
     const lp = this.numerology().lp, nm = NC ? NC.fromName(this.birthName()) : null;
-    const py = core ? core.personalYear(dob, at.getFullYear()).value : null;
+    const py = core ? core.personalYear(dob, this.pyYearOf(at, dob)).value : null;
     const pm = core && py != null ? core.personalMonth(py, at.getMonth() + 1).value : null;
     const pd = py != null ? this.personalDay(py, at) : null;
     const bday = core ? core.birthday(dob).value : null;
@@ -33812,7 +33863,7 @@ class Component extends DCLogic {
     const consent = this.consentMap();
     const prof = this.activeProfile();
     const PM = this.PM();
-    const py = core ? core.personalYear(this.dob(), new Date().getFullYear()) : null;
+    const py = core ? core.personalYear(this.dob(), this.pyYearOf(new Date())) : null;
     const horo = ready ? this.horoscope() : null;
     /* The header names the screen you are on, Today included. It used to say
        the app name here, which left the primary landing screen as the one
