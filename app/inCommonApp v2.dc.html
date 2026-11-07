@@ -3468,7 +3468,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
             </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;text-align:center">
-              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)">{{ apCenter }}</span>
+              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)"><sc-if value="{{ apCenterTx }}" hint-placeholder-val="{{ true }}"><span>{{ apCenter }}</span></sc-if><sc-if value="{{ apCenterMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apCenterName }}</span>
             </div>
           </div>
@@ -3512,7 +3512,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </sc-if>
             <div style="display:flex;align-items:center;gap:16px">
-              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
+              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)"><sc-if value="{{ apIconTx }}" hint-placeholder-val="{{ true }}"><span>{{ apIcon }}</span></sc-if><sc-if value="{{ apIconMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
@@ -3595,7 +3595,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
                 <sc-for list="{{ apLinks }}" as="lk" hint-placeholder-count="3">
                   <button data-lift onClick="{{ lk.go }}" aria-label="{{ lk.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2)">
-                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}">{{ lk.glyph }}</span>
+                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}"><sc-if value="{{ lk.tx }}" hint-placeholder-val="{{ true }}"><span>{{ lk.glyph }}</span></sc-if><sc-if value="{{ lk.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                     <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
                   </button>
                 </sc-for>
@@ -3629,7 +3629,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
             <sc-for list="{{ apHits }}" as="h" hint-placeholder-count="6">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -3642,7 +3642,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;animation:fadeUp .22s ease-out">
             <sc-for list="{{ apGrid }}" as="h" hint-placeholder-count="12">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -11103,7 +11103,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
             </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;text-align:center">
-              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)">{{ apCenter }}</span>
+              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)"><sc-if value="{{ apCenterTx }}" hint-placeholder-val="{{ true }}"><span>{{ apCenter }}</span></sc-if><sc-if value="{{ apCenterMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apCenterName }}</span>
             </div>
           </div>
@@ -11147,7 +11147,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </sc-if>
             <div style="display:flex;align-items:center;gap:16px">
-              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
+              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)"><sc-if value="{{ apIconTx }}" hint-placeholder-val="{{ true }}"><span>{{ apIcon }}</span></sc-if><sc-if value="{{ apIconMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
@@ -11230,7 +11230,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
                 <sc-for list="{{ apLinks }}" as="lk" hint-placeholder-count="3">
                   <button data-lift onClick="{{ lk.go }}" aria-label="{{ lk.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2)">
-                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}">{{ lk.glyph }}</span>
+                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}"><sc-if value="{{ lk.tx }}" hint-placeholder-val="{{ true }}"><span>{{ lk.glyph }}</span></sc-if><sc-if value="{{ lk.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                     <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
                   </button>
                 </sc-for>
@@ -11264,7 +11264,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
             <sc-for list="{{ apHits }}" as="h" hint-placeholder-count="6">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -11277,7 +11277,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;animation:fadeUp .22s ease-out">
             <sc-for list="{{ apGrid }}" as="h" hint-placeholder-count="12">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -24532,11 +24532,35 @@ class Component extends DCLogic {
   /* A study word found in a sentence: whole word, any case, a plural allowed. */
   apWordRe(t) { return new RegExp('(^|[^A-Za-z])' + String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(s|es)?(?![A-Za-z])', 'i'); }
   apStudyLessons() { const A = this.AP(); return A && A.studyLessons ? A.studyLessons(this.chartStudy()) : null; }
+  /* The Lexicon's words, once: the read entries first, then every study's
+     glossary. A study word with the same name and the same words in several
+     studies is one entry naming each of them; the same name with other words
+     is its own entry, named by its study. Sorted A to Z. */
+  apLexicon() {
+    if (this._apLex) return this._apLex;
+    const A = this.AP();
+    if (!A) return [];
+    const out = [], seen = {};
+    (A.LEXICON || []).forEach(([name, text, see]) => out.push({ name: name, text: text, see: see || null, studies: [] }));
+    const SW = A.STUDY_WORDS || {};
+    Object.keys(SW).forEach(k => { const L = A.studyLessons ? A.studyLessons(k) : null, title = L ? L.title : k;
+      (SW[k] || []).forEach(([name, text]) => { const id = name.toLowerCase() + '|' + text;
+        if (seen[id]) { if (seen[id].studies.indexOf(title) === -1) seen[id].studies.push(title); return; }
+        const w = { name: name, text: text, see: null, studies: [title], sk: k };
+        seen[id] = w; out.push(w); }); });
+    out.sort((x, y) => x.name.localeCompare(y.name, 'en', { sensitivity: 'base' }) || x.studies.length - y.studies.length);
+    const used = {};
+    out.forEach(w => { let sl = this.slug(w.name + (w.studies.length ? '-' + w.sk : '')); while (used[sl]) sl += '-x'; used[sl] = 1; w.slug = sl;
+      w.study = w.studies.length > 2 ? w.studies.slice(0, 2).join(', ') + ' and ' + (w.studies.length - 2) + ' more' : w.studies.join(' and '); });
+    this._apLex = out;
+    return out;
+  }
   apSections() {
     const A = this.AP(), L = this.apStudyLessons();
     if (!A) return [];
-    if (!L) return A.SECTIONS;
-    return [['mystudy', 'Your study: ' + L.title]].concat((L.words || []).length ? [['mywords', 'Words of ' + L.title]] : [], A.SECTIONS);
+    const lex = (A.LEXICON || []).length ? [['lexicon', 'The Lexicon']] : [];
+    if (!L) return A.SECTIONS.concat(lex);
+    return [['mystudy', 'Your study: ' + L.title]].concat((L.words || []).length ? [['mywords', 'Words of ' + L.title]] : [], A.SECTIONS, lex);
   }
   apEntries() {
     const sk = this.chartStudy();
@@ -24550,7 +24574,7 @@ class Component extends DCLogic {
     /* The study's own words, each defined as its lessons use it (the owner,
        6 November 2026: definitions live in the Astropedia). */
     if (L) (L.words || []).forEach((w, i) => add({ key: 'term:' + sk + ':' + i, ch: 'mywords', kind: 'term', wi: i, name: w.term,
-      glyph: '\u2766', sub: this.apFirst(w.text, 46), c: 'var(--ac2-hi)', slug: this.slug(w.term), text: w.text }));
+      glyph: this.MARK_G, sub: this.apFirst(w.text, 46), c: 'var(--ac2-hi)', slug: this.slug(w.term), text: w.text }));
     A.SIGNS.forEach((s, i) => add({ key: 'sign:' + s.name, ch: 'signs', kind: 'sign', name: s.name, glyph: s.glyph + '︎',
       sub: s.modality + ' ' + s.element, c: this.AP_EL[s.element], idx: i, slug: this.slug(s.name),
       text: [s.text, s.key, s.sun, s.moon, s.asc, s.house, s.strengths, s.challenges].join(' ') }));
@@ -24570,6 +24594,12 @@ class Component extends DCLogic {
       sub: this.apFirst(c.text, 46), c: 'var(--ac2-hi)', slug: this.slug(c.name), text: c.text }));
     A.TECHNIQUES.forEach(c => add({ key: 'technique:' + c.name, ch: 'techniques', kind: 'technique', name: c.name, glyph: '◴',
       sub: this.apFirst(c.text, 46), c: 'var(--ac2-hi)', slug: this.slug(c.name), text: c.text }));
+    /* The Lexicon, A to Z (the owner, 7 November 2026): the field's own words,
+       each written from a page that was read, and every study's glossary
+       beside them, named by the study it belongs to. A word with no symbol
+       wears the inCommon mark. */
+    this.apLexicon().forEach((w, i) => add({ key: 'lex:' + w.slug, ch: 'lexicon', kind: 'lex', li: i, name: w.name, glyph: this.MARK_G,
+      sub: w.study ? 'A word of ' + w.study : this.apFirst(w.text, 46), c: 'var(--ac2-hi)', slug: w.slug, text: w.text }));
     A.SECTIONS.forEach(([k, title]) => { if (this.AP_ESSAY_GLYPH[k]) add({ key: 'essay:' + k, ch: k, kind: 'essay', ess: k, name: title,
       glyph: this.AP_ESSAY_GLYPH[k], sub: '', c: 'var(--ac2-hi)', slug: k,
       text: this.apBlocks(k).map(b => b.head + ' ' + b.rows.map(r => r.text).join(' ')).join(' ') }); });
@@ -24681,7 +24711,7 @@ class Component extends DCLogic {
     /* The folio. */
     const facets = [], links = [], yours = [];
     let kicker = '', lead = '', epi = '', now = '', essay = [], dropcap = false;
-    const link = (label, glyph, key) => { const x = find(key); if (x) links.push({ label: label, glyph: x.glyph, c: x.c, aria: label + ', ' + x.name, go: () => this.apPick(key, false) }); };
+    const link = (label, glyph, key) => { const x = find(key); if (x) links.push({ label: label, glyph: x.glyph, mk: x.glyph === this.MARK_G, tx: x.glyph !== this.MARK_G, c: x.c, aria: label + ', ' + x.name, go: () => this.apPick(key, false) }); };
     if (e.kind === 'sign') {
       const s = A.sign(e.name), opp = A.SIGNS[(e.idx + 6) % 12];
       kicker = s.modality + ' ' + s.element + ' · ' + s.season; epi = s.key; lead = s.text;
@@ -24763,11 +24793,17 @@ class Component extends DCLogic {
       kicker = 'A word of ' + L.title; lead = w.text;
       const re = this.apWordRe(w.term);
       L.lessons.forEach((l, i) => { if (re.test(l.term + ' ' + l.text)) link('The lesson, ' + l.name, '', 'lesson:' + sk + ':' + i); });
+    } else if (e.kind === 'lex') {
+      const w = this.apLexicon()[e.li];
+      kicker = w.study ? 'A word of ' + w.study : ''; lead = w.text;
+      if (w.see) { const y = find(w.see); if (y) link(y.name, '', w.see); }
+      if (w.sk) { const L = this.AP().studyLessons(w.sk), re = this.apWordRe(w.name);
+        if (L && w.sk === this.chartStudy()) L.lessons.forEach((l, i) => { if (re.test(l.term + ' ' + l.text)) link('The lesson, ' + l.name, '', 'lesson:' + w.sk + ':' + i); }); }
     } else if (e.kind === 'essay') {
       essay = e.ess === 'orbs' ? [{ head: '', hasHead: false, rows: [A.ORBS.what, A.ORBS.how, A.ORBS.custom].map(t => ({ t: t })) }]
         : this.apBlocks(e.ess).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));
-      if (e.ess === 'sabian') links.push({ label: 'Open the Sabian Lexicon', glyph: '✧', c: 'var(--ac2-hi)', aria: 'Open the Sabian Lexicon', go: () => this.setState({ libSub: 'study', libView: 'lexicon', selId: null, lexQuery: '', lexSign: null, lexDeg: null }) });
-      if (e.ess === 'synastry') links.push({ label: 'Go to The Commons', glyph: '⚭', c: 'var(--ac2-hi)', aria: 'Go to The Commons', go: () => this.setState({ libSub: 'commons', libView: null, selId: null }) });
+      if (e.ess === 'sabian') links.push({ label: 'Open the Sabian Lexicon', glyph: '✧', tx: true, mk: false, c: 'var(--ac2-hi)', aria: 'Open the Sabian Lexicon', go: () => this.setState({ libSub: 'study', libView: 'lexicon', selId: null, lexQuery: '', lexSign: null, lexDeg: null }) });
+      if (e.ess === 'synastry') links.push({ label: 'Go to The Commons', glyph: '⚭', tx: true, mk: false, c: 'var(--ac2-hi)', aria: 'Go to The Commons', go: () => this.setState({ libSub: 'commons', libView: null, selId: null }) });
       if (e.ess === 'orbs') ['Conjunction', 'Square', 'Trine'].forEach(n => link(n, '', 'aspect:' + n));
     }
     const terms = [];
@@ -24789,7 +24825,7 @@ class Component extends DCLogic {
     const step = d => sib[(at + d + sib.length) % sib.length];
     const q = String(st.apQuery || '').trim().toLowerCase();
     const hits = q.length > 1 ? all.filter(x => x.hay.indexOf(q) !== -1) : [];
-    const tile = x => ({ glyph: x.glyph, name: x.name, sub: x.sub, c: x.c, on: x.key === e.key,
+    const tile = x => ({ glyph: x.glyph, mk: x.glyph === this.MARK_G, tx: x.glyph !== this.MARK_G, name: x.name, sub: x.sub, c: x.c, on: x.key === e.key,
       bd: x.key === e.key ? 'var(--ac2-hi)' : 'var(--bd)', bg: x.key === e.key ? 'rgba(var(--atmc),.2)' : 'var(--sf)',
       go: () => this.apPick(x.key, true) });
     return { libAstropedia: true,
@@ -24814,7 +24850,7 @@ class Component extends DCLogic {
         return { l: pct(q2.x), t: pct(q2.y), tip: 'Your ' + r.name + ', ' + fmtDeg(r), go: peek('natal:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, 'Your ' + r.name + ', ' + fmtDeg(r), 'body:' + r.name) }; }),
       apStars: stars,
       apHorizonPath: (() => { const a = P(0, 176), b = P(180, 176); return 'M' + f1(a.x) + ' ' + f1(a.y) + 'L' + f1(b.x) + ' ' + f1(b.y); })(),
-      apCenter: e.glyph, apCenterC: e.c, apCenterName: e.name,
+      apCenter: e.glyph, apCenterMk: e.glyph === this.MARK_G, apCenterTx: e.glyph !== this.MARK_G, apCenterC: e.c, apCenterName: e.name,
       apPeekOn: lv === 'first' && !!st.apPeek && !!st.apPeekAt,
       apPeekL: st.apPeekAt ? st.apPeekAt.l : '0%', apPeekT: st.apPeekAt ? st.apPeekAt.t : '0%', apPeekText: st.apPeekAt ? st.apPeekAt.text : '',
       apPeekGo: () => { if (st.apPeekAt) this.apPick(st.apPeekAt.key, false); },
@@ -24835,7 +24871,7 @@ class Component extends DCLogic {
           aria: m.label + ', ' + m.r.sign, go: () => this.apPick(se.key, true) }; }),
       /* The folio. */
       apAnim: (st.apFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
-      apFolioLabel: e.name, apIcon: e.glyph, apIconC: e.c, apName: e.name,
+      apFolioLabel: e.name, apIcon: e.glyph, apIconMk: e.glyph === this.MARK_G, apIconTx: e.glyph !== this.MARK_G, apIconC: e.c, apName: e.name,
       apKicker: kicker, apKickerOn: !!kicker, apEpi: epi, apEpiOn: !!epi,
       apLead: lead, apLeadOn: !!lead && !dropcap, apLeadCap: !!lead && dropcap,
       apNow: now, apNowOn: !!now,

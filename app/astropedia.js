@@ -801,6 +801,78 @@
     ]
   };
 
+  /* THE LEXICON (the owner, 7 November 2026: "Astropedia ... need lexicons
+     like Human Design has"). One A to Z of the words astrology uses, each
+     written only after a page that supports it was read; every page is in
+     docs/astro-upgrade/06-lexicon-sources.md. [name, text, see] where see is
+     an Astropedia entry key the word opens onto. The study glossaries join it
+     in the room, tagged by study, so a word is defined once. */
+  var LEXICON = [
+    ['Accidental dignity', "Strength a planet takes from where it stands in this chart rather than from its sign: near an angle, in good aspect, beside a helpful body.", 'concept:Essential Dignity'],
+    ['Almuten', "The planet that holds the most dignity over a degree once every kind is counted together, sign, exaltation, triplicity, term and face. The word comes from Arabic.", 'concept:Essential Dignity'],
+    ['Angular', "The houses that begin at the four angles, the 1st, 4th, 7th and 10th. They are where things are started.", 'concept:Angular, Succedent, and Cadent Houses'],
+    ['Aries Point', "Zero degrees of Aries, where the Sun crosses the celestial equator going north at the spring equinox. It drifts west against the stars by about a degree every seventy two years.", 'point:Aries Point'],
+    ['Ascendant', "The degree of the sign rising on the eastern horizon at the moment of birth, the beginning of the 1st house in most systems.", ''],
+    ['Ayanamsa', "The distance between the tropical and the sidereal zodiac, the correction Jyotish makes for precession. Lahiri's is the one most used in India.", 'concept:The Sidereal Zodiac and the Ayanamsa'],
+    ['Besieged', "A planet held between two hostile bodies, as Venus between Mars and Saturn in Lilly's example.", ''],
+    ['Black Moon Lilith', "In present day astrology, the point where the Moon's orbit is furthest from the Earth.", 'point:Black Moon Lilith'],
+    ['Cadent', "The houses that fall away from the angles, the 3rd, 6th, 9th and 12th. They are where things are passed on.", 'concept:Angular, Succedent, and Cadent Houses'],
+    ['Cazimi', "A planet in the heart of the Sun, within seventeen minutes of arc of it. Lilly gives sixteen in one place; the old texts read it as strength rather than harm.", 'concept:Combust and Cazimi'],
+    ['Chart ruler', "The planet that rules the rising sign, read as the voice that carries the whole chart.", 'concept:Chart Ruler'],
+    ['Combust', "A planet close enough to the Sun to be lost in its light, within eight and a half degrees by Lilly's count.", 'concept:Combust and Cazimi'],
+    ['Contraparallel', "Two bodies at the same declination on opposite sides of the celestial equator, heard much like an opposition.", ''],
+    ['Cosmobiology', "Reinhold Ebertin's school, grown from Alfred Witte's work: midpoints and the hard angles of the eighth harmonic, without Witte's hypothetical points.", ''],
+    ['Declination', "How far a body stands north or south of the celestial equator, from 0 to 90 degrees. It is not the same as latitude from the ecliptic.", ''],
+    ['Detriment', "The sign opposite a planet's own, where it works against the grain.", 'concept:Essential Dignity'],
+    ['Dispositor', "The ruler of the sign a body stands in. Its condition colours the body it disposes, and its own dispositor colours it in turn, until the chain closes.", ''],
+    ['Diurnal', "Of the day. The Sun, Jupiter and Saturn belong to the day, and work most easily when the Sun is above the horizon.", 'concept:Sect'],
+    ['Domicile', "A planet in a sign it rules, at home and most itself.", 'concept:Essential Dignity'],
+    ['Ecliptic', "The Sun's apparent yearly path through the sky, tilted about twenty three and a half degrees to the equator. The zodiac is measured along it.", ''],
+    ['Ecliptic latitude', "How far a body stands north or south of the ecliptic itself.", ''],
+    ['Equinox', "Either moment the Sun crosses the celestial equator and day and night are near equal, around 21 March and 23 September.", ''],
+    ['Exaltation', "A sign where a planet is honoured as a guest, the second of the essential dignities.", 'concept:Essential Dignity'],
+    ['Face', "A ten degree third of a sign with a planet of its own, the least of the essential dignities. The same division is called the decan.", 'concept:Decans'],
+    ['Fall', "The sign opposite a planet's exaltation, where it is least honoured.", 'concept:Essential Dignity'],
+    ['Hayz', "A planet that meets every condition of its sect at once, in its own hemisphere and its own kind of sign.", 'concept:Sect'],
+    ['Hellenistic astrology', "The horoscopic tradition of the Mediterranean world from about the second or first century before the common era to the sixth or seventh after it, with Ptolemy's Tetrabiblos among its texts.", ''],
+    ['Imum coeli', "Where the ecliptic crosses the meridian below the Earth, opposite the Midheaven. It usually begins the 4th house.", ''],
+    ['Joys', "The house each of the seven planets rejoices in: Mercury the 1st, the Moon the 3rd, Venus the 5th, Mars the 6th, the Sun the 9th, Jupiter the 11th and Saturn the 12th.", ''],
+    ['Kite', "A grand trine with a fourth body opposite one of its three and sextile to the other two, so the triangle has a point to fly from.", 'concept:Aspect Patterns'],
+    ['Lot', "A point made from three others: the distance between two is measured from the third, most often the Ascendant.", 'point:Part of Fortune'],
+    ['Lunar nodes', "The two points where the Moon's path crosses the ecliptic, the north going up and the south going down.", 'point:North Node'],
+    ['Lunar phases', "The Moon's month seen as light: four principal phases, new, first quarter, full and last quarter, and four between them.", ''],
+    ['Midpoint', "The point halfway between two bodies. When a third body stands on it, the three are heard together.", ''],
+    ['Mutual reception', "Two planets each standing in a sign the other rules, or otherwise dignified there, so each receives the other.", 'concept:Mutual Reception'],
+    ['Mystic rectangle', "Two oppositions joined by sextiles on the short sides and trines on the long, a box held together by its own tension and ease.", 'concept:Aspect Patterns'],
+    ['Nocturnal', "Of the night. The Moon, Venus and Mars belong to the night, and work most easily when the Sun is below the horizon.", 'concept:Sect'],
+    ['Orb', "How far from exact an aspect may be and still be heard.", 'essay:orbs'],
+    ['Parallel', "Two bodies at the same declination on the same side of the equator, within about a degree. Some read it as a conjunction.", ''],
+    ['Part of Fortune', "The lot of the body's fortunes: the Ascendant plus the Moon less the Sun by day, and the Sun less the Moon by night.", 'point:Part of Fortune'],
+    ['Part of Spirit', "The lot of the mind and its intentions, made the other way round from the Part of Fortune.", 'point:Part of Fortune'],
+    ['Partile', "An aspect in the same degree, or near enough. Lilly first meant the same degree and later allowed three.", 'essay:orbs'],
+    ['Peregrine', "A planet with no essential dignity where it stands, a wanderer far from home.", 'concept:Peregrine'],
+    ['Platic', "An aspect within its orb but not exact, the looser kind.", 'essay:orbs'],
+    ['Quincunx', "Two bodies 150 degrees apart, in signs that share nothing, asking for adjustment.", ''],
+    ['Quintile', "Two bodies 72 degrees apart, a fifth of the circle, linked to talent and to making something with it.", 'technique:Harmonic Charts'],
+    ['Reception', "A planet received by the ruler of the sign it stands in, or of its exaltation, when the two are in aspect.", 'concept:Mutual Reception'],
+    ['Saros', "A span of 223 lunar months, about eighteen years and eleven days, after which an eclipse returns in nearly the same shape.", 'concept:Eclipses'],
+    ['Sect', "The division of the seven planets into those of the day and those of the night. A planet of the chart's own sect works more easily.", 'concept:Sect'],
+    ['Semisextile', "Two bodies 30 degrees apart, neighbours in the zodiac.", ''],
+    ['Semisquare', "Two bodies 45 degrees apart, half a square.", ''],
+    ['Sesquiquadrate', "Two bodies 135 degrees apart, a square and a half.", ''],
+    ['Sidereal zodiac', "A zodiac fixed to the stars rather than to the seasons, used in Jyotish and in Western sidereal astrology.", 'concept:The Sidereal Zodiac and the Ayanamsa'],
+    ['Solstice', "Where the Sun stands furthest from the equator: 0 Cancer in June and 0 Capricorn in December, in the tropical zodiac.", ''],
+    ['Stellium', "A gathering of bodies in one sign or one house. The older word is satellitium.", 'essay:stellium'],
+    ['Succedent', "The houses that follow the angles, the 2nd, 5th, 8th and 11th. They are where things are held.", 'concept:Angular, Succedent, and Cadent Houses'],
+    ['Synastry', "Reading two charts beside each other, one person's bodies laid over the other's. It is a conversation between charts, never a score.", 'essay:synastry'],
+    ['Terms', "Unequal portions of each sign, each given to one of the five planets and never to the lights. Also called bounds.", 'concept:Essential Dignity'],
+    ['Triplicity', "Rulership by element, each of the four triplicities with planets of its own.", 'concept:Essential Dignity'],
+    ['Tropical zodiac', "The zodiac anchored to the seasons, beginning at the spring equinox, with the solstices at 0 Cancer and 0 Capricorn.", ''],
+    ['Uranian astrology', "The Hamburg School after Alfred Witte: midpoints, and eight hypothetical points beyond Neptune.", ''],
+    ['Void of course', "A body, most often the Moon, that makes no further aspect before it leaves its sign.", 'concept:Void of Course Moon'],
+    ['Yod', "Two bodies in sextile with a third quincunx to both, a long finger pointing at the third. It is also called the finger of fate.", 'concept:Aspect Patterns']
+  ];
+
   function signByName(n) { for (var i = 0; i < SIGNS.length; i++) { if (SIGNS[i].name === n) return SIGNS[i]; } return null; }
   function house(n) { return HOUSES[n - 1] || null; }
   function astralBody(n) { for (var i = 0; i < ASTRAL_BODIES.length; i++) { if (ASTRAL_BODIES[i].name === n) return ASTRAL_BODIES[i]; } return null; }
@@ -816,5 +888,6 @@
     STUDY_LESSONS: STUDY_LESSONS, studyLessons: studyLessons,
     ASTRAL_BODIES: ASTRAL_BODIES, POINTS: POINTS, ASPECTS: ASPECTS, ORBS: ORBS, CONCEPTS: CONCEPTS, CHART: CHART, SABIAN: SABIAN,
     STELLIUM: STELLIUM, TRANSITS: TRANSITS, TECHNIQUES: TECHNIQUES, SYNASTRY: SYNASTRY, EXAMPLE: EXAMPLE,
+    LEXICON: LEXICON, STUDY_WORDS: STUDY_WORDS,
     sign: signByName, house: house, houseSystem: houseSystem, astralBody: astralBody, point: point, aspect: aspect };
 }));
