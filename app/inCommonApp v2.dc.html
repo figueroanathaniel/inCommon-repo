@@ -7725,12 +7725,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
         </sc-for>
         <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
-        <sc-if value="{{ asp.natureOn }}" hint-placeholder-val="{{ false }}">
-          <details style="font:400 13px/1.6 var(--fb);color:var(--mut)">
-            <summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font:600 12px var(--fc);color:var(--ac2-hi)">{{ asp.natureLabel }}</summary>
-            <div style="padding-top:4px">{{ asp.nature }}</div>
-          </details>
-        </sc-if>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -15057,12 +15051,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
         </sc-for>
         <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
-        <sc-if value="{{ asp.natureOn }}" hint-placeholder-val="{{ false }}">
-          <details style="font:400 13px/1.6 var(--fb);color:var(--mut)">
-            <summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font:600 12px var(--fc);color:var(--ac2-hi)">{{ asp.natureLabel }}</summary>
-            <div style="padding-top:4px">{{ asp.nature }}</div>
-          </details>
-        </sc-if>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -23322,12 +23310,7 @@ class Component extends DCLogic {
     const houses = group('houses', housesHead, this.HOUSE_THEMES.map((th, i) => row({ glyph: String(i + 1), title: houseWord + ' ' + (i + 1), hi: cuspWord(i + 1), sub: th,
       aria: houseWord + ' ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
       { cards: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => this.impactHouseCard(h, ctx)) });
-    /* A contact to the Descendant, the IC or the South Node only mirrors the
-       one to the Ascendant, the Midheaven or the North Node, and the two nodes
-       always oppose each other, so the list shows each contact once
-       (owner, 7 November 2026). The index stays the one into asps. */
-    const aspects = group('aspects', o.expanded ? 'Aspects' : 'Major Aspects', o.asps.map((x, i) => ({ x: x, i: i }))
-      .filter(({ x }) => MIRROR4.indexOf(x.a.name) === -1 && MIRROR4.indexOf(x.b.name) === -1).slice(0, 40).map(({ x, i }) => row({
+    const aspects = group('aspects', o.expanded ? 'Aspects' : 'Major Aspects', o.asps.slice(0, 40).map((x, i) => row({
       title: x.a.glyph + ' ' + this.studyName(x.a.name) + ' ' + x.asp + ' ' + x.b.glyph + ' ' + this.studyName(x.b.name), meta: x.orb.toFixed(1) + '° orb',
       edge: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', sub: this.ASP_SHORT[x.asp] || '', go: () => this.setState({ aspSel: i }) })));
     const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map(x => row({
@@ -34857,17 +34840,14 @@ class Component extends DCLogic {
               aspClose: () => this.setState({ aspSel: null }),
               asp: (() => {
                 const x = st.aspSel != null ? asps[st.aspSel] : null;
-                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', natureOn: false, natureLabel: '', paras: [], possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
+                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', paras: [], possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
                 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
                 const L = this.aspectLines(x, houseOf, ordinal);
-                const nature = this.ASP_NATURE[x.asp] || (this.ASP_MINOR[x.asp] || {}).nature || '';
-                const plural = { conjunct: 'conjunctions', sextile: 'sextiles', square: 'squares', trine: 'trines', opposite: 'oppositions' }[x.asp] || this.aspName(x.asp).toLowerCase() + 's';
                 return { c: this.ASP_COLOR[x.asp][0], ga: x.a.glyph, gb: x.b.glyph,
                   title: x.a.name + ' ' + cap(x.asp) + ' ' + x.b.name,
                   orb: 'Within ' + x.orb.toFixed(1) + '\u00b0 orb',
-                  /* The angle's own lesson folds under a small link (owner's
-                     pending call, 7 November 2026): the two bodies lead. */
-                  nature: nature, natureOn: !!nature, natureLabel: 'About ' + plural,
+                  /* No geometry lesson in the sheet (owner, 7 November 2026). */
+                  nature: '',
                   paras: L.paras.map(t => ({ t: t })),
                   possibility: L.close,
                   labelA: 'See ' + x.a.name, labelB: 'See ' + x.b.name,

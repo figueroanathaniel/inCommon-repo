@@ -8162,8 +8162,10 @@ change them only with the owner. The source draft is
 `/mnt/project-files/aspect-language/body-in-house.md`. A point outside the ten
 gets no house line, never a generic one; an angle gets no house at all.
 
-The angle's geometry lesson (`ASP_NATURE`) is folded under "About squares"
-and the like, a `<details>` under the reading. The Aspects list no longer
-shows a contact to the Descendant, IC or South Node, because each mirrors the
-one to the Ascendant, Midheaven or North Node (`MIRROR4`, as the Placements
-pairs already did); the row keeps its index into `asps`.
+There is no geometry lesson in the sheet (the owner, 7 November 2026: "No
+geometry lesson"); `ASP_NATURE` still serves the Observatory's contact window.
+The Aspects list keeps every contact, the Descendant, IC and South Node ones
+included, though each mirrors one to the Ascendant, Midheaven or North Node:
+the owner's rule is that nothing is taken from the reader before the reason
+is put to them ("We don't want to strip a reader from any element of their
+curiosity"). Ask before hiding a row anywhere.
