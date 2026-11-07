@@ -152,6 +152,14 @@ symbols), and Progression (astrology) and Solar return no longer exist there.
 | Benefic | https://www.skyscript.co.uk/glossary/B |
 | Malefic | https://www.skyscript.co.uk/glossary/M; Saturn and Mars as the malefics rest on the Hellenistic study's lesson (`05`) |
 
+## Read on 7 November 2026, fourth batch
+
+| Term | What the page holds | Page |
+|---|---|---|
+| Evolutionary astrology | Forrest "practices what he calls Evolutionary Astrology, a term that he used in his 1984 book, The Inner Sky"; his definition, humanistic psychology fused with ancient metaphysics | https://en.wikipedia.org/wiki/Evolutionary_astrology (served the Steven Forrest (astrologer) biography) |
+| Psychological astrology | "the result of the cross-fertilisation of the fields of astrology" and psychology, also astropsychology. The page also calls it a pseudoscience; that is not drawn, by "No disclaimers" | https://en.wikipedia.org/wiki/Psychological_astrology |
+| Shadow period | About two weeks before and after Mercury's retrograde; the later shadow is integration and ends when Mercury returns to the degree where the retrograde began. A popular source, and it says "retroshade" rather than pre-shadow and post-shadow | https://astrostyle.com/astrology/mercury-retrograde-shadow/ |
+
 ## Not yet read
 
 These were tried and could not be read on 7 November 2026, so they are not in
@@ -159,6 +167,4 @@ the lexicon. Skyscript's index and most of AstroWiki refuse automated reads,
 and the session's page budget ran out partway through.
 
 Solar and lunar return (astrologysoftware.com refused both pages on 7
-November), overlay, hemisphere and quadrant emphasis, evolutionary and
-psychological astrology, zodiacal releasing (the app's chapter rests on `04`),
-pre-shadow.
+November), overlay, hemisphere and quadrant emphasis, zodiacal releasing (the app's chapter rests on `04`).
