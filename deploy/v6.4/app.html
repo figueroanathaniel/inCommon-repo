@@ -13396,6 +13396,95 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     ]
   };
 
+  /* THE LEXICON (the owner, 7 November 2026: "Astropedia ... need lexicons
+     like Human Design has"). One A to Z of the words astrology uses, each
+     written only after a page that supports it was read; every page is in
+     docs/astro-upgrade/06-lexicon-sources.md. [name, text, see] where see is
+     an Astropedia entry key the word opens onto. The study glossaries join it
+     in the room, tagged by study, so a word is defined once. */
+  var LEXICON = [
+    ['Accidental dignity', "Strength a planet takes from where it stands in this chart rather than from its sign: near an angle, in good aspect, beside a helpful body.", 'concept:Essential Dignity'],
+    ['Alcocoden', "The planet that rules the degree of the hyleg and looks at it. Persian and Arabic authors called it the kadhkhudah, the giver of years.", ''],
+    ['Almuten', "The planet that holds the most dignity over a degree once every kind is counted together, sign, exaltation, triplicity, term and face. The word comes from Arabic.", 'concept:Essential Dignity'],
+    ['Angular', "The houses that begin at the four angles, the 1st, 4th, 7th and 10th. They are where things are started.", 'concept:Angular, Succedent, and Cadent Houses'],
+    ['Application', "A body within orb of another and still moving toward the exact angle, so the contact is gathering. Retrograde motion can turn what looks like an approach into a parting.", 'essay:orbs'],
+    ['Aries Point', "Zero degrees of Aries, where the Sun crosses the celestial equator going north at the spring equinox. It drifts west against the stars by about a degree every seventy two years.", 'point:Aries Point'],
+    ['Ascendant', "The degree of the sign rising on the eastern horizon at the moment of birth, the beginning of the 1st house in most systems.", ''],
+    ['Ayanamsa', "The distance between the tropical and the sidereal zodiac, the correction Jyotish makes for precession. Lahiri's is the one most used in India.", 'concept:The Sidereal Zodiac and the Ayanamsa'],
+    ['Besieged', "A planet held between two hostile bodies, as Venus between Mars and Saturn in Lilly's example.", ''],
+    ['Black Moon Lilith', "In present day astrology, the point where the Moon's orbit is furthest from the Earth.", 'point:Black Moon Lilith'],
+    ['Cadent', "The houses that fall away from the angles, the 3rd, 6th, 9th and 12th. They are where things are passed on.", 'concept:Angular, Succedent, and Cadent Houses'],
+    ['Cazimi', "A planet in the heart of the Sun, within seventeen minutes of arc of it. Lilly gives sixteen in one place; the old texts read it as strength rather than harm.", 'concept:Combust and Cazimi'],
+    ['Chart ruler', "The planet that rules the rising sign, read as the voice that carries the whole chart.", 'concept:Chart Ruler'],
+    ['Collection of light', "Two planets that never meet each other both reach toward a third, and the third gathers their light and joins them.", 'essay:orbs'],
+    ['Combust', "A planet close enough to the Sun to be lost in its light, within eight and a half degrees by Lilly's count.", 'concept:Combust and Cazimi'],
+    ['Contraparallel', "Two bodies at the same declination on opposite sides of the celestial equator, heard much like an opposition.", ''],
+    ['Cosmobiology', "Reinhold Ebertin's school, grown from Alfred Witte's work: midpoints and the hard angles of the eighth harmonic, without Witte's hypothetical points.", ''],
+    ['Declination', "How far a body stands north or south of the celestial equator, from 0 to 90 degrees. It is not the same as latitude from the ecliptic.", ''],
+    ['Detriment', "The sign opposite a planet's own, where it works against the grain.", 'concept:Essential Dignity'],
+    ['Dispositor', "The ruler of the sign a body stands in. Its condition colours the body it disposes, and its own dispositor colours it in turn, until the chain closes.", ''],
+    ['Diurnal', "Of the day. The Sun, Jupiter and Saturn belong to the day, and work most easily when the Sun is above the horizon.", 'concept:Sect'],
+    ['Dodecatemoria', "An old way of giving a sign or a degree more to say by dividing or multiplying it by twelve. The word can also mean the twelve signs themselves, or portions of twelve degrees.", 'concept:Decans'],
+    ['Domicile', "A planet in a sign it rules, at home and most itself.", 'concept:Essential Dignity'],
+    ['Ecliptic', "The Sun's apparent yearly path through the sky, tilted about twenty three and a half degrees to the equator. The zodiac is measured along it.", ''],
+    ['Ecliptic latitude', "How far a body stands north or south of the ecliptic itself.", ''],
+    ['Equinox', "Either moment the Sun crosses the celestial equator and day and night are near equal, around 21 March and 23 September.", ''],
+    ['Exaltation', "A sign where a planet is honoured as a guest, the second of the essential dignities.", 'concept:Essential Dignity'],
+    ['Face', "A ten degree third of a sign with a planet of its own, the least of the essential dignities. The same division is called the decan.", 'concept:Decans'],
+    ['Fall', "The sign opposite a planet's exaltation, where it is least honoured.", 'concept:Essential Dignity'],
+    ['Final disposition', "Follow a planet to the ruler of its sign, then that ruler to the ruler of its own, and on. The chain comes to rest at a planet in its own sign, or circles without end.", 'concept:Essential Dignity'],
+    ['Firdaria', "Long periods of life, each given to a planet, a medieval technique attributed to the Persians. A day chart begins with the Sun and a night chart with the Moon.", 'concept:Sect'],
+    ['Grand cross', "Four bodies in two oppositions, each joined to its neighbours by squares: four squares locked together, with no single body at the centre.", 'concept:Aspect Patterns'],
+    ['Grand trine', "Three bodies each 120 degrees from the next, a triangle of trines. It is steady and easy, and can rest a little too comfortably.", 'concept:Aspect Patterns'],
+    ['Hayz', "A planet that meets every condition of its sect at once, in its own hemisphere and its own kind of sign.", 'concept:Sect'],
+    ['Hellenistic astrology', "The horoscopic tradition of the Mediterranean world from about the second or first century before the common era to the sixth or seventh after it, with Ptolemy's Tetrabiblos among its texts.", ''],
+    ['Hyleg', "The planet or point older astrologers read as the giver of life, the one most bound to vitality. The ruler of its degree is the alcocoden.", ''],
+    ['Imum coeli', "Where the ecliptic crosses the meridian below the Earth, opposite the Midheaven. It usually begins the 4th house.", ''],
+    ['Joys', "The house each of the seven planets rejoices in: Mercury the 1st, the Moon the 3rd, Venus the 5th, Mars the 6th, the Sun the 9th, Jupiter the 11th and Saturn the 12th.", ''],
+    ['Kite', "A grand trine with a fourth body opposite one of its three and sextile to the other two, so the triangle has a point to fly from.", 'concept:Aspect Patterns'],
+    ['Lot', "A point made from three others: the distance between two is measured from the third, most often the Ascendant.", 'point:Part of Fortune'],
+    ['Lunar nodes', "The two points where the Moon's path crosses the ecliptic, the north going up and the south going down.", 'point:North Node'],
+    ['Lunar phases', "The Moon's month seen as light: four principal phases, new, first quarter, full and last quarter, and four between them.", ''],
+    ['Midpoint', "The point halfway between two bodies. When a third body stands on it, the three are heard together.", ''],
+    ['Mutual reception', "Two planets each standing in a sign the other rules, or otherwise dignified there, so each receives the other.", 'concept:Mutual Reception'],
+    ['Mystic rectangle', "Two oppositions joined by sextiles on the short sides and trines on the long, a box held together by its own tension and ease.", 'concept:Aspect Patterns'],
+    ['Nocturnal', "Of the night. The Moon, Venus and Mars belong to the night, and work most easily when the Sun is below the horizon.", 'concept:Sect'],
+    ['Occidental', "Western, from the Latin for the west: setting and falling away, like the Sun going down.", ''],
+    ['Orb', "How far from exact an aspect may be and still be heard.", 'essay:orbs'],
+    ['Oriental', "Eastern, from the Latin for the east: rising and coming forth, like the Sun at dawn.", ''],
+    ['Parallel', "Two bodies at the same declination on the same side of the equator, within about a degree. Some read it as a conjunction.", ''],
+    ['Part of Fortune', "The lot of the body's fortunes: the Ascendant plus the Moon less the Sun by day, and the Sun less the Moon by night.", 'point:Part of Fortune'],
+    ['Part of Spirit', "The lot of the mind and its intentions, made the other way round from the Part of Fortune.", 'point:Part of Fortune'],
+    ['Partile', "An aspect in the same degree, or near enough. Lilly first meant the same degree and later allowed three.", 'essay:orbs'],
+    ['Peregrine', "A planet with no essential dignity where it stands, a wanderer far from home.", 'concept:Peregrine'],
+    ['Platic', "An aspect within its orb but not exact, the looser kind.", 'essay:orbs'],
+    ['Prohibition', "Two planets moving toward an aspect, and a third reaching one of them first, so the first contact never forms. Lilly sets it out in Christian Astrology.", 'essay:orbs'],
+    ['Quincunx', "Two bodies 150 degrees apart, in signs that share nothing, asking for adjustment.", ''],
+    ['Quintile', "Two bodies 72 degrees apart, a fifth of the circle, linked to talent and to making something with it.", 'technique:Harmonic Charts'],
+    ['Reception', "A planet received by the ruler of the sign it stands in, or of its exaltation, when the two are in aspect.", 'concept:Mutual Reception'],
+    ['Refranation', "A kind of prohibition: a planet moving toward an aspect turns retrograde and draws away before the aspect is exact.", 'concept:Retrograde Motion'],
+    ['Saros', "A span of 223 lunar months, about eighteen years and eleven days, after which an eclipse returns in nearly the same shape.", 'concept:Eclipses'],
+    ['Sect', "The division of the seven planets into those of the day and those of the night. A planet of the chart's own sect works more easily.", 'concept:Sect'],
+    ['Semisextile', "Two bodies 30 degrees apart, neighbours in the zodiac.", ''],
+    ['Semisquare', "Two bodies 45 degrees apart, half a square.", ''],
+    ['Separation', "A body within orb of another and moving away from the exact angle, so the contact is loosening. Retrograde motion can turn it around.", 'essay:orbs'],
+    ['Sesquiquadrate', "Two bodies 135 degrees apart, a square and a half.", ''],
+    ['Sidereal zodiac', "A zodiac fixed to the stars rather than to the seasons, used in Jyotish and in Western sidereal astrology.", 'concept:The Sidereal Zodiac and the Ayanamsa'],
+    ['Solstice', "Where the Sun stands furthest from the equator: 0 Cancer in June and 0 Capricorn in December, in the tropical zodiac.", ''],
+    ['Station', "The moment a planet's daily motion turns, direct to retrograde or back again, so it seems to hang on one degree. Tradition hears hesitation in it, and an effect that lingers.", 'concept:Retrograde Motion'],
+    ['Stellium', "A gathering of bodies in one sign or one house. The older word is satellitium.", 'essay:stellium'],
+    ['Succedent', "The houses that follow the angles, the 2nd, 5th, 8th and 11th. They are where things are held.", 'concept:Angular, Succedent, and Cadent Houses'],
+    ['Synastry', "Reading two charts beside each other, one person's bodies laid over the other's. It is a conversation between charts, never a score.", 'essay:synastry'],
+    ['T-square', "Two bodies in opposition, both square a third, which becomes the focus. The empty point across from the focus is held as sensitive.", 'concept:Aspect Patterns'],
+    ['Terms', "Unequal portions of each sign, each given to one of the five planets and never to the lights. Also called bounds.", 'concept:Essential Dignity'],
+    ['Translation of light', "A planet leaves one body and reaches another while still in orb of the first, carrying the first one's light across so the two are joined.", 'essay:orbs'],
+    ['Triplicity', "Rulership by element, each of the four triplicities with planets of its own.", 'concept:Essential Dignity'],
+    ['Tropical zodiac', "The zodiac anchored to the seasons, beginning at the spring equinox, with the solstices at 0 Cancer and 0 Capricorn.", ''],
+    ['Uranian astrology', "The Hamburg School after Alfred Witte: midpoints, and eight hypothetical points beyond Neptune.", ''],
+    ['Void of course', "A body, most often the Moon, that makes no further aspect before it leaves its sign.", 'concept:Void of Course Moon'],
+    ['Yod', "Two bodies in sextile with a third quincunx to both, a long finger pointing at the third. It is also called the finger of fate.", 'concept:Aspect Patterns']
+  ];
+
   function signByName(n) { for (var i = 0; i < SIGNS.length; i++) { if (SIGNS[i].name === n) return SIGNS[i]; } return null; }
   function house(n) { return HOUSES[n - 1] || null; }
   function astralBody(n) { for (var i = 0; i < ASTRAL_BODIES.length; i++) { if (ASTRAL_BODIES[i].name === n) return ASTRAL_BODIES[i]; } return null; }
@@ -13411,6 +13500,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     STUDY_LESSONS: STUDY_LESSONS, studyLessons: studyLessons,
     ASTRAL_BODIES: ASTRAL_BODIES, POINTS: POINTS, ASPECTS: ASPECTS, ORBS: ORBS, CONCEPTS: CONCEPTS, CHART: CHART, SABIAN: SABIAN,
     STELLIUM: STELLIUM, TRANSITS: TRANSITS, TECHNIQUES: TECHNIQUES, SYNASTRY: SYNASTRY, EXAMPLE: EXAMPLE,
+    LEXICON: LEXICON, STUDY_WORDS: STUDY_WORDS,
     sign: signByName, house: house, houseSystem: houseSystem, astralBody: astralBody, point: point, aspect: aspect };
 }));
 
@@ -35979,7 +36069,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
             </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;text-align:center">
-              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)">{{ apCenter }}</span>
+              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)"><sc-if value="{{ apCenterTx }}" hint-placeholder-val="{{ true }}"><span>{{ apCenter }}</span></sc-if><sc-if value="{{ apCenterMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apCenterName }}</span>
             </div>
           </div>
@@ -36023,7 +36113,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </sc-if>
             <div style="display:flex;align-items:center;gap:16px">
-              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
+              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)"><sc-if value="{{ apIconTx }}" hint-placeholder-val="{{ true }}"><span>{{ apIcon }}</span></sc-if><sc-if value="{{ apIconMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
@@ -36106,7 +36196,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
                 <sc-for list="{{ apLinks }}" as="lk" hint-placeholder-count="3">
                   <button data-lift onClick="{{ lk.go }}" aria-label="{{ lk.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2)">
-                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}">{{ lk.glyph }}</span>
+                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}"><sc-if value="{{ lk.tx }}" hint-placeholder-val="{{ true }}"><span>{{ lk.glyph }}</span></sc-if><sc-if value="{{ lk.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                     <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
                   </button>
                 </sc-for>
@@ -36140,7 +36230,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
             <sc-for list="{{ apHits }}" as="h" hint-placeholder-count="6">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -36153,7 +36243,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;animation:fadeUp .22s ease-out">
             <sc-for list="{{ apGrid }}" as="h" hint-placeholder-count="12">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -43625,7 +43715,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
             </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;text-align:center">
-              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)">{{ apCenter }}</span>
+              <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)"><sc-if value="{{ apCenterTx }}" hint-placeholder-val="{{ true }}"><span>{{ apCenter }}</span></sc-if><sc-if value="{{ apCenterMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <span style="font:600 9px var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apCenterName }}</span>
             </div>
           </div>
@@ -43669,7 +43759,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </div>
             </sc-if>
             <div style="display:flex;align-items:center;gap:16px">
-              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
+              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)"><sc-if value="{{ apIconTx }}" hint-placeholder-val="{{ true }}"><span>{{ apIcon }}</span></sc-if><sc-if value="{{ apIconMk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ apName }}</div>
                 <sc-if value="{{ apKickerOn }}" hint-placeholder-val="{{ false }}">
@@ -43752,7 +43842,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div style="display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
                 <sc-for list="{{ apLinks }}" as="lk" hint-placeholder-count="3">
                   <button data-lift onClick="{{ lk.go }}" aria-label="{{ lk.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2)">
-                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}">{{ lk.glyph }}</span>
+                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}"><sc-if value="{{ lk.tx }}" hint-placeholder-val="{{ true }}"><span>{{ lk.glyph }}</span></sc-if><sc-if value="{{ lk.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                     <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
                   </button>
                 </sc-for>
@@ -43786,7 +43876,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
             <sc-for list="{{ apHits }}" as="h" hint-placeholder-count="6">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -43799,7 +43889,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;animation:fadeUp .22s ease-out">
             <sc-for list="{{ apGrid }}" as="h" hint-placeholder-count="12">
               <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
-                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span aria-hidden="true" style="flex:none;width:36px;font:400 22px/1 var(--fb);color:{{ h.c }};text-align:center"><sc-if value="{{ h.tx }}" hint-placeholder-val="{{ true }}"><span>{{ h.glyph }}</span></sc-if><sc-if value="{{ h.mk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 40 24" aria-hidden="true" focusable="false" style="display:inline-block;width:1.2em;height:.72em;vertical-align:middle;overflow:visible"><path d="M20 4.21A9 9 0 0 1 20 19.79A9 9 0 0 1 20 4.21Z" style="fill:currentColor;fill-opacity:.07;stroke:rgba(var(--atmc2),.75);stroke-width:.45"></path><path d="M20 5.4A7.6 7.6 0 0 1 20 18.6A7.6 7.6 0 0 1 20 5.4Z" style="fill:rgba(var(--atmc2),.13);stroke:none"></path><circle cx="15.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="15.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="15.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M7.04 8.92A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><circle cx="24.5" cy="12.7" r="9" style="fill:none;stroke:#000;stroke-opacity:.42;stroke-width:3.2"></circle><circle cx="24.5" cy="12" r="9" style="fill:none;stroke:currentColor;stroke-width:2.6"></circle><circle cx="24.5" cy="12" r="7.75" style="fill:none;stroke:#000;stroke-opacity:.3;stroke-width:.5"></circle><path d="M16.04 8.92A9 9 0 0 1 27.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path><path d="M18.28 3.44A9 9 0 0 1 21.52 5.31" style="fill:none;stroke:#000;stroke-opacity:.38;stroke-width:3.3"></path><path d="M17.83 3.31A9 9 0 0 1 21.86 5.64" style="fill:none;stroke:currentColor;stroke-width:2.6"></path><path d="M17.83 3.31A9 9 0 0 1 18.58 3.54" style="fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:.8;stroke-linecap:round"></path></svg></sc-if></span>
                 <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
                   <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
                   <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
@@ -57139,11 +57229,35 @@ class Component extends DCLogic {
   /* A study word found in a sentence: whole word, any case, a plural allowed. */
   apWordRe(t) { return new RegExp('(^|[^A-Za-z])' + String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(s|es)?(?![A-Za-z])', 'i'); }
   apStudyLessons() { const A = this.AP(); return A && A.studyLessons ? A.studyLessons(this.chartStudy()) : null; }
+  /* The Lexicon's words, once: the read entries first, then every study's
+     glossary. A study word with the same name and the same words in several
+     studies is one entry naming each of them; the same name with other words
+     is its own entry, named by its study. Sorted A to Z. */
+  apLexicon() {
+    if (this._apLex) return this._apLex;
+    const A = this.AP();
+    if (!A) return [];
+    const out = [], seen = {};
+    (A.LEXICON || []).forEach(([name, text, see]) => out.push({ name: name, text: text, see: see || null, studies: [] }));
+    const SW = A.STUDY_WORDS || {};
+    Object.keys(SW).forEach(k => { const L = A.studyLessons ? A.studyLessons(k) : null, title = L ? L.title : k;
+      (SW[k] || []).forEach(([name, text]) => { const id = name.toLowerCase() + '|' + text;
+        if (seen[id]) { if (seen[id].studies.indexOf(title) === -1) seen[id].studies.push(title); return; }
+        const w = { name: name, text: text, see: null, studies: [title], sk: k };
+        seen[id] = w; out.push(w); }); });
+    out.sort((x, y) => x.name.localeCompare(y.name, 'en', { sensitivity: 'base' }) || x.studies.length - y.studies.length);
+    const used = {};
+    out.forEach(w => { let sl = this.slug(w.name + (w.studies.length ? '-' + w.sk : '')); while (used[sl]) sl += '-x'; used[sl] = 1; w.slug = sl;
+      w.study = w.studies.length > 2 ? w.studies.slice(0, 2).join(', ') + ' and ' + (w.studies.length - 2) + ' more' : w.studies.join(' and '); });
+    this._apLex = out;
+    return out;
+  }
   apSections() {
     const A = this.AP(), L = this.apStudyLessons();
     if (!A) return [];
-    if (!L) return A.SECTIONS;
-    return [['mystudy', 'Your study: ' + L.title]].concat((L.words || []).length ? [['mywords', 'Words of ' + L.title]] : [], A.SECTIONS);
+    const lex = (A.LEXICON || []).length ? [['lexicon', 'The Lexicon']] : [];
+    if (!L) return A.SECTIONS.concat(lex);
+    return [['mystudy', 'Your study: ' + L.title]].concat((L.words || []).length ? [['mywords', 'Words of ' + L.title]] : [], A.SECTIONS, lex);
   }
   apEntries() {
     const sk = this.chartStudy();
@@ -57157,7 +57271,7 @@ class Component extends DCLogic {
     /* The study's own words, each defined as its lessons use it (the owner,
        6 November 2026: definitions live in the Astropedia). */
     if (L) (L.words || []).forEach((w, i) => add({ key: 'term:' + sk + ':' + i, ch: 'mywords', kind: 'term', wi: i, name: w.term,
-      glyph: '\u2766', sub: this.apFirst(w.text, 46), c: 'var(--ac2-hi)', slug: this.slug(w.term), text: w.text }));
+      glyph: this.MARK_G, sub: this.apFirst(w.text, 46), c: 'var(--ac2-hi)', slug: this.slug(w.term), text: w.text }));
     A.SIGNS.forEach((s, i) => add({ key: 'sign:' + s.name, ch: 'signs', kind: 'sign', name: s.name, glyph: s.glyph + '︎',
       sub: s.modality + ' ' + s.element, c: this.AP_EL[s.element], idx: i, slug: this.slug(s.name),
       text: [s.text, s.key, s.sun, s.moon, s.asc, s.house, s.strengths, s.challenges].join(' ') }));
@@ -57177,6 +57291,12 @@ class Component extends DCLogic {
       sub: this.apFirst(c.text, 46), c: 'var(--ac2-hi)', slug: this.slug(c.name), text: c.text }));
     A.TECHNIQUES.forEach(c => add({ key: 'technique:' + c.name, ch: 'techniques', kind: 'technique', name: c.name, glyph: '◴',
       sub: this.apFirst(c.text, 46), c: 'var(--ac2-hi)', slug: this.slug(c.name), text: c.text }));
+    /* The Lexicon, A to Z (the owner, 7 November 2026): the field's own words,
+       each written from a page that was read, and every study's glossary
+       beside them, named by the study it belongs to. A word with no symbol
+       wears the inCommon mark. */
+    this.apLexicon().forEach((w, i) => add({ key: 'lex:' + w.slug, ch: 'lexicon', kind: 'lex', li: i, name: w.name, glyph: this.MARK_G,
+      sub: w.study ? 'A word of ' + w.study : this.apFirst(w.text, 46), c: 'var(--ac2-hi)', slug: w.slug, text: w.text }));
     A.SECTIONS.forEach(([k, title]) => { if (this.AP_ESSAY_GLYPH[k]) add({ key: 'essay:' + k, ch: k, kind: 'essay', ess: k, name: title,
       glyph: this.AP_ESSAY_GLYPH[k], sub: '', c: 'var(--ac2-hi)', slug: k,
       text: this.apBlocks(k).map(b => b.head + ' ' + b.rows.map(r => r.text).join(' ')).join(' ') }); });
@@ -57288,7 +57408,7 @@ class Component extends DCLogic {
     /* The folio. */
     const facets = [], links = [], yours = [];
     let kicker = '', lead = '', epi = '', now = '', essay = [], dropcap = false;
-    const link = (label, glyph, key) => { const x = find(key); if (x) links.push({ label: label, glyph: x.glyph, c: x.c, aria: label + ', ' + x.name, go: () => this.apPick(key, false) }); };
+    const link = (label, glyph, key) => { const x = find(key); if (x) links.push({ label: label, glyph: x.glyph, mk: x.glyph === this.MARK_G, tx: x.glyph !== this.MARK_G, c: x.c, aria: label + ', ' + x.name, go: () => this.apPick(key, false) }); };
     if (e.kind === 'sign') {
       const s = A.sign(e.name), opp = A.SIGNS[(e.idx + 6) % 12];
       kicker = s.modality + ' ' + s.element + ' · ' + s.season; epi = s.key; lead = s.text;
@@ -57370,11 +57490,17 @@ class Component extends DCLogic {
       kicker = 'A word of ' + L.title; lead = w.text;
       const re = this.apWordRe(w.term);
       L.lessons.forEach((l, i) => { if (re.test(l.term + ' ' + l.text)) link('The lesson, ' + l.name, '', 'lesson:' + sk + ':' + i); });
+    } else if (e.kind === 'lex') {
+      const w = this.apLexicon()[e.li];
+      kicker = w.study ? 'A word of ' + w.study : ''; lead = w.text;
+      if (w.see) { const y = find(w.see); if (y) link(y.name, '', w.see); }
+      if (w.sk) { const L = this.AP().studyLessons(w.sk), re = this.apWordRe(w.name);
+        if (L && w.sk === this.chartStudy()) L.lessons.forEach((l, i) => { if (re.test(l.term + ' ' + l.text)) link('The lesson, ' + l.name, '', 'lesson:' + w.sk + ':' + i); }); }
     } else if (e.kind === 'essay') {
       essay = e.ess === 'orbs' ? [{ head: '', hasHead: false, rows: [A.ORBS.what, A.ORBS.how, A.ORBS.custom].map(t => ({ t: t })) }]
         : this.apBlocks(e.ess).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));
-      if (e.ess === 'sabian') links.push({ label: 'Open the Sabian Lexicon', glyph: '✧', c: 'var(--ac2-hi)', aria: 'Open the Sabian Lexicon', go: () => this.setState({ libSub: 'study', libView: 'lexicon', selId: null, lexQuery: '', lexSign: null, lexDeg: null }) });
-      if (e.ess === 'synastry') links.push({ label: 'Go to The Commons', glyph: '⚭', c: 'var(--ac2-hi)', aria: 'Go to The Commons', go: () => this.setState({ libSub: 'commons', libView: null, selId: null }) });
+      if (e.ess === 'sabian') links.push({ label: 'Open the Sabian Lexicon', glyph: '✧', tx: true, mk: false, c: 'var(--ac2-hi)', aria: 'Open the Sabian Lexicon', go: () => this.setState({ libSub: 'study', libView: 'lexicon', selId: null, lexQuery: '', lexSign: null, lexDeg: null }) });
+      if (e.ess === 'synastry') links.push({ label: 'Go to The Commons', glyph: '⚭', tx: true, mk: false, c: 'var(--ac2-hi)', aria: 'Go to The Commons', go: () => this.setState({ libSub: 'commons', libView: null, selId: null }) });
       if (e.ess === 'orbs') ['Conjunction', 'Square', 'Trine'].forEach(n => link(n, '', 'aspect:' + n));
     }
     const terms = [];
@@ -57396,7 +57522,7 @@ class Component extends DCLogic {
     const step = d => sib[(at + d + sib.length) % sib.length];
     const q = String(st.apQuery || '').trim().toLowerCase();
     const hits = q.length > 1 ? all.filter(x => x.hay.indexOf(q) !== -1) : [];
-    const tile = x => ({ glyph: x.glyph, name: x.name, sub: x.sub, c: x.c, on: x.key === e.key,
+    const tile = x => ({ glyph: x.glyph, mk: x.glyph === this.MARK_G, tx: x.glyph !== this.MARK_G, name: x.name, sub: x.sub, c: x.c, on: x.key === e.key,
       bd: x.key === e.key ? 'var(--ac2-hi)' : 'var(--bd)', bg: x.key === e.key ? 'rgba(var(--atmc),.2)' : 'var(--sf)',
       go: () => this.apPick(x.key, true) });
     return { libAstropedia: true,
@@ -57421,7 +57547,7 @@ class Component extends DCLogic {
         return { l: pct(q2.x), t: pct(q2.y), tip: 'Your ' + r.name + ', ' + fmtDeg(r), go: peek('natal:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, 'Your ' + r.name + ', ' + fmtDeg(r), 'body:' + r.name) }; }),
       apStars: stars,
       apHorizonPath: (() => { const a = P(0, 176), b = P(180, 176); return 'M' + f1(a.x) + ' ' + f1(a.y) + 'L' + f1(b.x) + ' ' + f1(b.y); })(),
-      apCenter: e.glyph, apCenterC: e.c, apCenterName: e.name,
+      apCenter: e.glyph, apCenterMk: e.glyph === this.MARK_G, apCenterTx: e.glyph !== this.MARK_G, apCenterC: e.c, apCenterName: e.name,
       apPeekOn: lv === 'first' && !!st.apPeek && !!st.apPeekAt,
       apPeekL: st.apPeekAt ? st.apPeekAt.l : '0%', apPeekT: st.apPeekAt ? st.apPeekAt.t : '0%', apPeekText: st.apPeekAt ? st.apPeekAt.text : '',
       apPeekGo: () => { if (st.apPeekAt) this.apPick(st.apPeekAt.key, false); },
@@ -57442,7 +57568,7 @@ class Component extends DCLogic {
           aria: m.label + ', ' + m.r.sign, go: () => this.apPick(se.key, true) }; }),
       /* The folio. */
       apAnim: (st.apFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
-      apFolioLabel: e.name, apIcon: e.glyph, apIconC: e.c, apName: e.name,
+      apFolioLabel: e.name, apIcon: e.glyph, apIconMk: e.glyph === this.MARK_G, apIconTx: e.glyph !== this.MARK_G, apIconC: e.c, apName: e.name,
       apKicker: kicker, apKickerOn: !!kicker, apEpi: epi, apEpiOn: !!epi,
       apLead: lead, apLeadOn: !!lead && !dropcap, apLeadCap: !!lead && dropcap,
       apNow: now, apNowOn: !!now,
