@@ -34368,7 +34368,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
               <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
                 <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:14px/1 Georgia,serif;color:var(--ac2-hi)">{{ h.sym }}</span><span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 9px var(--fk);letter-spacing:.02em;text-transform:uppercase">{{ h.label }}</span></button>
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
                 </sc-for>
               </div>
               <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
@@ -41428,7 +41428,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
               <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
                 <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:14px/1 Georgia,serif;color:var(--ac2-hi)">{{ h.sym }}</span><span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 9px var(--fk);letter-spacing:.02em;text-transform:uppercase">{{ h.label }}</span></button>
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
                 </sc-for>
               </div>
               <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
@@ -55388,9 +55388,9 @@ class Component extends DCLogic {
         bg: k === aspPick ? 'rgba(var(--atmc),.32)' : 'var(--sf2)', bd: k === aspPick ? 'rgba(var(--atmc),.9)' : 'var(--bd)',
         go: () => this.setState({ ledAsp: k }) })),
       chAspLine: mean4 ? mean4.charAt(0).toUpperCase() + mean4.slice(1) + '.' : '',
-      chAspPairs: aspPairs.map(({ x, i }) => ({ g: (x.a.glyph || '') + ' ' + SYM(x.asp) + ' ' + (x.b.glyph || ''),
+      chAspPairs: aspPairs.map(({ x, i }) => ({ g: (x.a.glyph || '') + ' ' + (x.b.glyph || ''),
         t: this.studyName(x.a.name) + ' and ' + this.studyName(x.b.name),
-        o: x.orb < 1 ? 'within a degree' : Math.round(x.orb) + '\u00b0 from exact',
+        o: (x.orb < 1 ? '<1' : Math.round(x.orb)) + '\u00b0 from exact',
         aria: this.studyName(x.a.name) + ' ' + aspName4.toLowerCase() + ' ' + this.studyName(x.b.name) + ', ' + (x.orb < 1 ? 'within a degree' : Math.round(x.orb) + ' degrees from exact') + ', open the aspect',
         go: () => this.setState({ aspSel: i }) })),
       chAspPairsOn: aspPairs.length > 0, chAspPairsOff: !aspPairs.length,
