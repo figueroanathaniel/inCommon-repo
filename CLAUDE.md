@@ -8087,3 +8087,55 @@ own panel open (`hdSel`).
 iPhone's, and measures the window and the pill with the harness's own
 `contrastFails()` and `tapTargets()` over four identities, hardened and not, at
 1440 and 375: 32 cases, clean on 6 November 2026.
+
+## Retrogrades holds nine bodies, and each opens a read in chapters
+Asked for by the owner on 7 November 2026. The strip's first pull is
+**Retrogrades** (no longer Current Retrogrades), and it lists every body from
+Mercury to Pluto and Chiron (`RETRO_BODIES`), always, as rows
+(`retroRows()`): glyph, name, where it stands, and its state (retrograde and
+when it turns direct, pre-shadow, post-shadow, or direct and when it next
+stations, from `retroState()`). A body retrograde now wears a dot in `--ok`,
+the confirmed value green, never `--ac`, and the ℞ beside its name; the tile
+title carries the ℞ too. The section tabs inside the panel are gone.
+
+**A row opens the read, not a tab** (`rxGlance`, `retroGlanceVals()`), in the
+same glance dialog a placement and a number use (the pg* keys), with no
+"Open the focused read" button (`pgFocusOn` false). Its chapters: Now, the
+body, what its backward motion means, your chart (only with a known house),
+then the pre-shadow, the turn and the post-shadow, each led by the dates
+worked out for this run. Every body's words are its own (`RETRO_READ`,
+`RETRO_TALK`, `RETRO_MEAN`) and no sentence is shared between bodies. The
+retrograde buttons under the horoscope open the same read. Chiron's run in
+November 2026 measured 156 days in the app's own scan (`retroState`), which
+is what "about five months" rests on. Shadow dates exist only for Mercury,
+Venus and Mars (`SHADOW_BODIES`); for the slower bodies the read says the
+shadow spreads across most of a year.
+
+**The pulls sit under the Placements table**, in both shells, in this order:
+Retrogrades, the Eclipses (first while one is in season), the Stellium, and
+Harmonics last with a small New mark (`isNew`, `--ac2` border and
+`--ac2-hi` text). Take the mark off when the owner says Harmonics is no
+longer new. On the desktop the Placements card carries `data-ch-plc` and the
+Ledger has no height cap there, so the table stretches to the bottom of the
+column (from 1180px the card fills the column's view).
+
+**The Expanded Chart carries the aspect grid under the wheel**
+(`bloomGridSync()`, `[data-asp-grid]`, both branches in both shells): the
+staircase astrologers use, each shown point's glyph on the diagonal and the
+contact symbol (`ASP_SYM`, in `ASP_COLOR`) where two rows meet. It reads the
+same rich pass the wheel's lines draw and only the points switched on
+(`bloomShowOf()`), so Advanced gives the 22 and Expert every placed point.
+It is a DOM write keyed by a signature, never state, because a grid of ninety
+points is thousands of cells. Each contact cell carries its words for a
+screen reader. The dialog scrolls in the wide layout now so the grid can be
+reached. Measured in Deep Field only, at 1440 and 390: no contrast failure.
+
+**The motion is stated, never hedged** (the owner, 7 November 2026: "Just
+say the sentence."). A retrograde body moves backwards through the zodiac,
+and every line says so plainly: no "apparent", "appears to", "seems to",
+"in fact" or "from a moving Earth" anywhere a retrograde is described, in
+the app or the Astropedia. The heliocentric lessons, which teach that the
+Sun's view has no retrograde, are the study itself and keep their words.
+On the phone the tile's title row wraps, so the New pill and the ℞ drop
+under the title rather than past the tile's edge, and the Cycle Audit card
+is the last thing on the phone's astrology page.

@@ -12868,7 +12868,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     { name: 'Angular, Succedent, and Cadent Houses', text: 'The twelve houses fall into three groups of four by their relation to the angles. Angular houses, the first, fourth, seventh, and tenth, sit right on the Ascendant, IC, Descendant, and Midheaven, and are read as the most forceful, where a placement acts directly on a life. Succedent houses, the second, fifth, eighth, and eleventh, follow the angles and consolidate what they started, read as resources built rather than events. Cadent houses, the third, sixth, ninth, and twelfth, fall away from the angles and are read as processing houses: information, adjustment, and the work of making sense of what already happened.' },
     { name: 'Chart Ruler', text: 'The chart ruler is the traditional ruler of the sign on the Ascendant: Mars if Aries rises, Venus if Taurus rises, and so on through the wheel. Wherever that body sits by house and sign is read as a summary of the whole chart’s business, since it is the one placement bound to the exact degree the person was born on. A house works the same way in miniature: whichever sign sits on its cusp hands the room to that sign’s ruler, and the room is read through wherever the ruler actually stands.' },
     { name: 'Decans', text: 'Each thirty degree sign divides into three ten degree decans. They began in Egypt as thirty six groups of stars, one rising at dawn every ten days and each marking an hour of the night, painted on coffin lids from about the twenty first century BCE. Hellenistic astrology set three in every sign. Firmicus Maternus gives the faces in the order most Western astrology still uses: Mars, the Sun and Venus in Aries, then Mercury, the Moon and Saturn in Taurus, the seven classical bodies running on in one unbroken order without regard for each sign’s own ruler. Parashara counts the same ten degrees another way, through the signs of the element: the first decan belongs to the sign itself, the second to the next sign of its element and the third to the one after, so Aries runs Aries, Leo, Sagittarius. Manilius gives them to signs rather than to bodies: Aries keeps its first ten degrees, gives the next ten to Taurus and the last to Gemini, and the count runs on through the signs in order, with Pisces keeping its own last ten. The Golden Dawn set the small cards of the tarot, the Twos to the Tens, on the same Chaldean faces, and began the count at Leo: the Five of Wands is Saturn in Leo, and the Two of Wands is Mars in Aries. The chart keeps the faces and the drekkanas, because both are a living tradition. The opening decan carries the sign raw and unmixed, before anything has tested it. The middle decan is the sign at work, applied and made productive. The closing decan is the sign matured, already leaning toward whatever comes next. A decan does not replace the sign; it narrows it, the way an accent narrows a language without changing which language it is.' },
-    { name: 'Retrograde Motion', text: 'Retrograde motion is apparent, not real: no celestial body reverses course. Seen from a moving Earth, an outer body appears to slow, stand still, and walk backward through the zodiac for a season before turning forward again. The tradition reads the appearance as a turn inward, the same business as always, handled in review rather than in advance. The days on either side of the turn, the stations, are read as the loudest part of the whole passage.' },
+    { name: 'Retrograde Motion', text: 'A body in retrograde slows, stands still, and walks backward through the zodiac for a season, then turns forward again. The tradition reads that season as a turn inward, the same business as always, handled in review rather than in advance. The days on either side of the turn, the stations, are read as the loudest part of the whole passage.' },
     { name: 'Void of Course Moon', text: 'A Moon is void of course from the moment it makes its last aspect to another body before leaving its current sign until the moment it enters the next one. In that gap the tradition reads her as unattached, between rooms rather than in one, and reads action started there as more likely to drift or come to nothing than action started once she has landed. It is a weather report, not a lock on the day: plenty gets done under a void Moon, it simply tends to wander from the plan.' },
     { name: 'Combust and Cazimi', text: 'A body within about eight degrees of the Sun is combust, read as overpowered by proximity to the one light no other body can outshine, its own signal harder to hear under the glare. Inside about seventeen minutes of exact conjunction the same closeness flips: the body is cazimi, in the heart of the Sun rather than burned by it, and the tradition reads that narrow window as strength rather than loss. The difference between the two readings is almost entirely a matter of degrees.' },
     { name: 'Mutual Reception', text: 'Two bodies are in mutual reception when each sits in the sign the other rules, Mars in Cancer while the Moon sits in Aries, say. The tradition treats it as a kind of hospitality: each body is a guest in the other’s house, and each is understood well enough by its host to be handed a working key rather than left to manage as a stranger. It softens a difficult placement more reliably than almost anything else in the traditional toolkit.' },
@@ -32843,7 +32843,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 /* The Library shelf is a row of lit plates. Each draws its room in light; the stars and the warm fills breathe on their own, and the rest moves only under a hovering pointer or keyboard focus, so a phone that draws every section at once is not turning six wheels nobody is looking at. */
 [data-plate]{--plb:rgba(var(--atmc),.46);--plsh:inset 0 1px 0 rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.42)}[data-plate]:focus-visible,[data-plate]:hover{--plb:color-mix(in srgb,var(--ac2-hi) 62%,transparent);--plsh:inset 0 1px 0 rgba(255,255,255,.12),0 4px 8px rgba(0,0,0,.4),0 22px 48px rgba(0,0,0,.5),0 0 38px color-mix(in srgb,var(--ac2) 40%,transparent)}[data-plate]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}[data-plate]:hover [data-plate-go],[data-plate]:focus-visible [data-plate-go]{transform:translateX(3px)}[data-plate]:active{transform:scale(.985)!important}@keyframes plIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}@keyframes plTw{0%,100%{opacity:.18}50%{opacity:.9}}@keyframes plSpin{to{transform:rotate(360deg)}}@keyframes plFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes plFlow{to{stroke-dashoffset:-16}}@keyframes plBreath{0%,100%{opacity:.55}50%{opacity:1}}[data-pl]{transform-box:fill-box;transform-origin:center}[data-pl="tw"]{animation:plTw 3.8s ease-in-out infinite}[data-plate-tw]{animation:plTw 6.5s ease-in-out infinite}[data-pl="breath"]{animation:plBreath 4.6s ease-in-out infinite}[data-pl="spin"]{animation:plSpin 60s linear infinite paused}[data-pl="spinr"]{animation:plSpin 80s linear infinite reverse paused}[data-pl="float"]{animation:plFloat 4.8s ease-in-out infinite paused}[data-pl="flow"]{stroke-dasharray:3 5;animation:plFlow 1.4s linear infinite paused}[data-plate]:hover [data-pl],[data-plate]:focus-visible [data-pl],[data-portal]:hover [data-pl],[data-portal]:focus-within [data-pl]{animation-play-state:running}@media (prefers-reduced-motion:reduce){[data-pl],[data-plate-tw]{animation:none!important}}
 /* Closeness on the chart page (owner, 21 October 2026): no list may grow until it is the only thing on the screen. An open list and an open card stop at under half the screen and scroll inside themselves; on a wide desktop each of the three columns is held to the screen less the header and the banner and scrolls on its own, so once the title has scrolled away all three are on the screen together. The wheel's column never scrolls: the wheel holds its place and only the Horizon under it scrolls, so a list opened there cannot carry the wheel away. Not sticky: a column as tall as its row has nowhere to stick to. */
-[data-ch-list]{max-height:min(42vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-feat]{max-height:min(52vh,480px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding-right:4px}@media (min-width:1200px){[data-ch-col="wheel"]{max-width:max(520px,calc(100dvh - 260px))}}[data-ch-ledger]{max-height:min(62vh,620px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ledger-row]{transition:background-color .2s ease}[data-ledger-row]:hover,[data-ledger-row]:focus-visible{background-color:rgba(var(--atmc),.16)!important}[data-ledger-row]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:-2px}[data-wb]{transition:opacity .2s ease!important}[data-ledger-hot] [data-wb]:not([data-hot]):not([data-wb="-"]){opacity:.28!important}[data-wb][data-hot] circle:last-of-type{stroke-width:3.2px}[data-wb][data-hot] circle:first-of-type{opacity:.6}@media (max-width:819.98px){[data-ch-list],[data-ch-feat]{max-height:min(36vh,340px)}}@media (min-width:1180px){[data-ch-col]{max-height:calc(100dvh - 210px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 6px 14px;margin:-2px -6px 0}[data-ch-col="wheel"]{overflow:visible!important}[data-ch-col] > *{flex-shrink:0}[data-ch-col="wheel"] > [data-ch-mid]{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 4px 10px;margin:0 -4px}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
+[data-ch-list]{max-height:min(42vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-feat]{max-height:min(52vh,480px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding-right:4px}@media (min-width:1200px){[data-ch-col="wheel"]{max-width:max(520px,calc(100dvh - 260px))}}[data-ch-ledger]{max-height:min(62vh,620px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-plc="true"] [data-ch-ledger]{max-height:none;flex:1}@media (min-width:1180px){[data-ch-plc="true"]{min-height:calc(100dvh - 226px)}}[data-asp-grid] td,[data-asp-grid] th{width:24px;min-width:24px;height:24px;padding:0;text-align:center;vertical-align:middle;border:1px solid rgba(var(--atmc),.28);font:400 13px/1 var(--fb)}[data-asp-grid] th{font-weight:400;color:var(--tx);background:rgba(var(--atmc),.16)}[data-asp-grid] td.e{border-color:transparent}[data-ledger-row]{transition:background-color .2s ease}[data-ledger-row]:hover,[data-ledger-row]:focus-visible{background-color:rgba(var(--atmc),.16)!important}[data-ledger-row]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:-2px}[data-wb]{transition:opacity .2s ease!important}[data-ledger-hot] [data-wb]:not([data-hot]):not([data-wb="-"]){opacity:.28!important}[data-wb][data-hot] circle:last-of-type{stroke-width:3.2px}[data-wb][data-hot] circle:first-of-type{opacity:.6}@media (max-width:819.98px){[data-ch-list],[data-ch-feat]{max-height:min(36vh,340px)}}@media (min-width:1180px){[data-ch-col]{max-height:calc(100dvh - 210px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 6px 14px;margin:-2px -6px 0}[data-ch-col="wheel"]{overflow:visible!important}[data-ch-col] > *{flex-shrink:0}[data-ch-col="wheel"] > [data-ch-mid]{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 4px 10px;margin:0 -4px}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -34331,23 +34331,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
         </section>
       </sc-if>
-      <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
-           Today and opens from the chart it reads. -->
-      <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-        <div data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
-          <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-            <div role="status" style="font:italic 400 14px/1.6 var(--fb);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
-          </sc-if>
-          <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:3px">
-              <span style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
-              <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
-              <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
-            </div>
-            <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fc);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
-          </sc-if>
-        </div>
-      </sc-if>
     </div>
     <sc-if value="{{ astroFocusToday }}" hint-placeholder-val="{{ false }}">
       <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(47,255,143,.42);border-left:3px solid var(--ac);border-radius:var(--rad);padding:15px 16px;animation:fadeUp .25s ease">
@@ -34388,10 +34371,39 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </div>
     </sc-if>
     <div style="display:flex;flex-direction:column;gap:16px">
+        <div data-lift="card" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid rgba(var(--atmc),.46);border-radius:12px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px 8px 14px;border-bottom:1px solid var(--bd)">
+            <span role="heading" aria-level="2" style="flex:1;min-width:0;display:flex;align-items:baseline;gap:9px;font:400 19px/1.2 var(--fd);color:var(--tx)">Placements<span style="font:600 10.5px var(--fm);font-variant-numeric:tabular-nums;color:var(--dim)">{{ chLedgerCount }}</span></span>
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Placements view" style="flex:none;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+              <sc-for list="{{ chLedgerModes }}" as="m" hint-placeholder-count="2"><button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fc);letter-spacing:.06em;color:{{ m.c }}">{{ m.label }}</button></sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
+            <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
+                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
+              <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+                  <sc-for list="{{ chAspPairs }}" as="q" hint-placeholder-count="3"><li><button onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.4 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:44px;white-space:nowrap">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ q.o }}</span></button></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
+              </sc-if>
+              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
         <div role="group" aria-label="The sky now" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px">
           <sc-for list="{{ chSky }}" as="sk" hint-placeholder-count="3">
             <button data-lift data-feat-key="{{ sk.key }}" onClick="{{ sk.toggle }}" aria-expanded="{{ sk.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:0;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:9px 13px;border:1px solid {{ sk.bd }};border-radius:12px;background:{{ sk.bg }};transition:border-color .3s ease,background .3s ease">
-              <span style="font:400 15px/1.2 var(--fd);color:var(--tx)">{{ sk.title }}</span>
+              <span style="display:flex;flex-wrap:wrap;align-items:center;column-gap:6px;row-gap:3px;min-width:0;font:400 15px/1.2 var(--fd);color:var(--tx)"><span style="white-space:nowrap">{{ sk.title }}</span><span aria-hidden="true" style="display:{{ sk.rxD }};flex:none;font:14px/1 Georgia,serif;color:var(--ac2-hi)">&#8478;</span><span style="display:{{ sk.newD }};flex:none;align-items:center;padding:2px 5px 2px 6px;border-radius:999px;border:1px solid var(--ac2);background:rgba(var(--atmc2),.14);font:700 8.5px/1 var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">New</span></span>
               <span style="font:400 10.5px/1.35 var(--fu);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sk.sub }}</span>
             </button>
           </sc-for>
@@ -34425,6 +34437,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
                 </div>
               </sc-for>
+              <sc-if value="{{ f.rxOn }}" hint-placeholder-val="{{ false }}">
+                <div role="list" aria-label="Mercury to Pluto, and Chiron" style="display:flex;flex-direction:column;border-top:1px solid var(--bd);padding-top:6px">
+                  <sc-for list="{{ f.rx }}" as="x" hint-placeholder-count="9"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ x.go }}" aria-label="{{ x.aria }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;gap:10px;padding:4px 8px;border-radius:8px"><span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;box-sizing:border-box;border:1px solid {{ x.dotBd }};background:{{ x.dot }};box-shadow:{{ x.glow }}"></span><span aria-hidden="true" style="flex:none;min-width:18px;text-align:center;font:15px Georgia,serif;color:var(--ac2-hi)">{{ x.g }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px"><span style="display:flex;align-items:baseline;gap:6px;font:400 14px var(--fb);color:var(--tx)">{{ x.name }}<span aria-hidden="true" style="display:{{ x.rxD }};font:13px Georgia,serif;color:var(--ac2-hi)">&#8478;</span></span><span style="font:400 11.5px/1.35 var(--fu);color:var(--mut)">{{ x.state }}</span></span><span style="flex:none;font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ x.pos }}</span></button></div></sc-for>
+                </div>
+              </sc-if>
               <sc-if value="{{ f.hasTabs }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:2px">
                   <sc-for list="{{ f.tabs }}" as="t" hint-placeholder-count="2">
@@ -34447,35 +34464,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-if>
           </div>
         </sc-for>
-        <div data-lift="card" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid rgba(var(--atmc),.46);border-radius:12px;overflow:hidden">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px 8px 14px;border-bottom:1px solid var(--bd)">
-            <span role="heading" aria-level="2" style="flex:1;min-width:0;display:flex;align-items:baseline;gap:9px;font:400 19px/1.2 var(--fd);color:var(--tx)">Placements<span style="font:600 10.5px var(--fm);font-variant-numeric:tabular-nums;color:var(--dim)">{{ chLedgerCount }}</span></span>
-            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Placements view" style="flex:none;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-              <sc-for list="{{ chLedgerModes }}" as="m" hint-placeholder-count="2"><button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fc);letter-spacing:.06em;color:{{ m.c }}">{{ m.label }}</button></sc-for>
-            </div>
-          </div>
-          <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
-            <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
-              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
-                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
-                </sc-for>
-              </div>
-              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
-              <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
-                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
-                  <sc-for list="{{ chAspPairs }}" as="q" hint-placeholder-count="3"><li><button onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.4 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:44px;white-space:nowrap">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ q.o }}</span></button></li></sc-for>
-                </ul>
-              </sc-if>
-              <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
-                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
-              </sc-if>
-              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
-                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
-              </div>
-            </div>
-          </sc-if>
-        </div>
         <sc-if value="{{ chGatherOn }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:6px">
             <button onClick="{{ chGatherToggle }}" aria-expanded="{{ chGatherOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:4px 4px">
@@ -34693,6 +34681,23 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </section>
     </sc-for>
     </div>
+    <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026; at the foot of the phone page since 7 November 2026): it left
+         Today and opens from the chart it reads. -->
+    <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+      <div data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
+        <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="font:italic 400 14px/1.6 var(--fb);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
+        </sc-if>
+        <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <span style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
+            <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
+            <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
+          </div>
+          <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fc);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
+        </sc-if>
+      </div>
+    </sc-if>
   </div>
 </sc-if>
 
@@ -38502,7 +38507,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <sc-if value="{{ pgFlyOn }}" hint-placeholder-val="{{ false }}">
           <button data-lift onClick="{{ pgFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid var(--ac);background:var(--ac);font:700 11.5px var(--fc);color:var(--onac)">Back to Flight Mode<span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
         </sc-if>
-        <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fc);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
+        <sc-if value="{{ pgFocusOn }}" hint-placeholder-val="{{ true }}">
+          <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fc);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
+        </sc-if>
         <sc-if value="{{ pgSealOn }}" hint-placeholder-val="{{ false }}">
           <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;border:1px solid {{ pgSealC }};font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:{{ pgSealC }}"><span aria-hidden="true" style="flex:none;width:5px;height:5px;transform:rotate(45deg);background:{{ pgSealC }}"></span>{{ pgSeal }}</span>
         </sc-if>
@@ -38651,7 +38658,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <div style="justify-self:end"><button data-lift onClick="{{ chartBloomClose }}" aria-label="Close the expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--sf2);color:var(--tx);font:400 20px/1 var(--fc)">&#215;</button></div>
       </div>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
+        <div style="flex:1 0 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
@@ -38853,7 +38860,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
           </div>
-          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
@@ -38884,7 +38891,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:none;padding:4px 16px 16px"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div></div>
+        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
       </sc-if>
     </div>
   </div>
@@ -41448,10 +41455,39 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-if>
         </div>
         <div data-ch-col="1" style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div data-lift="card" data-ch-plc="{{ chLedgerOn }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid rgba(var(--atmc),.46);border-radius:12px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px 8px 14px;border-bottom:1px solid var(--bd)">
+            <span role="heading" aria-level="2" style="flex:1;min-width:0;display:flex;align-items:baseline;gap:9px;font:400 19px/1.2 var(--fd);color:var(--tx)">Placements<span style="font:600 10.5px var(--fm);font-variant-numeric:tabular-nums;color:var(--dim)">{{ chLedgerCount }}</span></span>
+            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Placements view" style="flex:none;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+              <sc-for list="{{ chLedgerModes }}" as="m" hint-placeholder-count="2"><button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fc);letter-spacing:.06em;color:{{ m.c }}">{{ m.label }}</button></sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
+            <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
+                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
+                </sc-for>
+              </div>
+              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
+              <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+                  <sc-for list="{{ chAspPairs }}" as="q" hint-placeholder-count="3"><li><button onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.4 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:44px;white-space:nowrap">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ q.o }}</span></button></li></sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
+                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
+              </sc-if>
+              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
+                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
         <div role="group" aria-label="The sky now" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:8px">
           <sc-for list="{{ chSky }}" as="sk" hint-placeholder-count="3">
             <button data-lift data-feat-key="{{ sk.key }}" onClick="{{ sk.toggle }}" aria-expanded="{{ sk.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:0;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:9px 13px;border:1px solid {{ sk.bd }};border-radius:12px;background:{{ sk.bg }};transition:border-color .3s ease,background .3s ease">
-              <span style="font:400 15px/1.2 var(--fd);color:var(--tx)">{{ sk.title }}</span>
+              <span style="display:flex;align-items:center;gap:6px;min-width:0;font:400 15px/1.2 var(--fd);color:var(--tx)"><span style="white-space:nowrap">{{ sk.title }}</span><span aria-hidden="true" style="display:{{ sk.rxD }};font:14px/1 Georgia,serif;color:var(--ac2-hi)">&#8478;</span><span style="display:{{ sk.newD }};align-items:center;padding:2px 6px;border-radius:999px;border:1px solid var(--ac2);background:rgba(var(--atmc2),.14);font:700 8.5px/1 var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">New</span></span>
               <span style="font:400 10.5px/1.35 var(--fu);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sk.sub }}</span>
             </button>
           </sc-for>
@@ -41485,6 +41521,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                   <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
                 </div>
               </sc-for>
+              <sc-if value="{{ f.rxOn }}" hint-placeholder-val="{{ false }}">
+                <div role="list" aria-label="Mercury to Pluto, and Chiron" style="display:flex;flex-direction:column;border-top:1px solid var(--bd);padding-top:6px">
+                  <sc-for list="{{ f.rx }}" as="x" hint-placeholder-count="9"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ x.go }}" aria-label="{{ x.aria }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;gap:10px;padding:4px 8px;border-radius:8px"><span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;box-sizing:border-box;border:1px solid {{ x.dotBd }};background:{{ x.dot }};box-shadow:{{ x.glow }}"></span><span aria-hidden="true" style="flex:none;min-width:18px;text-align:center;font:15px Georgia,serif;color:var(--ac2-hi)">{{ x.g }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px"><span style="display:flex;align-items:baseline;gap:6px;font:400 14px var(--fb);color:var(--tx)">{{ x.name }}<span aria-hidden="true" style="display:{{ x.rxD }};font:13px Georgia,serif;color:var(--ac2-hi)">&#8478;</span></span><span style="font:400 11.5px/1.35 var(--fu);color:var(--mut)">{{ x.state }}</span></span><span style="flex:none;font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ x.pos }}</span></button></div></sc-for>
+                </div>
+              </sc-if>
               <sc-if value="{{ f.hasTabs }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:2px">
                   <sc-for list="{{ f.tabs }}" as="t" hint-placeholder-count="2">
@@ -41507,35 +41548,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               </sc-if>
           </div>
         </sc-for>
-        <div data-lift="card" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid rgba(var(--atmc),.46);border-radius:12px;overflow:hidden">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px 8px 14px;border-bottom:1px solid var(--bd)">
-            <span role="heading" aria-level="2" style="flex:1;min-width:0;display:flex;align-items:baseline;gap:9px;font:400 19px/1.2 var(--fd);color:var(--tx)">Placements<span style="font:600 10.5px var(--fm);font-variant-numeric:tabular-nums;color:var(--dim)">{{ chLedgerCount }}</span></span>
-            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Placements view" style="flex:none;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-              <sc-for list="{{ chLedgerModes }}" as="m" hint-placeholder-count="2"><button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fc);letter-spacing:.06em;color:{{ m.c }}">{{ m.label }}</button></sc-for>
-            </div>
-          </div>
-          <sc-if value="{{ chLedgerOn }}" hint-placeholder-val="{{ true }}">
-            <div data-ch-ledger="1" style="display:flex;flex-direction:column;gap:10px;padding:12px 12px 10px">
-              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which aspect" style="display:flex;gap:5px">
-                <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
-                  <button data-lift onClick="{{ h.go }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx)"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx)">{{ h.sym }}</span></button>
-                </sc-for>
-              </div>
-              <p style="margin:0;font:italic 400 14px/1.55 var(--fb);color:var(--tx)">{{ chAspLine }}</p>
-              <sc-if value="{{ chAspPairsOn }}" hint-placeholder-val="{{ false }}">
-                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
-                  <sc-for list="{{ chAspPairs }}" as="q" hint-placeholder-count="3"><li><button onClick="{{ q.go }}" aria-label="{{ q.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;font:400 14px/1.4 var(--fb);color:var(--tx)"><span aria-hidden="true" style="font:14px Georgia,serif;color:var(--ac2-hi);min-width:44px;white-space:nowrap">{{ q.g }}</span><span style="flex:1;min-width:0">{{ q.t }}</span><span style="font:12.5px var(--fm);color:var(--mut);white-space:nowrap">{{ q.o }}</span></button></li></sc-for>
-                </ul>
-              </sc-if>
-              <sc-if value="{{ chAspPairsOff }}" hint-placeholder-val="{{ false }}">
-                <p style="margin:0;font:400 14px/1.5 var(--fb);color:var(--mut)">{{ chAspNone }}</p>
-              </sc-if>
-              <div role="list" aria-label="Placements" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 14px;border-top:1px solid var(--bd);padding-top:8px">
-                <sc-for list="{{ chPlRows }}" as="r" hint-placeholder-count="10"><div role="listitem" style="min-width:0"><button data-ledger-row="1" onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" onFocus="{{ r.enter }}" onBlur="{{ r.leave }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 6px;border-radius:8px;background:{{ r.bg }}"><span aria-hidden="true" style="font:14px Georgia,serif;color:{{ r.gc }};min-width:18px">{{ r.g }}</span><span style="font:13px var(--fb);color:var(--tx);white-space:nowrap">{{ r.name }}</span><span style="font:12.5px var(--fm);color:var(--mut);margin-left:auto;white-space:nowrap">{{ r.pos }}</span></button></div></sc-for>
-              </div>
-            </div>
-          </sc-if>
-        </div>
         <sc-if value="{{ chGatherOn }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:6px">
             <button onClick="{{ chGatherToggle }}" aria-expanded="{{ chGatherOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:4px 4px">
@@ -45784,7 +45796,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <div style="justify-self:end"><button data-lift onClick="{{ chartBloomClose }}" aria-label="Close the expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--sf2);color:var(--tx);font:400 20px/1 var(--fc)">&#215;</button></div>
       </div>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
+        <div style="flex:1 0 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
           <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
@@ -45986,7 +45998,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
           </div>
-          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
@@ -46017,7 +46029,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:none;padding:4px 16px 16px"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div></div>
+        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
       </sc-if>
     </div>
   </div>
@@ -47498,7 +47510,9 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <sc-if value="{{ pgFlyOn }}" hint-placeholder-val="{{ false }}">
           <button data-lift onClick="{{ pgFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid var(--ac);background:var(--ac);font:700 11.5px var(--fc);color:var(--onac)">Back to Flight Mode<span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
         </sc-if>
-        <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fc);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
+        <sc-if value="{{ pgFocusOn }}" hint-placeholder-val="{{ true }}">
+          <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fc);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
+        </sc-if>
         <sc-if value="{{ pgSealOn }}" hint-placeholder-val="{{ false }}">
           <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;border:1px solid {{ pgSealC }};font:600 9.5px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:{{ pgSealC }}"><span aria-hidden="true" style="flex:none;width:5px;height:5px;transform:rotate(45deg);background:{{ pgSealC }}"></span>{{ pgSeal }}</span>
         </sc-if>
@@ -48149,7 +48163,7 @@ class Component extends DCLogic {
     alignOpen: false, sabQuery: '', sabSign: null, ack: true, geoManual: false, geoLat: '', geoLon: '',
     geoNet: { status: 'idle', q: '', hits: [], msg: '' }, geoNetSay: '',
     welcomeFor: null, welcomePick: {}, makeDefault: null,
-    chartMode: 'basic', openBody: null, placeSel: null, plGlance: null, numGlance: null, aspSel: null, zoom: 1, panX: 0, panY: 0, hole: null,
+    chartMode: 'basic', openBody: null, placeSel: null, plGlance: null, numGlance: null, rxGlance: null, aspSel: null, zoom: 1, panX: 0, panY: 0, hole: null,
     chartExpandOpen: false, chartExpandSearch: '', chartExpandGroup: true, chartExpandSortBy: 'lon', chartExpandSortDir: 'asc',
     alignMode: 'today', alignHit: null, alignGate: null, alignNum: null, alignLast: null, alignSeed: 0,
     libView: null, lexQuery: '', lexSign: null, lexMode: 'mandala', lexDeg: null,
@@ -48793,6 +48807,7 @@ class Component extends DCLogic {
     this.cycleSceneSync();
     this.chartSceneSync();
     this.hdSceneSync();
+    this.bloomGridSync();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -48905,7 +48920,7 @@ class Component extends DCLogic {
   }
   openPath(path) {
     const seg = path.split('/').filter(Boolean);
-    const clean = { spiritView: null, placeSel: null, plGlance: null, numGlance: null, numSel: null, libView: null, ypCat: null, ypPick: false,
+    const clean = { spiritView: null, placeSel: null, plGlance: null, numGlance: null, rxGlance: null, numSel: null, libView: null, ypCat: null, ypPick: false,
       selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null };
     // The arriving path may normalise (a bare /library resolves to practices).
     // That correction is a replace, never a second history entry, or Back has to
@@ -52525,7 +52540,7 @@ class Component extends DCLogic {
     const p = this.activeProfile ? this.activeProfile() : null;
     return {
       ...base,
-      bloomWide: wide, bloomNarrow: !wide, bloomScroll: wide ? 'hidden' : 'auto', bloomLblD: wide ? 'inline' : 'none',
+      bloomWide: wide, bloomNarrow: !wide, bloomScroll: 'auto', bloomLblD: wide ? 'inline' : 'none',
       bloomName: this.usingSampleBirth() ? 'The sample chart' : ((p && p.name) || 'Your chart'),
       bloomCount: total + ' placements',
       bloomLeft: left, bloomRight: right, bloomAll: left.concat(right),
@@ -52585,6 +52600,60 @@ class Component extends DCLogic {
   BLOOM_CORE = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto',
     'North Node', 'South Node', 'Ascendant', 'Midheaven', 'Descendant', 'IC',
     'chiron', 'ceres', 'pallas', 'juno', 'vesta', 'lilithMean'];
+  /* THE ASPECT GRID UNDER THE EXPANDED CHART (the owner, 7 November 2026:
+     "have the standard icon table astrologers use beneath the natal chart.
+     Make it as adaptable as the placements get revealed and hidden"). The
+     aspectarian: a staircase with each shown point's glyph on the diagonal and
+     the contact between two points where their row and column meet. It reads
+     the same rich pass the wheel's lines draw and only the points switched on
+     (bloomShowOf), so switching a group rebuilds it. Written to the DOM, never
+     through state, because a grid of eighty points is thousands of cells and
+     a vals list of them would re-render the whole app; rebuilt only when its
+     signature changes. Every cell with a contact carries its words for a
+     screen reader. */
+  bloomGridSync() {
+    if (typeof document === 'undefined') return;
+    const hosts = document.querySelectorAll('[data-asp-grid]');
+    if (!hosts.length) { this._bgSig = null; return; }
+    const st = this.state;
+    if (!st.chartBloom) return;
+    const show = this.bloomShowOf();
+    const rows = this.fullChart(true).filter(r => r.lon != null && !r.uncomputed && show[this.pointKey(r)]);
+    const minor = st.chartExpandShowMinorAspects !== false;
+    const sig = rows.map(r => this.pointKey(r)).join(',') + '|' + minor + '|' + this.chartStamp() + '|' + hosts.length;
+    if (sig === this._bgSig && hosts[0].firstChild) return;
+    this._bgSig = sig;
+    const keyOf = r => this.pointKey(r), shown = {};
+    rows.forEach(r => { shown[keyOf(r)] = true; });
+    const pair = {};
+    this.natalAspects(true, { rich: true, minorAspects: minor, minorScale: true }).forEach(x => {
+      const ka = keyOf(x.a), kb = keyOf(x.b);
+      if (!shown[ka] || !shown[kb]) return;
+      const k = ka < kb ? ka + '|' + kb : kb + '|' + ka;
+      if (!pair[k]) pair[k] = x;
+    });
+    const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const SR = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';
+    const ASPW = { conjunct: 'conjunct', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposite', quincunx: 'quincunx', semisextile: 'semisextile', semisquare: 'semisquare', sesquisquare: 'sesquisquare' };
+    let h = '<table style="border-collapse:collapse;margin:0 auto"><caption style="' + SR + '">Aspect grid: each point on the diagonal, and the contact between two points where their row and column meet</caption><tbody>';
+    rows.forEach((r, i) => {
+      h += '<tr>';
+      for (let j = 0; j < i; j++) {
+        const o = rows[j], ka = keyOf(r), kb = keyOf(o);
+        const x = pair[ka < kb ? ka + '|' + kb : kb + '|' + ka];
+        if (!x) { h += '<td></td>'; continue; }
+        const d = Math.floor(x.orb), m = Math.floor((x.orb - d) * 60);
+        const words = this.pointLabel(r) + ' ' + (ASPW[x.asp] || x.asp) + ' ' + this.pointLabel(o) + ', ' + d + '°' + String(m).padStart(2, '0') + '′';
+        const c = (this.ASP_COLOR[x.asp] || ['var(--tx)'])[0];
+        h += '<td title="' + esc(words) + '" style="position:relative"><span aria-hidden="true" style="color:' + c + '">' + esc(this.ASP_SYM[x.asp] || '·') + '</span><span style="' + SR + '">' + esc(words) + '</span></td>';
+      }
+      h += '<th scope="row" title="' + esc(this.pointLabel(r)) + '" style="position:relative"><span aria-hidden="true">' + esc(r.glyph || '·') + '</span><span style="' + SR + '">' + esc(this.pointLabel(r)) + '</span></th>';
+      for (let j = i + 1; j < rows.length; j++) h += '<td class="e"></td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table>';
+    hosts.forEach(el => { el.innerHTML = rows.length > 1 ? h : ''; });
+  }
   bloomShowOf(core) {
     const base = this.BLOOM_CORE.reduce((o, k) => (o[k] = true, o), {});
     if (core) return base;
@@ -54190,9 +54259,9 @@ class Component extends DCLogic {
       horoRetros: retros, horoHasRetro: retros.length > 0,
       /* One plain button per celestial body retrograde on the day read, under the
          horoscope (the owner, 6 November 2026: buttons, no pills). Each opens the
-         Current Retrogrades reading on the astrology page with that body chosen. */
+         Retrogrades on the astrology page and that body's own read over it. */
       horoRxBtns: retroRaw.map(r => ({ name: r.n, aria: r.n + ' retrograde, open its reading',
-        go: () => { this.searchGo(this.searchSpirit('astrology', 1, { featOpen: 'retro', retroSel: r.n }))(); this.featLand('retro'); } })),
+        go: () => { this.searchGo(this.searchSpirit('astrology', 1, { featOpen: 'retro', retroSel: r.n }))(); this.featLand('retro'); this.setState({ rxGlance: r.n }); } })),
       horoRetroCount: retros.length + (retros.length === 1 ? ' body retrograde' : ' bodies retrograde'),
       horoMoon: this.horoMoonLine(hs, ord, theme), horoTail: tail,
       horoNoCastText: 'No transiting body is inside orb of a natal placement.' };
@@ -54735,9 +54804,11 @@ class Component extends DCLogic {
   // The Sun and Moon never retrograde, so they are not in the list. The window is
   // scanned a day at a time: Mercury's passage is about three weeks, so a coarser
   // step would miss one entirely.
-  RETRO_BODIES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  /* Chiron joined the list on the owner's word of 7 November 2026: the
+     Retrogrades pull lists Mercury to Pluto and Chiron. */
+  RETRO_BODIES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron'];
   RETRO_WIN = 300;
-  RETRO_DOCTRINE = 'Retrograde motion is apparent, not real. No celestial body reverses course. Seen from a moving Earth, it appears to slow, stand still, and then walk backwards through the zodiac for a season before turning forward again. The tradition reads that appearance as a turn inward: the same business as always, handled in review rather than in advance.';
+  RETRO_DOCTRINE = 'A retrograde body slows, stands still, and walks backwards through the zodiac for a season before turning forward again. The tradition reads that backward season as a turn inward: the same business as always, handled in review rather than in advance.';
   RETRO_MEAN = {
     Mercury: 'Mercury governs speech, exchange, transit and the written record. Retrograde, the tradition expects the second draft rather than the first: things said again, contracts reread, plans revised, and people from earlier turning up mid-sentence.',
     Venus: 'Venus governs attraction, worth and the terms of an agreement. Retrograde, it is read as a re-pricing. What you value, what you tolerate, and what you have been calling love out of habit all come up for another look.',
@@ -54746,7 +54817,8 @@ class Component extends DCLogic {
     Saturn: 'Saturn governs structure, limit, and the debt that comes due. Retrograde, the tradition reads an internal audit: the commitment is tested from the inside, and whatever was built on an unexamined rule is where the strain shows first.',
     Uranus: 'Uranus governs disruption and the break in the pattern. Retrograde, the shock is read as arriving inwardly first. Something you thought was settled turns out to still be moving, and the pressure to change comes from your own position rather than an outside event.',
     Neptune: 'Neptune governs dissolution, longing, and what is not quite seen. Retrograde, the tradition expects the fog to thin: an illusion loses its hold, sometimes as relief and sometimes as plain disappointment.',
-    Pluto: 'Pluto governs what is buried and what will not stay buried. Retrograde, it is read as descent rather than eruption. The same material, worked at privately and slowly, usually well before anyone else notices.'
+    Pluto: 'Pluto governs what is buried and what will not stay buried. Retrograde, it is read as descent rather than eruption. The same material, worked at privately and slowly, usually well before anyone else notices.',
+    Chiron: 'Chiron is the healer who could not heal himself, read as the place where a hurt becomes a skill. Retrograde, the tradition turns that work inward: the old wound is revisited without an audience, and what you know about pain is offered first to yourself.'
   };
   // Shadow periods are only tracked for the personal celestial bodies. An outer celestial body is
   // retrograde for months and in shadow for most of what is left, so dating its
@@ -54755,7 +54827,7 @@ class Component extends DCLogic {
   PHASE_LABEL = { pre: 'pre-shadow', retro: 'retrograde', post: 'post-shadow' };
   PHASE_WHAT = {
     pre: 'The pre-shadow is the run-up. The celestial body is still moving forward, but it has crossed into the stretch of zodiac it will end up covering three separate times before it is done: forward now, backward through the retrograde, forward again on the way out. Whatever surfaces in these weeks is usually the first draft of the story.',
-    retro: 'The retrograde proper begins at the station, the day the celestial body appears to stop and turn. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
+    retro: 'The retrograde proper begins at the station, the day the celestial body stops and turns. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
     post: 'The post-retrograde shadow runs from the day the celestial body turns forward again to the day it finally clears the degree where it first stationed. It is the third pass over the same ground, and the difference is that by now you know what the ground is.'
   };
   RETRO_TALK = {
@@ -54814,6 +54886,84 @@ class Component extends DCLogic {
       land: 'so the quiet excavation is happening there.',
       pre: 'The first pass is the thing you notice and immediately bury again.',
       post: 'The third pass is where it stays above ground.'
+    },
+    Chiron: {
+      about: 'Chiron is a small body whose orbit runs mostly between Saturn and Uranus, a centaur named for the teacher of heroes in Greek myth, who was wounded and could not die of it. The tradition reads Chiron as the ache you carry and the care that grows around it: the place where you know too much about a hurt to ever be careless with somebody else\u2019s.',
+      retro: 'Retrograde, Chiron turns the healing back toward the healer. Old sore spots ask for attention without needing a witness, and the help you usually give other people becomes help you are allowed to receive.',
+      land: 'so the tender ground being revisited lies there.',
+      pre: 'On the first pass an old hurt brushes past, and the reflex is to cover it.',
+      post: 'On the third pass you can touch the same place without flinching quite as hard.'
+    }
+  };
+  /* THE RETROGRADE READ (owner, 7 November 2026): every body from Mercury to
+     Pluto, and Chiron, opens a read with chapters like a placement's glance,
+     and each one is written for that body alone: an epigraph, its own first
+     pass, turn and third pass, and a question to hold. The astronomy in the
+     turns (how often, how long, what happens at the middle) was measured
+     against astronomy-engine over 2010 to 2030 before it was written. */
+  RETRO_READ = {
+    Mercury: {
+      epi: 'The messenger goes back for what it left on the table.',
+      pre: 'Mercury\u2019s pre-shadow is the most noticed of any body\u2019s, because Mercury is the one people are already listening for. Notes get misplaced, a message lands in the wrong thread, a plan gets agreed in a hurry. None of it is a disaster. It is the material the retrograde will hand back for a second look, laid out early.',
+      station: 'Mercury stations three or four times a year and walks back for about three weeks each time. Halfway through, it passes between the Earth and the Sun and crosses from the evening sky into the morning one. The tradition reads that crossing as the moment the old message becomes the new one: what was said before the turn gets heard properly after it.',
+      post: 'Once Mercury turns forward it moves slowly for days, which is why the end of this retrograde rarely feels like an end. Agreements made now carry the corrections the review found, travel plans hold, and the conversation that went round in circles finally gets a sentence that lands.',
+      heldHead: 'What goes back for a second reading', held: 'Which conversation in your life deserves a second draft rather than a faster first one?'
+    },
+    Venus: {
+      epi: 'Love and money stop on the road and look again at the price.',
+      pre: 'In the pre-shadow of Venus, someone or something from an earlier chapter tends to brush past again: a song, a face, an old want. The pull is real and it is also a preview. The retrograde will ask what that pull is worth now, so this is a season for noticing it without paying for it yet.',
+      station: 'Venus turns back only once every nineteen months or so, for about six weeks, which makes it the rarest of the personal retrogrades. In the middle of it Venus passes between the Earth and the Sun and changes from evening star to morning star. Some readers tie that passage to the old stories of descent and return, the beloved going under and coming back changed.',
+      post: 'Coming forward, Venus signs again for what it still wants. A bond that survived the review usually feels steadier for it, a purchase you held off on either still appeals or quietly does not, and a taste that changed stays changed.',
+      heldHead: 'What still holds its value', held: 'Which attachment have you been renewing out of habit, and which would you choose again today?'
+    },
+    Mars: {
+      epi: 'The warrior turns round and finds the fight was partly with itself.',
+      pre: 'Mars spends its pre-shadow gathering heat it cannot yet spend well. Projects start fast and then stall, tempers rise over small things, and the body asks for a rest that pride would rather not give. It helps to see this stretch as a first look at what the coming months will ask you to fight for.',
+      station: 'Mars retrogrades about once every two years and two months, and stays backwards for anywhere from two months to almost three. At the middle of it the Earth passes between Mars and the Sun, and Mars shines its brightest of the whole cycle. So the season that feels least able to act is also the one when the red light is loudest in the night sky, which the tradition reads as anger asking to be understood before it is used.',
+      post: 'When Mars goes forward again, drive returns in stages rather than all at once. The plans that survived are the ones worth the effort, and the force that went inward during the retrograde shows up afterward as stamina more than speed.',
+      heldHead: 'Where the strength goes now', held: 'What would you still fight for if you could choose only one thing?'
+    },
+    Jupiter: {
+      epi: 'The giant stops reaching outward and counts what it already holds.',
+      pre: 'Jupiter\u2019s pre-shadow stretches over months, so it rarely feels like a beginning. It tends to arrive as a widening horizon: a course, a journey, a belief, a bigger idea about your life that gets filed away for later.',
+      station: 'Jupiter goes retrograde roughly once a year, for about four months. At the middle the Earth passes between Jupiter and the Sun, and the planet rises at sunset and stays up all night. The tradition reads that long visibility as an invitation to look at your own philosophy in full light: what you believe, what you have outgrown, and what you were promised that never arrived.',
+      post: 'Turning forward, Jupiter releases what was examined. Growth after this retrograde is usually quieter and better aimed, because it rests on convictions you actually checked.',
+      heldHead: 'The size of a good life', held: 'Which belief about your future have you tested for yourself, and which did you inherit?'
+    },
+    Saturn: {
+      epi: 'The builder walks back along the wall, checking every stone.',
+      pre: 'In Saturn\u2019s pre-shadow a responsibility shows its weight before anyone mentions it. A deadline feels heavier than it should, a role you agreed to starts to pinch, or a rule you followed without thinking asks to be explained.',
+      station: 'Saturn turns back every year, for about four and a half months, so a good third of each year is spent in this review. Because it is so regular, the tradition treats it less as an event and more as a seasonal inspection: the yearly walk round the structure of your life, looking for cracks before the weather finds them.',
+      post: 'Once Saturn goes direct, what was repaired holds and what was let go stays gone. The understanding that follows is usually plain and practical: this commitment, at this size, for these reasons.',
+      heldHead: 'What the structure can bear', held: 'Which commitment would you make again, knowing what it actually costs?'
+    },
+    Uranus: {
+      epi: 'The rebel of the sky goes quiet and starts rewiring from the inside.',
+      pre: 'The pre-shadow of Uranus tends to arrive as a hunch rather than an event: a sense that some part of your life is too tight, and that the next change will not ask permission.',
+      station: 'Uranus is retrograde for about five months of every year. It moves so slowly that the station itself is the strongest point: for days it stands still over one degree, and the tradition reads anything of yours near that degree as taking on an extra charge of restlessness.',
+      post: 'After Uranus turns forward, the change you were circling usually happens, and with less drama than you feared, because the inner rewiring was done while it walked backwards.',
+      heldHead: 'The freedom you are building', held: 'Where in your life do you want room to change your mind?'
+    },
+    Neptune: {
+      epi: 'The sea draws back and leaves the shore showing.',
+      pre: 'Neptune\u2019s pre-shadow blurs things a little more than usual. Dreams grow vivid, intuition gets loud, and an ideal you hold about someone or something takes on a soft extra glow.',
+      station: 'Neptune spends a little over five months of each year retrograde. Each passage covers only a few degrees, so the same narrow band of sky is gone over again and again for years. The tradition reads that patience as the way an illusion really ends: never all at once, always by a slow tide.',
+      post: 'When Neptune goes forward, what you saw clearly tends to stay seen. Compassion survives the clearing; the fantasy does not have to.',
+      heldHead: 'What you can see now', held: 'Which dream is still worth keeping once you see it plainly?'
+    },
+    Pluto: {
+      epi: 'The underworld turns its lamp on what was left in the dark.',
+      pre: 'Pluto\u2019s pre-shadow is felt more than seen: a pressure under the surface, an old fear or an old struggle over control stirring before it has a name.',
+      station: 'Pluto, a dwarf planet at the edge of the classical sky, is retrograde for a little over five months every year. At the middle the Earth passes between Pluto and the Sun. The tradition calls this season a descent, the slow work of letting something end so the next form can come, carried out below the surface.',
+      post: 'As Pluto turns forward, what was transformed in private begins to show in public: a changed relationship to control, to intensity, and to what you will no longer allow.',
+      heldHead: 'What is ready to change form', held: 'What are you ready to stop holding power over, or to stop letting hold power over you?'
+    },
+    Chiron: {
+      epi: 'The wounded teacher sits down beside his own wound.',
+      pre: 'Chiron\u2019s pre-shadow is long and slow, so it shows up as tenderness rather than as an event: a memory that lands harder than expected, a kindness that catches in the throat.',
+      station: 'Chiron turns back once a year and stays retrograde for about five months. Its orbit is long and stretched, around fifty years, so its backward loops run wide in some signs and narrow in others. The tradition reads each loop as another pass over the same scar, a little gentler each time.',
+      post: 'When Chiron goes forward, the care you gave yourself in private becomes something you can offer. Many people find they can now speak about the hurt without it running the conversation.',
+      heldHead: 'Where the ache teaches', held: 'Where has an old hurt made you gentler with someone else?'
     }
   };
   // Shadow bounds. The pre-shadow opens where the celestial body first crosses the degree it
@@ -54892,6 +55042,100 @@ class Component extends DCLogic {
       coming: one(runs.filter(r => r.coming && !r.openEnd), (a, b) => a.fromI - b.fromI).sort((a, b) => a.fromI - b.fromI)
     };
     return this._rt;
+  }
+  /* One body's place in its retrograde cycle today: the phase it is in, the
+     run that phase belongs to (the current one, or the next, or the last),
+     and the shadow dates where a personal body has them. Every body from
+     Mercury to Pluto and Chiron answers, retrograde or not. */
+  retroState(name) {
+    const R = this.retroScan(), P = this.retroPhases().filter(p => p.name === name)[0];
+    if (P) return { name: name, phase: P.phase, run: P.run, preStart: P.preStart || null, postEnd: P.postEnd || null };
+    const next = R.coming.filter(r => r.name === name)[0], last = R.past.filter(r => r.name === name)[0];
+    const sh = this.SHADOW_BODIES.indexOf(name) !== -1;
+    const run = next || last || null, s = run && sh ? this.retroShadow(run) : {};
+    return { name: name, phase: 'direct', run: run, next: next || null, last: last || null, preStart: s.preStart || null, postEnd: s.postEnd || null };
+  }
+  /* The Retrogrades pull's rows: all nine, in order, the ones retrograde
+     today marked by a dot in the confirmed green (--ok, never the action
+     green) and the Rx glyph beside the name. */
+  retroRows() {
+    const day = d => this.fmtDay(d), now = this.t2000(new Date());
+    const rows = this.fullChart(false);
+    return this.RETRO_BODIES.map(name => {
+      const S = this.retroState(name), r = S.run, lon = this.lonOf(name, now);
+      const g = lon == null ? null : this.signOf(lon);
+      const row = rows.filter(x => x.name === name)[0];
+      const glyph = (row && row.glyph) || (name === 'Chiron' ? '⚷' : '');
+      const state = S.phase === 'retro' ? (r && !r.openEnd ? 'retrograde · turns direct ' + day(r.to) : 'retrograde')
+        : S.phase === 'pre' ? 'pre-shadow · stations ' + day(r.from)
+        : S.phase === 'post' ? 'post-shadow' + (S.postEnd ? ' · clears ' + day(S.postEnd) : '')
+        : S.next ? 'direct · stations ' + day(S.next.from) : 'direct';
+      const on = S.phase === 'retro';
+      return { name: name, g: glyph, pos: g ? Math.floor(g.deg) + '° ' + g.sign : '', state: state,
+        dot: on ? 'var(--ok)' : 'transparent', dotBd: on ? 'var(--ok)' : 'var(--bd)', glow: on ? '0 0 8px var(--ok)' : 'none', rxD: on ? 'inline' : 'none',
+        aria: name + ', ' + state + (g ? ', at ' + Math.floor(g.deg) + (Math.floor(g.deg) === 1 ? ' degree ' : ' degrees ') + g.sign : '') + '. Open its read.',
+        go: () => this.setState({ rxGlance: name }) };
+    });
+  }
+  /* The read itself, in chapters, filling the pg* keys the placement glance
+     fills so one dialog serves all three. No section labels inside it: the
+     chapters carry their own titles. */
+  retroGlanceVals() {
+    const name = this.state.rxGlance;
+    if (this.RETRO_BODIES.indexOf(name) === -1) return { pgOpen: false };
+    const S = this.retroState(name), r = S.run, K = this.RETRO_TALK[name] || {}, W = this.RETRO_READ[name] || {};
+    const day = d => this.fmtDay(d), now = new Date(), t = this.t2000(now);
+    const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+    const f = p => p ? Math.floor(p.deg) + '° ' + p.sign : 'its place';
+    const lon = this.lonOf(name, t), g = lon == null ? null : this.signOf(lon);
+    const at = g ? Math.floor(g.deg) + '° ' + g.sign : 'its place';
+    const rows = this.fullChart(false), sun = rows[0], asc = this.ascendant();
+    const tH = lon == null || !sun ? null : this.houseOf(lon, sun, asc);
+    const natal = rows.filter(x => x.name === name)[0];
+    const nH = natal && natal.lon != null && !natal.uncomputed ? this.houseOf(natal.lon, sun, asc) : null;
+    const first = v => String(v || '').split(/\.\s+/)[0].replace(/\.$/, '').toLowerCase();
+    const glyph = (natal && natal.glyph) || (name === 'Chiron' ? '⚷' : '');
+    const standing = S.phase === 'retro'
+      ? name + ' is retrograde now at ' + at + ', losing a little ground each day. It stationed ' + (r.openStart ? 'many months ago' : 'on ' + day(r.from)) + ' at ' + f(r.startPos) +
+        ' and turns forward again ' + (r.openEnd ? 'many months from now' : 'around ' + day(r.to) + ' at ' + f(r.endPos)) + (r.openStart || r.openEnd ? '.' : ', about ' + r.days + ' days of backward motion in all.')
+      : S.phase === 'pre'
+      ? name + ' is still moving forward at ' + at + ', but it has crossed into its pre-shadow' + (S.preStart ? ' on ' + day(S.preStart) : '') + '. It stations retrograde around ' + day(r.from) + ' at ' + f(r.startPos) + ' and stays that way until about ' + day(r.to) + '.'
+      : S.phase === 'post'
+      ? name + ' turned forward around ' + day(r.to) + ' at ' + f(r.endPos) + ' and now stands at ' + at + ', taking back the ground it gave up. The shadow closes ' + (S.postEnd ? 'around ' + day(S.postEnd) : 'once it passes ' + f(r.startPos) + ' again') + ', and that is the true end of this passage.'
+      : name + ' is moving forward at ' + at + '. ' + (S.last ? 'It last turned direct on ' + day(S.last.to) + ' at ' + f(S.last.endPos) + '. ' : '') +
+        (S.next ? 'Its next station comes around ' + day(S.next.from) + ' at ' + f(S.next.startPos) + ', and from there it walks back to ' + f(S.next.endPos) + '.' : 'Its next station lies more than ten months away.');
+    const meets = tH ? (S.phase === 'direct'
+        ? 'Transiting ' + name + ' is moving through your ' + ordinal(tH) + ' house, the room of ' + first(this.HOUSE_LONG[tH - 1]) + '. When it next turns back, that room is likely to be where the review begins.'
+        : 'Transiting ' + name + ' is crossing your ' + ordinal(tH) + ' house, the room of ' + first(this.HOUSE_LONG[tH - 1]) + ', ' + (K.land || 'so that room is where the review lives.')) +
+      (nH ? ' Your natal ' + name + ' sits at ' + f(natal) + ' in your ' + ordinal(nH) + ' house, the way of it you already know; this passage works the same function from ' + (nH === tH ? 'that very room.' : 'another room.') : '')
+      : '';
+    const preLead = S.preStart && r ? 'From ' + day(S.preStart) + ' to the station on ' + day(r.from) + '.'
+      : this.SHADOW_BODIES.indexOf(name) === -1 ? 'For a body this slow the shadow spreads across much of a year, so it carries no single date.' : '';
+    const stLead = !r ? '' : r.openStart || r.openEnd ? (r.openStart ? 'Turns direct around ' + day(r.to) + '.' : 'Stations around ' + day(r.from) + '.')
+      : 'Retrograde from ' + day(r.from) + ' at ' + f(r.startPos) + ' to ' + day(r.to) + ' at ' + f(r.endPos) + ', ' + r.days + ' days.';
+    const postLead = S.postEnd && r ? 'From the turn on ' + day(r.to) + ' until about ' + day(S.postEnd) + '.'
+      : this.SHADOW_BODIES.indexOf(name) === -1 ? 'The clearing is gradual, over months.' : '';
+    const ch = (n, tab, heading, lead, lines) => ({ kick: n + ' · ' + tab, heading: heading, lead: lead || '', lines: lines.filter(Boolean).map(x => ({ t: x })) });
+    const chapters = [
+      ch('I', 'Now', name + ' today', '', [standing]),
+      ch('II', 'The body', 'What ' + name + ' handles', '', [K.about]),
+      ch('III', 'Backwards', name + ' walking backwards', '', [K.retro]),
+      meets ? ch('IV', 'Your chart', 'Where it meets you', '', [meets]) : null,
+      ch(meets ? 'V' : 'IV', 'Pre-shadow', 'The first pass', preLead, [W.pre, K.pre]),
+      ch(meets ? 'VI' : 'V', 'The turn', 'The retrograde itself', stLead, [W.station]),
+      ch(meets ? 'VII' : 'VI', 'Post-shadow', 'The third pass', postLead, [W.post, K.post])
+    ].filter(Boolean);
+    const close = () => this.setState({ rxGlance: null });
+    return { pgOpen: true, pgZ: '72', pgComputed: true, pgWhy: [], pgClose: close, pgFlyOn: false, pgFly: () => {},
+      pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
+      pgTitle: name + (S.phase === 'retro' ? ' ℞' : ''), pgGlyph: glyph,
+      pgKind: { retro: 'Retrograde', pre: 'Pre-shadow', post: 'Post-shadow', direct: 'Direct' }[S.phase],
+      pgWhere: at + (tH ? ' · your ' + ordinal(tH) + ' house' : ''),
+      pgFocusOn: false, pgFocus: () => {},
+      pgEpiOn: !!W.epi, pgEpi: W.epi || '', pgSealOn: false, pgSeal: '', pgSealC: 'var(--mut)',
+      pgChapters: chapters, pgSynth: { heading: W.heldHead || '', lines: W.held ? [{ text: W.held }] : [] },
+      pgCards: [], pgAspOn: false, pgAsp: [], pgTrOn: false, pgTr: [],
+      pgDegOn: false, pgDegKick: '', pgDegree: { heading: '', lines: [] }, pgSabOn: false, pgSab: '', pgSabMeta: '' };
   }
   /* ---- DATED TRANSIT WINDOWS ------------------------------------------------
    *
@@ -55615,6 +55859,7 @@ class Component extends DCLogic {
       chLedgerIcons: { b: this.bandIcon('bedrock'), w: this.bandIcon('weather'), h: this.bandIcon('horizon') },
       chLedgerModes: [['table', 'Table'], ['cards', 'Flash cards']].map(([id, lb]) => ({ label: lb, ...modeOf(id), go: () => this.setState({ ledgerMode: id }) })),
       chSky: sky.map(f => ({ key: f.key, title: f.title, sub: f.sub, open: f.open, toggle: f.toggle,
+        newD: f.isNew ? 'inline-flex' : 'none', rxD: f.rxT ? 'inline' : 'none',
         bd: f.open ? 'var(--ac2-hi)' : 'var(--bd)', bg: f.open ? 'rgba(var(--atmc),.22)' : 'var(--sf)' })),
       chSkyOpen: sky.filter(f => f.open),
       chGatherOn: !!(gather && stel.any), chGather: gatherText,
@@ -59763,7 +60008,7 @@ class Component extends DCLogic {
   numberGlanceVals() {
     const sel = this.state.numGlance, v = this.numberDetailVals(sel);
     if (!v.spiritNumDetail) return { pgOpen: false };
-    return { pgOpen: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgComputed: true, pgWhy: [],
+    return { pgOpen: true, pgFocusOn: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgComputed: true, pgWhy: [],
       pgClose: () => this.setState({ numGlance: null }), pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
       pgTitle: v.nmTitle, pgGlyph: v.nmValue, pgKind: v.nmKind,
       pgWhere: v.nmCoords.map(k => k.k === 'Number' ? null : k.v).filter(Boolean).join(' · '),
@@ -65908,7 +66153,7 @@ class Component extends DCLogic {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, aboutOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, atlasRec: null, plGlance: null, numGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false, obsRoom: false, obsExplore: false,
+      avaDraft: null, dpSel: null, atlasRec: null, plGlance: null, numGlance: null, rxGlance: null, swOpen: false, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null, obsAspWin: false, obsRoom: false, obsExplore: false,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
@@ -66145,13 +66390,14 @@ class Component extends DCLogic {
      Every word is the packet's; only the arrangement is lighter: no medallion,
      no starfield, no pages to turn. Open the focused read goes to the packet. */
   placementGlanceVals() {
+    if (this.state.rxGlance) return this.retroGlanceVals();
     if (this.state.numGlance) return this.numberGlanceVals();
     const k = this.state.plGlance;
     if (!k) return { pgOpen: false };
     const v = this.placementVals(k);
     if (!v || !v.spiritPlacement) return { pgOpen: false };
     const close = () => this.setState({ plGlance: null, numGlance: null });
-    const base = { pgOpen: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgClose: close,
+    const base = { pgOpen: true, pgFocusOn: true, pgZ: (this.state.chartBloom || this.state.chartExpandOpen) ? '420' : '72', pgClose: close,
       pgFlyOn: !!this.state.chartExpandOpen, pgFly: () => this.obsFlyBack(k), pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
       pgTitle: v.plTitle || (v.plName ? v.plName.charAt(0) + v.plName.slice(1).toLowerCase() : ''), pgGlyph: v.plGlyph || '',
       pgKind: v.plKind || '', pgFocus: () => this.setState({ plGlance: null, numGlance: null, tab: 'spirit', spiritView: 'placement', placeSel: k, aspSel: null,
@@ -66951,61 +67197,15 @@ class Component extends DCLogic {
                 const RP = this.retroPhases();
                 const nameList = a => a.length === 1 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
                 const retroLines = (() => {
-                  const R = this.retroScan(), out = [];
+                  const out = [];
                   const now = RP.filter(p => p.phase === 'retro'), pre = RP.filter(p => p.phase === 'pre'), post = RP.filter(p => p.phase === 'post');
                   if (now.length) {
-                    out.push(plain(nameList(now.map(p => p.name)) + (now.length === 1 ? ' is' : ' are') + ' retrograde today. Nothing is moving backwards in fact: from where we stand on a moving Earth, ' + (now.length === 1 ? 'it appears' : 'they appear') + ' to slow, halt, and walk back through the zodiac for a season.'));
+                    out.push(plain(nameList(now.map(p => p.name)) + (now.length === 1 ? ' is' : ' are') + ' retrograde today, ' + (now.length === 1 ? 'moving' : 'each moving') + ' backwards through the zodiac for a season.'));
                   } else {
-                    out.push(plain('Nothing is retrograde today. Mercury through Pluto are all in direct motion, which the tradition reads as a season for building forward rather than reviewing.'));
+                    out.push(plain('Nothing is retrograde today. Every body from Mercury to Pluto, and Chiron with them, is in direct motion, which the tradition reads as a season for building forward rather than reviewing.'));
                   }
                   if (pre.length) out.push(plain(nameList(pre.map(p => p.name)) + (pre.length === 1 ? ' has' : ' have') + ' entered the pre-shadow, still moving forward, but already inside the stretch of sky ' + (pre.length === 1 ? 'it' : 'they') + ' will cover three times before this is finished. That is why ' + (pre.length === 1 ? 'it appears' : 'they appear') + ' here before the retrograde proper begins.'));
                   if (post.length) out.push(plain(nameList(post.map(p => p.name)) + ' turned forward again and ' + (post.length === 1 ? 'is' : 'are') + ' clearing the post-retrograde shadow, retracing the same degrees for the third and last time.'));
-                  if (RP.length) out.push(plain('Open any of them below for where it stands, what it usually asks for, and how it meets your own chart.'));
-                  else if (R.coming[0]) out.push(plain('Next to turn: ' + R.coming[0].name + ', around ' + this.fmtDay(R.coming[0].from) + '. It will appear here as soon as it enters its pre-shadow.'));
-                  return out;
-                })();
-                const retroTabs = RP.map(p => {
-                  const on = (RP.some(x => x.name === st.retroSel) ? st.retroSel : RP[0].name) === p.name;
-                  return { name: p.name, phase: this.PHASE_LABEL[p.phase], on: on,
-                    c: on ? '#0d1510' : 'var(--tx)', sc: on ? 'rgba(13,21,16,.72)' : 'var(--dim)',
-                    bg: on ? 'var(--ac)' : 'var(--sf2)', bd: on ? 'var(--ac)' : 'var(--bd)',
-                    go: () => this.setState({ retroSel: p.name }) };
-                });
-                const retroBody = (() => {
-                  if (!RP.length) return [];
-                  const sel = RP.filter(p => p.name === st.retroSel)[0] || RP[0];
-                  const K = this.RETRO_TALK[sel.name] || {}, r = sel.run;
-                  const day = d => this.fmtDay(d);
-                  const f = p => p ? Math.floor(p.deg) + '\u00b0 ' + p.sign : 'a degree this build does not draw';
-                  const tLon = this.lonOf(sel.name, this.t2000(new Date()));
-                  const tSign = tLon == null ? null : this.signOf(tLon);
-                  const tH = tLon == null ? null : houseOf({ lon: tLon });
-                  const natal = rows.filter(x => x.name === sel.name)[0];
-                  const out = [];
-                  const standing = sel.phase === 'retro'
-                    ? sel.name + ' is retrograde right now, sitting at ' + (tSign ? Math.floor(tSign.deg) + '\u00b0 ' + tSign.sign : 'a degree this build does not draw') + ' and losing ground each day. It stationed ' +
-                      (r.openStart ? 'before the window this build can see' : 'on ' + day(r.from)) + ' at ' + f(r.startPos) + ', and turns forward again ' +
-                      (r.openEnd ? 'past the far edge of that window' : 'around ' + day(r.to) + ' at ' + f(r.endPos)) + ', roughly ' + r.days + ' days of apparent backward motion in all.'
-                    : sel.phase === 'pre'
-                    ? sel.name + ' is still moving forward, but it crossed into its pre-shadow ' + (sel.preStart ? 'on ' + day(sel.preStart) : 'recently') + ' and now sits at ' + (tSign ? Math.floor(tSign.deg) + '\u00b0 ' + tSign.sign : 'a degree this build does not draw') + '. It stations retrograde around ' + day(r.from) + ' at ' + f(r.startPos) + ', and stays that way until roughly ' + day(r.to) + '.'
-                    : sel.name + ' turned forward again around ' + day(r.to) + ' at ' + f(r.endPos) + ' and is now at ' + (tSign ? Math.floor(tSign.deg) + '\u00b0 ' + tSign.sign : 'a degree this build does not draw') + ', retracing the ground it lost. The shadow closes ' + (sel.postEnd ? 'around ' + day(sel.postEnd) : 'once it recovers ' + f(r.startPos)) + ', and that is the true end of the passage.';
-                  out.push(S('Where it stands right now', standing));
-                  if (K.about) out.push(S('What ' + sel.name + ' handles', K.about));
-                  if (K.retro) out.push(S(sel.name + ' walking backwards', K.retro));
-                  if (tH && natal && natal.deg != null && !natal.uncomputed) {
-                    out.push(S('How it meets your chart',
-                      'Transiting ' + sel.name + ' is crossing your ' + ordinal(tH) + ' house, the room of ' + first(this.HOUSE_LONG[tH - 1]) + ', ' + (K.land || 'so that is where the review is happening.') +
-                      ' You were born with ' + sel.name + ' at ' + Math.floor(natal.deg) + '\u00b0 ' + natal.sign + ' in your ' + ordinal(houseOf(natal)) + ' house, which is the version of it you already know how to use. This season asks you to use it in a different room than usual.'));
-                  }
-                  const wrap = (label, base, tail, dates) => S(label, base + (dates ? ' ' + dates : '') + (tail ? ' ' + tail : ''));
-                  out.push(wrap('The pre-shadow', this.PHASE_WHAT.pre, K.pre,
-                    sel.preStart ? 'For this passage it opened on ' + day(sel.preStart) + ' and ran to the station on ' + day(r.from) + '.'
-                      : 'For a celestial body this slow the shadow stretches across most of a year, so this build does not put a date on it.'));
-                  out.push(wrap('The retrograde itself', this.PHASE_WHAT.retro, null,
-                    (r.openStart ? '' : 'This one runs from ' + day(r.from) + ' to ' + day(r.to) + ', about ' + r.days + ' days.')));
-                  out.push(wrap('The post-retrograde shadow', this.PHASE_WHAT.post, K.post,
-                    sel.postEnd ? 'Here it runs from ' + day(r.to) + ' until roughly ' + day(sel.postEnd) + '.'
-                      : 'For the slower celestial bodies that final pass takes months, so treat the station as the turn and the clearing as gradual.'));
                   return out;
                 })();
                 const retroSub = (() => {
@@ -67096,19 +67296,18 @@ class Component extends DCLogic {
                   return n ? 'next: ' + n.kind.toLowerCase() + ' eclipse ' + this.fmtDay(n.date) + ' \u00b7 ' + Math.floor(n.deg) + '\u00b0 ' + n.sign : 'none ahead in the scanned window';
                 })();
                 const eclRow = { key: 'eclipse', when: eclNow ? 'weather' : 'horizon', title: 'Eclipses', sub: eclSub, lines: eclLines, tabs: eclTabs, body: eclBody };
+                /* ORDER (owner, 7 November 2026): Retrogrades first, Harmonics all
+                   the way to the right and marked new. An eclipse inside its
+                   five-day window is the loudest thing in the sky, so it leads;
+                   otherwise it waits after the retrogrades. */
                 const rows2 = [
-                  /* HARMONICS (owner, 6 November 2026): the pill that was Important
-                     Today opens the harmonic charts card, unchanged. */
-                  ...(this.harmonicVals().hmOn ? [{ key: 'harmonics', when: 'bedrock', title: 'Harmonics', sub: 'the 4th, 5th, 7th and 9th', lines: [], body: [], hm: true }] : []),
-                  { key: 'retro', when: 'weather', title: 'Current Retrogrades', sub: retroSub, lines: retroLines, tabs: retroTabs, body: retroBody },
+                  { key: 'retro', when: 'weather', title: 'Retrogrades', rx: true, sub: retroSub, lines: retroLines, body: [] },
                   { key: 'stellium', when: 'bedrock', title: 'Stellium', sub: stel.any ? 'a gathering in your wheel' : 'no gathering found', lines: stellLines, body: stellBody }
                 ];
-                // An eclipse inside its five-day window is the loudest thing in the sky, so
-                // it sits directly after Harmonics. Otherwise it waits its turn after
-                // the retrogrades rather than crowding the panel with a date months away.
-                rows2.splice(eclNow ? 1 : Math.min(2, rows2.length), 0, eclRow);
+                rows2.splice(eclNow ? 0 : 1, 0, eclRow);
+                if (this.harmonicVals().hmOn) rows2.push({ key: 'harmonics', when: 'bedrock', title: 'Harmonics', isNew: true, sub: 'the 4th, 5th, 7th and 9th', lines: [], body: [], hm: true });
                 return rows2.map(r => ({
-                  hmIn: !!r.hm,
+                  hmIn: !!r.hm, rxOn: !!r.rx, rx: r.rx ? this.retroRows() : [], isNew: !!r.isNew, rxT: !!r.rx,
                   key: r.key, when: r.when, title: r.title, sub: r.sub, lines: r.lines,
                   hasTabs: !!(r.tabs && r.tabs.length), tabs: r.tabs || [],
                   hasBody: !!(r.body && r.body.length), body: r.body || [],
@@ -68167,7 +68366,7 @@ class Component extends DCLogic {
          ever addresses a room; this addresses a card, a hexagram, an image and a
          degree, so a jump that did not clear them would open the tarot deck at
          whatever card the last search happened to land on. */
-      const clean = { spiritView: null, placeSel: null, plGlance: null, numGlance: null, numSel: null, libView: null, ypCat: null, ypPick: false,
+      const clean = { spiritView: null, placeSel: null, plGlance: null, numGlance: null, rxGlance: null, numSel: null, libView: null, ypCat: null, ypPick: false,
         selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null,
         ttSec: null, ttCard: null, icSec: null, icHex: null, icQuery: '',
         dlSec: null, dlOpen: null, dlQuery: '', lexSign: null, lexDeg: null, lexQuery: '', tlOpen: null,
@@ -69128,7 +69327,7 @@ class Component extends DCLogic {
         if (dy > 110) this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 });
         else this.setState({ vtDragY: 0 });
       },
-      vtSheetClose: () => this.setState({ plGlance: null, numGlance: null, swOpen: false, placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
+      vtSheetClose: () => this.setState({ plGlance: null, numGlance: null, rxGlance: null, swOpen: false, placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
       isToday: true, isSpirit: true, spiritMain: false,
       spiritAstro: true, spiritHd: true, spiritNumer: true,
       isOracle: true, isSettings: true,
