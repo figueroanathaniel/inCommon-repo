@@ -18184,6 +18184,54 @@ class Component extends DCLogic {
     trine: (a, b, pa, pb) => 'What comes free here is that ' + a + ' asking ' + pa + ' already carries ' + b + ' asking ' + pb + ', which is why you are liable to treat it as ordinary and give it away.',
     opposite: (a, b, pa, pb) => 'The stretch is between ' + a + ' asking ' + pa + ' at one end and ' + b + ' asking ' + pb + ' at the other, and you will keep meeting the far end in people until you can hold both ends yourself.'
   };
+  /* The closing sentence of a contact on a placement page (the owner, 7
+     November 2026: never repeat a sentence; give each contact a mood). Each
+     aspect has a theme and four closers; every closer names both ends and
+     where each one stands, so no two contacts read alike. */
+  ASP_MOOD = {
+    conjunct: { theme: 'Fusion', lines: [
+      (A, B, pa, pb) => A + ' and ' + B + ' share one address in ' + pa + ', so whatever stirs one wakes the other, and the force of the two together is yours to aim.',
+      (A, B, pa, pb) => 'Standing this close in ' + pa + ', ' + A + ' and ' + B + ' speak with one voice, and telling their two accents apart is a quiet pleasure that deepens with age.',
+      (A, B, pa, pb) => A + ' colours ' + B + ' and ' + B + ' colours ' + A + ' until, in ' + pa + ', the blend becomes a signature only you carry.',
+      (A, B, pa, pb) => 'In ' + pa + ', ' + A + ' and ' + B + ' arrive together like two notes struck at once, and the chord they make is the sound people come to know as you.',
+      (A, B, pa, pb) => 'Where ' + A + ' goes in ' + pa + ', ' + B + ' is already walking beside it, and the two of them make one stride long enough to cover real ground.',
+      (A, B, pa, pb) => A + ' lends ' + B + ' its fire and ' + B + ' lends ' + A + ' its shape, so in ' + pa + ' a single gesture of yours can carry both at once.'] },
+    opposite: { theme: 'The Mirror', lines: [
+      (A, B, pa, pb) => A + ' in ' + pa + ' and ' + B + ' in ' + pb + ' face each other across the wheel, so what one of them forgets, the other tends to find in the people around you.',
+      (A, B, pa, pb) => 'Across the chart from each other, ' + A + ' and ' + B + ' trade places like dancers, and the steadiness comes from learning the whole floor between ' + pa + ' and ' + pb + '.',
+      (A, B, pa, pb) => 'Some days ' + A + ' in ' + pa + ' feels like the whole of you and ' + B + ' in ' + pb + ' like a stranger; the balance arrives when both are invited to the same table.',
+      (A, B, pa, pb) => B + ' holds up a mirror to ' + A + ', ' + pb + ' answering ' + pa + ', and what looks back is rarely an enemy, more often the half still waiting to be met.',
+      (A, B, pa, pb) => 'Like the two pans of a scale, ' + A + ' in ' + pa + ' and ' + B + ' in ' + pb + ' tip back and forth until you find the weight that steadies both.',
+      (A, B, pa, pb) => 'The distance from ' + pa + ' to ' + pb + ' is the width of a whole sky, and ' + A + ' and ' + B + ' teach you to stand in the middle of it without losing either view.'] },
+    trine: { theme: 'The Current', lines: [
+      (A, B, pa, pb) => A + ' in ' + pa + ' flows into ' + B + ' in ' + pb + ' like water finding its own channel, and the gift grows each time you steer it on purpose.',
+      (A, B, pa, pb) => 'Between ' + pa + ' and ' + pb + ', ' + A + ' and ' + B + ' move in step without being asked, an ease worth spending rather than saving.',
+      (A, B, pa, pb) => A + ' hands ' + B + ' what it needs before ' + B + ' knows to ask, and from ' + pb + ' that generosity can carry you further than effort alone.',
+      (A, B, pa, pb) => 'What runs between ' + A + ' and ' + B + ' feels so natural it can pass unnoticed; name it once, ' + pa + ' to ' + pb + ', and it starts working for you.',
+      (A, B, pa, pb) => 'Talents travel easily from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ', a tailwind that turns ordinary days into chances when you lean into it.',
+      (A, B, pa, pb) => A + ' and ' + B + ' already speak the same language across ' + pa + ' and ' + pb + ', and a little practice turns that fluency into something others can feel.'] },
+    square: { theme: 'The Forge', lines: [
+      (A, B, pa, pb) => A + ' and ' + B + ' rarely want the same thing at the same hour, and each time you choose between ' + pa + ' and ' + pb + ', the blade gets a little keener.',
+      (A, B, pa, pb) => 'Think of ' + A + ' in ' + pa + ' as the hammer and ' + B + ' in ' + pb + ' as the anvil: the ringing is uncomfortable, and it is also the sound of something taking shape.',
+      (A, B, pa, pb) => 'When ' + A + ' tugs toward ' + pa + ' and ' + B + ' answers from ' + pb + ', the knot you feel is a working knot, the kind that holds weight once you learn its tie.',
+      (A, B, pa, pb) => B + ' keeps asking ' + A + ' to prove itself, ' + pb + ' pressing on ' + pa + ', and the proof you build over the years becomes a strength nobody handed you.',
+      (A, B, pa, pb) => 'The corner where ' + A + ' in ' + pa + ' meets ' + B + ' in ' + pb + ' is a hard turn to take, and taking it again and again is how your balance learns to hold.',
+      (A, B, pa, pb) => A + ' sets the pace in ' + pa + ' and ' + B + ' refuses it from ' + pb + ', and out of that refusal comes a rhythm entirely your own.'] },
+    sextile: { theme: 'The Open Door', lines: [
+      (A, B, pa, pb) => A + ' in ' + pa + ' leaves a door ajar for ' + B + ' in ' + pb + '; walking through takes one small, deliberate step, and the room beyond is worth it.',
+      (A, B, pa, pb) => B + ' is ready to help ' + A + ' the moment you ask, ' + pb + ' lending a hand to ' + pa + ', and the asking is the whole of the skill.',
+      (A, B, pa, pb) => 'An easy word passes between ' + A + ' and ' + B + ', ' + pa + ' to ' + pb + ', and each time you act on it the path between them widens.',
+      (A, B, pa, pb) => A + ' and ' + B + ' are friendly neighbours, ' + pa + ' and ' + pb + ' within calling distance, and a little visiting turns that friendliness into real support.',
+      (A, B, pa, pb) => 'A spark jumps from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ' whenever you give it something to catch on, and small kindling is enough.',
+      (A, B, pa, pb) => 'Opportunity sits lightly between ' + A + ' and ' + B + ', ' + pa + ' beckoning to ' + pb + ', and it answers best to curiosity rather than force.'] },
+    minor: { theme: 'The Whisper', lines: [
+      (A, B, pa, pb) => A + ' and ' + B + ' speak quietly to each other between ' + pa + ' and ' + pb + ', and the message comes through best when the rest of the day goes still.',
+      (A, B, pa, pb) => 'The link between ' + A + ' in ' + pa + ' and ' + B + ' in ' + pb + ' is subtle, an adjustment more than an event, and it rewards a patient ear.',
+      (A, B, pa, pb) => A + ' nudges ' + B + ' at an odd angle, ' + pa + ' to ' + pb + ', and small corrections made over the years are how this contact earns its keep.',
+      (A, B, pa, pb) => 'Between ' + A + ' and ' + B + ' the signal is faint and persistent, ' + pa + ' and ' + pb + ' tuning to each other a little more each season.',
+      (A, B, pa, pb) => 'A thread runs from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ', thin enough to forget and strong enough to pull you back to it.',
+      (A, B, pa, pb) => A + ' and ' + B + ' meet at an awkward slant, ' + pa + ' leaning toward ' + pb + ', and the small adjustments they ask for add up to grace.'] }
+  };
   ASP_NATURE = {
     conjunct: 'Zero degrees: the two bodies stand side by side, usually in the same sign, and their energies blur into a single drive. Each one colours everything the other does. That concentration is the gift. A conjunction is where a chart is most focused, and often the first thing other people feel from you, because it arrives at full strength.',
     sextile: 'Sixty degrees, usually between signs of friendly elements, fire with air or earth with water. The two bodies speak a common language and help each other readily, and the tradition calls it an opportunity. It behaves like a door that opens a little wider every time you walk through it, so small, deliberate efforts here tend to pay back more than their size.',
@@ -20820,7 +20868,9 @@ class Component extends DCLogic {
      openings even after the sentence structure was varied. */
   HORO_TONE = {
     Sun: { e: ['a clear sense of your own weight in the room', 'the feeling of being seen for what you actually do', 'your own authority, unforced and legible to other people'],
-      h: ['a pull between what you want and what is expected of you', 'the cost of being visible when you would rather not be', 'a day where your own aims and somebody else\u2019s both have a claim'] },
+      h: ['a pull between what you want and what is expected of you', 'the cost of being visible when you would rather not be', 'a day where your own aims and somebody else\u2019s both have a claim',
+      (A, B, pa, pb) => 'A thread runs from ' + A + ' in ' + pa + ' to ' + B + ' in ' + pb + ', thin enough to forget and strong enough to pull you back to it.',
+      (A, B, pa, pb) => A + ' and ' + B + ' meet at an awkward slant, ' + pa + ' leaning toward ' + pb + ', and the small adjustments they ask for add up to grace.'] },
     Moon: { e: ['an unusually accurate read on the mood around you', 'instincts that are worth trusting before they are worth explaining', 'an easy fluency with what other people are not saying'],
       h: ['feelings that arrive faster than their reasons', 'a mood that turns before you have finished the last one', 'reactions that are older than the thing setting them off'] },
     Mercury: { e: ['sharp communication', 'the right words arriving on time', 'a clarity that makes an awkward conversation simple'],
@@ -33535,12 +33585,16 @@ class Component extends DCLogic {
     // Contacts. The angles sit in the natal set now, so the Ascendant reads its
     // own aspects and its own transits exactly as a celestial body does.
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
+    const moodUsed = {}, placeOf = p => { const h = p && p.lon != null ? this.houseOf(p.lon, all[0], asc) : null;
+      return h ? 'your ' + PC.ord(h) + ' house' : (p && p.sign) || 'its sign'; };
     const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
+      const M = this.ASP_MOOD[k] || this.ASP_MOOD.minor, seed = this.shash(rk);
+      const n = moodUsed[k] = (moodUsed[k] || 0) + 1, close = M.lines[(Math.abs(seed) + n - 1) % M.lines.length](name, oName, placeOf(r), placeOf(o));
       return { glyph: o.glyph, edge: edgeOf(k),
         title: name + ' ' + this.aspName(k) + ' ' + oName,
-        meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0',
-        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. Two parts of you in a conversation that never quite ends, and like most long conversations, its tone is set by how you tend it rather than by how it began.',
+        meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0 \u00b7 ' + M.theme,
+        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. ' + close,
         cta: 'See ' + oName + ' \u2192', okey: key(o), go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
