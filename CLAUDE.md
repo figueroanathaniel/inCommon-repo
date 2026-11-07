@@ -7579,7 +7579,7 @@ Until 15 October 2026 they shipped unrewritten, and from a site root that
 address is answered by the catch all with the app, so a home screen icon was
 an HTML page.
 
-`tools/` holds thirty five scripts. Twenty two are gates and are worth running
+`tools/` holds thirty five scripts. Twenty three are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -7587,7 +7587,11 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
-`check-astral-bodies.js`, `check-timing-lexicon.js`, `check-sky-weather.js`.
+`check-astral-bodies.js`, `check-timing-lexicon.js`, `check-sky-weather.js`,
+`check-reading-text.js` (no phrase table mixes plain phrases with template
+functions, the fault that printed function source into the Today horoscope on
+7 November 2026; `drive-reading-text.js` is its rendered half, 730 days in a
+browser).
 Ten generate:
 `build-bundle.js`, `build-number-matrix.js` (`app/number-matrix.js`, from the owner's Book of Numbers CSV), `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
