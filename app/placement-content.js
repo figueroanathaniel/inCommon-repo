@@ -1008,6 +1008,7 @@
   function ordWord(n) { return ['first', 'second', 'third'][n - 1] || String(n); }
   function low(s) { return String(s || '').charAt(0).toLowerCase() + String(s || '').slice(1); }
   function stripDot(s) { return String(s || '').replace(/\.$/, ''); }
+  function cap(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
 
   /* WHAT EACH BODY DOES IN EACH HOUSE (owner, 7 November 2026). One line per
      body per house, the body acting in the room's own scenes. Kin Common
@@ -1157,7 +1158,7 @@
   };
 
   var PC = {
-    VERSION: '1.1.0',
+    VERSION: '1.2.0',
     bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY, inHouseTable: IN_HOUSE,
     /* inHouse(body, house) -> the line, or '' for a point the table does not hold. */
     inHouse: function (body, house) { var r = IN_HOUSE[body]; return r && house >= 1 && house <= 12 ? r[house - 1] : ''; },
@@ -1219,7 +1220,7 @@
       ][n - 1];
       var ruler = s.decans[n - 1], fl = PC.decanFilter(ruler);
       return { n: n, word: ordWord(n), ruler: ruler, rulerName: fl.name, filter: fl,
-        range: ((n - 1) * 10) + '\u00b0, ' + (n * 10 - 1) + '\u00b0', character: character };
+        range: ((n - 1) * 10) + '\u00b0 to ' + (n * 10) + '\u00b0', character: character };
     },
 
     astralBodyInSign: function (body, sign) {
@@ -1231,8 +1232,11 @@
     astralBodyInHouse: function (body, house) {
       var name = nm(body);
       var b = BODIES[body], h = HOUSES[house - 1]; if (!b || !h) return '';
+      /* The approved body in house line stands where the house's question used
+         to, because The Room already asks it and a sentence is never said twice. */
+      var own = PC.inHouse ? PC.inHouse(body, house) : '';
       return name + ' in the ' + ord(house) + ' house carries ' + b.energy + ' into ' + h.arena + '. ' +
-        h.asks + ' ' + h.presence;
+        (own ? own + ' ' : '') + h.presence;
     },
     signInHouse: function (sign, house) {
       var s = SIGNS[sign], h = HOUSES[house - 1]; if (!s || !h) return '';
@@ -1250,11 +1254,11 @@
         (dig.strong ? 'this part of you has the sign at its back.' : 'this part of you has had to find its own footing.') : '';
       return {
         synthesis: name + ' in ' + sign + ' in the ' + ord(house) + ' house gathers ' + b.energy +
-          ' around ' + h.arena + ', and asks you to meet it ' + s.manner + '.' + digClause +
-          ' Put together: ' + name + ' brings the longing, ' + sign + ' brings the style, and the ' + ord(house) +
+          ' around ' + h.arena + ', and meets it ' + s.manner + '.' + digClause +
+          ' ' + name + ' brings the longing, ' + sign + ' brings the style, and the ' + ord(house) +
           ' house is where life keeps handing it back to you.',
         possibility: 'You may feel this most around ' + h.arena + ', and least when a moment asks you to be the opposite of ' +
-          sign + '. You know your own life better than any page does, so keep what rings true and set the rest aside.'
+          sign + '.'
       };
     },
 
@@ -1279,7 +1283,7 @@
       if (b.shadows[2]) challenges.push('If you feel yourself starting to ' + b.shadows[2] + ', pause and ask what you actually need.');
       else if (b.shadows[1]) challenges.push('If you feel yourself starting to ' + b.shadows[1] + ', pause and ask what you actually need.');
       var opportunities = [
-        'Try this: ' + b.growth[0] + ', starting with ' + h.tryWith + '.',
+        cap(b.growth[0]) + ', starting with ' + h.tryWith + '.',
         'Next time ' + h.cue + ', ' + s.move + '.',
         'In ' + h.focus.split(',')[0] + ', ' + h.growth + '.'
       ];
@@ -1288,7 +1292,7 @@
         'Watch for ' + b.blocks[0] + ', especially in ' + h.focus.split(',')[0] + '.',
         'When you meet ' + h.block + ', name it. Once it has a name, it is easier to step around.'
       ];
-      if (b.blocks[1]) obstacles.push('Another snag to spot: ' + b.blocks[1] + '.');
+      if (b.blocks[1]) obstacles.push('There is another snag worth spotting in ' + b.blocks[1] + '.');
       obstacles.push('Your ease with ' + low(s.quality) + ' can answer before you have finished asking. Give it a beat.');
       return { strengths: strengths, challenges: challenges, opportunities: opportunities, obstacles: obstacles };
     },
@@ -1330,10 +1334,10 @@
         degree: {
           heading: Math.floor(degInSign) + '\u00b0 ' + sign,
           lines: [
-            T('CALCULATED', Math.floor(degInSign) + '\u00b0 ' + sign + ' falls in the ' + dec.word + ' decan (' + dec.range + '), co-ruled by ' + dec.rulerName + '.'),
+            T('CALCULATED', Math.floor(degInSign) + '\u00b0 ' + sign + ' falls in the ' + dec.word + ' decan, ' + dec.range + ', co-ruled by ' + dec.rulerName + '.'),
             T('TRADITIONAL', dec.character),
             T('TRADITIONAL', dec.rulerName.charAt(0).toUpperCase() + dec.rulerName.slice(1) + '\u2019s filter here ' + dec.filter.primary + '. What might otherwise run on ' + low(s.quality) +
-              ' alone gains ' + dec.filter.gain + '. ' + dec.rulerName.charAt(0).toUpperCase() + dec.rulerName.slice(1) + ' asks: ' + dec.filter.asks),
+              ' alone gains ' + dec.filter.gain + '. ' + dec.rulerName.charAt(0).toUpperCase() + dec.rulerName.slice(1) + ' asks one thing more. ' + cap(dec.filter.asks)),
             T('TRADITIONAL', 'At this degree ' + name + ' passes through two hands. ' + sign + ' shapes the manner, ' + dec.rulerName + ' leans on the emphasis, and what reaches the ' + ord(house) +
               ' house is ' + low(b.energy) + ' carried by both.'),
             T('POSSIBILITY', 'You may find this feels more particular than ' + name + ' in ' + sign + ' alone: not the whole sign, only this ten degree slice of it, showing up in ' + h.arena.split(',')[0] + '.')

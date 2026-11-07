@@ -7422,6 +7422,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   function ordWord(n) { return ['first', 'second', 'third'][n - 1] || String(n); }
   function low(s) { return String(s || '').charAt(0).toLowerCase() + String(s || '').slice(1); }
   function stripDot(s) { return String(s || '').replace(/\.$/, ''); }
+  function cap(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
 
   /* WHAT EACH BODY DOES IN EACH HOUSE (owner, 7 November 2026). One line per
      body per house, the body acting in the room's own scenes. Kin Common
@@ -7571,7 +7572,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   };
 
   var PC = {
-    VERSION: '1.1.0',
+    VERSION: '1.2.0',
     bodies: BODIES, signs: SIGNS, houses: HOUSES, dignityTable: DIGNITY, inHouseTable: IN_HOUSE,
     /* inHouse(body, house) -> the line, or '' for a point the table does not hold. */
     inHouse: function (body, house) { var r = IN_HOUSE[body]; return r && house >= 1 && house <= 12 ? r[house - 1] : ''; },
@@ -7633,7 +7634,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       ][n - 1];
       var ruler = s.decans[n - 1], fl = PC.decanFilter(ruler);
       return { n: n, word: ordWord(n), ruler: ruler, rulerName: fl.name, filter: fl,
-        range: ((n - 1) * 10) + '\u00b0, ' + (n * 10 - 1) + '\u00b0', character: character };
+        range: ((n - 1) * 10) + '\u00b0 to ' + (n * 10) + '\u00b0', character: character };
     },
 
     astralBodyInSign: function (body, sign) {
@@ -7645,8 +7646,11 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     astralBodyInHouse: function (body, house) {
       var name = nm(body);
       var b = BODIES[body], h = HOUSES[house - 1]; if (!b || !h) return '';
+      /* The approved body in house line stands where the house's question used
+         to, because The Room already asks it and a sentence is never said twice. */
+      var own = PC.inHouse ? PC.inHouse(body, house) : '';
       return name + ' in the ' + ord(house) + ' house carries ' + b.energy + ' into ' + h.arena + '. ' +
-        h.asks + ' ' + h.presence;
+        (own ? own + ' ' : '') + h.presence;
     },
     signInHouse: function (sign, house) {
       var s = SIGNS[sign], h = HOUSES[house - 1]; if (!s || !h) return '';
@@ -7664,11 +7668,11 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
         (dig.strong ? 'this part of you has the sign at its back.' : 'this part of you has had to find its own footing.') : '';
       return {
         synthesis: name + ' in ' + sign + ' in the ' + ord(house) + ' house gathers ' + b.energy +
-          ' around ' + h.arena + ', and asks you to meet it ' + s.manner + '.' + digClause +
-          ' Put together: ' + name + ' brings the longing, ' + sign + ' brings the style, and the ' + ord(house) +
+          ' around ' + h.arena + ', and meets it ' + s.manner + '.' + digClause +
+          ' ' + name + ' brings the longing, ' + sign + ' brings the style, and the ' + ord(house) +
           ' house is where life keeps handing it back to you.',
         possibility: 'You may feel this most around ' + h.arena + ', and least when a moment asks you to be the opposite of ' +
-          sign + '. You know your own life better than any page does, so keep what rings true and set the rest aside.'
+          sign + '.'
       };
     },
 
@@ -7693,7 +7697,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       if (b.shadows[2]) challenges.push('If you feel yourself starting to ' + b.shadows[2] + ', pause and ask what you actually need.');
       else if (b.shadows[1]) challenges.push('If you feel yourself starting to ' + b.shadows[1] + ', pause and ask what you actually need.');
       var opportunities = [
-        'Try this: ' + b.growth[0] + ', starting with ' + h.tryWith + '.',
+        cap(b.growth[0]) + ', starting with ' + h.tryWith + '.',
         'Next time ' + h.cue + ', ' + s.move + '.',
         'In ' + h.focus.split(',')[0] + ', ' + h.growth + '.'
       ];
@@ -7702,7 +7706,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
         'Watch for ' + b.blocks[0] + ', especially in ' + h.focus.split(',')[0] + '.',
         'When you meet ' + h.block + ', name it. Once it has a name, it is easier to step around.'
       ];
-      if (b.blocks[1]) obstacles.push('Another snag to spot: ' + b.blocks[1] + '.');
+      if (b.blocks[1]) obstacles.push('There is another snag worth spotting in ' + b.blocks[1] + '.');
       obstacles.push('Your ease with ' + low(s.quality) + ' can answer before you have finished asking. Give it a beat.');
       return { strengths: strengths, challenges: challenges, opportunities: opportunities, obstacles: obstacles };
     },
@@ -7744,10 +7748,10 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
         degree: {
           heading: Math.floor(degInSign) + '\u00b0 ' + sign,
           lines: [
-            T('CALCULATED', Math.floor(degInSign) + '\u00b0 ' + sign + ' falls in the ' + dec.word + ' decan (' + dec.range + '), co-ruled by ' + dec.rulerName + '.'),
+            T('CALCULATED', Math.floor(degInSign) + '\u00b0 ' + sign + ' falls in the ' + dec.word + ' decan, ' + dec.range + ', co-ruled by ' + dec.rulerName + '.'),
             T('TRADITIONAL', dec.character),
             T('TRADITIONAL', dec.rulerName.charAt(0).toUpperCase() + dec.rulerName.slice(1) + '\u2019s filter here ' + dec.filter.primary + '. What might otherwise run on ' + low(s.quality) +
-              ' alone gains ' + dec.filter.gain + '. ' + dec.rulerName.charAt(0).toUpperCase() + dec.rulerName.slice(1) + ' asks: ' + dec.filter.asks),
+              ' alone gains ' + dec.filter.gain + '. ' + dec.rulerName.charAt(0).toUpperCase() + dec.rulerName.slice(1) + ' asks one thing more. ' + cap(dec.filter.asks)),
             T('TRADITIONAL', 'At this degree ' + name + ' passes through two hands. ' + sign + ' shapes the manner, ' + dec.rulerName + ' leans on the emphasis, and what reaches the ' + ord(house) +
               ' house is ' + low(b.energy) + ' carried by both.'),
             T('POSSIBILITY', 'You may find this feels more particular than ' + name + ' in ' + sign + ' alone: not the whole sign, only this ten degree slice of it, showing up in ' + h.arena.split(',')[0] + '.')
@@ -52266,7 +52270,7 @@ class Component extends DCLogic {
     }[dg.state] || '');
     const hs = PC && house && r.group !== 'angle' ? PC.houses[house - 1] : null;
     if (hs) {
-      out.push('It lives in a part of living where ' + hs.living + ' happens.');
+      out.push('It lives in a part of living where ' + this.livingVerb(hs.living) + '.');
       const ln = PC.inHouse(name, house);
       if (ln) out.push(ln);
       if (hs.gift && hs.shadow) out.push('Its gift here is ' + hs.gift + '. Its shadow is ' + hs.shadow + '.');
@@ -66559,12 +66563,18 @@ class Component extends DCLogic {
      the sign walks into the room as itself, the body speaks as itself, and the
      reader is trusted to go with it. The words live in placement-content.js;
      a point with no voice of its own gets no lead rather than a generic one. */
+  /* A house's part of living is often a list ("play, making things and
+     falling for someone"), and a list happens in the plural. */
+  livingVerb(l) {
+    const t = String(l || '').replace(/,\s*$/, '');
+    return t + (/,| and /.test(t) ? ' happen' : ' happens');
+  }
   plLeads(r, name, ordH, dig) {
     const PC = window.PlacementContent || {}, hs = PC.houses || [], ss = PC.signs || {}, bs = PC.bodies || {};
     const hn = Number(String(ordH).replace(/\D/g, '')) || 0, h = hs[hn - 1] || {}, sg = ss[r.sign] || {};
     const bk = PC.keyFor ? PC.keyFor(r.id || r.name) : r.name, bd = bs[bk] || bs[r.name] || {};
     return [
-      h.living ? 'A part of living where ' + h.living + ' happens consistently, and your ' + name + ' lives here.' : '',
+      h.living ? 'A part of living where ' + this.livingVerb(h.living) + ' consistently, and your ' + name + ' lives here.' : '',
       sg.enters || '',
       bd.voice || '',
       h.cue ? 'Your ' + name + ' comes alive when ' + h.cue + '.' : '',
@@ -66717,14 +66727,20 @@ class Component extends DCLogic {
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
     const moodUsed = {}, placeOf = p => { const h = p && p.lon != null ? this.houseOf(p.lon, all[0], asc) : null;
       return h ? 'your ' + PC.ord(h) + ' house' : (p && p.sign) || 'its sign'; };
-    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
+    /* The 22 points a reader knows lead, so a square to the Sun is not
+       listed under two asteroids that happen to be tighter. */
+    const the = (n, lead) => /^(Sun|Moon)$/.test(n) ? (lead ? 'The ' : 'the ') + n : n;
+    const coreSet = new Set(this.BLOOM_CORE), coreOf = p => coreSet.has(key(p)) || coreSet.has(p.name) ? 0 : 1;
+    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk)
+      .map((x, i) => ({ x: x, i: i, c: coreOf(key(x.a) === rk ? x.b : x.a) }))
+      .sort((p, q) => p.c - q.c || p.i - q.i).slice(0, 8).map(w => w.x).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
       const M = this.ASP_MOOD[k] || this.ASP_MOOD.minor, seed = this.shash(rk);
       const n = moodUsed[k] = (moodUsed[k] || 0) + 1, close = M.lines[(Math.abs(seed) + n - 1) % M.lines.length](name, oName, placeOf(r), placeOf(o));
       return { glyph: o.glyph, edge: edgeOf(k),
         title: name + ' ' + this.aspName(k) + ' ' + oName,
         meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0 \u00b7 ' + M.theme,
-        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. ' + close,
+        text: the(name, true) + ' brings ' + this.bodyEnergy(rk) + ', ' + the(oName) + ' brings ' + this.bodyEnergy(key(o)) + ', and between them runs ' + (this.ASP_MEAN[k] || 'a live contact') + '. ' + close,
         cta: 'See ' + oName + ' \u2192', okey: key(o), go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
@@ -66734,6 +66750,10 @@ class Component extends DCLogic {
       const ORB = { conjunct: 4, opposite: 4, trine: 3, square: 3, sextile: 2 };
       const sky = this.chartAt(new Date()), soon = this.chartAt(new Date(Date.now() + 86400000)), out = [];
       const sep = (p, q) => { let v = Math.abs(this.norm360(p - q)); return v > 180 ? 360 - v : v; };
+      const felt = {}, feel = nm => { const n = felt[nm] = (felt[nm] || 0) + 1;
+        if (n === 1) return 'You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.';
+        if (n === 2 && this.ASP_MEAN[nm]) return 'It can arrive as ' + this.ASP_MEAN[nm] + '.';
+        return this.ASP_SHORT[nm] || 'It lands on the same angle in a voice of its own.'; };
       sky.forEach((p, i) => {
         const d0 = sep(p.lon, r.lon), d1 = sep(soon[i].lon, r.lon);
         this.ASPECTS.forEach(([ang, nm]) => {
@@ -66743,7 +66763,7 @@ class Component extends DCLogic {
           out.push({ orbN: off, glyph: p.glyph, edge: edgeOf(nm),
             title: 'Transiting ' + p.name + ' ' + this.aspName(nm) + ' your ' + name,
             meta: 'orb ' + off.toFixed(1) + '\u00b0 \u00b7 ' + (closing ? 'tightening' : 'separating'),
-            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.' });
+            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. ' + feel(nm) });
         });
       });
       return out.sort((a, b) => a.orbN - b.orbN).slice(0, 6);
@@ -66777,7 +66797,7 @@ class Component extends DCLogic {
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),
       plNoSabianWhy: this.bodyAccuracyNote(rk, name),
-      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword + ': the phase of this degree; this build does not carry the 1925 wording.') : '',
+      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword.charAt(0).toUpperCase() + sb.keyword.slice(1) + '.') : '',
       plSabianMeta: sb ? (sb.verified ? 'Sabian symbol \u00b7 ' + sb.address : 'Degree phase \u00b7 ' + sb.address) : '',
       plLexLabel: sb ? 'View ' + sb.address + ' in the Sabian Lexicon \u2192' : '',
       plLexGo: sb ? () => this.setState({ tab: 'library', libView: 'lexicon', selId: null, lexQuery: '', lexSign: sb.sign, lexDeg: sb.degree }) : () => {},

@@ -6833,6 +6833,16 @@ Back and the breadcrumb, and the phone sheet is painted over an opaque `--bg`
 because `--sf` carries alpha. Measured over every page at 1440, 390 and 375,
 four identities hardened and not: no pair under 4.5:1, no control under 44px.
 
+**The packet speaks the aspect voice** (the owner, 7 November 2026, after a
+full Saturn read on the sample chart). At Home carries the approved body in
+house line (`PlacementContent.inHouse`) in place of the house's question,
+which The Room already asks; a house's part of living takes `happen` when it
+is a list (`livingVerb()`); Conversations lead with the 22 points a reader
+knows (`BLOOM_CORE`), then by orb, and open by naming what each body brings,
+never with a label and a colon; two transits at one angle never end on the
+same sentence; and the degree carries no line about what the build holds.
+Held together no longer tells the reader to keep what rings true.
+
 ## A passing tap opens the glance, a focused read opens the packet
 Asked for by the owner on 4 November 2026: "It's nice for a focused read. For
 passing, make it a pop up without the fantastic visuals, keep the info, and make

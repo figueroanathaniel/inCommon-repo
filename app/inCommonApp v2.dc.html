@@ -19527,7 +19527,7 @@ class Component extends DCLogic {
     }[dg.state] || '');
     const hs = PC && house && r.group !== 'angle' ? PC.houses[house - 1] : null;
     if (hs) {
-      out.push('It lives in a part of living where ' + hs.living + ' happens.');
+      out.push('It lives in a part of living where ' + this.livingVerb(hs.living) + '.');
       const ln = PC.inHouse(name, house);
       if (ln) out.push(ln);
       if (hs.gift && hs.shadow) out.push('Its gift here is ' + hs.gift + '. Its shadow is ' + hs.shadow + '.');
@@ -33820,12 +33820,18 @@ class Component extends DCLogic {
      the sign walks into the room as itself, the body speaks as itself, and the
      reader is trusted to go with it. The words live in placement-content.js;
      a point with no voice of its own gets no lead rather than a generic one. */
+  /* A house's part of living is often a list ("play, making things and
+     falling for someone"), and a list happens in the plural. */
+  livingVerb(l) {
+    const t = String(l || '').replace(/,\s*$/, '');
+    return t + (/,| and /.test(t) ? ' happen' : ' happens');
+  }
   plLeads(r, name, ordH, dig) {
     const PC = window.PlacementContent || {}, hs = PC.houses || [], ss = PC.signs || {}, bs = PC.bodies || {};
     const hn = Number(String(ordH).replace(/\D/g, '')) || 0, h = hs[hn - 1] || {}, sg = ss[r.sign] || {};
     const bk = PC.keyFor ? PC.keyFor(r.id || r.name) : r.name, bd = bs[bk] || bs[r.name] || {};
     return [
-      h.living ? 'A part of living where ' + h.living + ' happens consistently, and your ' + name + ' lives here.' : '',
+      h.living ? 'A part of living where ' + this.livingVerb(h.living) + ' consistently, and your ' + name + ' lives here.' : '',
       sg.enters || '',
       bd.voice || '',
       h.cue ? 'Your ' + name + ' comes alive when ' + h.cue + '.' : '',
@@ -33978,14 +33984,20 @@ class Component extends DCLogic {
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
     const moodUsed = {}, placeOf = p => { const h = p && p.lon != null ? this.houseOf(p.lon, all[0], asc) : null;
       return h ? 'your ' + PC.ord(h) + ' house' : (p && p.sign) || 'its sign'; };
-    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
+    /* The 22 points a reader knows lead, so a square to the Sun is not
+       listed under two asteroids that happen to be tighter. */
+    const the = (n, lead) => /^(Sun|Moon)$/.test(n) ? (lead ? 'The ' : 'the ') + n : n;
+    const coreSet = new Set(this.BLOOM_CORE), coreOf = p => coreSet.has(key(p)) || coreSet.has(p.name) ? 0 : 1;
+    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk)
+      .map((x, i) => ({ x: x, i: i, c: coreOf(key(x.a) === rk ? x.b : x.a) }))
+      .sort((p, q) => p.c - q.c || p.i - q.i).slice(0, 8).map(w => w.x).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
       const M = this.ASP_MOOD[k] || this.ASP_MOOD.minor, seed = this.shash(rk);
       const n = moodUsed[k] = (moodUsed[k] || 0) + 1, close = M.lines[(Math.abs(seed) + n - 1) % M.lines.length](name, oName, placeOf(r), placeOf(o));
       return { glyph: o.glyph, edge: edgeOf(k),
         title: name + ' ' + this.aspName(k) + ' ' + oName,
         meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0 \u00b7 ' + M.theme,
-        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. ' + close,
+        text: the(name, true) + ' brings ' + this.bodyEnergy(rk) + ', ' + the(oName) + ' brings ' + this.bodyEnergy(key(o)) + ', and between them runs ' + (this.ASP_MEAN[k] || 'a live contact') + '. ' + close,
         cta: 'See ' + oName + ' \u2192', okey: key(o), go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
@@ -33995,6 +34007,10 @@ class Component extends DCLogic {
       const ORB = { conjunct: 4, opposite: 4, trine: 3, square: 3, sextile: 2 };
       const sky = this.chartAt(new Date()), soon = this.chartAt(new Date(Date.now() + 86400000)), out = [];
       const sep = (p, q) => { let v = Math.abs(this.norm360(p - q)); return v > 180 ? 360 - v : v; };
+      const felt = {}, feel = nm => { const n = felt[nm] = (felt[nm] || 0) + 1;
+        if (n === 1) return 'You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.';
+        if (n === 2 && this.ASP_MEAN[nm]) return 'It can arrive as ' + this.ASP_MEAN[nm] + '.';
+        return this.ASP_SHORT[nm] || 'It lands on the same angle in a voice of its own.'; };
       sky.forEach((p, i) => {
         const d0 = sep(p.lon, r.lon), d1 = sep(soon[i].lon, r.lon);
         this.ASPECTS.forEach(([ang, nm]) => {
@@ -34004,7 +34020,7 @@ class Component extends DCLogic {
           out.push({ orbN: off, glyph: p.glyph, edge: edgeOf(nm),
             title: 'Transiting ' + p.name + ' ' + this.aspName(nm) + ' your ' + name,
             meta: 'orb ' + off.toFixed(1) + '\u00b0 \u00b7 ' + (closing ? 'tightening' : 'separating'),
-            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.' });
+            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. ' + feel(nm) });
         });
       });
       return out.sort((a, b) => a.orbN - b.orbN).slice(0, 6);
@@ -34038,7 +34054,7 @@ class Component extends DCLogic {
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),
       plNoSabianWhy: this.bodyAccuracyNote(rk, name),
-      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword + ': the phase of this degree; this build does not carry the 1925 wording.') : '',
+      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword.charAt(0).toUpperCase() + sb.keyword.slice(1) + '.') : '',
       plSabianMeta: sb ? (sb.verified ? 'Sabian symbol \u00b7 ' + sb.address : 'Degree phase \u00b7 ' + sb.address) : '',
       plLexLabel: sb ? 'View ' + sb.address + ' in the Sabian Lexicon \u2192' : '',
       plLexGo: sb ? () => this.setState({ tab: 'library', libView: 'lexicon', selId: null, lexQuery: '', lexSign: sb.sign, lexDeg: sb.degree }) : () => {},
