@@ -21193,72 +21193,143 @@ class Component extends DCLogic {
     const keep = m.length >= 4 ? m.filter((_, i) => i !== this.dvarIndex(this.horoNow(), salt + '|drop', m.length)) : m;
     return [].concat(head || [], this.dorder(salt + '|order', keep), tail || []).filter(Boolean).join(' ');
   }
+  /* ---- The daily horoscope (the owner, 7 November 2026) ----------------- *
+     A daily occurrence, read off the day itself. The Moon leads because it is
+     the one body that changes the day, then the contacts that peak today, then
+     one slow contact as background, then the retrogrades. Every body and every
+     house speaks in the placement voice: the house is said as a part of living,
+     the sign moves as itself, the body speaks its own line. No commands, no
+     "expect", no label colons, no description of how the reading is made, and
+     timing sits inside the sentence rather than after a colon. */
+  HORO_DAY_VERB = {
+    conjunct: ['sits down beside your', 'joins your', 'settles onto your'],
+    sextile: ['opens a door to your', 'calls across to your', 'offers an easy opening to your'],
+    square: ['presses on your', 'leans hard on your', 'crosses your'],
+    trine: ['flows easily into your', 'runs smoothly with your', 'lends its ease to your'],
+    opposite: ['faces your', 'pulls against your', 'stands across the sky from your']
+  };
+  HORO_DAY_FEEL = {
+    conjunct: ['For a while the two move as one, each louder for the other.', 'The two blur into a single drive, and it carries further than either would alone.', 'Two energies share one seat for a while, and neither speaks quietly.'],
+    sextile: ['The way between them is friendly, and it opens further the more it is used.', 'Something small and willing passes between them, easy to miss and easy to take up.', 'A light current runs between the two, the kind that answers to a little attention.'],
+    square: ['The friction sharpens rather than settles, and something takes shape inside it.', 'The pressure is real, and it is also how a new strength gets made.', 'The two want different things at the same hour, and the rub between them keeps the day awake.'],
+    trine: ['It runs without effort, a gift that grows when it has somewhere to go.', 'Ease moves between them, quiet enough to miss and generous enough to use.', 'The two already understand each other, and the day carries that understanding lightly.'],
+    opposite: ['Each holds what the other lacks, and the day has room for both.', 'The pull runs both ways, and the balance lives somewhere between them.', 'One end of the sky answers the other, and both ends are yours.']
+  };
+  HORO_DAY_ORD = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth'];
+  HORO_DAY_FAST = ['Sun', 'Mercury', 'Venus', 'Mars'];
+  HORO_DAY_SLOW = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  HORO_DAY_TARGET = ['Sun', 'Moon', 'Ascendant', 'Venus', 'Mars', 'Mercury', 'Midheaven', 'Jupiter', 'Saturn'];
+  horoDayPart(h) {
+    return h < 5 ? 'Before dawn' : h < 11 ? 'In the morning' : h < 14 ? 'Around midday' : h < 18 ? 'In the afternoon' : h < 22 ? 'In the evening' : 'Late tonight';
+  }
+  /* Moon contacts to natal points that perfect inside this local day, by hour. */
+  horoMoonContacts(day, natal) {
+    const t0 = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0, 0), lon = [];
+    for (let i = 0; i <= 24; i++) lon.push(this.lonOf('Moon', this.t2000(new Date(t0.getTime() + i * 3600000))));
+    if (lon.some(x => x == null)) return [];
+    const out = [];
+    natal.filter(p => this.HORO_DAY_TARGET.indexOf(p.name) !== -1 && p.lon != null).forEach(p => {
+      this.ASPECTS.forEach(([ang, nm]) => {
+        let best = null;
+        lon.forEach((l, i) => { const off = Math.abs(this.horoSep(l, p.lon) - ang); if (!best || off < best.off) best = { off: off, i: i }; });
+        if (best && best.off <= 0.6 && best.i < 24) out.push({ target: p.name, k: nm, hour: best.i, rank: this.HORO_DAY_TARGET.indexOf(p.name) });
+      });
+    });
+    return out.sort((a, b) => a.rank - b.rank || a.hour - b.hour);
+  }
   horoProse(d, casts, sky, retros, hs, ord, theme) {
-    const T = (b, k, sl) => this.toneOf(b, k, sl);
-    const c0 = casts[0], c1 = casts.filter(c => !c0 || c.pBody !== c0.pBody)[0];
-    const moonH = hs(d.moon.lon);
-    const tone0 = c0 ? T(c0.pBody, c0.pK, 'a') : (sky[0] ? T(sky[0].aName, sky[0].k, 'a') : '');
-    const tone1 = c1 ? T(c1.pBody, c1.pK, 'b') : (sky[1] ? T(sky[1].aName, sky[1].k, 'b') : '');
-    const t0 = tone0 || 'a sky that is leaving you alone';
-    const also = tone1 && tone1 !== tone0 ? tone1 : '';
-    const head = this.dpick('h.open', [
-      'Today brings ' + t0 + (also ? ', alongside ' + also : '') + '.',
-      'The shape of today is ' + t0 + (also ? ', with ' + also + ' running underneath it' : '') + '.',
-      'What today has in it: ' + t0 + (also ? ', and ' + also : '') + '.',
-      'Expect today to hand you ' + t0 + (also ? ' before it hands you ' + also : '') + '.',
-      'Today reads as ' + t0 + (also ? ' crossed with ' + also : '') + '.',
-      'You are being given ' + t0 + ' today' + (also ? ', and ' + also + ' with it' : '') + '.'
-    ]);
-    const moon = this.dpick('h.moon', [
-      'The Moon is in ' + d.moon.sign + ', crossing your ' + ord(moonH) + ' house, so the day is felt in ' + theme(moonH) + ' rather than merely thought about there.',
-      'With the Moon through ' + d.moon.sign + ' and your ' + ord(moonH) + ' house, ' + theme(moonH) + ' is where the day registers in the body before it registers as a thought.',
-      'Your ' + ord(moonH) + ' house has the Moon in it today, in ' + d.moon.sign + ', which means ' + theme(moonH) + ' will carry whatever mood the day sets.',
-      'The Moon in ' + d.moon.sign + ' is walking your ' + ord(moonH) + ' house. Watch ' + theme(moonH) + ': that is where the weather shows up first.',
-      'Everything today is felt through your ' + ord(moonH) + ' house, where the ' + d.moon.sign + ' Moon is sitting, so ' + theme(moonH) + ' sets the tone rather than reflecting it.'
-    ]);
-    let event = '', advice = '';
-    if (c0) {
-      const ev = this.eventOf(c0.pBody, 'h');
-      event = this.dpick('h.event', [
-        'Expect ' + ev + ' to come up around ' + theme(c0.pTargetHouse) + ': ' + c0.when + '.',
-        'The specific thing to watch for is ' + ev + ', arriving through ' + theme(c0.pTargetHouse) + '; that contact is ' + c0.when + '.',
-        'Around ' + theme(c0.pTargetHouse) + ', look for ' + ev + '. It is ' + c0.when + '.',
-        'The event this points at is ' + ev + ', and the department is ' + theme(c0.pTargetHouse) + ': ' + c0.when + '.',
-        'If it lands as anything nameable, it lands as ' + ev + ' in ' + theme(c0.pTargetHouse) + ', ' + c0.when + '.'
-      ]);
-      advice = this.horoClass(c0.pBody, c0.pK) === 'h'
-        ? this.dpick('h.hard', [
-            'You will get further balancing ' + this.horoMean(c0.pTarget) + ' against ' + this.horoMean(c0.pBody) + ' than picking one of them, and the friction is the instruction rather than a fault in the day.',
-            '' + this.horoCap(this.horoMean(c0.pTarget)) + ' has a claim today. So does ' + this.horoMean(c0.pBody) + '. The discomfort between them is the information, not a mistake you made.',
-            'Do not resolve this one early. ' + this.horoCap(this.horoMean(c0.pTarget)) + ' is real today, and so is ' + this.horoMean(c0.pBody) + ', and the day is asking you to hold both at once.',
-            'Whatever you decide, decide it slowly: forcing ' + this.horoMean(c0.pTarget) + ' to agree with ' + this.horoMean(c0.pBody) + ' is what makes a day like this expensive.',
-            'The temptation is to decide which of these you are. ' + this.horoCap(this.horoMean(c0.pTarget)) + ' is asking for one thing. ' + this.horoCap(this.horoMean(c0.pBody)) + ' is asking for another, and today those are not the same thing.',
-            'Hold it open. What pulls toward ' + this.horoMean(c0.pTarget) + ' and what pulls toward ' + this.horoMean(c0.pBody) + ' are both yours, and choosing early usually means choosing whichever one is louder.',
-            '' + this.horoCap(this.horoMean(c0.pTarget)) + ', set against ' + this.horoMean(c0.pBody) + ', is the shape of the day. The tradition reads that friction as a question rather than a verdict.',
-            'Nothing here resolves cleanly, and it is not meant to. ' + this.horoCap(this.horoMean(c0.pTarget)) + ' pulls one way, ' + this.horoMean(c0.pBody) + ' the other, and the day is the distance between them.'
-          ])
-        : this.dpick('h.easy', [
-            'It should go easily, which is precisely how a day like this gets spent on nothing, so decide in advance what you want out of it.',
-            'This is the kind of contact you only notice afterwards, if at all. Name one thing to spend it on before the morning is over.',
-            'Nothing here will push you, and that is the risk: an easy day asks nothing, and then it is gone.',
-            'The opening is real but it is quiet. Use it deliberately or it reads as an ordinary day in hindsight.'
-          ]);
-    } else {
-      event = this.dpick('h.none', [
-        'Nothing in the sky is inside orb of your own chart, which makes today unusually your own: what happens will be caused by people and choices rather than by weather.',
-        'No transit is touching your chart today. That is more common than most readings admit, and it means the causes available are entirely human ones.',
-        'Your chart is untouched at the moment, nothing within orb. Read today as your own doing, because there is nothing overhead to hand it to.',
-        'There is no contact to your placements today. The sky is busy elsewhere, and what happens is down to the people in the room.'
-      ]);
+    const PC = window.PlacementContent || {}, B = PC.bodies || {}, S = PC.signs || {}, H = PC.houses || [];
+    const day = this.horoNow(), ow = n => this.HORO_DAY_ORD[n] || ord(n);
+    const spoke = {}, voice = n => { const b = B[PC.keyFor ? PC.keyFor(n) : n]; if (!b || !b.voice || spoke[b.voice]) return ''; spoke[b.voice] = 1; return b.voice; };
+    const living = n => { const h = H[n - 1]; return h && h.living ? String(h.living).replace(/,\s*$/, '') : ''; };
+    /* A phrase already said in this reading is not said twice: the next one
+       in its list stands in. */
+    const said = {}, fresh = (salt, arr) => {
+      let v = this.dpick(salt, arr);
+      if (said[v]) v = arr.find(x => !said[x]) || v;
+      said[v] = 1; return v;
+    };
+    const verb = (k, sl) => fresh('hd.verb|' + sl + '|' + k, this.HORO_DAY_VERB[k] || this.HORO_DAY_VERB.conjunct);
+    const feel = (k, sl) => fresh('hd.feel|' + sl + '|' + k, this.HORO_DAY_FEEL[k] || this.HORO_DAY_FEEL.conjunct);
+    const the = n => (n === 'Sun' || n === 'Moon' ? 'the ' + n : n);
+    const out = [];
+
+    /* The Moon, its sign and the part of living it crosses. */
+    const moonH = hs(d.moon.lon), sg = S[d.moon.sign] || {}, liv = moonH ? living(moonH) : '';
+    const where = moonH ? ' and your ' + ow(moonH) + ' house' : '';
+    const part = liv ? ', a part of living where ' + liv + ' happens' : '';
+    out.push(this.dpick('hd.moon', [
+      'The Moon moves through ' + d.moon.sign + where + ' today' + part + '.',
+      'Today the Moon walks through ' + d.moon.sign + where + part + '.',
+      'The Moon spends today in ' + d.moon.sign + (moonH ? ', crossing your ' + ow(moonH) + ' house' : '') + part + '.'
+    ]));
+    if (sg.manner) out.push(this.dpick('hd.manner', [
+      'Feeling moves ' + sg.manner + '.',
+      'The mood moves ' + sg.manner + '.',
+      'Whatever is felt today moves ' + sg.manner + '.'
+    ]));
+    /* A change of sign before midnight turns the mood, so it is said, after
+       the day's own contact so the evening comes last. */
+    let turn = '';
+    for (let i = 1; i <= 12; i++) {
+      const l = this.lonOf('Moon', this.t2000(new Date(day.getTime() + i * 3600000)));
+      if (l == null) break;
+      const s2 = this.signOf(l);
+      if (s2.sign !== d.moon.sign) {
+        const m2 = (S[s2.sign] || {}).manner;
+        turn = this.horoDayPart(day.getHours() + i) + ' the Moon crosses into ' + s2.sign + (m2 ? ', and feeling begins to move ' + m2 : '') + '.';
+        break;
+      }
     }
+
+    /* The Moon's own contact with this chart today. */
+    const mc = this.horoMoonContacts(day, d.tr.natal)[0];
+    if (mc) {
+      const v = voice(mc.target);
+      out.push(this.horoDayPart(mc.hour) + ' the Moon ' + verb(mc.k, 'm') + ' ' + mc.target + '.');
+      if (v) out.push(v);
+      out.push(feel(mc.k, 'm'));
+    }
+    if (turn) out.push(turn);
+
+    /* A faster body peaking on this chart within a day of today. */
+    const arcOf = h => this.horoArc(h, false);
+    const fast = d.tr.personal.filter(h => this.HORO_DAY_FAST.indexOf(h.a.name) !== -1 && this.HORO_DAY_TARGET.indexOf(h.b.name) !== -1)
+      .map(h => ({ h: h, a: arcOf(h) })).filter(x => x.a && Math.abs(x.a.exactIn) <= 1 && x.a.exactOrb <= 1)
+      .sort((x, y) => Math.abs(x.a.exactIn) - Math.abs(y.a.exactIn) || x.h.orb - y.h.orb)[0];
+    if (fast) {
+      const k = String(fast.h.asp).toLowerCase(), when = fast.a.exactIn === 0 ? 'Today ' : fast.a.exactIn > 0 ? 'By tomorrow ' : 'Since yesterday ';
+      out.push(when + the(fast.h.a.name) + ' ' + verb(k, 'f') + ' ' + fast.h.b.name + '.');
+      out.push(feel(k, 'f'));
+    }
+
+    /* One slow contact, as the ground the day stands on. */
+    const slow = d.tr.personal.filter(h => this.HORO_DAY_SLOW.indexOf(h.a.name) !== -1)
+      .map(h => ({ h: h, a: arcOf(h) })).filter(x => x.a)
+      .sort((x, y) => x.h.orb - y.h.orb)[0];
+    if (slow) {
+      const k = String(slow.h.asp).toLowerCase(), a = slow.a, nm = slow.h.a.name, tg = slow.h.b.name;
+      const lead = this.dpick('hd.under', ['Under it all, ', 'Underneath the day, ', 'Beneath the passing weather, ']);
+      const timing = (a.edge || a.exactOrb > 2) ? ', a long contact that is still in the air'
+        : a.exactIn === 0 ? ', and today is the height of it'
+        : a.exactIn > 0 ? ', building toward ' + this.fmtDay(a.date)
+        : ', a contact that peaked on ' + this.fmtDay(a.date) + ' and is still in the air';
+      out.push(lead + nm + ' ' + verb(k, 's') + ' ' + tg + timing + '.');
+      const v = voice(nm);
+      if (v) out.push(v);
+    }
+
+    /* The retrogrades, as one gentle line. */
     const rn = retros.map(r => r.name.replace(' retrograde', ''));
-    const retro = retros.length ? this.dpick('h.retro', [
-      'With ' + this.horoList(rn) + ' retrograde, second thoughts are worth more than first ones, and anything signed this week deserves reading twice.',
-      this.horoList(rn) + ' ' + (rn.length > 1 ? 'are' : 'is') + ' retrograde, so this is a week for revisiting rather than launching, and for reading the small print.',
-      'Keep in mind ' + this.horoList(rn) + ' running backwards: the useful move today is review, not commitment.',
-      'Underneath it, ' + this.horoList(rn) + ' ' + (rn.length > 1 ? 'are' : 'is') + ' retrograde. Expect to go over old ground, and expect it to be worth going over.'
-    ]) : '';
-    return this.dprose('h', [head], [moon, event, advice], [retro]);
+    if (rn.length) {
+      const L = this.horoList(rn), are = rn.length > 1 ? 'are' : 'is';
+      out.push(this.dpick('hd.retro', [
+        'With ' + L + ' retrograde, an old conversation may come back around, worth having again.',
+        L + ' ' + are + ' retrograde, and the familiar returns for a second look.',
+        'With ' + L + ' retrograde, what comes back around today tends to be worth the second visit.'
+      ]));
+    }
+    return out.filter(Boolean).join(' ');
   }
   /* The date the whole reading is drawn for. Noon, so a timezone shift can
      never walk the chosen day into the one either side of it. The floor is the
@@ -21641,16 +21712,14 @@ class Component extends DCLogic {
     const next = casts.filter(c => c.arcIn > 0).sort((a, b) => a.arcIn - b.arcIn)[0];
     const nowExact = casts.filter(c => c.arcIn === 0)[0];
     const soon = next || nowExact || casts[0];
-    let lastTo = null, unbounded = false;
-    casts.forEach(c => { if (c.toAt && (!lastTo || c.toAt > lastTo)) lastTo = c.toAt; if (c.hiBound) unbounded = true; });
     const lead = this.horoProse(d, casts, sky, retros, hs, ord, theme);
     const basis = casts.length
       ? ((next || nowExact) ? 'Read from ' : 'Read from the separating ') +
         soon.head.replace('Transiting ', '') + ', ' + soon.when + ', loudest ' + soon.span + '.'
       : 'Read from the sky\u2019s own aspects: nothing is within orb of a natal placement of yours' +
         (sky[0] ? ', and the general weather is ' + sky[0].head + ', ' + sky[0].when + '.' : '.');
-    const horizon = !casts.length || !lastTo ? 'the week ahead'
-      : (unbounded ? 'beyond ' : 'through ') + this.fmtDay(lastTo);
+    /* The reading belongs to the day it is read for (the owner, 7 November 2026). */
+    const horizon = this.fmtDay(when);
     const tail = !casts.length
       ? 'This redraws itself as the sky moves. The Moon changes the shortest hand every two days or so.'
       : nowExact
