@@ -7720,10 +7720,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <button onClick="{{ aspClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
       </div>
       <div style="font:600 10px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ asp.orb }}</div>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.nature }}</div>
-      <div style="font:400 13px/1.7 var(--fb);color:var(--mut);border-left:2px solid var(--bd);padding-left:11px">{{ asp.depth }}</div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.possibility }}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px">
+        <sc-for list="{{ asp.paras }}" as="pa" hint-placeholder-count="3">
+          <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
+        </sc-for>
+        <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -15045,10 +15046,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <button onClick="{{ aspClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
       </div>
       <div style="font:600 10px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ asp.orb }}</div>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.nature }}</div>
-      <div style="font:400 13px/1.7 var(--fb);color:var(--mut);border-left:2px solid var(--bd);padding-left:11px">{{ asp.depth }}</div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.possibility }}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px">
+        <sc-for list="{{ asp.paras }}" as="pa" hint-placeholder-count="3">
+          <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
+        </sc-for>
+        <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -19494,33 +19496,73 @@ class Component extends DCLogic {
     const fn = this.SYN_CLOSE[String(pr.asp).toLowerCase()] || this.SYN_CLOSE.conjunct;
     return fn(pr.a.name, pr.b.name, pull(pr.a.name), pull(pr.b.name), firstA, firstB);
   }
+  /* THE ASPECT SHEET SPEAKS AS THE TWO BODIES (owner, 7 November 2026).
+     Each body gets a paragraph of its own before the contact is read: its
+     voice, how its sign walks into the room, its dignity, the part of living
+     its house holds and what this body does there (PlacementContent.inHouse,
+     the 120 body in house lines), then the house's gift and shadow. The third
+     paragraph is the angle between them, each in its sign's manner, and how
+     loud the contact runs. The closer is ASP_CLOSE, untouched. */
+  ASP_MEET = {
+    conjunct: ['At a conjunction the two stand on one degree and act as one.', ', and ', 'Whatever wakes one wakes the other in the same breath.'],
+    sextile: ['At a sextile the two reach each other easily, and the door opens when one of them knocks.', ', and ', 'Put one in service of the other and each grows more capable.'],
+    square: ['At a square the two press on each other.', ', while ', 'They cannot both win the same hour. The rub keeps the chart awake, and over the years it becomes a strength nobody handed over.'],
+    trine: ['At a trine the two share an element and help each other without being asked.', ', and ', 'It costs nothing, which makes it easy to overlook and worth training.'],
+    opposite: ['At an opposition the two face each other across the chart.', ', while ', 'Each holds the half the other lacks, and over time the pull between them turns into perspective.']
+  };
+  aspBodyPara(r, house) {
+    const PC = (typeof window !== 'undefined' && window.PlacementContent) || null;
+    const name = r.name, sign = r.sign;
+    const b = PC ? PC.bodies[PC.keyFor(r.id || name)] || PC.bodies[name] : null;
+    const sg = PC && sign ? PC.signs[sign] : null;
+    const out = [];
+    out.push(b && b.voice ? b.voice : name + ' stands at ' + Math.floor(r.deg) + '\u00b0 ' + sign + '.');
+    if (sg && sg.enters && sg.enters.indexOf(sign + ' ') === 0) out.push('In ' + sign + ' it ' + sg.enters.slice(sign.length + 1));
+    const dg = PC && b ? PC.dignity(name, sign) : null;
+    if (dg) out.push({
+      rulership: sign + ' is one of its own signs, so nothing has to be translated.',
+      exaltation: 'It is exalted there, an honoured guest that gives its best.',
+      detriment: sign + ' sits across from its home, so it works in a borrowed manner.',
+      fall: 'It sits in its fall there, so what comes easily elsewhere is learned slowly here.'
+    }[dg.state] || '');
+    const hs = PC && house && r.group !== 'angle' ? PC.houses[house - 1] : null;
+    if (hs) {
+      out.push('It lives in a part of living where ' + this.livingVerb(hs.living) + '.');
+      const ln = PC.inHouse(name, house);
+      if (ln) out.push(ln);
+      if (hs.gift && hs.shadow) out.push('Its gift here is ' + hs.gift + '. Its shadow is ' + hs.shadow + '.');
+    }
+    return out.filter(Boolean).join(' ');
+  }
   aspectLines(x, houseOf, ordinal) {
     const A = x.a.name, B = x.b.name;
     const pull = n => this.ASP_PULL[n] ||
       (this.PL_MEAN[n] ? 'to have its ' + this.PL_MEAN[n] + ' taken seriously' : 'to be given its own weight');
     const pa = pull(A), pb = pull(B);
-    const th = h => this.HOUSE_THEMES[(h - 1 + 12) % 12] || 'that part of your life';
-    const ha = houseOf(x.a), hb = houseOf(x.b);
-    const place = r => r.name + ' at ' + Math.floor(r.deg) + '\u00b0 ' + r.sign;
-    /* Orb is the volume knob and the reader is owed it plainly: a contact
-       inside a degree runs most days, one at the edge of orb is weather. */
+    const PC = (typeof window !== 'undefined' && window.PlacementContent) || null;
+    const THE = ['Sun', 'Moon', 'North Node', 'South Node', 'Ascendant', 'Descendant', 'Midheaven', 'IC'];
+    const the = n => (THE.indexOf(n) !== -1 ? 'the ' : '') + n;
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    /* Orb is the volume knob, said plainly. */
+    const o = x.orb.toFixed(1) + '\u00b0';
     const loud = x.orb <= 1
-      ? 'At ' + x.orb.toFixed(1) + '\u00b0 this is one of the tightest contacts in your chart, so it runs most days rather than occasionally.'
+      ? 'At ' + o + ' this is one of the tightest contacts in the chart, so it runs most days.'
       : x.orb <= 3
-        ? 'At ' + x.orb.toFixed(1) + '\u00b0 it is firmly in orb: present in the ordinary run of things, not only under pressure.'
-        : 'At ' + x.orb.toFixed(1) + '\u00b0 it sits at the wide end of orb, so expect it in strong weather rather than every week.';
-    const where = ha === hb
-      ? 'Both sit in your ' + ordinal(ha) + ' house, so the whole exchange happens on one ground: ' + th(ha) + '.'
-      : 'It runs between your ' + ordinal(ha) + ' house and your ' + ordinal(hb) + ', so it shows up where you handle ' + th(ha) + ' and where you handle ' + th(hb) + '.';
-    /* The register, not the finding. voice.turn introduces the behaviour of the
-       angle and voice.hold closes the paragraph, so a water chart is read at a
-       different pace than an air one while the mechanics, the houses and the
-       orb are identical for everybody. Nothing here changes what is asserted. */
-    const voice = this.toneVoice(false);
+        ? 'At ' + o + ' it is firmly in orb and shows up in the ordinary run of things.'
+        : 'At ' + o + ' it sits at the wide end of orb and comes forward in strong weather.';
     const mn = this.ASP_MINOR[x.asp] || {};
+    const meet = this.ASP_MEET[x.asp] || ['At ' + (/^[aeiou]/i.test(this.aspName(x.asp)) ? 'an ' : 'a ') + this.aspName(x.asp).toLowerCase() + ' the two meet at a finer angle.', ', and ', mn.short || ''];
+    const ma = PC && PC.signs[x.a.sign] ? PC.signs[x.a.sign].manner : '', mb = PC && PC.signs[x.b.sign] ? PC.signs[x.b.sign].manner : '';
+    const manner = !ma || !mb ? ''
+      : x.a.sign === x.b.sign ? 'Both move ' + ma + ', so the two arrive together.'
+        : cap(the(A)) + ' moves ' + ma + meet[1] + the(B) + ' moves ' + mb + '.';
+    const paras = [
+      this.aspBodyPara(x.a, houseOf(x.a)),
+      this.aspBodyPara(x.b, houseOf(x.b)),
+      [meet[0], manner, meet[2], loud].filter(Boolean).join(' ')
+    ];
     return {
-      depth: place(x.a) + ' and ' + place(x.b) + '. ' + where + ' ' +
-        voice.turn + ' this: ' + this.lowerFirst(this.ASP_PLAY[x.asp] || mn.play || '') + ' ' + loud + ' ' + voice.hold,
+      paras: paras, depth: paras.join(' '),
       close: this.ASP_CLOSE[x.asp] ? this.ASP_CLOSE[x.asp](A, B, pa, pb) : mn.ask ? mn.ask(A, B) : this.ASP_CLOSE.conjunct(A, B, pa, pb)
     };
   }
@@ -33955,12 +33997,18 @@ class Component extends DCLogic {
      the sign walks into the room as itself, the body speaks as itself, and the
      reader is trusted to go with it. The words live in placement-content.js;
      a point with no voice of its own gets no lead rather than a generic one. */
+  /* A house's part of living is often a list ("play, making things and
+     falling for someone"), and a list happens in the plural. */
+  livingVerb(l) {
+    const t = String(l || '').replace(/,\s*$/, '');
+    return t + (/,| and /.test(t) ? ' happen' : ' happens');
+  }
   plLeads(r, name, ordH, dig) {
     const PC = window.PlacementContent || {}, hs = PC.houses || [], ss = PC.signs || {}, bs = PC.bodies || {};
     const hn = Number(String(ordH).replace(/\D/g, '')) || 0, h = hs[hn - 1] || {}, sg = ss[r.sign] || {};
     const bk = PC.keyFor ? PC.keyFor(r.id || r.name) : r.name, bd = bs[bk] || bs[r.name] || {};
     return [
-      h.living ? 'A part of living where ' + h.living + ' happens consistently, and your ' + name + ' lives here.' : '',
+      h.living ? 'A part of living where ' + this.livingVerb(h.living) + ' consistently, and your ' + name + ' lives here.' : '',
       sg.enters || '',
       bd.voice || '',
       h.cue ? 'Your ' + name + ' comes alive when ' + h.cue + '.' : '',
@@ -34113,14 +34161,20 @@ class Component extends DCLogic {
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
     const moodUsed = {}, placeOf = p => { const h = p && p.lon != null ? this.houseOf(p.lon, all[0], asc) : null;
       return h ? 'your ' + PC.ord(h) + ' house' : (p && p.sign) || 'its sign'; };
-    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
+    /* The 22 points a reader knows lead, so a square to the Sun is not
+       listed under two asteroids that happen to be tighter. */
+    const the = (n, lead) => /^(Sun|Moon)$/.test(n) ? (lead ? 'The ' : 'the ') + n : n;
+    const coreSet = new Set(this.BLOOM_CORE), coreOf = p => coreSet.has(key(p)) || coreSet.has(p.name) ? 0 : 1;
+    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk)
+      .map((x, i) => ({ x: x, i: i, c: coreOf(key(x.a) === rk ? x.b : x.a) }))
+      .sort((p, q) => p.c - q.c || p.i - q.i).slice(0, 8).map(w => w.x).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
       const M = this.ASP_MOOD[k] || this.ASP_MOOD.minor, seed = this.shash(rk);
       const n = moodUsed[k] = (moodUsed[k] || 0) + 1, close = M.lines[(Math.abs(seed) + n - 1) % M.lines.length](name, oName, placeOf(r), placeOf(o));
       return { glyph: o.glyph, edge: edgeOf(k),
         title: name + ' ' + this.aspName(k) + ' ' + oName,
         meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0 \u00b7 ' + M.theme,
-        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. ' + close,
+        text: the(name, true) + ' brings ' + this.bodyEnergy(rk) + ', ' + the(oName) + ' brings ' + this.bodyEnergy(key(o)) + ', and between them runs ' + (this.ASP_MEAN[k] || 'a live contact') + '. ' + close,
         cta: 'See ' + oName + ' \u2192', okey: key(o), go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
@@ -34130,6 +34184,10 @@ class Component extends DCLogic {
       const ORB = { conjunct: 4, opposite: 4, trine: 3, square: 3, sextile: 2 };
       const sky = this.chartAt(new Date()), soon = this.chartAt(new Date(Date.now() + 86400000)), out = [];
       const sep = (p, q) => { let v = Math.abs(this.norm360(p - q)); return v > 180 ? 360 - v : v; };
+      const felt = {}, feel = nm => { const n = felt[nm] = (felt[nm] || 0) + 1;
+        if (n === 1) return 'You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.';
+        if (n === 2 && this.ASP_MEAN[nm]) return 'It can arrive as ' + this.ASP_MEAN[nm] + '.';
+        return this.ASP_SHORT[nm] || 'It lands on the same angle in a voice of its own.'; };
       sky.forEach((p, i) => {
         const d0 = sep(p.lon, r.lon), d1 = sep(soon[i].lon, r.lon);
         this.ASPECTS.forEach(([ang, nm]) => {
@@ -34139,7 +34197,7 @@ class Component extends DCLogic {
           out.push({ orbN: off, glyph: p.glyph, edge: edgeOf(nm),
             title: 'Transiting ' + p.name + ' ' + this.aspName(nm) + ' your ' + name,
             meta: 'orb ' + off.toFixed(1) + '\u00b0 \u00b7 ' + (closing ? 'tightening' : 'separating'),
-            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.' });
+            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. ' + feel(nm) });
         });
       });
       return out.sort((a, b) => a.orbN - b.orbN).slice(0, 6);
@@ -34173,7 +34231,7 @@ class Component extends DCLogic {
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),
       plNoSabianWhy: this.bodyAccuracyNote(rk, name),
-      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword + ': the phase of this degree; this build does not carry the 1925 wording.') : '',
+      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword.charAt(0).toUpperCase() + sb.keyword.slice(1) + '.') : '',
       plSabianMeta: sb ? (sb.verified ? 'Sabian symbol \u00b7 ' + sb.address : 'Degree phase \u00b7 ' + sb.address) : '',
       plLexLabel: sb ? 'View ' + sb.address + ' in the Sabian Lexicon \u2192' : '',
       plLexGo: sb ? () => this.setState({ tab: 'library', libView: 'lexicon', selId: null, lexQuery: '', lexSign: sb.sign, lexDeg: sb.degree }) : () => {},
@@ -34975,14 +35033,16 @@ class Component extends DCLogic {
               aspClose: () => this.setState({ aspSel: null }),
               asp: (() => {
                 const x = st.aspSel != null ? asps[st.aspSel] : null;
-                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', depth: '', possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
+                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', paras: [], possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
                 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+                const L = this.aspectLines(x, houseOf, ordinal);
                 return { c: this.ASP_COLOR[x.asp][0], ga: x.a.glyph, gb: x.b.glyph,
                   title: x.a.name + ' ' + cap(x.asp) + ' ' + x.b.name,
                   orb: 'Within ' + x.orb.toFixed(1) + '\u00b0 orb',
-                  nature: this.ASP_NATURE[x.asp] || (this.ASP_MINOR[x.asp] || {}).nature || '',
-                  depth: this.aspectLines(x, houseOf, ordinal).depth,
-                  possibility: this.aspectLines(x, houseOf, ordinal).close,
+                  /* No geometry lesson in the sheet (owner, 7 November 2026). */
+                  nature: '',
+                  paras: L.paras.map(t => ({ t: t })),
+                  possibility: L.close,
                   labelA: 'See ' + x.a.name, labelB: 'See ' + x.b.name,
                   goA: () => { this.setState({ aspSel: null }); openBody(x.a.name); },
                   goB: () => { this.setState({ aspSel: null }); openBody(x.b.name); } };
