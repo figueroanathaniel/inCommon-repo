@@ -52,6 +52,29 @@ What changed since run 1:
   dc1a03f. 97c93bf still applies cleanly to dc1a03f.
 - Branches: 133 besides main, 111 fully merged (3 newly merged, none deleted).
 
+### Run 3, 2026-11-07 16:18Z (main c870ce5)
+
+What changed since run 2:
+- Live site: Netlify production deploy 6aef2d30 is `ready`, published
+  2026-11-07 13:52Z from **2e0e0e4** (Merge PR #202). Main is now c870ce5
+  (#205 aspect sheet voice, #207 At Home and Held together), which is **not
+  live yet**, and the Netlify API reports this deploy as `locked: true`.
+  Checked: both fields read from the Netlify API. Inferred: a locked deploy
+  stops later commits publishing on their own, so #205 and #207 wait until
+  someone unlocks or publishes.
+- Open PRs: #198 and #199 as before, plus #203, #204, #206 and #208 (all
+  active feature work, Keep). This ledger is #196.
+- Supabase: the same five functions, same versions. No change.
+- New candidates: B4 `ASP_PLAY` and B5 `lowerFirst()`, both left unread by
+  #205 (commit 75ddc86).
+- A1: `plEpi` and `nmEpi` still present; 97c93bf still merges without
+  conflict. B1 to B3 unchanged.
+- Slow scan (Nate's request, 14:30Z): full report at
+  `/mnt/project-files/dead-data-ledger/slow-scan-2026-11-07.md`. Pruning
+  tests (Nate's request, 15:45Z): 14 pass or fail tests that decide keep or
+  delete, at `/mnt/project-files/dead-data-ledger/pruning-tests.md`. Both
+  are summarised under section I below. Nothing was deleted.
+
 ## Candidates
 
 ### A. Questions routed here by Nate
@@ -114,6 +137,17 @@ run 2).
   names `retroSel`, so a removal should correct that sentence too. Not checked:
   whether the search row should now open that body's glance instead; that is a
   behaviour question, not dead data.
+
+**B4. `ASP_PLAY` (aspect possibility table)**: **Risky** (new in run 3).
+- Its only reader in the app, the aspect sheet line at 19523, was removed by
+  #205 (75ddc86). Now its definition at line 18129 is its only match in the
+  app file. `tools/check-aspect-text.js` still lifts it and checks every
+  aspect has an entry, so deleting it means changing that gate in the same
+  change. CLAUDE.md's "Aspects teach what the contact offers" names it.
+
+**B5. `lowerFirst()`**: **Safe to delete** (new in run 3).
+- Defined at line 18064; its only call was the same removed line. No tool
+  reads it.
 
 ### C. Retired Oki stack (unwired in V1.6.0)
 
@@ -269,6 +303,25 @@ or abandoned.
 The five Supabase functions and `server/migrations` 0001 to 0018 are **Keep**
 (all deployed or applied; migrations verified live 2026-11-04). Not scanned
 this run: the database for unused tables or columns.
+
+### I. Slow scan of 7 November (summary)
+
+Full evidence in the slow scan report named in run 3. Headlines, checked at
+2e0e0e4:
+- Page weight: `app/jpl-derived-points.js` is 43% of every page load (2.21 of
+  4.20 MB gzipped); only the Expanded Chart's planetary nodes and Lilith read
+  it. **Keep**; loading it lazily is a separate change for Nate.
+- Old bundles `deploy/v6.2` and `deploy/v6.3` (26 MB): **Safe**, removal
+  trial owed. `preview/fonts-self` and `app/assets/canonical`: **Risky**,
+  named in CLAUDE.md. `celestial-codex/`: **Risky**.
+- 33 methods never called (about 427 lines): **Safe**, except the Oki ones
+  (Oki is kept unwired by rule) and `personalWeek`/`weekNo` (test U7).
+- Nine scripts loaded on every visit and never called (news, i18n,
+  multiChart, skyWire, lint, feedBuilder): **Risky**, their gates test them.
+- Dead state keys (sabQuery, sabSign, icOpenLine, dailyNumOpen, numListsOpen,
+  hsSky, retroSel, flushing): **Safe**.
+- Repo size: removing files will not shrink the 87 MB repo much; history
+  holds over 100 copies of the 12 MB bundle.
 
 ## Not covered yet
 - Unused functions and state keys inside `app/inCommonApp v2.dc.html` beyond
