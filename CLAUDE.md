@@ -8129,3 +8129,13 @@ It is a DOM write keyed by a signature, never state, because a grid of ninety
 points is thousands of cells. Each contact cell carries its words for a
 screen reader. The dialog scrolls in the wide layout now so the grid can be
 reached. Measured in Deep Field only, at 1440 and 390: no contrast failure.
+
+**The motion is stated, never hedged** (the owner, 7 November 2026: "Just
+say the sentence."). A retrograde body moves backwards through the zodiac,
+and every line says so plainly: no "apparent", "appears to", "seems to",
+"in fact" or "from a moving Earth" anywhere a retrograde is described, in
+the app or the Astropedia. The heliocentric lessons, which teach that the
+Sun's view has no retrograde, are the study itself and keep their words.
+On the phone the tile's title row wraps, so the New pill and the ℞ drop
+under the title rather than past the tile's edge, and the Cycle Audit card
+is the last thing on the phone's astrology page.

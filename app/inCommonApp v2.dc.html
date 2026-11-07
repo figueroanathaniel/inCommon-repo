@@ -1741,23 +1741,6 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
           </sc-for>
         </section>
       </sc-if>
-      <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
-           Today and opens from the chart it reads. -->
-      <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-        <div data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
-          <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-            <div role="status" style="font:italic 400 14px/1.6 var(--fb);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
-          </sc-if>
-          <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:3px">
-              <span style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
-              <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
-              <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
-            </div>
-            <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fc);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
-          </sc-if>
-        </div>
-      </sc-if>
     </div>
     <sc-if value="{{ astroFocusToday }}" hint-placeholder-val="{{ false }}">
       <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(47,255,143,.42);border-left:3px solid var(--ac);border-radius:var(--rad);padding:15px 16px;animation:fadeUp .25s ease">
@@ -1830,7 +1813,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <div role="group" aria-label="The sky now" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px">
           <sc-for list="{{ chSky }}" as="sk" hint-placeholder-count="3">
             <button data-lift data-feat-key="{{ sk.key }}" onClick="{{ sk.toggle }}" aria-expanded="{{ sk.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:0;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:9px 13px;border:1px solid {{ sk.bd }};border-radius:12px;background:{{ sk.bg }};transition:border-color .3s ease,background .3s ease">
-              <span style="display:flex;align-items:center;gap:6px;min-width:0;font:400 15px/1.2 var(--fd);color:var(--tx)"><span style="white-space:nowrap">{{ sk.title }}</span><span aria-hidden="true" style="display:{{ sk.rxD }};font:14px/1 Georgia,serif;color:var(--ac2-hi)">&#8478;</span><span style="display:{{ sk.newD }};align-items:center;padding:2px 6px;border-radius:999px;border:1px solid var(--ac2);background:rgba(var(--atmc2),.14);font:700 8.5px/1 var(--fk);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">New</span></span>
+              <span style="display:flex;flex-wrap:wrap;align-items:center;column-gap:6px;row-gap:3px;min-width:0;font:400 15px/1.2 var(--fd);color:var(--tx)"><span style="white-space:nowrap">{{ sk.title }}</span><span aria-hidden="true" style="display:{{ sk.rxD }};flex:none;font:14px/1 Georgia,serif;color:var(--ac2-hi)">&#8478;</span><span style="display:{{ sk.newD }};flex:none;align-items:center;padding:2px 5px 2px 6px;border-radius:999px;border:1px solid var(--ac2);background:rgba(var(--atmc2),.14);font:700 8.5px/1 var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">New</span></span>
               <span style="font:400 10.5px/1.35 var(--fu);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sk.sub }}</span>
             </button>
           </sc-for>
@@ -2108,6 +2091,23 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
       </section>
     </sc-for>
     </div>
+    <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026; at the foot of the phone page since 7 November 2026): it left
+         Today and opens from the chart it reads. -->
+    <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+      <div data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
+        <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="font:italic 400 14px/1.6 var(--fb);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
+        </sc-if>
+        <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <span style="font:600 10px var(--fk);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
+            <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
+            <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
+          </div>
+          <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fc);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
+        </sc-if>
+      </div>
+    </sc-if>
   </div>
 </sc-if>
 
@@ -22218,7 +22218,7 @@ class Component extends DCLogic {
      Retrogrades pull lists Mercury to Pluto and Chiron. */
   RETRO_BODIES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron'];
   RETRO_WIN = 300;
-  RETRO_DOCTRINE = 'Retrograde motion is apparent, not real. No celestial body reverses course. Seen from a moving Earth, it appears to slow, stand still, and then walk backwards through the zodiac for a season before turning forward again. The tradition reads that appearance as a turn inward: the same business as always, handled in review rather than in advance.';
+  RETRO_DOCTRINE = 'A retrograde body slows, stands still, and walks backwards through the zodiac for a season before turning forward again. The tradition reads that backward season as a turn inward: the same business as always, handled in review rather than in advance.';
   RETRO_MEAN = {
     Mercury: 'Mercury governs speech, exchange, transit and the written record. Retrograde, the tradition expects the second draft rather than the first: things said again, contracts reread, plans revised, and people from earlier turning up mid-sentence.',
     Venus: 'Venus governs attraction, worth and the terms of an agreement. Retrograde, it is read as a re-pricing. What you value, what you tolerate, and what you have been calling love out of habit all come up for another look.',
@@ -22237,7 +22237,7 @@ class Component extends DCLogic {
   PHASE_LABEL = { pre: 'pre-shadow', retro: 'retrograde', post: 'post-shadow' };
   PHASE_WHAT = {
     pre: 'The pre-shadow is the run-up. The celestial body is still moving forward, but it has crossed into the stretch of zodiac it will end up covering three separate times before it is done: forward now, backward through the retrograde, forward again on the way out. Whatever surfaces in these weeks is usually the first draft of the story.',
-    retro: 'The retrograde proper begins at the station, the day the celestial body appears to stop and turn. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
+    retro: 'The retrograde proper begins at the station, the day the celestial body stops and turns. From there it walks back over ground it already covered, which is why the season feels like re-reading rather than reading. The days on either side of a station are the loudest part of it.',
     post: 'The post-retrograde shadow runs from the day the celestial body turns forward again to the day it finally clears the degree where it first stationed. It is the third pass over the same ground, and the difference is that by now you know what the ground is.'
   };
   RETRO_TALK = {
@@ -22350,7 +22350,7 @@ class Component extends DCLogic {
     Uranus: {
       epi: 'The rebel of the sky goes quiet and starts rewiring from the inside.',
       pre: 'The pre-shadow of Uranus tends to arrive as a hunch rather than an event: a sense that some part of your life is too tight, and that the next change will not ask permission.',
-      station: 'Uranus is retrograde for about five months of every year. It moves so slowly that the station itself is the strongest point: for days it seems to stand still over one degree, and the tradition reads anything of yours near that degree as taking on an extra charge of restlessness.',
+      station: 'Uranus is retrograde for about five months of every year. It moves so slowly that the station itself is the strongest point: for days it stands still over one degree, and the tradition reads anything of yours near that degree as taking on an extra charge of restlessness.',
       post: 'After Uranus turns forward, the change you were circling usually happens, and with less drama than you feared, because the inner rewiring was done while it walked backwards.',
       heldHead: 'The freedom you are building', held: 'Where in your life do you want room to change your mind?'
     },
@@ -34610,7 +34610,7 @@ class Component extends DCLogic {
                   const out = [];
                   const now = RP.filter(p => p.phase === 'retro'), pre = RP.filter(p => p.phase === 'pre'), post = RP.filter(p => p.phase === 'post');
                   if (now.length) {
-                    out.push(plain(nameList(now.map(p => p.name)) + (now.length === 1 ? ' is' : ' are') + ' retrograde today. Nothing is moving backwards in fact: from where we stand on a moving Earth, ' + (now.length === 1 ? 'it appears' : 'they appear') + ' to slow, halt, and walk back through the zodiac for a season.'));
+                    out.push(plain(nameList(now.map(p => p.name)) + (now.length === 1 ? ' is' : ' are') + ' retrograde today, ' + (now.length === 1 ? 'moving' : 'each moving') + ' backwards through the zodiac for a season.'));
                   } else {
                     out.push(plain('Nothing is retrograde today. Every body from Mercury to Pluto, and Chiron with them, is in direct motion, which the tradition reads as a season for building forward rather than reviewing.'));
                   }
