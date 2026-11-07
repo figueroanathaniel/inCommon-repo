@@ -33,16 +33,35 @@ Baseline checked this run:
 - Store shells: `native/` builds from `tools/build-native.js`, which copies
   the bundle folder named in `tools/build-bundle.js` (v6.4).
 
+### Run 2, 2026-11-07 08:18Z (main dc1a03f)
+
+What changed since run 1:
+- Live site: Netlify production deploy 6aee9ef7 is `ready`, published
+  2026-11-07 03:46Z from main **dc1a03f** (Merge PR #200), the commit this run
+  was scanned at.
+- Main gained PRs #195 (harmonics replaces Important Today), #197 (Astropedia
+  lexicon) and #200 (retrogrades, pulls under Placements, aspect grid).
+- Open PRs now: #198 (`feature/numbers-lexicon`), #199
+  (`feature/astropedia-lexicon-3`) and this ledger, #196.
+- Supabase: the same five functions, same versions (oracle v62, billing v44,
+  account v36, store v28, oracle-voice v20). No change.
+- New candidate: B3, `retroSel`. Checked and clean: the Important Today removal
+  in #195 left nothing behind (`todayLines`, `todayBody`, `retroTabs` and
+  `retroBody` have 0 matches in the app file).
+- A1, B1 and B2 are unchanged in substance; line numbers below are updated to
+  dc1a03f. 97c93bf still applies cleanly to dc1a03f.
+- Branches: 133 besides main, 111 fully merged (3 newly merged, none deleted).
+
 ## Candidates
 
 ### A. Questions routed here by Nate
 
-**A1. Packet cover epigraph rows (`plEpi`, `nmEpi`)** — verdict: **Keep the
+**A1. Packet cover epigraph rows (`plEpi`, `nmEpi`)**: verdict: **Keep the
 epigraph text; the ruled row around it is the dead part.**
 - Asked 2026-11-06 19:17Z: should the placement and numerology packet covers
   lose their epigraph rows, as the Atlas did?
 - Checked: the rows are live. `app/inCommonApp v2.dc.html` renders
-  `{{ plEpi }}` at lines 5592 and 9163 and `{{ nmEpi }}` at 5754 and 9835,
+  `{{ plEpi }}` at lines 5609 and 9198 and `{{ nmEpi }}` at 5771 and 9870 (dc1a03f),
   each between two hairline spans, and `deploy/v6.4/app.html` (the published
   bundle) carries the same markup (13 matches). The text is real content:
   `plEpi` is the body's role (`b.role`, line 33390) and `nmEpi` is the
@@ -59,23 +78,23 @@ epigraph text; the ruled row around it is the dead part.**
   unmerged commit, **97c93bf** (6 Nov 16:11Z), "Packet covers: epigraph without
   rules, no label over the title": it drops the hairlines and the kind label
   and sets the epigraph in gold under the title (`data-epi`), as the Atlas
-  does. It has no PR. It is 46 commits behind main, and its diff still applies
-  to main cleanly (`git apply --check` passed).
+  does. It has no PR. It is 60 commits behind main (run 2), and its diff still applies
+  to main dc1a03f cleanly (`git apply --check` passed in runs 1 and 2).
 - Recommendation: do not delete the epigraph text. Bring 97c93bf to main (PR
   from that branch) when Nate wants it; that settles the row without losing
   content. Not checked: how it looks on a phone; no screenshot was taken.
 
 ### B. Unused data inside the app file
 
-**B1. `todaySections` (old Today rows)** — **Safe to delete** (with B2).
-- `todayValsBase()` builds `todaySections` (line 26066, and an empty one at
-  26049). No template reads it: the only two matches for `todaySections` in
+**B1. `todaySections` (old Today rows)**: **Safe to delete** (with B2).
+- `todayValsBase()` builds `todaySections` (line 26454, and an empty one at
+  26437, at dc1a03f). No template reads it: the only two matches for `todaySections` in
   the app file are those two assignments. Inferred: leftover from the Today
   page before the forecast moved onto each chart (4 November).
 
-**B2. Astrology green edge on alignment rows** — **Safe to delete the field**;
+**B2. Astrology green edge on alignment rows**: **Safe to delete the field**;
 not drawn anywhere.
-- `alignRows` passes `'#2fff8f'` as `edge` for Astrology (line 26153;
+- `alignRows` passes `'#2fff8f'` as `edge` for Astrology (line 26541 at dc1a03f;
   `#8b5cf6` and `#7d9bff` for the other two). `todayVals()` hands these rows
   to the chart forecast banners as `fbAstro`, `fbHd`, `fbNum`. Checked all
   five banner loops (lines 1054, 1425, 2109, 8508, 9315): none reads
@@ -85,10 +104,21 @@ not drawn anywhere.
   colour, which CLAUDE.md forbids. Removing the unused `edge` argument
   removes the trap.
 
+**B3. `retroSel` (old retrograde tab selection)**: **Safe to delete** (new in
+run 2).
+- Written once, by the retrograde search row at line 21674:
+  `searchSpirit('astrology', 1, { featOpen: 'retro', retroSel: r.n })`. Read
+  nowhere: that is its only match in the app file. Inferred: #200 replaced the
+  retrograde tabs with the retrograde glance (`rxGlance`), which does not read
+  it. CLAUDE.md's "Each retrograde body is a plain button" paragraph still
+  names `retroSel`, so a removal should correct that sentence too. Not checked:
+  whether the search row should now open that body's glance instead; that is a
+  behaviour question, not dead data.
+
 ### C. Retired Oki stack (unwired in V1.6.0)
 
 **C1. `app/oki-api.js`, `oki-prompt-builder.js`, `oki-post-processor.js`,
-`safety-router.js`, `memory-store.js`, `evaluation-suite.js`** — **Risky.**
+`safety-router.js`, `memory-store.js`, `evaluation-suite.js`**: **Risky.**
 - Checked: none is loaded by the app file or included in `deploy/v6.4`.
 - Still named by: `app/sw.js` precache list (the dev service worker; the
   bundle's own sw.js does not list them), `tools/check-layer-boundary.js`
@@ -97,36 +127,36 @@ not drawn anywhere.
   `check-layer-boundary`. `safety-router.js` is a retired router, not the
   live crisis surfaces, but treat it with the safety rule in mind.
 
-**C2. `app/oki-voice-v144.js`** — **Keep for now.** CLAUDE.md (lines 3454,
+**C2. `app/oki-voice-v144.js`**: **Keep for now.** CLAUDE.md (lines 3454,
 4388) and `tools/build-bundle.js` (line 617) cite its `checkVoice()` as the
 pattern for the voice check. Not loaded by the app. Inferred: reference only.
 
-**C3. `app/components/` (15 `.dc.html` files)** — **Risky**, and the two
+**C3. `app/components/` (15 `.dc.html` files)**: **Risky**, and the two
 crisis ones are **Keep** until Nate says otherwise.
 - No app page, tool or bundle references any of them. They include
   `CrisisButton` and `CrisisResources`; the live crisis surfaces are in the
   app file, but safety is not negotiable, so these wait for an explicit call.
 
-**C4. `app/ios-frame.jsx`, `app/ephemeris-worker.js`** — **Risky.** Not
+**C4. `app/ios-frame.jsx`, `app/ephemeris-worker.js`**: **Risky.** Not
 loaded by the app. ios-frame is used by the verification reports and the
 components above; ephemeris-worker is listed in `check-layer-boundary.js`.
 
 ### D. Ephemeris router modules
 
 `ephemeris-router.js`, `ephemeris-backend-swiss.js`, `ephemeris-backend-current.js`,
-`ephemeris-integration.js`, `ephemeris-points.js` — **Keep (for now).**
+`ephemeris-integration.js`, `ephemeris-points.js`: **Keep (for now).**
 CLAUDE.md says none of them supplies a position, but the app file still loads
 them and initialises the router in `componentDidMount()`. Removing them is a
 code change, not a cleanup.
 
 ### E. Old bundle folders
 
-**E1. `deploy/v6.2` (13 MB) and `deploy/v6.3` (15 MB)** — **Safe to delete.**
+**E1. `deploy/v6.2` (13 MB) and `deploy/v6.3` (15 MB)**: **Safe to delete.**
 Netlify publishes `deploy/v6.4`; the store shells and drift check read the
 folder from `build-bundle.js` (v6.4). Remaining mentions are in docs and
 comments. Netlify keeps its own deploy history for rollback.
 
-**E2. `preview/` (15 MB)** — **Risky.** `netlify.toml` serves
+**E2. `preview/` (15 MB)**: **Risky.** `netlify.toml` serves
 `preview/fonts-self` as a branch deploy context. Check whether that branch
 still exists before removing.
 
@@ -149,11 +179,11 @@ deploy path): `ASPECT-PATTERNS-REPORT.md`, `EPHEMERIS-INTEGRATION-COMPLETE.md`,
 
 Inferred, not read: these look like delivery reports from earlier build rounds.
 
-### G. Branches (128 besides main)
+### G. Branches (133 besides main, run 2)
 
 Method: GitHub compare of each branch against main.
 
-**G1. Fully merged (0 commits not on main): 108 branches** — **Safe to
+**G1. Fully merged (0 commits not on main): 111 branches**: **Safe to
 delete.** Deleting a merged branch loses no commits. The `release/*`
 branches are among them; keeping those as markers is Nate's choice.
 
@@ -202,15 +232,19 @@ taskforce/01-data-schema, taskforce/02-security-rls,
 taskforce/02-security-rls-account-tier, taskforce/03-refactor-features, 
 taskforce/05-performance, visuals/globe-frame-cost-20261026, 
 visuals/stage-resume-20261027, 
+feature/astro-harmonics-aspects (run 2), feature/astropedia-lexicon (run 2), 
+feature/retrogrades-pulls (run 2).
 
-**G2. Commits not on main** — **Risky**, check each before deleting. A branch
+**G2. Commits not on main**: **Risky**, check each before deleting. A branch
 "1 ahead" may have been squash-merged (content on main under another commit)
 or abandoned.
 
 | Branch | Ahead | Behind | Last commit | Note |
 |---|---|---|---|---|
-| feature/astro-harmonics-aspects | 5 | 0 | 2026-11-07 | **Keep**: open PR #195 |
-| feature/packet-covers | 1 | 46 | 2026-11-06 | **Keep**: holds 97c93bf, see A1 |
+| feature/numbers-lexicon | 7 | 3 | 2026-11-07 | **Keep**: open PR #198 |
+| feature/astropedia-lexicon-3 | 2 | 3 | 2026-11-07 | **Keep**: open PR #199 |
+| chore/dead-data-ledger | 1 | 14 | 2026-11-07 | **Keep**: this ledger, PR #196 |
+| feature/packet-covers | 1 | 60 | 2026-11-06 | **Keep**: holds 97c93bf, see A1 |
 | draft/recovery-2.9.7-20261103 | 29 | 172 | 2026-11-03 | recovery draft |
 | taskforce/04-visuals-webgl | 29 | 172 | 2026-11-04 | |
 | qa/4.2-phone-staging | 28 | 172 | 2026-11-04 | 4.2 QA staging |
