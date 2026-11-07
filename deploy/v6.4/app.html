@@ -57432,6 +57432,22 @@ class Component extends DCLogic {
      glossary. A study word with the same name and the same words in several
      studies is one entry naming each of them; the same name with other words
      is its own entry, named by its study. Sorted A to Z. */
+  /* A lexicon word opens the search sheet already holding it, so the reader
+     sees every room in the Library that speaks of it (owner, 7 November 2026:
+     "give the option to link from lexicon to library"). The search is the one
+     index over the app, so this finds what the rooms find. */
+  libFind(q) {
+    const t = String(q || '').slice(0, 80);
+    return () => this.setState(this.isVt() ? { vtSearch: true, vtQuery: t } : { dtSearch: true, dtQuery: t });
+  }
+  /* Offered only where the search finds a room beyond the word's own entry,
+     so the link never opens onto the word alone. Kept per word for the visit:
+     the rows it looks for do not move with the chart. */
+  libFindHas(q) {
+    const t = String(q || '').trim(), m = this._libFindM || (this._libFindM = {});
+    if (t in m) return m[t];
+    return (m[t] = this.searchAll(t).some(g => (g.rows || []).some(r => r.title !== t && r.sub !== 'A word in the Book of Numbers' && r.sub !== 'A word in the Astropedia')));
+  }
   apLexicon() {
     if (this._apLex) return this._apLex;
     const A = this.AP();
@@ -58074,20 +58090,6 @@ class Component extends DCLogic {
           findOn: on && this.libFindHas(name), findGo: this.libFind(name) };
       }) : []
     };
-  }
-  /* A lexicon word opens the search sheet already holding it, so the reader
-     sees every room in the Library that speaks of it (owner, 7 November 2026:
-     "give the option to link from lexicon to library"). The search is the one
-     index over the app, so this finds what the rooms find. */
-  libFind(q) {
-    const t = String(q || '').slice(0, 80);
-    return () => this.setState(this.isVt() ? { vtSearch: true, vtQuery: t } : { dtSearch: true, dtQuery: t });
-  }
-  /* Offered only where the search finds a room beyond the word's own entry,
-     so the link never opens onto the word alone. */
-  libFindHas(q) {
-    const t = String(q || '').trim();
-    return this.searchAll(t).some(g => (g.rows || []).some(r => r.title !== t && r.sub !== 'A word in the Book of Numbers' && r.sub !== 'A word in the Astropedia'));
   }
   /* THE HUMAN DESIGN ATLAS, given the room the Astropedia and the Book have
      (owner, 20 October 2026: "Doing the same thing for human design").
