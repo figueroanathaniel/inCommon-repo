@@ -6833,6 +6833,22 @@ Back and the breadcrumb, and the phone sheet is painted over an opaque `--bg`
 because `--sf` carries alpha. Measured over every page at 1440, 390 and 375,
 four identities hardened and not: no pair under 4.5:1, no control under 44px.
 
+**The packet speaks the aspect voice** (the owner, 7 November 2026, after a
+full Saturn read on the sample chart). At Home carries the approved body in
+house line (`PlacementContent.inHouse`) in place of the house's question,
+which The Room already asks; a house's part of living takes `happen` when it
+is a list (`livingVerb()`); Conversations lead with the 22 points a reader
+knows (`BLOOM_CORE`), then by orb, and open by naming what each body brings,
+never with a label and a colon; two transits at one angle never end on the
+same sentence; and the degree carries no line about what the build holds.
+Held together no longer tells the reader to keep what rings true.
+At Home is the body and the room as one paragraph (the owner, same day:
+"repetitive and drawling, no sense of integration"): the body in house line,
+then one sentence of the house's gift and shadow said through the body. The
+house's generic presence line, its question and the arena list are not
+repeated there; a point with no body in house line gets one plain sentence of
+what it carries into the house instead.
+
 ## A passing tap opens the glance, a focused read opens the packet
 Asked for by the owner on 4 November 2026: "It's nice for a focused read. For
 passing, make it a pop up without the fantastic visuals, keep the info, and make
@@ -8144,10 +8160,99 @@ On the phone the tile's title row wraps, so the New pill and the ℞ drop
 under the title rather than past the tile's edge, and the Cycle Audit card
 is the last thing on the phone's astrology page.
 
+## The aspect sheet speaks as the two bodies
+Asked for by the owner on 7 November 2026 ("How does the Sun act where it's
+at? Where does Saturn get to make anything happen in a room built to fit for
+a night out?"). The aspect dialog (`aspOpen`, both shells) and the
+Observatory's contact window read `aspectLines()`, which returns `paras`:
+a paragraph per body (`aspBodyPara()`: its voice, "In <sign> it" and the
+sign's entrance, a dignity sentence, the part of living its house holds, the
+body in house line, and the house's gift and shadow), then the angle
+(`ASP_MEET`: an opener, each body in its sign's manner, a follow line, and the
+orb said plainly with no "expect"). `ASP_CLOSE` still closes it, untouched.
+
+**The 120 body in house lines are `PlacementContent.inHouse(body, house)`**
+(`IN_HOUSE` in `placement-content.js`, 1.1.0), the ten bodies by twelve
+houses. The owner keeps them as Kin Common writing to be sold on its own:
+change them only with the owner. The source draft is
+`/mnt/project-files/aspect-language/body-in-house.md`. A point outside the ten
+gets no house line, never a generic one; an angle gets no house at all.
+
+**What the sign makes of the house comes next** (the owner, 7 November 2026):
+after the part of living line, `PlacementContent.signHouse(sign, house)` gives
+one of 144 lines (`SIGN_IN_HOUSE`, the twelve signs by twelve houses, read with
+the body's own sign), then the body in house line. These are Kin Common LLC
+writing too, recorded as HBS-1.0 in
+`/mnt/project-files/kin-common-ip/house-by-sign-ip-record.docx`. **Every other
+surface gets its own rendition, and a rendition may stem only from an approved
+one** (the master or a rendition the owner has approved). Draft it, show it
+to the owner, record its parent in the record's lineage table, and ship it
+only once approved. Do not paste the master into a second surface.
+
+There is no geometry lesson in the sheet (the owner, 7 November 2026: "No
+geometry lesson"); `ASP_NATURE` still serves the Observatory's contact window.
+The Aspects list keeps every contact, the Descendant, IC and South Node ones
+included, though each mirrors one to the Ascendant, Midheaven or North Node:
+the owner's rule is that nothing is taken from the reader before the reason
+is put to them ("We don't want to strip a reader from any element of their
+curiosity"). Ask before hiding a row anywhere.
+
+## The Placements table has five aspect squares
+Asked for by the owner on 7 November 2026: the Sextile square sits after
+Conjunction, Opposition, Trine and Square over the Placements table, in both
+shells (`ASP4` in `chartGroupVals()`). It reads the same rich pass as the
+other four and its own `ASP_MEAN` line, and lights the pairs the same way.
+`tools/drive-placements-sextile.js` holds it, 10 rows.
+
+## A body can be found in the Expert aspect grid
+The owner said on 7 November 2026 that the Expert table "is impossible to
+read or utilize after a certain point. A search utility is a good start."
+With every point on, the grid is 94 points and about 310 contacts, a staircase
+some 2,400px wide, and below its first rows a symbol has no column label in
+sight. A find field sits over the grid (`[data-asp-find]`, all four grid
+hosts, `bloomGridQ`). A word typed there turns the grid into a list
+(`bloomGridFound()`), read from the same pairs the grid draws: one body gives
+every contact it makes among the points shown, closest to exact first; two
+bodies give the contact between them; an aspect's name keeps only that
+aspect. A whole name wins over a longer one, so "venus" is Venus and not the
+Venus Node too. The list is written into the grid host by `bloomGridSync()`,
+a DOM write like the grid, with the query in its signature, and the count is
+spoken after a pause. Clearing the field brings back the view in use.
+
+**Four more ways to read it, and the owner chose all of them** (7 November 2026).
+Under the field is a strip of controls (`[data-bg-ctl]`, `bloomGridCtl()`),
+outside `[data-chart]` so the contrast and touch sweeps measure it:
+
+- **List or Grid** (`bloomGridView`). The list is every contact as a line,
+  and it is where the phone opens (`bloomGridViewOf()`: below 820 wide); the
+  desktop opens on the grid. A query always shows the list. The list orders
+  Closest first or By body (`bloomGridSort`), and By body gathers each
+  point's contacts under the one higher on the chart (`bloomGridList()`).
+- **Aspects shown** (`bloomGridOff`): any aspect can be switched off, in the
+  list and the grid alike. Each switch carries its colour as a line under
+  the symbol, never as the text's colour.
+- **One family beside the usual 22** (`bloomGridFam`): Every family, or
+  `BLOOM_CORE` plus one category, which turns ninety four rows into about
+  forty. Shown only when a family beyond the 22 is switched on.
+- **The grid's labels are pinned**: a header row along the top and a column
+  down the side, both `position: sticky` inside a host that scrolls both
+  ways at `min(68vh, 640px)`. The host has no padding in grid view, because
+  a sticky label sits inside the padding and the cells show through it.
+- **A press on a label traces it** (`bloomGridTap()`, `bloomGridTrace()`):
+  the point's row and column light, the other symbols fade, and a second
+  press clears it. Only the side labels are buttons (one tab stop a point);
+  the top labels answer a pointer. The trace is held in `_bgTrace` and put
+  back after every rebuild, a DOM write like the rest, never state.
+
+All of it is this dialog's own and is not kept. `tools/drive-aspect-find.js`
+holds it in both shells, 26 rows. The strip measured clean with the
+harness's own `contrastFails()` and `tapTargets()`, four identities,
+hardened and not, at 1440 and 375.
+
 ## The aspect squares are the reader's to arrange
 Asked for by the owner on 7 November 2026: "Give the user autonomy to
-rearrange the aspects squares in the placements table." The four squares
-over the Placements table (Conjunction, Opposition, Trine, Square, the
+rearrange the aspects squares in the placements table." The five squares
+over the Placements table (Conjunction, Opposition, Trine, Square, Sextile, the
 `chAspTabs` row, both shells) stand in the order the reader sets, and with
 no aspect chosen the first square is the one that opens.
 

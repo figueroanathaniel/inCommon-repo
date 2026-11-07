@@ -253,7 +253,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
 /* The Library shelf is a row of lit plates. Each draws its room in light; the stars and the warm fills breathe on their own, and the rest moves only under a hovering pointer or keyboard focus, so a phone that draws every section at once is not turning six wheels nobody is looking at. */
 [data-plate]{--plb:rgba(var(--atmc),.46);--plsh:inset 0 1px 0 rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.42)}[data-plate]:focus-visible,[data-plate]:hover{--plb:color-mix(in srgb,var(--ac2-hi) 62%,transparent);--plsh:inset 0 1px 0 rgba(255,255,255,.12),0 4px 8px rgba(0,0,0,.4),0 22px 48px rgba(0,0,0,.5),0 0 38px color-mix(in srgb,var(--ac2) 40%,transparent)}[data-plate]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}[data-plate]:hover [data-plate-go],[data-plate]:focus-visible [data-plate-go]{transform:translateX(3px)}[data-plate]:active{transform:scale(.985)!important}@keyframes plIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}@keyframes plTw{0%,100%{opacity:.18}50%{opacity:.9}}@keyframes plSpin{to{transform:rotate(360deg)}}@keyframes plFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes plFlow{to{stroke-dashoffset:-16}}@keyframes plBreath{0%,100%{opacity:.55}50%{opacity:1}}[data-pl]{transform-box:fill-box;transform-origin:center}[data-pl="tw"]{animation:plTw 3.8s ease-in-out infinite}[data-plate-tw]{animation:plTw 6.5s ease-in-out infinite}[data-pl="breath"]{animation:plBreath 4.6s ease-in-out infinite}[data-pl="spin"]{animation:plSpin 60s linear infinite paused}[data-pl="spinr"]{animation:plSpin 80s linear infinite reverse paused}[data-pl="float"]{animation:plFloat 4.8s ease-in-out infinite paused}[data-pl="flow"]{stroke-dasharray:3 5;animation:plFlow 1.4s linear infinite paused}[data-plate]:hover [data-pl],[data-plate]:focus-visible [data-pl],[data-portal]:hover [data-pl],[data-portal]:focus-within [data-pl]{animation-play-state:running}@media (prefers-reduced-motion:reduce){[data-pl],[data-plate-tw]{animation:none!important}}
 /* Closeness on the chart page (owner, 21 October 2026): no list may grow until it is the only thing on the screen. An open list and an open card stop at under half the screen and scroll inside themselves; on a wide desktop each of the three columns is held to the screen less the header and the banner and scrolls on its own, so once the title has scrolled away all three are on the screen together. The wheel's column never scrolls: the wheel holds its place and only the Horizon under it scrolls, so a list opened there cannot carry the wheel away. Not sticky: a column as tall as its row has nowhere to stick to. */
-[data-ch-list]{max-height:min(42vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-feat]{max-height:min(52vh,480px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding-right:4px}@media (min-width:1200px){[data-ch-col="wheel"]{max-width:max(520px,calc(100dvh - 260px))}}[data-ch-ledger]{max-height:min(62vh,620px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-plc="true"] [data-ch-ledger]{max-height:none;flex:1}@media (min-width:1180px){[data-ch-plc="true"]{min-height:calc(100dvh - 226px)}}[data-asp-grid] td,[data-asp-grid] th{width:24px;min-width:24px;height:24px;padding:0;text-align:center;vertical-align:middle;border:1px solid rgba(var(--atmc),.28);font:400 13px/1 var(--fb)}[data-asp-grid] th{font-weight:400;color:var(--tx);background:rgba(var(--atmc),.16)}[data-asp-grid] td.e{border-color:transparent}[role="radiogroup"] > [data-asp-tile]{cursor:grab!important}[data-asp-drag]{position:relative;z-index:2;background:linear-gradient(rgba(var(--atmc),.26),rgba(var(--atmc),.26)),var(--bg)!important;cursor:grabbing!important;border-color:var(--ac2-hi)!important;box-shadow:0 10px 24px rgba(0,0,0,.45),0 0 0 1px rgba(var(--atmc),.6)!important}[data-ledger-row]{transition:background-color .2s ease}[data-ledger-row]:hover,[data-ledger-row]:focus-visible{background-color:rgba(var(--atmc),.16)!important}[data-ledger-row]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:-2px}[data-wb]{transition:opacity .2s ease!important}[data-ledger-hot] [data-wb]:not([data-hot]):not([data-wb="-"]){opacity:.28!important}[data-wb][data-hot] circle:last-of-type{stroke-width:3.2px}[data-wb][data-hot] circle:first-of-type{opacity:.6}@media (max-width:819.98px){[data-ch-list],[data-ch-feat]{max-height:min(36vh,340px)}}@media (min-width:1180px){[data-ch-col]{max-height:calc(100dvh - 210px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 6px 14px;margin:-2px -6px 0}[data-ch-col="wheel"]{overflow:visible!important}[data-ch-col] > *{flex-shrink:0}[data-ch-col="wheel"] > [data-ch-mid]{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 4px 10px;margin:0 -4px}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
+[data-ch-list]{max-height:min(42vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-feat]{max-height:min(52vh,480px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding-right:4px}@media (min-width:1200px){[data-ch-col="wheel"]{max-width:max(520px,calc(100dvh - 260px))}}[data-ch-ledger]{max-height:min(62vh,620px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-plc="true"] [data-ch-ledger]{max-height:none;flex:1}@media (min-width:1180px){[data-ch-plc="true"]{min-height:calc(100dvh - 226px)}}[data-asp-grid] td,[data-asp-grid] th{width:24px;min-width:24px;height:24px;padding:0;text-align:center;vertical-align:middle;border-right:1px solid rgba(var(--atmc),.28);border-bottom:1px solid rgba(var(--atmc),.28);font:400 13px/1 var(--fb)}[data-asp-grid] th{font-weight:400;color:var(--tx);background:linear-gradient(rgba(var(--atmc),.2),rgba(var(--atmc),.2)),var(--bg)}[data-asp-grid] td.e{border-color:transparent}[data-asp-grid] td.d{color:var(--mut);background:rgba(var(--atmc),.08)}[data-asp-grid][data-bg-view="grid"]{max-height:min(68vh,640px);overflow:auto!important;padding:0!important;margin-top:6px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-asp-grid] thead th{position:sticky;top:0;z-index:2;cursor:pointer}[data-asp-grid] tbody th{position:sticky;left:0;z-index:1}[data-asp-grid] thead th.k{left:0;z-index:3;cursor:default}[data-asp-grid] th button{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:24px;cursor:pointer;color:inherit;font:400 13px/1 var(--fb)}[data-asp-grid] th button:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:-2px}[data-asp-grid] th button[aria-pressed="true"]{background:rgba(var(--atmc2),.5)}[data-asp-grid] [data-tracing] td:not(.on)>span[aria-hidden]{opacity:.18}[data-asp-grid] [data-tracing] th:not(.on){color:var(--dim)}[data-asp-grid] [data-tracing] td.on{background:rgba(var(--atmc),.3)}[data-asp-grid] [data-tracing] th.on{background:linear-gradient(rgba(var(--atmc2),.4),rgba(var(--atmc2),.4)),var(--bg)}[role="radiogroup"] > [data-asp-tile]{cursor:grab!important}[data-asp-drag]{position:relative;z-index:2;background:linear-gradient(rgba(var(--atmc),.26),rgba(var(--atmc),.26)),var(--bg)!important;cursor:grabbing!important;border-color:var(--ac2-hi)!important;box-shadow:0 10px 24px rgba(0,0,0,.45),0 0 0 1px rgba(var(--atmc),.6)!important}[data-ledger-row]{transition:background-color .2s ease}[data-ledger-row]:hover,[data-ledger-row]:focus-visible{background-color:rgba(var(--atmc),.16)!important}[data-ledger-row]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:-2px}[data-wb]{transition:opacity .2s ease!important}[data-ledger-hot] [data-wb]:not([data-hot]):not([data-wb="-"]){opacity:.28!important}[data-wb][data-hot] circle:last-of-type{stroke-width:3.2px}[data-wb][data-hot] circle:first-of-type{opacity:.6}@media (max-width:819.98px){[data-ch-list],[data-ch-feat]{max-height:min(36vh,340px)}}@media (min-width:1180px){[data-ch-col]{max-height:calc(100dvh - 210px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 6px 14px;margin:-2px -6px 0}[data-ch-col="wheel"]{overflow:visible!important}[data-ch-col] > *{flex-shrink:0}[data-ch-col="wheel"] > [data-ch-mid]{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 4px 10px;margin:0 -4px}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -1793,7 +1793,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div data-noswipe="1" style="display:flex;gap:5px">
                 <sc-if value="{{ chAspPicking }}" hint-placeholder-val="{{ true }}">
                   <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="radiogroup" aria-label="Which aspect" aria-describedby="asp-hint-p" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
-                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="5">
                       <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.go }}" onPointerDown="{{ h.down }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
                     </sc-for>
                     <span id="asp-hint-p" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">Drag a square, or press Alt with an arrow key, to move it.</span>
@@ -1801,7 +1801,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </sc-if>
                 <sc-if value="{{ chAspArranging }}" hint-placeholder-val="{{ false }}">
                   <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="group" aria-label="Arrange the aspects" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
-                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="5">
                       <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.place }}" aria-pressed="{{ h.held }}" aria-label="{{ h.arrLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px dashed {{ h.arrBd }};border-radius:10px;background:{{ h.arrBg }};color:var(--tx);-webkit-user-select:none;user-select:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
                     </sc-for>
                   </div>
@@ -6283,7 +6283,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
           </div>
-          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-noswipe="1" data-bg-ctl="1" style="align-self:center;width:min(100%,560px);display:flex;flex-direction:column;gap:8px;padding:8px 2px 0"><div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center"><div role="radiogroup" aria-label="Show the contacts as" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgViews }}" as="v" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ v.on }}" tabIndex="{{ v.tab }}" onClick="{{ v.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ v.bd }};background:{{ v.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ v.label }}</button></sc-for></div><sc-if value="{{ bgSortOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Order the contacts" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgSorts }}" as="o" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ o.on }}" tabIndex="{{ o.tab }}" onClick="{{ o.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ o.label }}</button></sc-for></div></sc-if></div><div role="group" aria-label="Aspects shown" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgAsps }}" as="a" hint-placeholder-count="5"><button type="button" data-lift="1" aria-pressed="{{ a.on }}" onClick="{{ a.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true" style="font:15px Georgia,serif;border-bottom:2px solid {{ a.line }};line-height:1.1">{{ a.sym }}</span>{{ a.label }}</button></sc-for></div><sc-if value="{{ bgFamOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Which family of points beside the usual 22" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgFams }}" as="m" hint-placeholder-count="3"><button type="button" role="radio" data-lift="1" aria-checked="{{ m.on }}" tabIndex="{{ m.tab }}" onClick="{{ m.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ m.bd }};background:{{ m.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ m.label }}</button></sc-for></div></sc-if></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" onClick="{{ bloomGridTap }}" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
@@ -6314,7 +6314,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
+        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-noswipe="1" data-bg-ctl="1" style="align-self:center;width:min(100%,560px);display:flex;flex-direction:column;gap:8px;padding:8px 2px 0"><div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center"><div role="radiogroup" aria-label="Show the contacts as" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgViews }}" as="v" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ v.on }}" tabIndex="{{ v.tab }}" onClick="{{ v.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ v.bd }};background:{{ v.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ v.label }}</button></sc-for></div><sc-if value="{{ bgSortOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Order the contacts" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgSorts }}" as="o" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ o.on }}" tabIndex="{{ o.tab }}" onClick="{{ o.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ o.label }}</button></sc-for></div></sc-if></div><div role="group" aria-label="Aspects shown" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgAsps }}" as="a" hint-placeholder-count="5"><button type="button" data-lift="1" aria-pressed="{{ a.on }}" onClick="{{ a.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true" style="font:15px Georgia,serif;border-bottom:2px solid {{ a.line }};line-height:1.1">{{ a.sym }}</span>{{ a.label }}</button></sc-for></div><sc-if value="{{ bgFamOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Which family of points beside the usual 22" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgFams }}" as="m" hint-placeholder-count="3"><button type="button" role="radio" data-lift="1" aria-checked="{{ m.on }}" tabIndex="{{ m.tab }}" onClick="{{ m.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ m.bd }};background:{{ m.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ m.label }}</button></sc-for></div></sc-if></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" onClick="{{ bloomGridTap }}" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
       </sc-if>
     </div>
   </div>
@@ -7733,10 +7733,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <button onClick="{{ aspClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
       </div>
       <div style="font:600 10px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ asp.orb }}</div>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.nature }}</div>
-      <div style="font:400 13px/1.7 var(--fb);color:var(--mut);border-left:2px solid var(--bd);padding-left:11px">{{ asp.depth }}</div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.possibility }}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px">
+        <sc-for list="{{ asp.paras }}" as="pa" hint-placeholder-count="3">
+          <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
+        </sc-for>
+        <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -8890,7 +8891,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
               <div data-noswipe="1" style="display:flex;gap:5px">
                 <sc-if value="{{ chAspPicking }}" hint-placeholder-val="{{ true }}">
                   <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="radiogroup" aria-label="Which aspect" aria-describedby="asp-hint-d" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
-                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="5">
                       <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.go }}" onPointerDown="{{ h.down }}" role="radio" aria-checked="{{ h.on }}" aria-label="{{ h.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px solid {{ h.bd }};border-radius:10px;background:{{ h.bg }};color:var(--tx);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
                     </sc-for>
                     <span id="asp-hint-d" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">Drag a square, or press Alt with an arrow key, to move it.</span>
@@ -8898,7 +8899,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
                 </sc-if>
                 <sc-if value="{{ chAspArranging }}" hint-placeholder-val="{{ false }}">
                   <div data-asp-row="1" onKeyDown="{{ aspKeys }}" role="group" aria-label="Arrange the aspects" style="flex:1;min-width:0;display:flex;gap:5px;touch-action:pan-y">
-                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="4">
+                    <sc-for list="{{ chAspTabs }}" as="h" hint-placeholder-count="5">
                       <button data-lift data-asp-tile="{{ h.key }}" onClick="{{ h.place }}" aria-pressed="{{ h.held }}" aria-label="{{ h.arrLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;border:1px dashed {{ h.arrBd }};border-radius:10px;background:{{ h.arrBg }};color:var(--tx);-webkit-user-select:none;user-select:none"><span aria-hidden="true" style="font:20px/1 Georgia,serif;color:var(--tx);pointer-events:none">{{ h.sym }}</span></button>
                     </sc-for>
                   </div>
@@ -13434,7 +13435,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
             </div>
 
           </div>
-          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-noswipe="1" data-bg-ctl="1" style="align-self:center;width:min(100%,560px);display:flex;flex-direction:column;gap:8px;padding:8px 2px 0"><div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center"><div role="radiogroup" aria-label="Show the contacts as" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgViews }}" as="v" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ v.on }}" tabIndex="{{ v.tab }}" onClick="{{ v.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ v.bd }};background:{{ v.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ v.label }}</button></sc-for></div><sc-if value="{{ bgSortOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Order the contacts" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgSorts }}" as="o" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ o.on }}" tabIndex="{{ o.tab }}" onClick="{{ o.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ o.label }}</button></sc-for></div></sc-if></div><div role="group" aria-label="Aspects shown" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgAsps }}" as="a" hint-placeholder-count="5"><button type="button" data-lift="1" aria-pressed="{{ a.on }}" onClick="{{ a.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true" style="font:15px Georgia,serif;border-bottom:2px solid {{ a.line }};line-height:1.1">{{ a.sym }}</span>{{ a.label }}</button></sc-for></div><sc-if value="{{ bgFamOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Which family of points beside the usual 22" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgFams }}" as="m" hint-placeholder-count="3"><button type="button" role="radio" data-lift="1" aria-checked="{{ m.on }}" tabIndex="{{ m.tab }}" onClick="{{ m.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ m.bd }};background:{{ m.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ m.label }}</button></sc-for></div></sc-if></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" onClick="{{ bloomGridTap }}" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div>
           <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
           <div role="group" aria-label="Points on the chart" style="flex:none;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 0 10px"><button data-lift onClick="{{ bloomShowCore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Advanced</button><button data-lift onClick="{{ bloomShowAll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Expert</button><button data-lift onClick="{{ bloomSkyGo }}" role="switch" aria-checked="{{ bloomSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ bloomSkyDot }}"></span>Today&#8217;s sky</button></div>
           <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
@@ -13465,7 +13466,7 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         </div>
       </sc-if>
       <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
-        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
+        <div style="flex:none;padding:4px 16px 16px;display:flex;flex-direction:column;align-items:center"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div><div data-noswipe="1" style="align-self:center;width:min(100%,560px);display:flex;padding:10px 2px 0"><input type="search" data-lift="in" data-asp-find="1" value="{{ bloomGridQ }}" onInput="{{ bloomGridFind }}" placeholder="Find a body, or two" autoComplete="off" spellcheck="false" aria-label="Find a body in the aspect grid" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)"></div><div data-noswipe="1" data-bg-ctl="1" style="align-self:center;width:min(100%,560px);display:flex;flex-direction:column;gap:8px;padding:8px 2px 0"><div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center"><div role="radiogroup" aria-label="Show the contacts as" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgViews }}" as="v" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ v.on }}" tabIndex="{{ v.tab }}" onClick="{{ v.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ v.bd }};background:{{ v.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ v.label }}</button></sc-for></div><sc-if value="{{ bgSortOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Order the contacts" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;flex:none"><sc-for list="{{ bgSorts }}" as="o" hint-placeholder-count="2"><button type="button" role="radio" data-lift="1" aria-checked="{{ o.on }}" tabIndex="{{ o.tab }}" onClick="{{ o.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ o.label }}</button></sc-for></div></sc-if></div><div role="group" aria-label="Aspects shown" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgAsps }}" as="a" hint-placeholder-count="5"><button type="button" data-lift="1" aria-pressed="{{ a.on }}" onClick="{{ a.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px"><span aria-hidden="true" style="font:15px Georgia,serif;border-bottom:2px solid {{ a.line }};line-height:1.1">{{ a.sym }}</span>{{ a.label }}</button></sc-for></div><sc-if value="{{ bgFamOn }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Which family of points beside the usual 22" onKeyDown="{{ radioKeys }}" style="display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px"><sc-for list="{{ bgFams }}" as="m" hint-placeholder-count="3"><button type="button" role="radio" data-lift="1" aria-checked="{{ m.on }}" tabIndex="{{ m.tab }}" onClick="{{ m.go }}" style="all:unset;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid {{ m.bd }};background:{{ m.bg }};color:var(--tx);font:500 13px var(--fc);cursor:pointer;flex:none;white-space:nowrap">{{ m.label }}</button></sc-for></div></sc-if></div><div data-asp-grid="1" data-noswipe="1" data-chart="1" onClick="{{ bloomGridTap }}" style="max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;align-self:center;padding:6px 2px 2px"></div></div>
       </sc-if>
     </div>
   </div>
@@ -15071,10 +15072,11 @@ button[data-xin="1"]{animation:expertIn 1.5s ease backwards,expertGlow 2.6s ease
         <button onClick="{{ aspClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
       </div>
       <div style="font:600 10px var(--fk);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ asp.orb }}</div>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.nature }}</div>
-      <div style="font:400 13px/1.7 var(--fb);color:var(--mut);border-left:2px solid var(--bd);padding-left:11px">{{ asp.depth }}</div>
-      <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ asp.possibility }}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px">
+        <sc-for list="{{ asp.paras }}" as="pa" hint-placeholder-count="3">
+          <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ pa.t }}</p>
+        </sc-for>
+        <p style="margin:0;font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ asp.possibility }}</p>
       </div>
       <div style="display:flex;gap:9px">
         <button data-lift onClick="{{ asp.goA }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fc);color:var(--ac)">{{ asp.labelA }}</button>
@@ -19520,33 +19522,75 @@ class Component extends DCLogic {
     const fn = this.SYN_CLOSE[String(pr.asp).toLowerCase()] || this.SYN_CLOSE.conjunct;
     return fn(pr.a.name, pr.b.name, pull(pr.a.name), pull(pr.b.name), firstA, firstB);
   }
+  /* THE ASPECT SHEET SPEAKS AS THE TWO BODIES (owner, 7 November 2026).
+     Each body gets a paragraph of its own before the contact is read: its
+     voice, how its sign walks into the room, its dignity, the part of living
+     its house holds and what this body does there (PlacementContent.inHouse,
+     the 120 body in house lines), then the house's gift and shadow. The third
+     paragraph is the angle between them, each in its sign's manner, and how
+     loud the contact runs. The closer is ASP_CLOSE, untouched. */
+  ASP_MEET = {
+    conjunct: ['At a conjunction the two stand on one degree and act as one.', ', and ', 'Whatever wakes one wakes the other in the same breath.'],
+    sextile: ['At a sextile the two reach each other easily, and the door opens when one of them knocks.', ', and ', 'Put one in service of the other and each grows more capable.'],
+    square: ['At a square the two press on each other.', ', while ', 'They cannot both win the same hour. The rub keeps the chart awake, and over the years it becomes a strength nobody handed over.'],
+    trine: ['At a trine the two share an element and help each other without being asked.', ', and ', 'It costs nothing, which makes it easy to overlook and worth training.'],
+    opposite: ['At an opposition the two face each other across the chart.', ', while ', 'Each holds the half the other lacks, and over time the pull between them turns into perspective.']
+  };
+  aspBodyPara(r, house) {
+    const PC = (typeof window !== 'undefined' && window.PlacementContent) || null;
+    const name = r.name, sign = r.sign;
+    const b = PC ? PC.bodies[PC.keyFor(r.id || name)] || PC.bodies[name] : null;
+    const sg = PC && sign ? PC.signs[sign] : null;
+    const out = [];
+    out.push(b && b.voice ? b.voice : name + ' stands at ' + Math.floor(r.deg) + '\u00b0 ' + sign + '.');
+    if (sg && sg.enters && sg.enters.indexOf(sign + ' ') === 0) out.push('In ' + sign + ' it ' + sg.enters.slice(sign.length + 1));
+    const dg = PC && b ? PC.dignity(name, sign) : null;
+    if (dg) out.push({
+      rulership: sign + ' is one of its own signs, so nothing has to be translated.',
+      exaltation: 'It is exalted there, an honoured guest that gives its best.',
+      detriment: sign + ' sits across from its home, so it works in a borrowed manner.',
+      fall: 'It sits in its fall there, so what comes easily elsewhere is learned slowly here.'
+    }[dg.state] || '');
+    const hs = PC && house && r.group !== 'angle' ? PC.houses[house - 1] : null;
+    if (hs) {
+      out.push('It lives in a part of living where ' + this.livingVerb(hs.living) + '.');
+      const sh = PC.signHouse ? PC.signHouse(sign, house) : '';
+      if (sh) out.push(sh);
+      const ln = PC.inHouse(name, house);
+      if (ln) out.push(ln);
+      if (hs.gift && hs.shadow) out.push('Its gift here is ' + hs.gift + '. Its shadow is ' + hs.shadow + '.');
+    }
+    return out.filter(Boolean).join(' ');
+  }
   aspectLines(x, houseOf, ordinal) {
     const A = x.a.name, B = x.b.name;
     const pull = n => this.ASP_PULL[n] ||
       (this.PL_MEAN[n] ? 'to have its ' + this.PL_MEAN[n] + ' taken seriously' : 'to be given its own weight');
     const pa = pull(A), pb = pull(B);
-    const th = h => this.HOUSE_THEMES[(h - 1 + 12) % 12] || 'that part of your life';
-    const ha = houseOf(x.a), hb = houseOf(x.b);
-    const place = r => r.name + ' at ' + Math.floor(r.deg) + '\u00b0 ' + r.sign;
-    /* Orb is the volume knob and the reader is owed it plainly: a contact
-       inside a degree runs most days, one at the edge of orb is weather. */
+    const PC = (typeof window !== 'undefined' && window.PlacementContent) || null;
+    const THE = ['Sun', 'Moon', 'North Node', 'South Node', 'Ascendant', 'Descendant', 'Midheaven', 'IC'];
+    const the = n => (THE.indexOf(n) !== -1 ? 'the ' : '') + n;
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    /* Orb is the volume knob, said plainly. */
+    const o = x.orb.toFixed(1) + '\u00b0';
     const loud = x.orb <= 1
-      ? 'At ' + x.orb.toFixed(1) + '\u00b0 this is one of the tightest contacts in your chart, so it runs most days rather than occasionally.'
+      ? 'At ' + o + ' this is one of the tightest contacts in the chart, so it runs most days.'
       : x.orb <= 3
-        ? 'At ' + x.orb.toFixed(1) + '\u00b0 it is firmly in orb: present in the ordinary run of things, not only under pressure.'
-        : 'At ' + x.orb.toFixed(1) + '\u00b0 it sits at the wide end of orb, so expect it in strong weather rather than every week.';
-    const where = ha === hb
-      ? 'Both sit in your ' + ordinal(ha) + ' house, so the whole exchange happens on one ground: ' + th(ha) + '.'
-      : 'It runs between your ' + ordinal(ha) + ' house and your ' + ordinal(hb) + ', so it shows up where you handle ' + th(ha) + ' and where you handle ' + th(hb) + '.';
-    /* The register, not the finding. voice.turn introduces the behaviour of the
-       angle and voice.hold closes the paragraph, so a water chart is read at a
-       different pace than an air one while the mechanics, the houses and the
-       orb are identical for everybody. Nothing here changes what is asserted. */
-    const voice = this.toneVoice(false);
+        ? 'At ' + o + ' it is firmly in orb and shows up in the ordinary run of things.'
+        : 'At ' + o + ' it sits at the wide end of orb and comes forward in strong weather.';
     const mn = this.ASP_MINOR[x.asp] || {};
+    const meet = this.ASP_MEET[x.asp] || ['At ' + (/^[aeiou]/i.test(this.aspName(x.asp)) ? 'an ' : 'a ') + this.aspName(x.asp).toLowerCase() + ' the two meet at a finer angle.', ', and ', mn.short || ''];
+    const ma = PC && PC.signs[x.a.sign] ? PC.signs[x.a.sign].manner : '', mb = PC && PC.signs[x.b.sign] ? PC.signs[x.b.sign].manner : '';
+    const manner = !ma || !mb ? ''
+      : x.a.sign === x.b.sign ? 'Both move ' + ma + ', so the two arrive together.'
+        : cap(the(A)) + ' moves ' + ma + meet[1] + the(B) + ' moves ' + mb + '.';
+    const paras = [
+      this.aspBodyPara(x.a, houseOf(x.a)),
+      this.aspBodyPara(x.b, houseOf(x.b)),
+      [meet[0], manner, meet[2], loud].filter(Boolean).join(' ')
+    ];
     return {
-      depth: place(x.a) + ' and ' + place(x.b) + '. ' + where + ' ' +
-        voice.turn + ' this: ' + this.lowerFirst(this.ASP_PLAY[x.asp] || mn.play || '') + ' ' + loud + ' ' + voice.hold,
+      paras: paras, depth: paras.join(' '),
       close: this.ASP_CLOSE[x.asp] ? this.ASP_CLOSE[x.asp](A, B, pa, pb) : mn.ask ? mn.ask(A, B) : this.ASP_CLOSE.conjunct(A, B, pa, pb)
     };
   }
@@ -19981,6 +20025,9 @@ class Component extends DCLogic {
       bloomCount: total + ' placements',
       bloomLeft: left, bloomRight: right, bloomAll: left.concat(right),
       bloomShowAll: () => setShow(rows.reduce((o, r) => (o[this.pointKey(r)] = true, o), {})),
+      bloomGridQ: st.bloomGridQ || '',
+      bloomGridFind: e => this.setState({ bloomGridQ: e && e.target ? e.target.value : '' }),
+      ...this.bloomGridCtl(rows, show),
       bloomShowCore: () => setShow(this.bloomShowOf(true)),
       bloomSkyOn: st.bloomSky ? 'true' : 'false', bloomSkyDot: st.bloomSky ? 'var(--ac2-hi)' : 'transparent',
       bloomSkyGo: () => this.setState({ bloomSky: !this.state.bloomSky }),
@@ -20054,15 +20101,24 @@ class Component extends DCLogic {
     const st = this.state;
     if (!st.chartBloom) return;
     const show = this.bloomShowOf();
-    const rows = this.fullChart(true).filter(r => r.lon != null && !r.uncomputed && show[this.pointKey(r)]);
+    const keyOf = r => this.pointKey(r);
+    let rows = this.fullChart(true).filter(r => r.lon != null && !r.uncomputed && show[keyOf(r)]);
+    const fg = this.bloomGridFamOf(rows);
+    const fam = fg.fams.indexOf(st.bloomGridFam) !== -1 ? st.bloomGridFam : '';
+    if (fam) rows = rows.filter(r => fg.core[keyOf(r)] || (r.category || r.group) === fam);
     const minor = st.chartExpandShowMinorAspects !== false;
-    const sig = rows.map(r => this.pointKey(r)).join(',') + '|' + minor + '|' + this.chartStamp() + '|' + hosts.length;
+    const q = String(st.bloomGridQ || '').trim().toLowerCase();
+    const off = st.bloomGridOff || {};
+    const view = q ? 'list' : this.bloomGridViewOf();
+    const sort = st.bloomGridSort === 'body' ? 'body' : 'orb';
+    const sig = rows.map(keyOf).join(',') + '|' + minor + '|' + this.chartStamp() + '|' + hosts.length + '|' + q + '|' + view + '|' + sort + '|' + fam + '|' + Object.keys(off).filter(k => off[k]).join(',');
     if (sig === this._bgSig && hosts[0].firstChild) return;
     this._bgSig = sig;
-    const keyOf = r => this.pointKey(r), shown = {};
+    const shown = {};
     rows.forEach(r => { shown[keyOf(r)] = true; });
     const pair = {};
     this.natalAspects(true, { rich: true, minorAspects: minor, minorScale: true }).forEach(x => {
+      if (off[x.asp]) return;
       const ka = keyOf(x.a), kb = keyOf(x.b);
       if (!shown[ka] || !shown[kb]) return;
       const k = ka < kb ? ka + '|' + kb : kb + '|' + ka;
@@ -20071,24 +20127,189 @@ class Component extends DCLogic {
     const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const SR = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';
     const ASPW = { conjunct: 'conjunct', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposite', quincunx: 'quincunx', semisextile: 'semisextile', semisquare: 'semisquare', sesquisquare: 'sesquisquare' };
-    let h = '<table style="border-collapse:collapse;margin:0 auto"><caption style="' + SR + '">Aspect grid: each point on the diagonal, and the contact between two points where their row and column meet</caption><tbody>';
+    hosts.forEach(el => el.setAttribute('data-bg-view', view));
+    const say = t => { clearTimeout(this._bgSayT); this._bgSayT = setTimeout(() => this.speak(t, 'polite'), 600); };
+    if (view === 'list') {
+      const f = q ? this.bloomGridFound(q, rows, pair, keyOf) : { found: Object.keys(pair).map(k => pair[k]), lead: [], who: 'The chart' };
+      const h = f.msg ? { html: '<p style="margin:0;padding:10px 4px;font:400 14px/1.5 var(--fb);color:var(--mut)">' + esc(f.msg) + '</p>', say: f.msg }
+        : this.bloomGridList(f, rows, keyOf, sort, ASPW, esc);
+      hosts.forEach(el => { el.innerHTML = h.html; });
+      if (q) say(h.say);
+      return;
+    }
+    const n = rows.length;
+    const lbl = 'background:linear-gradient(rgba(var(--atmc),.2),rgba(var(--atmc),.2)),var(--bg)';
+    let h = '<table style="border-collapse:separate;border-spacing:0;margin:0 auto;border-top:1px solid rgba(var(--atmc),.28);border-left:1px solid rgba(var(--atmc),.28)"><caption style="' + SR + '">Aspect grid: each point down the side and along the top, and the contact between two points where their row and column meet. Press a point down the side to trace its row and column.</caption><thead><tr><th class="k" style="' + lbl + '"><span style="' + SR + '">Points</span></th>';
+    rows.forEach(r => {
+      const k = keyOf(r);
+      h += '<th scope="col" data-bg-r="' + esc(k) + '" data-bg-c="' + esc(k) + '" data-bg-trace="' + esc(k) + '" data-bg-name="' + esc(this.pointLabel(r)) + '" title="' + esc(this.pointLabel(r)) + '"><span aria-hidden="true">' + esc(r.glyph || '·') + '</span><span style="' + SR + '">' + esc(this.pointLabel(r)) + '</span></th>';
+    });
+    h += '</tr></thead><tbody>';
     rows.forEach((r, i) => {
-      h += '<tr>';
+      const ka = keyOf(r);
+      h += '<tr><th scope="row" data-bg-r="' + esc(ka) + '" data-bg-c="' + esc(ka) + '"><button type="button" data-bg-trace="' + esc(ka) + '" data-bg-name="' + esc(this.pointLabel(r)) + '" aria-pressed="false" title="' + esc(this.pointLabel(r)) + '" aria-label="Trace ' + esc(this.pointLabel(r)) + '"><span aria-hidden="true">' + esc(r.glyph || '·') + '</span></button></th>';
       for (let j = 0; j < i; j++) {
-        const o = rows[j], ka = keyOf(r), kb = keyOf(o);
+        const o = rows[j], kb = keyOf(o);
         const x = pair[ka < kb ? ka + '|' + kb : kb + '|' + ka];
-        if (!x) { h += '<td></td>'; continue; }
+        const at = ' data-bg-r="' + esc(ka) + '" data-bg-c="' + esc(kb) + '"';
+        if (!x) { h += '<td' + at + '></td>'; continue; }
         const d = Math.floor(x.orb), m = Math.floor((x.orb - d) * 60);
         const words = this.pointLabel(r) + ' ' + (ASPW[x.asp] || x.asp) + ' ' + this.pointLabel(o) + ', ' + d + '°' + String(m).padStart(2, '0') + '′';
         const c = (this.ASP_COLOR[x.asp] || ['var(--tx)'])[0];
-        h += '<td title="' + esc(words) + '" style="position:relative"><span aria-hidden="true" style="color:' + c + '">' + esc(this.ASP_SYM[x.asp] || '·') + '</span><span style="' + SR + '">' + esc(words) + '</span></td>';
+        h += '<td' + at + ' title="' + esc(words) + '" style="position:relative"><span aria-hidden="true" style="color:' + c + '">' + esc(this.ASP_SYM[x.asp] || '·') + '</span><span style="' + SR + '">' + esc(words) + '</span></td>';
       }
-      h += '<th scope="row" title="' + esc(this.pointLabel(r)) + '" style="position:relative"><span aria-hidden="true">' + esc(r.glyph || '·') + '</span><span style="' + SR + '">' + esc(this.pointLabel(r)) + '</span></th>';
-      for (let j = i + 1; j < rows.length; j++) h += '<td class="e"></td>';
+      h += '<td class="d" data-bg-r="' + esc(ka) + '" data-bg-c="' + esc(ka) + '"><span aria-hidden="true">' + esc(r.glyph || '·') + '</span></td>';
+      for (let j = i + 1; j < n; j++) h += '<td class="e"></td>';
       h += '</tr>';
     });
     h += '</tbody></table>';
-    hosts.forEach(el => { el.innerHTML = rows.length > 1 ? h : ''; });
+    hosts.forEach(el => { el.innerHTML = n > 1 ? h : ''; });
+    if (this._bgTrace && !shown[this._bgTrace]) this._bgTrace = null;
+    this.bloomGridTrace();
+  }
+  /* FINDING A BODY IN THE EXPERT GRID (the owner, 7 November 2026: the
+     Expert table "is impossible to read or utilize after a certain point. A
+     search utility is a good start"). Ninety four points make a staircase
+     wider than any screen, and below its first rows a symbol has no column
+     label in sight. A word typed over the grid turns it into a list: one
+     body gives every contact it makes among the points shown, closest to
+     exact first; two bodies give the contact between them; an aspect's name
+     keeps only that aspect. It reads the same pairs the grid draws. */
+  bloomGridFound(q, rows, pair, keyOf) {
+    const ASP_WORD = {};
+    this.BG_ASPS.forEach(k => { ASP_WORD[k] = k; });
+    Object.assign(ASP_WORD, { conjunction: 'conjunct', opposition: 'opposite', sextiles: 'sextile', squares: 'square', trines: 'trine' });
+    const words = q.split(/[\s,+&]+/).filter(w => w && w !== 'and' && w !== 'with' && w !== 'to');
+    const asps = [], bodies = [];
+    words.forEach(w => {
+      const a = ASP_WORD[w] || Object.keys(ASP_WORD).find(k => w.length >= 4 && k.indexOf(w) === 0);
+      if (a) { asps.push(ASP_WORD[a] || a); return; }
+      const namesOf = r => [this.pointLabel(r), r.name, r.id].filter(Boolean).map(n => String(n).toLowerCase());
+      /* A whole name wins: "venus" is Venus, not the Venus Node as well. */
+      const exact = rows.filter(r => namesOf(r).some(n => n === w));
+      const hits = (exact.length ? exact : rows.filter(r => namesOf(r).some(n => n.indexOf(w) === 0 || (w.length >= 3 && n.indexOf(w) !== -1)))).map(keyOf);
+      bodies.push(hits);
+    });
+    const byKey = {};
+    rows.forEach(r => { byKey[keyOf(r)] = r; });
+    const shownName = keys => keys.map(k => this.pointLabel(byKey[k])).join(' or ');
+    if (bodies.some(b => !b.length)) return { msg: 'No point by that name is on the chart now.' };
+    const found = Object.keys(pair).map(k => pair[k]).filter(x => {
+      if (asps.length && asps.indexOf(x.asp) === -1) return false;
+      const ka = keyOf(x.a), kb = keyOf(x.b);
+      if (!bodies.length) return true;
+      if (bodies.length === 1) return bodies[0].indexOf(ka) !== -1 || bodies[0].indexOf(kb) !== -1;
+      return (bodies[0].indexOf(ka) !== -1 && bodies[1].indexOf(kb) !== -1) || (bodies[0].indexOf(kb) !== -1 && bodies[1].indexOf(ka) !== -1);
+    });
+    const who = bodies.length ? bodies.map(shownName).join(' and ') : 'The chart';
+    if (!found.length) return { msg: who + (bodies.length > 1 ? ' make no contact' : ' makes no contact') + (asps.length ? ' of that kind' : '') + ' among the points shown.' };
+    return { found, lead: bodies.length ? bodies[0] : [], who };
+  }
+  /* The list: every contact as a line, the body asked about (or the one
+     higher on the chart) first, closest to exact first or gathered by body. */
+  bloomGridList(f, rows, keyOf, sort, ASPW, esc) {
+    const at = {};
+    rows.forEach((r, i) => { at[keyOf(r)] = i; });
+    const lead = f.lead || [];
+    const oriented = f.found.map(x => {
+      const ka = keyOf(x.a), kb = keyOf(x.b);
+      const flip = lead.length ? lead.indexOf(ka) === -1 : at[kb] < at[ka];
+      return { x, a: flip ? x.b : x.a, b: flip ? x.a : x.b };
+    });
+    oriented.sort((p, q) => sort === 'body' ? (at[keyOf(p.a)] - at[keyOf(q.a)]) || (p.x.orb - q.x.orb) : p.x.orb - q.x.orb);
+    const lines = oriented.map(({ x, a, b }) => {
+      const d = Math.floor(x.orb), m = Math.floor((x.orb - d) * 60);
+      const c = (this.ASP_COLOR[x.asp] || ['var(--tx)'])[0];
+      return '<li style="display:flex;align-items:center;gap:10px;min-height:40px;border-bottom:1px solid rgba(var(--atmc),.22)">' +
+        '<span aria-hidden="true" style="flex:none;min-width:58px;font:15px Georgia,serif;white-space:nowrap;color:var(--ac2-hi)">' + esc(a.glyph || '') + ' <span style="color:' + c + '">' + esc(this.ASP_SYM[x.asp] || '') + '</span> ' + esc(b.glyph || '') + '</span>' +
+        '<span style="flex:1;min-width:0;font:400 14px/1.4 var(--fb);color:var(--tx)">' + esc(this.pointLabel(a) + ' ' + (ASPW[x.asp] || x.asp) + ' ' + this.pointLabel(b)) + '</span>' +
+        '<span style="flex:none;font:12.5px var(--fm);color:var(--mut);white-space:nowrap">' + d + '°' + String(m).padStart(2, '0') + '′</span></li>';
+    });
+    const say = lines.length + (lines.length === 1 ? ' contact' : ' contacts') + (sort === 'body' ? ', gathered by body.' : ', closest to exact first.');
+    return { html: '<ul aria-label="' + esc(say) + '" style="margin:0;padding:4px 2px 0;list-style:none;min-width:min(520px,82vw);text-align:left">' + lines.join('') + '</ul>', say };
+  }
+  /* READING THE EXPERT GRID (the owner chose all five, 7 November 2026):
+     the find field, a list of every contact (the opening view on a phone),
+     the grid with its labels pinned to the top and the left, one family of
+     points at a time beside the usual 22, and a press on a label that lights
+     its row and column. The view, the aspects kept, the order and the family
+     are this dialog's own and open fresh each time. */
+  bloomGridViewOf() {
+    const st = this.state;
+    if (st.bloomGridView === 'grid' || st.bloomGridView === 'list') return st.bloomGridView;
+    return (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) < 820 ? 'list' : 'grid';
+  }
+  BG_ASPS = ['conjunct', 'opposite', 'trine', 'square', 'sextile', 'quincunx', 'semisextile', 'semisquare', 'sesquisquare'];
+  BG_ASP_NAME = { conjunct: 'Conjunct', opposite: 'Opposite', trine: 'Trine', square: 'Square', sextile: 'Sextile', quincunx: 'Quincunx', semisextile: 'Semisextile', semisquare: 'Semisquare', sesquisquare: 'Sesquisquare' };
+  bloomGridFamOf(rows) {
+    const core = this.BLOOM_CORE.reduce((o, k) => (o[k] = true, o), {});
+    const fams = [];
+    rows.forEach(r => {
+      const c = r.category || r.group;
+      if (!core[this.pointKey(r)] && c && fams.indexOf(c) === -1) fams.push(c);
+    });
+    return { core, fams };
+  }
+  bloomGridCtl(rows, show) {
+    const st = this.state, view = this.bloomGridViewOf();
+    const minor = st.chartExpandShowMinorAspects !== false;
+    const off = st.bloomGridOff || {};
+    const pill = on => ({ bd: on ? 'var(--ac2-hi)' : 'var(--bd)', bg: on ? 'rgba(var(--atmc),.26)' : 'transparent' });
+    const views = [['list', 'List'], ['grid', 'Grid']].map(([k, label], i) => {
+      const on = view === k;
+      return { key: k, label, on: on ? 'true' : 'false', tab: on ? 0 : -1, ...pill(on),
+        go: () => { this._bgTrace = null; this.setState({ bloomGridView: k }); } };
+    });
+    const asps = this.BG_ASPS.filter((a, i) => minor || i < 5).map(a => {
+      const on = !off[a];
+      return { key: a, label: this.BG_ASP_NAME[a], sym: this.ASP_SYM[a] || '', line: (this.ASP_COLOR[a] || ['var(--tx)'])[0],
+        on: on ? 'true' : 'false', ...pill(on),
+        go: () => { const cur = { ...(this.state.bloomGridOff || {}) }; cur[a] = !cur[a]; this.setState({ bloomGridOff: cur }); } };
+    });
+    const sort = st.bloomGridSort === 'body' ? 'body' : 'orb';
+    const sorts = [['orb', 'Closest first'], ['body', 'By body']].map(([k, label]) => {
+      const on = sort === k;
+      return { key: k, label, on: on ? 'true' : 'false', tab: on ? 0 : -1, ...pill(on), go: () => this.setState({ bloomGridSort: k }) };
+    });
+    const shownRows = rows.filter(r => r.lon != null && !r.uncomputed && show[this.pointKey(r)]);
+    const { fams } = this.bloomGridFamOf(shownRows);
+    const fam = fams.indexOf(st.bloomGridFam) !== -1 ? st.bloomGridFam : '';
+    const famList = [['', 'Every family']].concat(fams.map(c => [c, this.CAT_LABEL[c] || c])).map(([k, label]) => {
+      const on = fam === k;
+      return { key: k || 'all', label, on: on ? 'true' : 'false', tab: on ? 0 : -1, ...pill(on),
+        go: () => { this._bgTrace = null; this.setState({ bloomGridFam: k }); } };
+    });
+    return {
+      bgViews: views, bgAsps: asps, bgSorts: sorts, bgSortOn: view === 'list' || !!String(st.bloomGridQ || '').trim(),
+      bgFams: famList, bgFamOn: fams.length > 0,
+      bloomGridTap: e => this.bloomGridTap(e)
+    };
+  }
+  /* A press on a label in the grid lights that point's row and column and
+     quiets the rest; a second press, or a press on another label, moves or
+     clears it. Written to the DOM like the grid itself. */
+  bloomGridTap(e) {
+    const b = e && e.target && e.target.closest ? e.target.closest('[data-bg-trace]') : null;
+    if (!b) return;
+    const k = b.getAttribute('data-bg-trace');
+    this._bgTrace = this._bgTrace === k ? null : k;
+    this.bloomGridTrace();
+    const lbl = b.getAttribute('data-bg-name') || '';
+    this.speak(this._bgTrace ? lbl + ' traced across the grid.' : 'Trace cleared.', 'polite');
+  }
+  bloomGridTrace() {
+    if (typeof document === 'undefined') return;
+    const k = this._bgTrace;
+    document.querySelectorAll('[data-asp-grid] table').forEach(t => {
+      let any = false;
+      t.querySelectorAll('[data-bg-r]').forEach(c => {
+        const on = !!k && (c.getAttribute('data-bg-r') === k || c.getAttribute('data-bg-c') === k);
+        if (on) any = true;
+        c.classList.toggle('on', on);
+      });
+      t.querySelectorAll('[data-bg-trace]').forEach(btn => btn.setAttribute('aria-pressed', btn.getAttribute('data-bg-trace') === k ? 'true' : 'false'));
+      if (k && any) t.setAttribute('data-tracing', '1'); else t.removeAttribute('data-tracing');
+    });
   }
   bloomShowOf(core) {
     const base = this.BLOOM_CORE.reduce((o, k) => (o[k] = true, o), {});
@@ -23068,8 +23289,8 @@ class Component extends DCLogic {
      place it should go. The last is the single pointer way that dragging
      needs beside it. The order is kept on the device, per account, like the
      theme, and it does not sync. */
-  ASP4_KEYS = ['conjunct', 'opposite', 'trine', 'square'];
-  ASP4_NAMES = { conjunct: 'Conjunction', opposite: 'Opposition', trine: 'Trine', square: 'Square' };
+  ASP4_KEYS = ['conjunct', 'opposite', 'trine', 'square', 'sextile'];
+  ASP4_NAMES = { conjunct: 'Conjunction', opposite: 'Opposition', trine: 'Trine', square: 'Square', sextile: 'Sextile' };
   get ASP_ORDER_KEY() { return this.acctKey('incommon.aspOrder'); }
   aspOrder() {
     const K = this.ASP4_KEYS, raw = this.readLS(this.ASP_ORDER_KEY, null);
@@ -23413,10 +23634,11 @@ class Component extends DCLogic {
           nx ? 'next ' + nx.mover + ' ' + this.aspName(nx.asp) + ' from ' + this.fmtDay(nx.from) : ''].filter(Boolean).join(', ') };
     });
     /* THE PLACEMENTS TABLE (owner, 6 November 2026): built the way the
-       harmonics card is built, with the four major aspects where the 4th,
-       5th, 7th and 9th stand. A tab, the aspect's own line, the reader's
+       harmonics card is built, with the major aspects where the 4th,
+       5th, 7th and 9th stand. The sextile joined the four on 7 November
+       2026, the owner's ask. A tab, the aspect's own line, the reader's
        pairs closest first, then every placement, the pair's bodies lit. */
-    /* The four squares stand in the order the reader set (aspOrder), and the
+    /* The five squares stand in the order the reader set (aspOrder), and the
        first of them is the one that opens when nothing has been chosen. */
     const ASP4 = this.aspOrder().map(k => [k, this.ASP4_NAMES[k]]);
     const aspPick = ASP4.some(a => a[0] === st.ledAsp) ? st.ledAsp : ASP4[0][0];
@@ -33980,12 +34202,18 @@ class Component extends DCLogic {
      the sign walks into the room as itself, the body speaks as itself, and the
      reader is trusted to go with it. The words live in placement-content.js;
      a point with no voice of its own gets no lead rather than a generic one. */
+  /* A house's part of living is often a list ("play, making things and
+     falling for someone"), and a list happens in the plural. */
+  livingVerb(l) {
+    const t = String(l || '').replace(/,\s*$/, '');
+    return t + (/,| and /.test(t) ? ' happen' : ' happens');
+  }
   plLeads(r, name, ordH, dig) {
     const PC = window.PlacementContent || {}, hs = PC.houses || [], ss = PC.signs || {}, bs = PC.bodies || {};
     const hn = Number(String(ordH).replace(/\D/g, '')) || 0, h = hs[hn - 1] || {}, sg = ss[r.sign] || {};
     const bk = PC.keyFor ? PC.keyFor(r.id || r.name) : r.name, bd = bs[bk] || bs[r.name] || {};
     return [
-      h.living ? 'A part of living where ' + h.living + ' happens consistently, and your ' + name + ' lives here.' : '',
+      h.living ? 'A part of living where ' + this.livingVerb(h.living) + ' consistently, and your ' + name + ' lives here.' : '',
       sg.enters || '',
       bd.voice || '',
       h.cue ? 'Your ' + name + ' comes alive when ' + h.cue + '.' : '',
@@ -34138,14 +34366,20 @@ class Component extends DCLogic {
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
     const moodUsed = {}, placeOf = p => { const h = p && p.lon != null ? this.houseOf(p.lon, all[0], asc) : null;
       return h ? 'your ' + PC.ord(h) + ' house' : (p && p.sign) || 'its sign'; };
-    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
+    /* The 22 points a reader knows lead, so a square to the Sun is not
+       listed under two asteroids that happen to be tighter. */
+    const the = (n, lead) => /^(Sun|Moon)$/.test(n) ? (lead ? 'The ' : 'the ') + n : n;
+    const coreSet = new Set(this.BLOOM_CORE), coreOf = p => coreSet.has(key(p)) || coreSet.has(p.name) ? 0 : 1;
+    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk)
+      .map((x, i) => ({ x: x, i: i, c: coreOf(key(x.a) === rk ? x.b : x.a) }))
+      .sort((p, q) => p.c - q.c || p.i - q.i).slice(0, 8).map(w => w.x).map(x => {
       const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
       const M = this.ASP_MOOD[k] || this.ASP_MOOD.minor, seed = this.shash(rk);
       const n = moodUsed[k] = (moodUsed[k] || 0) + 1, close = M.lines[(Math.abs(seed) + n - 1) % M.lines.length](name, oName, placeOf(r), placeOf(o));
       return { glyph: o.glyph, edge: edgeOf(k),
         title: name + ' ' + this.aspName(k) + ' ' + oName,
         meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0 \u00b7 ' + M.theme,
-        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. ' + close,
+        text: the(name, true) + ' brings ' + this.bodyEnergy(rk) + ', ' + the(oName) + ' brings ' + this.bodyEnergy(key(o)) + ', and between them runs ' + (this.ASP_MEAN[k] || 'a live contact') + '. ' + close,
         cta: 'See ' + oName + ' \u2192', okey: key(o), go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
@@ -34155,6 +34389,10 @@ class Component extends DCLogic {
       const ORB = { conjunct: 4, opposite: 4, trine: 3, square: 3, sextile: 2 };
       const sky = this.chartAt(new Date()), soon = this.chartAt(new Date(Date.now() + 86400000)), out = [];
       const sep = (p, q) => { let v = Math.abs(this.norm360(p - q)); return v > 180 ? 360 - v : v; };
+      const felt = {}, feel = nm => { const n = felt[nm] = (felt[nm] || 0) + 1;
+        if (n === 1) return 'You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.';
+        if (n === 2 && this.ASP_MEAN[nm]) return 'It can arrive as ' + this.ASP_MEAN[nm] + '.';
+        return this.ASP_SHORT[nm] || 'It lands on the same angle in a voice of its own.'; };
       sky.forEach((p, i) => {
         const d0 = sep(p.lon, r.lon), d1 = sep(soon[i].lon, r.lon);
         this.ASPECTS.forEach(([ang, nm]) => {
@@ -34164,7 +34402,7 @@ class Component extends DCLogic {
           out.push({ orbN: off, glyph: p.glyph, edge: edgeOf(nm),
             title: 'Transiting ' + p.name + ' ' + this.aspName(nm) + ' your ' + name,
             meta: 'orb ' + off.toFixed(1) + '\u00b0 \u00b7 ' + (closing ? 'tightening' : 'separating'),
-            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. You may notice it as ' + (this.ASP_POSS[nm] || 'a contact you feel before you can name it') + '.' });
+            text: p.name + ' at ' + Math.floor(p.deg) + '\u00b0 ' + p.sign + ' is ' + (closing ? 'still closing on' : 'moving off') + ' this point. ' + feel(nm) });
         });
       });
       return out.sort((a, b) => a.orbN - b.orbN).slice(0, 6);
@@ -34198,7 +34436,7 @@ class Component extends DCLogic {
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),
       plNoSabianWhy: this.bodyAccuracyNote(rk, name),
-      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword + ': the phase of this degree; this build does not carry the 1925 wording.') : '',
+      plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword.charAt(0).toUpperCase() + sb.keyword.slice(1) + '.') : '',
       plSabianMeta: sb ? (sb.verified ? 'Sabian symbol \u00b7 ' + sb.address : 'Degree phase \u00b7 ' + sb.address) : '',
       plLexLabel: sb ? 'View ' + sb.address + ' in the Sabian Lexicon \u2192' : '',
       plLexGo: sb ? () => this.setState({ tab: 'library', libView: 'lexicon', selId: null, lexQuery: '', lexSign: sb.sign, lexDeg: sb.degree }) : () => {},
@@ -35000,14 +35238,16 @@ class Component extends DCLogic {
               aspClose: () => this.setState({ aspSel: null }),
               asp: (() => {
                 const x = st.aspSel != null ? asps[st.aspSel] : null;
-                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', depth: '', possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
+                if (!x) return { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', nature: '', paras: [], possibility: '', labelA: '', labelB: '', goA: () => {}, goB: () => {} };
                 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+                const L = this.aspectLines(x, houseOf, ordinal);
                 return { c: this.ASP_COLOR[x.asp][0], ga: x.a.glyph, gb: x.b.glyph,
                   title: x.a.name + ' ' + cap(x.asp) + ' ' + x.b.name,
                   orb: 'Within ' + x.orb.toFixed(1) + '\u00b0 orb',
-                  nature: this.ASP_NATURE[x.asp] || (this.ASP_MINOR[x.asp] || {}).nature || '',
-                  depth: this.aspectLines(x, houseOf, ordinal).depth,
-                  possibility: this.aspectLines(x, houseOf, ordinal).close,
+                  /* No geometry lesson in the sheet (owner, 7 November 2026). */
+                  nature: '',
+                  paras: L.paras.map(t => ({ t: t })),
+                  possibility: L.close,
                   labelA: 'See ' + x.a.name, labelB: 'See ' + x.b.name,
                   goA: () => { this.setState({ aspSel: null }); openBody(x.a.name); },
                   goB: () => { this.setState({ aspSel: null }); openBody(x.b.name); } };
